@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -85,6 +86,7 @@ import java.util.Locale
 private val TABS = listOf("Чат", "Задачи", "Память", "Заработок", "Настройки")
 private val stamp = SimpleDateFormat("d MMM, HH:mm", Locale.forLanguageTag("ru-RU"))
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IskraScreen(vm: AssistantViewModel, onExport: () -> Unit) {
     val data by vm.data.collectAsStateWithLifecycle()

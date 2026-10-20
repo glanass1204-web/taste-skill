@@ -1,0 +1,60 @@
+name: Iskra Android
+
+on:
+  push:
+    paths:
+      - "iskra-android/**"
+      - ".github/workflows/iskra-android.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: iskra-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: iskra-android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew --no-daemon :core:test
+
+      - name: Build APK
+        run: ./gradlew --no-daemon :app:assembleRelease
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk iskra.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iskra-apk
+          path: iskra-android/iskra.apk
+
+      # Последняя сборка всегда лежит по одной ссылке:
+      # https://github.com/<владелец>/<репозиторий>/releases/download/iskra-latest/iskra.apk
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete iskra-latest --yes --cleanup-tag || true
+          gh release create iskra-latest iskra.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Искра — последняя сборка" \
+            --notes "Сборка ${GITHUB_RUN_NUMBER} из ветки ${GITHUB_REF_NAME}. Скачай iskra.apk на телефон и установи."

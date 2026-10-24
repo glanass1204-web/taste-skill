@@ -213,6 +213,38 @@ const res=await pg.evaluate(()=>{
   const p2=base();p2.mat.body='egger18';eq(M.effSettings(p2).t,18,'Egger 18: толщина 18')}
  // ---- кромка 0,4 на корпус
  {const p=base();p.mat.edge='mix';const r=M.calc(p,S);ok(r.edge04>0&&r.edge2>0,'смешанная кромка: обе');const p0=base();const r0=M.calc(p0,S);eq(r.edge2+r.edge04,r0.edgeM,'смешанная кромка: общая длина та же',0.01)}
+
+ // ---- присадка: планки на стенке на той же высоте, что чашки на двери
+ const nums=s=>(s.match(/-?\d+(?:[.,]\d+)?/g)||[]).map(x=>+x.replace(',','.'));
+ for(const [W,n,wl] of [[1800,3,false],[1800,3,true],[2400,3,false],[1200,2,false],[2400,4,true]]){const p=base();p.W=W;p.mirrors=0;p.walls.L=wl;p.sections=Array.from({length:n},()=>({shelves:3,rod:false,drawers:0,baskets:0}));
+   const r=M.calc(p,S),w=r.wings[0],dm=M.drillMap(p,S,r),tag=`присадка ${W} ${n}с${wl?' стена':''}`,pl=p.plinth;
+   w.doors.forEach((d,k)=>{const g=dm.find(x=>x.name===`Дверь ${k+1}`);ok(!!g,tag+` дверь ${k+1} в списке`);if(!g)return;
+     const cupLine=g.lines.find(l=>l.startsWith('Чашки'));const ys=nums(cupLine.split('Y от низа:')[1]);eq(ys.length,(d.h<=2000?4:d.h<=2400?5:6),tag+` дверь ${k+1}: число петель`,0);
+     const bx=d.hinge==='L'?d.x:d.x+d.w,side=bx<5||bx>W-5,pi=bx<5?0:bx>W-5?n:w.xs.slice(1).findIndex(x=>Math.abs(x-t/2-bx)<3)+1;
+     const pan=dm.find(x=>side?x.name===(pi===0?'Боковина левая':'Боковина правая'):x.name===`Перегородка ${pi}`);
+     const exp=ys.map(y=>y+(side?pl+2:2-t));ok(pan&&pan.lines.some(l=>/Планки петель/.test(l)&&exp.every(v=>nums(l.split('Y')[1]).some(z=>Math.abs(z-v)<=0.5))),tag+` дверь ${k+1}: планки на стенке совпадают с чашками`)});
+   // на одной перегородке с двух сторон — у второй двери сдвиг 32 мм, винты не встречаются
+   for(let i=1;i<n;i++){const pan=dm.find(x=>x.name===`Перегородка ${i}`);if(!pan)continue;const L=pan.lines.filter(l=>/Левая сторона\. Планки/.test(l)),Rr=pan.lines.filter(l=>/Правая сторона\. Планки/.test(l));
+     if(L.length&&Rr.length){const a=nums(L[0].split('Y')[1]),b=nums(Rr[0].split('Y')[1]);ok(a.every(v=>b.every(z=>Math.abs(z-v)>=32-0.5)),tag+` перегородка ${i}: планки с двух сторон разнесены ≥ 32 мм`)}}
+   // полкодержатели на высоте полок из чертежа
+   const sh=dm.find(x=>x.name==='Боковина левая').lines.find(l=>/Полкодержатели/.test(l));ok(!!sh,tag+': полкодержатели на левой боковине')}
+ {const p=base();p.W=1800;p.mirrors=0;p.walls.L=true;p.sections=Array.from({length:3},()=>({shelves:3,rod:false,drawers:0,baskets:0}));const r=M.calc(p,S),dm=M.drillMap(p,S,r);
+  ok(dm.some(g=>g.lines.some(l=>/сдвинуты на 32/.test(l))),'стена слева: две двери на перегородке 1 — сдвиг 32 мм')}
+ {const p=base();const r=M.calc(p,S),dm=M.drillMap(p,S,r),bl=dm.find(x=>x.name==='Боковина левая');ok(bl.lines[0].includes('X 50, 203.5, 356.5, 510'),'конфирматы по глубине 560: 50 / 203,5 / 356,5 / 510')}
+ for(const kind of ['kitchen','chest']){const p=base();p.kind=kind;if(kind==='chest')p.c={W:1200,H:850,D:450,plinth:60,legs:0,cols:[{type:'door',drawers:0,shelves:2},{type:'door',drawers:0,shelves:2},{type:'drawers',drawers:3,shelves:0}]};
+   const r=M.calc(p,S),dm=M.drillMap(p,S,r);ok(dm.length>3,kind+': присадка есть');ok(dm.some(g=>g.lines.some(l=>/Чашки петель/.test(l))),kind+': чашки петель');ok(dm.some(g=>g.lines.some(l=>/Планки петель/.test(l))),kind+': планки петель');
+   dm.forEach(g=>g.lines.forEach(l=>ok(!/NaN|undefined|Infinity/.test(l),kind+': нет пустых чисел: '+g.name)))}
+ // ---- шаблоны: встроенные открываются без ошибок
+ M.builtinTemplates().forEach(tp=>{const np=M.fromTemplate(tp);const r=M.calc(np,S);ok(!r.warn.some(x=>x.lvl==='err'),`шаблон «${tp.name}»: без ошибок`+(r.warn.filter(x=>x.lvl==='err').map(x=>' — '+x.t).join('')));
+   ok(np.client===''&&np.meas.photos.length===0,`шаблон «${tp.name}»: без данных клиента`)});
+ // ---- замер
+ {const p=base();p.meas.w=['1805','1800','1798'];p.meas.h=['2450','2455',''];const r=M.calc(p,S);
+  ok(r.warn.some(x=>x.lvl==='err'&&/Не войдёт по ширине/.test(x.t)&&/1788/.test(x.t)),'замер 1798: шкаф 1800 не войдёт, максимум 1788');
+  ok(r.warn.some(x=>x.lvl==='err'&&/Не поднять/.test(x.t)&&/2374/.test(x.t)),'потолок 2450: шкаф 2400 не поднять, максимум 2374');
+  p.W=1788;p.H=2374;const r2=M.calc(p,S);ok(!r2.warn.some(x=>/Не войдёт|Не поднять/.test(x.t||x)),'после подгонки 1788×2374: ошибок нет');
+  p.meas.w=['1830','1800',''];ok(M.calc(p,S).warn.some(x=>/гуляет на 30/.test(x.t||x)),'завал стен 30 мм: предупреждение')}
+ {const p=base();p.kind='kitchen';p.meas.w=['2390','',''];ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/нижний ряд/.test(x.t)),'кухня 2400 на стену 2390: ошибка');
+  p.meas.w=['2450','',''];p.meas.h=['2000','',''];ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/упрутся в потолок/.test(x.t)),'верхние до 2170 при потолке 2000: ошибка')}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

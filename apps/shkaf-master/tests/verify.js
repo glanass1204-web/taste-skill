@@ -162,6 +162,15 @@ const res=await pg.evaluate(()=>{
   ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/не помещается на фасад/.test(x.t)),'ручка 360 мм на фасад 376: ошибка')}
  {const p=base();p.kind='chest';p.hw.handle='r320';p.c={W:450,H:850,D:450,plinth:60,legs:0,cols:[{type:'drawers',drawers:3,shelves:0}]};ok(!M.calc(p,S).warn.some(x=>/не помещается на фасад/.test(x.t)),'ручка 360 мм на фасад 446: помещается')}
  {const p=base();p.D=480;p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];ok(M.calc(p,S).warn.some(x=>/плечики/.test(x.t)),'штанга при глубине 480: предупреждение')}
+
+ // ---- КДМ: зазор между дверями на перегородке 4 мм
+ {const p=base();p.mirrors=0;p.hw.hinge='kdm';const w=M.calc(p,S).wings[0],ds=[...w.doors].sort((a,b)=>a.x-b.x);
+  for(let i=1;i<ds.length;i++){const g=ds[i].x-(ds[i-1].x+ds[i-1].w),onPart=ds[i].sec!==ds[i-1].sec;eq(g,onPart?4:3,`КДМ: зазор ${onPart?'на перегородке 4':'в секции 3'} мм`)}
+  for(let i=1;i<3;i++){const c=w.xs[i]-t/2,l=ds.filter(d=>d.sec===i-1).at(-1),f=ds.find(d=>d.sec===i);eq((l.x+l.w+f.x)/2,c,`КДМ: стык на центре перегородки ${i}`)}
+  eq(ds[0].x,2,'КДМ: край 2 мм');eq(ds.at(-1).x+ds.at(-1).w,p.W-2,'КДМ: край справа 2 мм');
+  const r=M.calc(p,S);ok(r.hw.some(h=>/КДМ/.test(h[0])&&/полунакладная/.test(h[0])),'КДМ в смете')}
+ {const p=base();p.kind='chest';p.hw.hinge='kdm';p.c={W:1200,H:850,D:450,plinth:60,legs:0,cols:[{type:'door',drawers:0,shelves:2},{type:'door',drawers:0,shelves:2},{type:'door',drawers:0,shelves:2}]};const r=M.calc(p,S);
+  for(let i=1;i<3;i++){eq(r.fr[i].x-(r.fr[i-1].x+r.fr[i-1].w),4,'КДМ комод: зазор 4');eq((r.fr[i-1].x+r.fr[i-1].w+r.fr[i].x)/2,r.xs[i]-t/2,'КДМ комод: стык на перегородке')}}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

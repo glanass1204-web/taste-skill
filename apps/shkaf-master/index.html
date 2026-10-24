@@ -523,11 +523,12 @@ const SET_WORK=[['work','Сборка и доставка','% от матери�
 const rail=(cc,price)=>({id:'r'+cc,name:`Скоба ${cc} мм`,cc,len:cc+40,proj:35,price});
 const CATALOG={
   hinges:[
-    {id:'boyard',name:'Boyard, с доводчиком',over:180,half:180},
-    {id:'gtv',name:'GTV, с доводчиком',over:150,half:150},
-    {id:'amix',name:'AMIX, с доводчиком',over:250,half:250},
-    {id:'hettich',name:'Hettich Sensys',over:550,half:550},
-    {id:'blum',name:'Blum CLIP top BLUMOTION',over:750,half:750}],
+    {id:'kdm',name:'КДМ Clip-On 110°, с доводчиком',over:49,half:51,gap:4,src:'kdm.ru: угол 110°, чашка 35 мм, планка H0, регулировка 3D (глубина ±2, высота ±1,5, горизонталь ±2 мм). Полунакладная — зазор между фасадами на одной перегородке 4 мм. Цена на kdm.ru 40–57 ₽ за штуку, зависит от города (октябрь 2026).'},
+    {id:'boyard',name:'Boyard, с доводчиком',over:180,half:180,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'gtv',name:'GTV, с доводчиком',over:150,half:150,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'amix',name:'AMIX, с доводчиком',over:250,half:250,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'hettich',name:'Hettich Sensys',over:550,half:550,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'blum',name:'Blum CLIP top BLUMOTION',over:750,half:750,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'}],
   slides:[
     {id:'ball',name:'Шариковые, полное выдвижение',kind:'side',dW:26,dL:0,price:650,src:'Зазор 12,5–13 мм на сторону: ящик на 26 мм уже проёма, длина ящика = длине направляющей.'},
     {id:'roller',name:'Роликовые, частичное выдвижение',kind:'side',dW:26,dL:0,price:250,src:'Зазор 12,5 мм на сторону: ящик на 25–26 мм уже проёма.'},
@@ -541,7 +542,7 @@ const CATALOG={
     {id:'aristo',name:'Aristo',dh:40,ov:27,check:true,src:'По таблице расчёта Aristo: высота = проём − 40, ширина = (проём + 27 × перехлёсты) / двери. В других источниках перехлёст другой — сверьте с таблицей вашего профиля.'},
     {id:'absolut',name:'ABSOLUT',dh:40,ov:21,src:'Инструкция ABSOLUT: высота = проём − 40 мм, ширина двери = (проём + 21) / 2.'},
     {id:'custom',name:'Свой профиль — по таблице поставщика',dh:40,ov:26,custom:true,src:'Впишите вычет по высоте и перехлёст из таблицы вашего профиля.'}]};
-const CAT_EDIT={hinges:['over','half'],slides:['price'],handles:['cc','len','proj','price'],coupe:[]};
+const CAT_EDIT={hinges:['over','half','gap'],slides:['price'],handles:['cc','len','proj','price'],coupe:[]};
 const CAT_EDIT_CUSTOM={slides:['dW','dL'],coupe:['dh','ov']};
 function catMerge(saved){const out={};
   for(const k of Object.keys(CATALOG)){const sv=(saved&&saved[k])||[];
@@ -686,10 +687,12 @@ function calcWing(p,s,W,sections,blk,key,walls){
   const doors=[];let coupeD=null,doorH=0;
   if(!coupe){
     doorH=H-pl-4;
+    // зазор между дверями на одной перегородке задаёт полунакладная петля (у КДМ — 4 мм)
+    const hg=HWp.hinge.gap||3;
     const B=[0];spans.forEach((x,i)=>B.push(B[i]+x));
     sections.forEach((c,i)=>{
       const a=Math.max(B[i],bL),b=Math.min(B[i+1],W-bR);if(b-a<=0)return;
-      const lo=a===0?2:(bL&&a===bL)?3:1.5,ro=Math.abs(b-W)<.01?2:(bR&&b===W-bR)?3:1.5;
+      const lo=a===0?2:(bL&&a===bL)?3:hg/2,ro=Math.abs(b-W)<.01?2:(bR&&b===W-bR)?3:hg/2;
       // у планки нет стенки под петли, поэтому дверь угловой секции всегда одна и висит на дальней стороне
       const reg=b-a-lo-ro,d=i===ci?1:reg>620?2:1,dw=(reg-3*(d-1))/d;
       if(i===ci&&reg>620)warn.push(ERR(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`));
@@ -969,7 +972,7 @@ function calcChest(p,s){
   const inW=W-2*t,span=W/n,fz=Hb-pl-t-3,slide=slideFor(D-20),HWp=HW(p,s),sys=HWp.slide,ch=[];
   const colWs=Array.from({length:n},(_,i)=>span-(i===0?t:t/2)-(i===n-1?t:t/2));
   const xs=[];colWs.reduce((x,w,i)=>(xs[i]=x,x+w+t),t);
-  const fr=Array.from({length:n},(_,i)=>{const lo=i===0?2:1.5,ro=i===n-1?2:1.5;return{x:i*span+lo,w:span-lo-ro}});
+  const hg=HWp.hinge.gap||3,fr=Array.from({length:n},(_,i)=>{const lo=i===0?2:hg/2,ro=i===n-1?2:hg/2;return{x:i*span+lo,w:span-lo-ro}});
   add('Крышка','Корпус',W,D,1,'ldsp',2,2);
   add('Боковина','Корпус',Hb-t,D,2,'ldsp',1,0);
   add('Дно','Корпус',inW,D,1,'ldsp',1,0);
@@ -1309,7 +1312,7 @@ function renderSettings(){
   const ci=(k,x,f,label,ro)=>`<div class="field"><label for="c_${k}_${x.id}_${f}">${label}</label><div class="inwrap"><input id="c_${k}_${x.id}_${f}" data-cat="${k}:${x.id}:${f}" type="number" inputmode="decimal" value="${x[f]}"${ro?' disabled':''}></div></div>`;
   const row=(nm,sub,cells)=>`<div class="cat-row"><div class="nm">${esc(nm)}${sub?`<small>${esc(sub)}</small>`:''}</div>${cells}</div>`;
   const C=settings.cat;
-  $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>row(x.name,'',ci('hinges',x,'over','накладная')+ci('hinges',x,'half','полунакладная'))).join('')
+  $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>row(x.name,x.src||'',ci('hinges',x,'over','накладная, ₽')+ci('hinges',x,'half','полунакладная, ₽')+ci('hinges',x,'gap','зазор на перегородке, мм'))).join('')
    +`<h3 style="margin-top:14px">Направляющие</h3>`+C.slides.map(x=>row(x.name,x.src,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм',!x.custom)+ci('slides',x,'dL','короче направл., мм',!x.custom))).join('')
    +`<h3 style="margin-top:14px">Ручки</h3>`+C.handles.map(x=>row(x.name,'',ci('handles',x,'cc','межцентр, мм')+ci('handles',x,'len','длина, мм')+ci('handles',x,'proj','вынос, мм')+ci('handles',x,'price','₽ за шт'))).join('')
    +`<h3 style="margin-top:14px">Профили купе</h3>`+C.coupe.map(x=>row(x.name,x.src,ci('coupe',x,'dh','проём − , мм',!x.custom)+ci('coupe',x,'ov','перехлёст, мм',!x.custom))).join('');

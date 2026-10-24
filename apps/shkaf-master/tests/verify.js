@@ -171,6 +171,25 @@ const res=await pg.evaluate(()=>{
   const r=M.calc(p,S);ok(r.hw.some(h=>/КДМ/.test(h[0])&&/полунакладная/.test(h[0])),'КДМ в смете')}
  {const p=base();p.kind='chest';p.hw.hinge='kdm';p.c={W:1200,H:850,D:450,plinth:60,legs:0,cols:[{type:'door',drawers:0,shelves:2},{type:'door',drawers:0,shelves:2},{type:'door',drawers:0,shelves:2}]};const r=M.calc(p,S);
   for(let i=1;i<3;i++){eq(r.fr[i].x-(r.fr[i-1].x+r.fr[i-1].w),4,'КДМ комод: зазор 4');eq((r.fr[i-1].x+r.fr[i-1].w+r.fr[i].x)/2,r.xs[i]-t/2,'КДМ комод: стык на перегородке')}}
+
+ // ---- все направляющие скрытого монтажа: формулы по инструкциям
+ for(const [id,dW,dL,maxT] of [['boyard',42,10,16],['samet',45,10,18],['quadroyou',42,10,16],['quadro',40,0,16],['blum',42,10,16]]){
+   const sys=S_cat('slides',id);eq(sys.dW,dW,`${id}: вычет по ширине`,0);eq(sys.dL,dL,`${id}: вычет по длине`,0);eq(sys.maxT,maxT,`${id}: боковины до`,0);
+   for(const kind of ['wardrobe','chest','kitchen']){const p=base();p.kind=kind;p.hw.slide=id;
+     if(kind==='wardrobe')p.sections=[{shelves:1,rod:false,drawers:2,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];
+     if(kind==='chest')p.c={W:800,H:850,D:450,plinth:60,legs:0,cols:[{type:'drawers',drawers:3,shelves:0}]};
+     const r=M.calc(p,S),fb=r.parts.filter(x=>x.name==='Ящик: перед и зад'),sd=r.parts.filter(x=>x.name==='Ящик: боковина');
+     const op=kind==='wardrobe'?r.wings[0].ws[0]-2*t:kind==='chest'?r.colWs[0]:400-2*t;
+     ok(fb.some(x=>Math.abs(x.L-(op-dW))<=0.5),`${id} ${kind}: перед/зад = проём − ${dW}`);
+     const sl=kind==='wardrobe'?r.wings[0].slide:null;if(sl){ok(sd.some(x=>x.L===sl-dL),`${id}: боковина = направляющая − ${dL}`);ok(sl+(sys.minD||0)<=p.D,`${id}: глубина корпуса ≥ длина + ${sys.minD}`)}
+     ok(!r.warn.some(x=>x.lvl==='err'&&/рассчитаны на боковины/.test(x.t)),`${id} ${kind}: при ЛДСП 16 нет ошибки`)}}
+ {const S18=JSON.parse(JSON.stringify(S));S18.t=18;const mk=id=>{const p=base();p.hw.slide=id;p.sections=[{shelves:1,rod:false,drawers:2,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];return M.calc(p,S18)};
+  ok(!mk('samet').warn.some(x=>/рассчитаны на боковины/.test(x.t)),'Samet при ЛДСП 18: допустимо');
+  ok(mk('boyard').warn.some(x=>x.lvl==='err'&&/до 16 мм/.test(x.t)),'Boyard при ЛДСП 18: ошибка')}
+ // ---- у каждой петли из каталога стыки на перегородках, петли на стенках
+ for(const h of S.cat.hinges){const p=base();p.mirrors=0;p.hw.hinge=h.id;const w=M.calc(p,S).wings[0],ds=[...w.doors].sort((a,b)=>a.x-b.x);
+   for(let i=1;i<3;i++){const c=w.xs[i]-t/2,l=ds.filter(d=>d.sec===i-1).at(-1),f=ds.find(d=>d.sec===i);eq((l.x+l.w+f.x)/2,c,`${h.id}: стык на перегородке`);eq(f.x-(l.x+l.w),h.gap,`${h.id}: зазор на перегородке ${h.gap}`)}
+   ok(M.calc(p,S).hw.some(x=>x[0].includes(h.name)),`${h.id}: в смете`)}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

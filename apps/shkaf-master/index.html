@@ -80,6 +80,7 @@ h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
 .inwrap select{font-family:var(--f-body);font-size:15px}
 .inwrap span{color:var(--muted);font-size:12px;padding-left:4px}
 .inwrap:focus-within{border-color:var(--accent)}
+.inwrap.bad,.inwrap.bad:focus-within{border-color:var(--warn);background:var(--warn-soft)}
 .text input{font-family:var(--f-body)}
 
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -258,7 +259,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
       </div>
       <div class="grid3">
         <div class="field"><label for="pPl">Цоколь</label><div class="inwrap"><input id="pPl" data-k="plinth" inputmode="numeric" type="number"><span>мм</span></div></div>
-        <div class="field"><label for="pMz">Антресоль</label><div class="inwrap"><input id="pMz" data-k="mezzH" inputmode="numeric" type="number"><span>мм</span></div></div>
+        <div class="field"><label for="pMz">Антресоль от верха</label><div class="inwrap"><input id="pMz" data-k="mezzH" inputmode="numeric" type="number"><span>мм</span></div></div>
         <div class="field" id="coupeNField"><label for="pCn">Дверей купе</label><div class="inwrap"><select id="pCn" data-k="coupeN"><option value="0">Авто</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div>
       </div>
       <label class="switch"><input type="checkbox" id="pMezz"> Антресольная полка</label>
@@ -500,7 +501,7 @@ function newProject(){return norm({id:uid(),name:'Новый заказ',client:
   sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],updated:Date.now()})}
 function norm(p){
   p.kind=p.kind||'wardrobe';p.address=p.address||'';
-  p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=p.cornerOpen||450;p.mirrors=p.mirrors||0;
+  p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
   p.k=Object.assign(kDefaults(),p.k||{});p.c=Object.assign(cDefaults(),p.c||{});if(p.c.legs===undefined)p.c.legs=0;
@@ -518,7 +519,8 @@ let tab='build',activeSec='',showDoors=false;
 const secsOf=k=>k==='B'?P.sectionsB:P.sections;
 
 /* ---------- общие помощники ---------- */
-const hingeCount=h=>h<=1000?2:h<=1500?3:h<=2000?4:5;
+// петель на дверь: по высоте, а зеркало утяжеляет дверь — плюс одна петля
+const hingeCount=(h,mirror)=>(h<=1000?2:h<=1500?3:h<=2000?4:h<=2400?5:6)+(mirror&&h>1000?1:0);
 const slideFor=d=>[550,500,450,400,350,300,250].find(v=>v<=d-10)||0;
 const boxHFor=fh=>Math.max(80,Math.min(200,Math.floor((fh-50)/10)*10));
 // фасады округляем вниз: иначе ряд дверей может выйти на миллиметр шире корпуса
@@ -564,7 +566,7 @@ function calcWing(p,s,W,sections,blk,key){
   if(!coupe){
     if(ci<0)spans=Array(n).fill(W/n);
     else if(n===1)spans=[W];
-    else{const open=blk.open||(W-blk.w)/n,cs=blk.w+open,o=(W-cs)/(n-1);spans=Array(n).fill(o);spans[ci]=cs}
+    else{const open=blk.open||Math.min((W-blk.w)/n,600),cs=blk.w+open,o=(W-cs)/(n-1);spans=Array(n).fill(o);spans[ci]=cs}
     ws=spans.map((sp,i)=>sp-(i===0?t:t/2)-(i===n-1?t:t/2));
   }else{
     ws=Array(n).fill(net/n);
@@ -600,7 +602,9 @@ function calcWing(p,s,W,sections,blk,key){
     sections.forEach((c,i)=>{
       const a=Math.max(B[i],bL),b=Math.min(B[i+1],W-bR);if(b-a<=0)return;
       const lo=a===0?2:(bL&&a===bL)?3:1.5,ro=Math.abs(b-W)<.01?2:(bR&&b===W-bR)?3:1.5;
-      const reg=b-a-lo-ro,d=reg>620?2:1,dw=(reg-3*(d-1))/d;
+      // у планки нет стенки под петли, поэтому дверь угловой секции всегда одна и висит на дальней стороне
+      const reg=b-a-lo-ro,d=i===ci?1:reg>620?2:1,dw=(reg-3*(d-1))/d;
+      if(i===ci&&reg>620)warn.push(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`);
       // у угловой секции петли ставим с дальней от угла стороны: дверь открывается от угла, а не на соседнюю сторону
       const single=i===ci?(bL?'R':'L'):(i<n/2?'L':'R');
       for(let j=0;j<d;j++)doors.push({sec:i,w:dw,h:doorH,x:a+lo+j*(dw+3),hinge:d===2?(j===0?'L':'R'):single});
@@ -619,6 +623,7 @@ function calcWing(p,s,W,sections,blk,key){
   if(ci>=0&&(sections[ci].drawers||sections[ci].baskets))warn.push('ящики и корзины в угловой секции упрутся в соседнюю сторону — перенесите их в другую секцию.');
   const per=D>450?4:3;
   const zTop=p.mezz?p.mezzH+t:t,zBot=H-pl-t,zoneH=zBot-zTop;
+  if(p.mezz&&zoneH<600)warn.push(`под антресолью остаётся ${Math.max(0,Math.round(zoneH))} мм — антресоль опущена слишком низко. Уменьшите «Антресоль от верха».`);
   sections.forEach((c,i)=>{const need=(c.drawers+c.baskets)*200+(c.rod?1050:0)+c.shelves*180;if(need>zoneH)warn.push(`секция ${i+1}: наполнение не помещается по высоте.`)});
   if(nb&&shelfD<400)warn.push('для корзин нужна глубина полки от 400 мм.');
   if(Math.min(...ws)<250)warn.push('секции слишком узкие — уменьшите число секций.');
@@ -658,7 +663,7 @@ function calcWardrobe(p,s){
   const mirrors=[];
   if(!coupe){
     // петля на боковине — накладная; где на одну перегородку садятся две двери — полунакладная
-    let hOver=0,hHalf=0;wings.forEach(w=>w.doors.forEach(d=>{const bx=d.hinge==='L'?d.x:d.x+d.w,outer=bx<5||bx>w.W-5;outer?hOver+=hingeCount(d.h):hHalf+=hingeCount(d.h)}));
+    let hOver=0,hHalf=0;wings.forEach(w=>w.doors.forEach(d=>{const bx=d.hinge==='L'?d.x:d.x+d.w,outer=bx<5||bx>w.W-5;outer?hOver+=hingeCount(d.h,d.mirror):hHalf+=hingeCount(d.h,d.mirror)}));
     if(hOver)hw.push(['Петля накладная с доводчиком',hOver,'шт',pr.hinge]);
     if(hHalf)hw.push(['Петля полунакладная с доводчиком',hHalf,'шт',pr.hinge]);
     hw.push(['Ручка',doorsAll.length+nd,'шт',pr.handle]);
@@ -779,7 +784,7 @@ function calcKitchen(p,s){
     if(m.type==='drawers')drawerFronts(h-4,w,Math.max(1,m.drawers),iw);
     // духовке нужна ниша 595 мм в свету: от полки до нижней кромки верхней царги
     if(m.type==='oven'){add('Полка под духовку','Полки',iw,d-20,1,'ldsp',1,0);conf+=4;
-      add('Фальш-фасад под духовкой','Фасады',w-4,h-620,1,'ldsp',2,2);if(h<700)warn.push(`${lab}: корпус ниже 700 мм — духовка (ниша 595 мм) не встанет.`)}
+      const ofh=h-604-t;add('Фальш-фасад под духовкой','Фасады',w-4,ofh,1,'ldsp',2,2);if(ofh<60)warn.push(`${lab}: корпус низкий — под духовку (ниша 600 мм) не остаётся места. Нужна высота корпуса от ${664+t} мм.`)}
     if(tall){const low=k.baseH-4,up=h-4-low-3;doorsFront(low,w);doorsFront(up,w);add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);supports+=4*m.shelves;
       if(h>s.sheetL-2*s.trim)warn.push(`${lab}: пенал выше длины листа.`)}
     if(w<150)warn.push(`${lab}: модуль уже 150 мм.`);
@@ -832,7 +837,7 @@ function drawKitchen(p,s){
     g+=`<rect x="${x}" y="${y0}" width="${w}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`;
     if(m.type==='doors'||m.type==='sink')g+=fronts(x,y0,w,h,w>600?2:1);
     if(m.type==='drawers'){const n=Math.max(1,m.drawers),fh=(h-4-3*(n-1))/n;for(let j=0;j<n;j++){const fy=y0+2+j*(fh+3);g+=R(x+2,fy,w-4,fh,dec)+handleH(x+w*.35,fy+Math.min(40,fh*.25),w*.3,sw)}}
-    if(m.type==='oven'){const fh=h-620;g+=R(x+2,y0+h-fh-2,w-4,fh,dec);
+    if(m.type==='oven'){const fh=h-604-s.t;g+=R(x+2,y0+h-fh-2,w-4,fh,dec);
       g+=`<rect x="${x+20}" y="${y0+20}" width="${w-40}" height="${595-10}" rx="${sw*4}" class="sv-ink" fill="none" stroke-width="${sw*1.5}"/><rect x="${x+70}" y="${y0+110}" width="${w-140}" height="${595-200}" rx="${sw*3}" class="sv-mut" opacity=".35"/>`}
     if(tall){const low=k.baseH;g+=fronts(x,y0+h-low,w,low,w>600?2:1)+fronts(x,y0,w,h-low,w>600?2:1)}
     if(!tall&&k.worktop){g+=`<rect x="${x}" y="${y0-38}" width="${w}" height="38" class="sv-mut sv-ink" stroke-width="${sw}" opacity=".85"/>`;
@@ -1005,7 +1010,9 @@ function renderBuild(){
   $$('#view-build [data-k]').forEach(el=>{if(document.activeElement!==el)el.value=P[el.dataset.k]??''});
   $('#decors').innerHTML=Object.entries(DECORS).map(([k,d])=>`<button type="button" data-decor="${k}" aria-pressed="${P.decor===k}" title="${d.name}" aria-label="${d.name}" style="background:${d.fill}"></button>`).join('');
   $('#front').innerHTML=drawingHTML();
-  $('#buildAlerts').innerHTML=(c.warn.length?`<div class="alert">${c.warn.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'')+((c.notes||[]).length?`<p class="hint" style="margin-top:8px">${c.notes.map(esc).join('<br>')}</p>`:'');
+  const over=[...new Set([...R.cl.over,...R.ch.over].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
+  const warnAll=over.length?[...c.warn,`Не помещаются на лист ${settings.sheetL}×${settings.sheetW}: ${over.join(', ')}. Их нет в раскрое и в смете — цена занижена.`]:c.warn;
+  $('#buildAlerts').innerHTML=(warnAll.length?`<div class="alert">${warnAll.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'')+((c.notes||[]).length?`<p class="hint" style="margin-top:8px">${c.notes.map(esc).join('<br>')}</p>`:'');
   if(kind==='wardrobe')renderWardrobeUI(c);else if(kind==='kitchen')renderKitchenUI(c);else renderChestUI(c);
 }
 function renderWardrobeUI(c){
@@ -1200,13 +1207,16 @@ function restore(text){
 }
 
 /* ---------- события ---------- */
-const LIM={cornerOpen:[300,1200],W:[300,5000],W2:[600,5000],H:[300,3000],D:[250,900],plinth:[0,200],mezzH:[200,900]};
+const LIM={cornerOpen:[300,600],W:[300,5000],W2:[600,5000],H:[300,3000],D:[250,900],plinth:[0,200],mezzH:[200,900]};
 const KLIM={baseH:[500,900],baseD:[300,700],legs:[0,200],wallH:[300,1000],wallD:[200,450],wallY:[1100,1900],tallH:[1500,2700]};
 const CLIM={W:[300,2400],H:[300,1600],D:[250,700],plinth:[0,150],legs:[0,250]};
 const num=el=>{const v=Math.round(+el.value);return el.value===''||isNaN(v)?null:v};
 const inLim=(v,l)=>v!==null&&v>=l[0]&&v<=l[1];
+function limitsOf(el){const d=el.dataset;if(d.k&&LIM[d.k])return LIM[d.k];if(d.kk)return KLIM[d.kk];if(d.ck)return CLIM[d.ck];if(d.mw)return[100,1500];return null}
+function storedOf(el){const d=el.dataset;if(d.k)return P[d.k];if(d.kk)return P.k[d.kk];if(d.ck)return P.c[d.ck];if(d.mw){const [z,i]=d.mw.split(':');return P.k[z][+i].w}}
 document.addEventListener('input',e=>{
-  const el=e.target,d=el.dataset;
+  const el=e.target,d=el.dataset,lim=limitsOf(el);
+  if(lim){const box=el.closest('.inwrap');if(box)box.classList.toggle('bad',!inLim(num(el),lim))}
   if(d.k&&el.tagName!=='SELECT'){const k=d.k;
     if(['name','client','phone','address'].includes(k)){P[k]=el.value;$('#hdrName').textContent=P.name||'Без названия';save();return}
     const v=num(el);if(inLim(v,LIM[k])){P[k]=v;change()}return}
@@ -1218,7 +1228,10 @@ document.addEventListener('input',e=>{
     if(g==='p')settings.p[k]=v;else settings[k]=v;change();}
 });
 document.addEventListener('change',e=>{
-  const el=e.target,d=el.dataset;
+  const el=e.target,d=el.dataset,lim=limitsOf(el);
+  // число вне допустимого: возвращаем то, по которому реально идёт расчёт, и говорим об этом
+  if(lim&&el.tagName==='INPUT'&&!inLim(num(el),lim)){el.value=storedOf(el);const box=el.closest('.inwrap');if(box)box.classList.remove('bad');
+    toast(`Можно от ${lim[0]} до ${lim[1]} мм. Оставлено ${el.value} мм`);return}
   if(el.id==='pMezz'){P.mezz=el.checked;change()}
   else if(el.id==='showDoors'){showDoors=el.checked;renderBuild()}
   else if(el.id==='sGrain'){settings.grain=el.checked;change()}

@@ -111,6 +111,24 @@ const res=await pg.evaluate(()=>{
    eq(side.L+t+legs,850,tag+' высота с ножками');eq(r.fz+(legs?0:pl)+t+3+legs,850,tag+' фасады по высоте');
    ok(r.hw.some(h=>h[0].startsWith('Эксцентриковая')),tag+' крышка на эксцентриках');
    if(legs)ok(r.hw.some(h=>h[0].startsWith('Ножка')),tag+' ножки в смете');sanity(r,tag)}
+
+ // ---- у каждой двери петли на боковине или перегородке (шкафы прямые, угловые, комоды)
+ {const sup=(list,x)=>list.some(s=>Math.abs(s-x)<=3.1);
+  for(const W of [600,900,1200,1500,1800,2100,2400,3000])for(const n of [1,2,3,4,5,6]){const p=base();p.W=W;p.mirrors=0;p.sections=Array.from({length:n},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
+    const w=M.calc(p,S).wings[0];if(w.ws.some(x=>x<150))continue;const S0=[0,W,...w.xs.slice(1).map(x=>x-t/2)];
+    w.doors.forEach(d=>ok(sup(S0,d.hinge==='L'?d.x:d.x+d.w),`шкаф ${W} ${n}с: петли двери без стенки`))}
+  for(const side of ['L','R'])for(const W of [1200,1800,2400,3000])for(const W2 of [1000,1400,2000])for(const nA of [1,2,3,4])for(const nB of [1,2,3])for(const co of [300,450,600]){
+    const p=base();p.shape='corner';p.cornerSide=side;p.W=W;p.W2=W2;p.cornerOpen=co;p.mirrors=0;
+    p.sections=Array.from({length:nA},()=>({shelves:2,rod:false,drawers:0,baskets:0}));p.sectionsB=Array.from({length:nB},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
+    M.calc(p,S).wings.forEach(w=>{const S0=[0,w.W,...w.xs.slice(1).map(x=>x-t/2)];const ci=w.blk.w?(w.blk.side==='L'?0:w.sections.length-1):-1;
+      w.doors.forEach(d=>ok(sup(S0,d.hinge==='L'?d.x:d.x+d.w),`угол ${side} ${W}×${W2} А${nA}Б${nB}: петли без стенки`));
+      if(ci>=0)ok(w.doors.filter(d=>d.sec===ci).length<=1,`угол ${side} ${W}×${W2}: у угловой секции одна дверь`)})}
+  for(const W of [450,800,1200,1600,2000])for(const n of [1,2,3,4]){const p=base();p.kind='chest';p.c={W,H:850,D:450,plinth:60,legs:0,cols:Array.from({length:n},()=>({type:'door',drawers:0,shelves:2}))};
+    const r=M.calc(p,S);const S0=[0,W,...r.xs.slice(1).map(x=>x-t/2)];
+    r.fr.forEach((f,i)=>{const nd=f.w>600?2:1,dw=(f.w-3*(nd-1))/nd;for(let j=0;j<nd;j++){const dx=f.x+j*(dw+3),left=nd===2?j===0:i<n/2;ok(sup(S0,left?dx:dx+dw),`комод ${W} ${n}к: петли дверцы без стенки`)}})}}
+ // ---- петли на зеркальных и высоких дверях
+ {const p=base();p.mirrors=3;const r=M.calc(p,S);const tot=r.hw.filter(h=>h[0].startsWith('Петля')).reduce((a,h)=>a+h[1],0);eq(tot,3*6,'петли: 3 зеркальные двери 2316 мм по 6');
+  const p2=base();p2.H=2700;p2.mirrors=0;const r2=M.calc(p2,S);eq(r2.hw.filter(h=>h[0].startsWith('Петля')).reduce((a,h)=>a+h[1],0),3*6,'петли: дверь 2616 мм — по 6')}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

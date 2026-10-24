@@ -87,6 +87,7 @@ h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
 .check.warn{background:var(--warn-soft);color:var(--warn)}
 .check.bad{background:var(--err-soft);color:var(--err)}
 .price-chip.bad{box-shadow:0 0 0 3px var(--err)}
+@media (max-width:520px){#matPanel .grid2,#hwPanel .grid2{grid-template-columns:minmax(0,1fr)}}
 .cat-row{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,1fr));gap:8px;align-items:end;padding-block:8px;border-bottom:1px solid var(--line)}
 .cat-row:last-child{border-bottom:0}
 .cat-row .nm{font-size:14px;font-weight:500;min-width:0}
@@ -245,6 +246,20 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
 
     <div id="checkLine"></div>
 
+    <div class="card" id="matPanel">
+      <h3>Материалы</h3>
+      <div class="grid2">
+        <div class="field"><label for="mBody">Корпус</label><div class="inwrap"><select id="mBody" data-mat="body"></select></div></div>
+        <div class="field"><label for="mFront">Фасады</label><div class="inwrap"><select id="mFront" data-mat="front"></select></div></div>
+        <div class="field" id="mFDecorF"><label for="mFDecor">Декор фасадов</label><div class="inwrap"><select id="mFDecor" data-mat="frontDecor"></select></div></div>
+        <div class="field" id="mFColorF"><label for="mFColor">Цвет фасадов на чертеже</label><div class="inwrap"><select id="mFColor" data-mat="frontColor"></select></div></div>
+        <div class="field text" id="mFNoteF"><label for="mFNote">Цвет / плёнка по каталогу цеха</label><div class="inwrap"><input id="mFNote" data-matnote="1" type="text" autocomplete="off" placeholder="Например, RAL 9003 матовый"></div></div>
+        <div class="field"><label for="mEdge">Кромка</label><div class="inwrap"><select id="mEdge" data-mat="edge"></select></div></div>
+        <div class="field" id="mTopF"><label for="mTop">Столешница</label><div class="inwrap"><select id="mTop" data-mat="top"></select></div></div>
+      </div>
+      <p class="hint" id="matInfo"></p>
+    </div>
+
     <div class="card" id="hwPanel">
       <h3>Фурнитура и стены</h3>
       <div class="grid2">
@@ -370,6 +385,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     <div id="partsErr"></div>
     <p class="hint">Размеры чистовые, с учётом кромки. Первый размер — вдоль текстуры. Кромка: Д — длинная сторона, Ш — короткая. Скажите поставщику, что размеры даны с кромкой.</p>
     <div class="card" id="partsLdsp"></div>
+    <div class="card" id="partsFront" hidden></div>
     <div class="card" id="partsHdf"></div>
     <div class="card" id="partsCoupe" hidden></div>
     <div class="card" id="partsMirror" hidden></div>
@@ -393,6 +409,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     <div class="stats" id="cutStats"></div>
     <div id="cutAlerts"></div>
     <div class="card" id="cutLdsp"></div>
+    <div class="card" id="cutFront" hidden></div>
     <div class="card" id="cutHdf"></div>
     <p class="hint">Раскрой примерный, гильотинный, полосами. Поставщик может разложить детали плотнее на своей программе.</p>
   </section>
@@ -439,6 +456,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     </div>
     <div class="card"><h3>Материал и раскрой</h3><div class="grid2" id="setMat"></div>
       <label class="switch"><input type="checkbox" id="sGrain"> Учитывать текстуру (детали не поворачиваются)</label></div>
+    <div class="card"><h3>Материалы</h3>
+      <p class="hint">Цены вашего поставщика. Толщина и формат листа влияют на раскрой и размеры деталей.</p>
+      <div id="setMat2"></div></div>
     <div class="card"><h3>Каталог фурнитуры</h3>
       <p class="hint">Поставьте цены вашего поставщика. Размеры ручек и вычеты для направляющих влияют на расчёт и проверки — берите их из карточки товара или инструкции.</p>
       <div id="setCat"></div></div>
@@ -505,16 +525,16 @@ const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
-const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,work:20,markup:40,
+const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день'},
   p:{ldsp:4800,hdf:1100,edge:40,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,basket:1900,mirror:3200,tie:30,
-     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10}};
-const SET_MAT=[['t','Толщина ЛДСП','мм'],['sheetL','Лист, длина','мм'],['sheetW','Лист, ширина','мм'],['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%']];
-const SET_PRICE=[['ldsp','Лист ЛДСП','₽/лист'],['hdf','Лист ХДФ','₽/лист'],['edge','Кромка ПВХ 2 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
+     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,edge04:12,topEnd:150,topJoint:300}};
+const SET_MAT=[['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%'],['fMinArea','Мин. площадь заказного фасада','м²']];
+const SET_PRICE=[['hdf','Лист ХДФ','₽/лист'],['edge','Кромка ПВХ 2 мм','₽/м'],['edge04','Кромка ПВХ 0,4 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
   ['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
   ['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['mirror','Зеркало на фасад','₽/м²'],
   ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeRail','Рельсы купе','₽/м'],
-  ['worktop','Столешница 38 мм','₽/м'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт']];
+  ['topEnd','Планка торцевая столешницы','₽/шт'],['topJoint','Планка соединительная столешницы','₽/шт'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт']];
 const SET_WORK=[['work','Сборка и доставка','% от материалов'],['markup','Наценка','%']];
 
 /* ---------- каталог фурнитуры ----------
@@ -523,17 +543,17 @@ const SET_WORK=[['work','Сборка и доставка','% от матери�
 const rail=(cc,price)=>({id:'r'+cc,name:`Скоба ${cc} мм`,cc,len:cc+40,proj:35,price});
 const CATALOG={
   hinges:[
-    {id:'kdm',seg:'эконом',name:'КДМ Clip-On 110°, с доводчиком',over:49,half:51,gap:4,src:'kdm.ru: угол 110°, чашка 35 мм, планка H0, регулировка 3D (глубина ±2, высота ±1,5, горизонталь ±2 мм). Полунакладная — зазор между фасадами на одной перегородке 4 мм. Цена на kdm.ru 40–57 ₽ за штуку, зависит от города (октябрь 2026).'},
-    {id:'amix',seg:'эконом',name:'AMIX, с доводчиком',over:120,half:120,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'gtv',seg:'эконом',name:'GTV, с доводчиком',over:150,half:150,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'boyard',seg:'средний',name:'Boyard, с доводчиком',over:180,half:180,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'firmax',seg:'средний',name:'Firmax, с доводчиком',over:200,half:200,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'samet',seg:'средний',name:'Samet, с доводчиком',over:250,half:250,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'fgv',seg:'средний',name:'FGV, с доводчиком',over:300,half:300,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'hettich',seg:'премиум',name:'Hettich Sensys',over:550,half:550,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'grass',seg:'премиум',name:'Grass Tiomos',over:600,half:600,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'salice',seg:'премиум',name:'Salice Silentia',over:600,half:600,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'},
-    {id:'blum',seg:'премиум',name:'Blum CLIP top BLUMOTION',over:750,half:750,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый. Сверьте со схемой выбранной петли. Цена примерная.'}],
+    {id:'kdm',seg:'эконом',name:'КДМ Clip-On 110°, с доводчиком',over:49,half:51,gap:4,tmin:14,tmax:25,src:'kdm.ru: угол 110°, чашка 35 мм, планка H0, регулировка 3D (глубина ±2, высота ±1,5, горизонталь ±2 мм). Полунакладная — зазор между фасадами на одной перегородке 4 мм. Фасады 14–25 мм. Цена на kdm.ru 40–57 ₽ за штуку, зависит от города (октябрь 2026).'},
+    {id:'amix',seg:'эконом',name:'AMIX, с доводчиком',over:120,half:120,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'gtv',seg:'эконом',name:'GTV, с доводчиком',over:150,half:150,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'boyard',seg:'средний',name:'Boyard, с доводчиком',over:180,half:180,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'firmax',seg:'средний',name:'Firmax, с доводчиком',over:200,half:200,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'samet',seg:'средний',name:'Samet, с доводчиком',over:250,half:250,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'fgv',seg:'средний',name:'FGV, с доводчиком',over:300,half:300,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'hettich',seg:'премиум',name:'Hettich Sensys',over:550,half:550,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'grass',seg:'премиум',name:'Grass Tiomos',over:600,half:600,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'salice',seg:'премиум',name:'Salice Silentia',over:600,half:600,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'},
+    {id:'blum',seg:'премиум',name:'Blum CLIP top BLUMOTION',over:750,half:750,gap:3,src:'Зазор между фасадами на перегородке 3 мм — общепринятый, фасады 14–24 мм. Сверьте со схемой выбранной петли. Цена примерная.'}],
   slides:[
     {id:'roller',seg:'эконом',name:'Роликовые, частичное выдвижение',kind:'side',dW:26,dL:0,price:250,src:'Зазор 12,5 мм на сторону: ящик на 25–26 мм уже проёма.'},
     {id:'ball',seg:'эконом',name:'Шариковые, полное выдвижение',kind:'side',dW:26,dL:0,price:650,src:'Зазор 12,5–13 мм на сторону: ящик на 26 мм уже проёма, длина ящика = длине направляющей.'},
@@ -551,6 +571,50 @@ const CATALOG={
     {id:'aristo',seg:'средний',name:'Aristo',dh:40,ov:27,check:true,src:'По таблице расчёта Aristo: высота = проём − 40, ширина = (проём + 27 × перехлёсты) / двери. В других источниках перехлёст другой — сверьте с таблицей вашего профиля.'},
     {id:'absolut',seg:'средний',name:'ABSOLUT',dh:40,ov:21,src:'Инструкция ABSOLUT: высота = проём − 40 мм, ширина двери = (проём + 21) / 2.'},
     {id:'custom',seg:'другое',name:'Свой профиль — по таблице поставщика',dh:40,ov:26,custom:true,src:'Впишите вычет по высоте и перехлёст из таблицы вашего профиля.'}]};
+/* ---------- материалы ----------
+   Формат листа и толщина корпуса влияют на раскрой и все размеры. Фасады бывают из той же ЛДСП,
+   из ЛДСП другого декора (отдельные листы) или заказные (МДФ и др. — заказ в цех по м², без кромки ПВХ). */
+const FCOLORS={white:{name:'Белый',fill:'#F2F2EE'},light:{name:'Светло-серый',fill:'#D3D6D5'},graphite:{name:'Графит',fill:'#4A4F55'},beige:{name:'Бежевый',fill:'#E2D2BA'},olive:{name:'Оливковый',fill:'#8A8F6A'},navy:{name:'Тёмно-синий',fill:'#30405A'}};
+const MATERIALS={
+  bodies:[
+    {id:'krono16',name:'ЛДСП Kronospan 16 мм',t:16,L:2800,W:2070,price:4800,src:'Формат Kronospan 2800×2070 мм. Цена примерная.'},
+    {id:'krono18',name:'ЛДСП Kronospan 18 мм',t:18,L:2800,W:2070,price:5300,src:'Формат Kronospan 2800×2070 мм. Цена примерная.'},
+    {id:'egger16',name:'ЛДСП Egger 16 мм',t:16,L:2800,W:2070,price:6500,src:'Формат Egger 2800×2070 мм. Цена примерная.'},
+    {id:'egger18',name:'ЛДСП Egger 18 мм',t:18,L:2800,W:2070,price:7200,src:'Формат Egger 2800×2070 мм. Цена примерная.'},
+    {id:'lamarty16',name:'ЛДСП Lamarty 16 мм',t:16,L:2750,W:1830,price:3500,src:'Формат Lamarty 2750×1830 мм; около 3 500 ₽ за лист 16 мм (Москва, 2026).'},
+    {id:'lamarty18',name:'ЛДСП Lamarty 18 мм',t:18,L:2750,W:1830,price:3900,src:'Формат Lamarty 2750×1830 мм. Цена примерная.'},
+    {id:'custom',name:'Свой лист',t:16,L:2800,W:2070,price:4800,custom:true,src:'Впишите толщину, формат и цену вашего листа.'}],
+  fronts:[
+    {id:'body',kind:'body',name:'ЛДСП, как корпус',src:'Фасады выкраиваются из тех же листов, кромка ПВХ 2 мм.'},
+    {id:'ldsp',kind:'sheet',name:'ЛДСП другого декора',src:'Отдельные листы того же формата и толщины, что корпус. Кромка ПВХ 2 мм.'},
+    {id:'mdfpvc',kind:'order',name:'МДФ в плёнке ПВХ',t:19,price:8500,kg:16,src:'Заказ в цех по м². Цена от 8 500 ₽/м² (mofasad.ru). Вес МДФ 19 мм — около 15–16 кг/м².'},
+    {id:'mdfmat',kind:'order',name:'МДФ эмаль матовая',t:19,price:10000,kg:16,src:'Заказ в цех по м². Эмаль матовая гладкая 16/19 мм — 9 000/10 000 ₽/м² (fasadneva.ru).'},
+    {id:'mdfgloss',kind:'order',name:'МДФ эмаль глянец',t:19,price:14000,kg:16,src:'Заказ в цех по м². Эмаль глянцевая гладкая 16/19 мм — 14 000 ₽/м² (fasadneva.ru).'},
+    {id:'mdf22',kind:'order',name:'МДФ эмаль матовая 22 мм',t:22,price:11500,kg:19,src:'Заказ в цех по м². Эмаль матовая 22 мм — 11 500 ₽/м² (fasadneva.ru). Вес 22 мм — около 18–19 кг/м².'},
+    {id:'plastic',kind:'order',name:'Пластик (AGT, HPL) на МДФ',t:18,price:7500,kg:15,src:'Заказ в цех по м². Цена примерная.'},
+    {id:'custom',kind:'order',name:'Свои фасады на заказ',t:19,price:9000,kg:16,custom:true,src:'Впишите толщину, цену за м² и вес по данным вашего цеха.'}],
+  tops:[
+    {id:'pf26',name:'Постформинг 26 мм, длина 3050',t:26,D:600,maxL:3050,price:2500,planks:true,src:'Стандарт: глубина 600 мм, длина 3050 или 4200 мм, толщина 26 или 38 мм. Цена примерная.'},
+    {id:'pf38',name:'Постформинг 38 мм, длина 3050',t:38,D:600,maxL:3050,price:3500,planks:true,src:'Стандарт: глубина 600 мм, длина 3050 или 4200 мм, толщина 38 мм. Цена примерная.'},
+    {id:'pf38l',name:'Постформинг 38 мм, длина 4200',t:38,D:600,maxL:4200,price:3700,planks:true,src:'Длина 4200 мм — меньше стыков. Цена примерная.'},
+    {id:'egger38',name:'Egger 38 мм, длина 4100',t:38,D:600,maxL:4100,price:5500,planks:true,src:'Стандарт Egger: 4100×600×38 мм. Цена примерная.'},
+    {id:'stone',name:'Искусственный камень (акрил), край 38 мм',t:38,D:600,maxL:0,price:25000,src:'Изготавливается по замеру, швы склеиваются незаметно. Цена примерная за погонный метр.'},
+    {id:'quartz',name:'Кварцевый агломерат 20 мм',t:20,D:600,maxL:0,price:35000,src:'Изготавливается по замеру. Цена примерная за погонный метр.'},
+    {id:'custom',name:'Своя столешница',t:38,D:600,maxL:3050,price:3500,planks:true,custom:true,src:'Впишите толщину, глубину, длину листа и цену за погонный метр.'}],
+  edges:[
+    {id:'all2',name:'ПВХ 2 мм на все видимые торцы'},
+    {id:'mix',name:'ПВХ 2 мм на фасады, 0,4 мм на корпус'}]};
+const MAT_EDIT={bodies:['price'],fronts:['price','kg'],tops:['price'],edges:[]},MAT_EDIT_CUSTOM={bodies:['t','L','W'],fronts:['t'],tops:['t','D','maxL']};
+function matMerge(saved,oldP){const out={};
+  for(const k of Object.keys(MATERIALS)){const sv=(saved&&saved[k])||[];
+    out[k]=MATERIALS[k].map(d=>{const o={...d},x=sv.find(y=>y.id===d.id);if(x)[...MAT_EDIT[k],...(d.custom?MAT_EDIT_CUSTOM[k]||[]:[])].forEach(f=>{if(Number.isFinite(+x[f]))o[f]=+x[f]});return o})}
+  // перенос цены листа из прошлой версии программы
+  if(!saved&&oldP&&Number.isFinite(+oldP.ldsp))out.bodies.find(b=>b.id==='krono16').price=+oldP.ldsp;
+  return out}
+const matItem=(k,id,st)=>{const m=(st||settings).mat||settings.mat;return m[k].find(x=>x.id===id)||m[k][0]};
+// чем и как отделаны фасады
+function frontMat(p,s){const f=matItem('fronts',p.mat.front,s);return{f,mat:f.kind==='body'?'ldsp':f.kind==='sheet'?'ldspF':'order',edge:f.kind!=='order',t:f.kind==='order'?f.t:s.t}}
+const frontFill=p=>{const f=matItem('fronts',p.mat.front);return f.kind==='body'?DECORS[p.decor].fill:f.kind==='sheet'?(DECORS[p.mat.frontDecor]||DECORS.white).fill:(FCOLORS[p.mat.frontColor]||FCOLORS.white).fill};
 const CAT_EDIT={hinges:['over','half','gap'],slides:['price'],handles:['cc','len','proj','price'],coupe:[]};
 const CAT_EDIT_CUSTOM={slides:['dW','dL'],coupe:['dh','ov']};
 function catMerge(saved){const out={};
@@ -581,6 +645,7 @@ function norm(p){
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
+  p.mat=Object.assign({body:'krono16',front:'body',frontDecor:'white',frontColor:'white',frontNote:'',top:'pf38',edge:'all2'},p.mat||{});
   p.hw=Object.assign({hinge:'boyard',slide:'ball',handle:'r128',handleIn:'knob',coupe:'std'},p.hw||{});p.walls=Object.assign({L:false,R:false,A:false,B:false},p.walls||{});
   p.k=Object.assign(kDefaults(),p.k||{});p.c=Object.assign(cDefaults(),p.c||{});if(p.c.legs===undefined)p.c.legs=0;
   return p}
@@ -589,6 +654,7 @@ let settings=Object.assign(clone(DEFAULT_SETTINGS),LS.get('shkaf.settings',{}));
 settings.p=Object.assign({},DEFAULT_SETTINGS.p,settings.p||{});
 settings.company=Object.assign({},DEFAULT_SETTINGS.company,settings.company||{});
 settings.cat=catMerge(settings.cat);
+settings.mat=matMerge(LS.get('shkaf.settings',{}).mat,LS.get('shkaf.settings',{}).p);
 let projects=LS.get('shkaf.projects',[]).map(norm);
 let curId=LS.get('shkaf.current',null);
 const storageOk=LS.set('shkaf.probe',1);
@@ -602,11 +668,16 @@ const HW=(p,st)=>({hinge:catItem('hinges',p.hw.hinge,st),slide:catItem('slides',
 /* ---------- общие помощники ---------- */
 // петель на дверь: по высоте, а зеркало утяжеляет дверь — плюс одна петля
 const ERR=t=>({t,lvl:'err'});
+function frontChecks(p,s,h,warn,maxH){const fm=frontMat(p,s),tmin=h.tmin||14,tmax=h.tmax||24;
+  if(fm.t>tmax||fm.t<tmin)warn.push(ERR(`Фасады ${fm.t} мм, а петли «${h.name}» рассчитаны на фасады ${tmin}–${tmax} мм. Выберите другие петли или фасады.`));
+  if((fm.f.kg||0)>=15&&maxH>1500)warn.push(`Тяжёлые фасады (${fm.f.kg} кг/м²) высотой ${Math.round(maxH)} мм — сверьте число петель по таблице производителя петель.`)}
 const hingeCount=(h,mirror)=>(h<=1000?2:h<=1500?3:h<=2000?4:h<=2400?5:6)+(mirror&&h>1000?1:0);
 const slideFor=d=>[550,500,450,400,350,300,250].find(v=>v<=d-10)||0;
 const boxHFor=fh=>Math.max(80,Math.min(200,Math.floor((fh-50)/10)*10));
 // фасады округляем вниз: иначе ряд дверей может выйти на миллиметр шире корпуса
-function adder(parts){return(name,group,L,Wd,qty,mat,eL,eW)=>{if(qty>0&&L>0&&Wd>0){const r=group==='Фасады'||/фасад/i.test(name)?Math.floor:Math.round;
+function adder(parts,fm){return(name,group,L,Wd,qty,mat,eL,eW)=>{if(qty>0&&L>0&&Wd>0){const r=group==='Фасады'||/фасад/i.test(name)?Math.floor:Math.round;
+  // детали группы «Фасады» идут из материала фасадов: другой декор или заказ в цех без кромки
+  if(fm&&group==='Фасады'){mat=fm.mat;if(!fm.edge){eL=0;eW=0}}
   parts.push({name,group,L:r(L+1e-6),Wd:r(Wd+1e-6),qty,mat:mat||'ldsp',eL:eL||0,eW:eW||0})}}}
 // Короб ящика под выбранную систему. opening — чистый проём между стенками (или проставками).
 function drawerBoxes(add,t,opening,boxH,slide,qty,sys){
@@ -665,7 +736,7 @@ function calcWing(p,s,W,sections,blk,key,walls){
     if(ci>=0&&n>1){const cw=Math.min(net-250*(n-1),Math.max(net/n,blk.w-t+(p.cornerOpen||450)));ws=ws.map((_,i)=>i===ci?cw:(net-cw)/(n-1))}
   }
   const xs=[];ws.reduce((x,w,i)=>(xs[i]=x,x+w+t),t);
-  const parts=[],warn=[],add=adder(parts);
+  const parts=[],warn=[],add=adder(parts,frontMat(p,s));
   add('Боковина','Корпус',H,D,2,'ldsp',1,0);
   add('Крыша','Корпус',inW,D,1,'ldsp',1,0);
   add('Дно','Корпус',inW,D,1,'ldsp',1,0);
@@ -742,14 +813,14 @@ function calcWing(p,s,W,sections,blk,key,walls){
 
 function calcWardrobe(p,s){
   const corner=p.shape==='corner',coupe=p.type==='coupe',A_L=p.cornerSide==='L';
-  // Угол распашного шкафа: сторона Б отодвигается на толщину двери А (20 мм), на обеих сторонах доборные планки.
+  // Угол распашного шкафа: сторона Б отодвигается на толщину двери А плюс 4 мм, на обеих сторонах доборные планки.
   // Угол купе: двери внутри корпуса, сторона Б примыкает к стороне А вплотную.
   const blkA=!corner?{side:'L',w:0}:coupe?{side:p.cornerSide,w:p.D}:{side:p.cornerSide,w:p.D+FILLER,open:p.cornerOpen||450,planka:true};
   // стены у краёв: у прямого шкафа — слева и справа, у углового — у свободных концов сторон А и Б
   const wA=!corner?{L:p.walls.L,R:p.walls.R}:{[A_L?'R':'L']:p.walls.A},wB=corner?{[A_L?'L':'R']:p.walls.B}:{};
   const HWp=HW(p,s);
   const wings=[calcWing(p,s,p.W,p.sections,blkA,'A',wA)];
-  const lenB=corner?(coupe?p.W2-p.D:p.W2-p.D-20):0;
+  const fT=frontMat(p,s).t,lenB=corner?(coupe?p.W2-p.D:p.W2-p.D-(fT+4)):0;
   if(corner)wings.push(calcWing(p,s,lenB,p.sectionsB,coupe?{side:'L',w:0}:{side:A_L?'R':'L',w:FILLER,planka:true},'B',wB));
   const parts=mergeParts(wings.flatMap(w=>w.parts));
   const warn=[];
@@ -762,6 +833,7 @@ function calcWardrobe(p,s){
   if(corner&&!coupe&&HWp.handle.proj>FILLER-15)warn.push(ERR(`Ручки выступают на ${HWp.handle.proj} мм — в углу двери сторон А и Б заденут ручки друг друга (планка ${FILLER} мм рассчитана на вынос до ${FILLER-15} мм). Выберите ручку с меньшим выносом.`));
   if(corner&&lenB<500)warn.push(ERR(`Сторона Б слишком короткая: корпус выходит ${Math.round(lenB)} мм. Увеличьте ширину стороны Б.`));
   const doorsAll=coupe?wings.flatMap(w=>w.coupeD.items):wings.flatMap(w=>w.doors);
+  if(!coupe&&doorsAll.length)frontChecks(p,s,HWp.hinge,warn,Math.max(...doorsAll.map(d=>d.h)));
   const nm=Math.min(p.mirrors||0,doorsAll.length);
   doorsAll.forEach(d=>d.mirror=false);
   for(let j=0;j<nm;j++)doorsAll[Math.floor((j+.5)*doorsAll.length/nm)].mirror=true;
@@ -801,7 +873,7 @@ function calcWardrobe(p,s){
 
 function drawFront(p,s,w){
   const t=s.t,W=w.W,H=p.H,n=w.sections.length,pl=Math.max(0,p.plinth),M=Math.max(W,H,1400);
-  const sw=M/380,fs=M*0.03,dec=DECORS[p.decor].fill,id='h'+w.key,R=svgR(sw);
+  const sw=M/380,fs=M*0.03,dec=DECORS[p.decor].fill,fdec=frontFill(p),id='h'+w.key,R=svgR(sw);
   const padL=40,padR=M*0.09,padT=M*0.075,padB=M*0.08;
   let g=`<defs><pattern id="${id}" width="${M/45}" height="${M/45}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="${M/45}" class="sv-ink" stroke-width="${sw}" opacity=".45"/></pattern></defs>`;
   g+=`<rect x="${t}" y="${t}" width="${W-2*t}" height="${H-pl-2*t}" class="sv-cav"/>`;
@@ -835,14 +907,14 @@ function drawFront(p,s,w){
   if(showDoors){
     if(p.type==='swing'){
       w.doors.forEach(d=>{const x=d.x,y=2,h=d.h;
-        g+=`<rect x="${x}" y="${y}" width="${d.w}" height="${h}" fill="${dec}" fill-opacity=".9" class="sv-ink" stroke-width="${sw}"/>`;
+        g+=`<rect x="${x}" y="${y}" width="${d.w}" height="${h}" fill="${fdec}" fill-opacity=".95" class="sv-ink" stroke-width="${sw}"/>`;
         if(d.mirror)g+=mirrorRect(x+50,y+50,d.w-100,h-100);
         const hx=d.hinge==='L'?x:x+d.w,ox=d.hinge==='L'?x+d.w:x;
         g+=`<path d="M${ox} ${y} L${hx} ${y+h/2} L${ox} ${y+h}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".6"/>`;
         g+=handleV(ox+(d.hinge==='L'?-50:50),y+h*.48-80,160,sw)});
     }else{
       w.coupeD.items.forEach((d,i)=>{const y=t+20;
-        g+=`<rect x="${d.x}" y="${y}" width="${d.w}" height="${d.h}" fill="${d.mirror?MIRROR:dec}" fill-opacity="${i%2?'.97':'.85'}" class="sv-ink" stroke-width="${sw}"/>`;
+        g+=`<rect x="${d.x}" y="${y}" width="${d.w}" height="${d.h}" fill="${d.mirror?MIRROR:fdec}" fill-opacity="${i%2?'.97':'.85'}" class="sv-ink" stroke-width="${sw}"/>`;
         if(d.mirror)g+=mirrorRect(d.x+25,y+30,d.w-50,d.h-60);
         g+=`<rect x="${d.x}" y="${y}" width="25" height="${d.h}" class="sv-mut" opacity=".55"/><rect x="${d.x+d.w-25}" y="${y}" width="25" height="${d.h}" class="sv-mut" opacity=".55"/>`});
     }
@@ -851,7 +923,7 @@ function drawFront(p,s,w){
     if(hw>0){const bx=L?0:W-hw;
       g+=`<rect x="${bx}" y="0" width="${hw}" height="${H}" fill="url(#${id})" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*5} ${sw*3}"/>`;
       g+=`<text x="${bx+hw/2}" y="${H*.42}" font-size="${fs*.9}" text-anchor="middle" class="sv-txt" font-weight="600" transform="rotate(-90 ${bx+hw/2} ${H*.42})">стык со стороной ${w.key==='A'?'Б':'А'}</text>`}
-    if(plk){const px=L?hw:W-w.blk.w;g+=R(px,2,plk,H-pl-4,dec)+`<text x="${px+plk/2}" y="${H*.75}" font-size="${fs*.6}" text-anchor="middle" class="sv-mut" transform="rotate(-90 ${px+plk/2} ${H*.75})">планка ${plk}</text>`}}
+    if(plk){const px=L?hw:W-w.blk.w;g+=R(px,2,plk,H-pl-4,fdec)+`<text x="${px+plk/2}" y="${H*.75}" font-size="${fs*.6}" text-anchor="middle" class="sv-mut" transform="rotate(-90 ${px+plk/2} ${H*.75})">планка ${plk}</text>`}}
   g+=dimLines(W,H,M,sw,fs,padR,padB);
   return `<svg viewBox="${-padL} ${-padT} ${W+padL+padR} ${H+padT+padB}" role="img" aria-label="Чертёж фасада ${W} на ${H} мм">${g}</svg>`;
 }
@@ -877,8 +949,9 @@ function drawPlan(p){
 /* ================= КУХНЯ ================= */
 const modLabel=(zone,i,m)=>(m.type==='tall'?'П':zone==='wall'?'В':'Н')+(i+1);
 function calcKitchen(p,s){
-  const k=p.k,t=s.t,parts=[],warn=[],add=adder(parts),pr=s.p;
+  const k=p.k,t=s.t,parts=[],warn=[],add=adder(parts,frontMat(p,s)),pr=s.p;
   let legs=0,hinges=0,handles=0,slides=0,supports=0,conf=0,hangers=0,dry=0,sink=0;
+  const top=matItem('tops',p.mat.top,s),tT=k.worktop?top.t:0,fm=frontMat(p,s);
   const slide=slideFor(k.baseD-20),HWp=HW(p,s),sys=HWp.slide,kh={base:[],wall:[]};
   // двери модуля: у крайнего модуля возле стены петли ставим со стороны от стены
   const doorsFront=(h,w,zone,i,cnt,lab)=>{const n=w>600?2:1,dw=(w-4-3*(n-1))/n;add('Фасад','Фасады',h,dw,n,'ldsp',2,2);hinges+=n*hingeCount(h);handles+=n;
@@ -920,13 +993,18 @@ function calcKitchen(p,s){
     if(w<150)warn.push(ERR(`${lab}: модуль уже 150 мм.`));
   });
   const baseLen=k.base.filter(m=>m.type!=='tall').reduce((a,m)=>a+m.w,0),allBase=k.base.reduce((a,m)=>a+m.w,0);
-  if(k.worktop&&baseLen>3000)warn.push(`Столешница ${baseLen} мм длиннее 3 м — понадобится стык.`);
+  const joints=k.worktop&&top.maxL&&baseLen>top.maxL?Math.ceil(baseLen/top.maxL)-1:0;
+  if(joints)warn.push(`Столешница ${baseLen} мм длиннее листа ${top.maxL} мм — ${plural(joints,'стык','стыка','стыков')}. Стык не делайте над мойкой и варочной панелью.`);
+  // фасад стоит на 2 мм перед корпусом; столешница должна перекрыть его хотя бы на 5 мм
+  if(k.worktop&&k.baseD+2+fm.t>top.D-5)warn.push(ERR(`Столешница глубиной ${top.D} мм не закроет фасады: корпус ${k.baseD} + фасад ${fm.t} мм. Уменьшите глубину нижних модулей до ${top.D-7-fm.t} мм или возьмите столешницу глубже.`));
+  if(hinges)frontChecks(p,s,HWp.hinge,warn,Math.max(k.wallH,k.base.some(m=>m.type==='tall')?k.tallH-k.legs-k.baseH:0));
   if(!slide&&k.base.some(m=>m.type==='drawers'||m.type==='oven'))warn.push(ERR('Ящики не помещаются по глубине — увеличьте глубину нижних модулей.'));
   const hw=[];
   hw.push(['Конфирмат 7×50',conf,'шт',pr.confirmat]);
   if(legs)hw.push(['Ножка кухонная регулируемая',legs,'шт',pr.leg]);
   if(allBase)hw.push(['Цоколь кухонный ПВХ',+(allBase/1000).toFixed(2),'м',pr.kplinth]);
-  if(k.worktop&&baseLen)hw.push(['Столешница 38 мм',+(baseLen/1000).toFixed(2),'м',pr.worktop]);
+  if(k.worktop&&baseLen){hw.push([`Столешница: ${top.name.toLowerCase()}`,+(baseLen/1000).toFixed(2),'м',top.price]);
+    if(top.planks){hw.push(['Планка торцевая для столешницы',2,'шт',pr.topEnd]);if(joints)hw.push(['Планка соединительная для столешницы',joints,'шт',pr.topJoint])}}
   if(sink)hw.push(['Врезка мойки в столешницу',sink,'шт',pr.sinkCut]);
   hingeRows(hw,HWp.hinge,hinges,0);handleRow(hw,HWp.handle,handles);slideRow(hw,sys,slide,slides);
   if(slides&&sys.maxT&&t>sys.maxT)warn.push(ERR(`Направляющие «${sys.name}» рассчитаны на боковины ящика до ${sys.maxT} мм, а ЛДСП ${t} мм. Выберите другие направляющие.`));
@@ -934,37 +1012,37 @@ function calcKitchen(p,s){
   if(hangers)hw.push(['Навес регулируемый',hangers,'шт',pr.hanger]);
   if(dry)hw.push(['Сушка для посуды',dry,'шт',pr.drying]);
   const tallM=k.base.find(m=>m.type==='tall'),notes=tallM?[`Пенал собирают лёжа и поднимают: потолок должен быть не ниже ${Math.ceil(Math.hypot(k.tallH-k.legs,k.baseD))+k.legs+10} мм.`]:[];
-  if(k.wallY-(k.legs+k.baseH+38)<450)warn.push(`Между столешницей и верхними шкафами ${k.wallY-(k.legs+k.baseH+38)} мм — меньше 450 мм неудобно работать. Поднимите верхние модули.`);
-  return{parts:mergeParts(parts),hw,warn,notes,mirrors:[],doorsAll:[],baseLen,allBase,kh,wallLen:k.wall.reduce((a,m)=>a+m.w,0)};
+  if(k.wallY-(k.legs+k.baseH+tT)<450)warn.push(`Между столешницей и верхними шкафами ${k.wallY-(k.legs+k.baseH+tT)} мм — меньше 450 мм неудобно работать. Поднимите верхние модули.`);
+  return{parts:mergeParts(parts),hw,warn,notes,mirrors:[],doorsAll:[],baseLen,allBase,kh,tT,top,wallLen:k.wall.reduce((a,m)=>a+m.w,0)};
 }
 function wallLayout(k){
   const tallR=[];let x=0;k.base.forEach(m=>{if(m.type==='tall')tallR.push([x,x+m.w]);x+=m.w});
   const xs=[];x=0;k.wall.forEach(m=>{let moved=true;while(moved){moved=false;for(const [a,b] of tallR)if(x<b&&x+m.w>a){x=b;moved=true}}xs.push(x);x+=m.w});return xs}
 function drawKitchen(p,s,r){
-  const k=p.k,dec=DECORS[p.decor].fill,wxs=wallLayout(k);
+  const k=p.k,dec=DECORS[p.decor].fill,fdec=frontFill(p),wxs=wallLayout(k),tT=r.tT||0;
   const baseW=k.base.reduce((a,m)=>a+m.w,0),wallEnd=k.wall.length?wxs[wxs.length-1]+k.wall[k.wall.length-1].w:0;
-  const W=Math.max(baseW,wallEnd,600),Ht=Math.max(k.tallH,k.wallY+k.wallH,k.legs+k.baseH+38);
+  const W=Math.max(baseW,wallEnd,600),Ht=Math.max(k.tallH,k.wallY+k.wallH,k.legs+k.baseH+tT);
   const M=Math.max(W,Ht),sw=M/380,fs=M*0.026,R=svgR(sw),F=Ht,padT=M*0.06,padB=M*0.09,padR=M*0.08;
   let g=`<line x1="${-M*.02}" x2="${W+M*.02}" y1="${F}" y2="${F}" class="sv-ink" stroke-width="${sw*1.5}"/>`;
-  const fronts=(x,y,w,h,n,hs)=>{const dw=(w-4-3*(n-1))/n;let o='';for(let j=0;j<n;j++){const fx=x+2+j*(dw+3),hg=(hs&&hs[j])||(j===0?'L':'R');o+=R(fx,y+2,dw,h-4,dec)+handleV(hg==='L'?fx+dw-40:fx+40,y+h*.08,Math.min(160,h*.25),sw)}return o};
+  const fronts=(x,y,w,h,n,hs)=>{const dw=(w-4-3*(n-1))/n;let o='';for(let j=0;j<n;j++){const fx=x+2+j*(dw+3),hg=(hs&&hs[j])||(j===0?'L':'R');o+=R(fx,y+2,dw,h-4,fdec)+handleV(hg==='L'?fx+dw-40:fx+40,y+h*.08,Math.min(160,h*.25),sw)}return o};
   let x=0;
   k.base.forEach((m,i)=>{const tall=m.type==='tall',h=tall?k.tallH-k.legs:k.baseH,y0=F-k.legs-h,w=m.w,key='base:'+i;
     g+=`<rect x="${x}" y="${F-k.legs}" width="${w}" height="${k.legs}" class="sv-mut" opacity=".35"/>`;
     g+=`<rect x="${x}" y="${y0}" width="${w}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`;
     if(m.type==='doors'||m.type==='sink')g+=fronts(x,y0,w,h,w>600?2:1,r.kh.base[i]);
-    if(m.type==='drawers'){const n=Math.max(1,m.drawers),fh=(h-4-3*(n-1))/n;for(let j=0;j<n;j++){const fy=y0+2+j*(fh+3);g+=R(x+2,fy,w-4,fh,dec)+handleH(x+w*.35,fy+Math.min(40,fh*.25),w*.3,sw)}}
-    if(m.type==='oven'){const fh=h-604-s.t;g+=R(x+2,y0+h-fh-2,w-4,fh,dec);
+    if(m.type==='drawers'){const n=Math.max(1,m.drawers),fh=(h-4-3*(n-1))/n;for(let j=0;j<n;j++){const fy=y0+2+j*(fh+3);g+=R(x+2,fy,w-4,fh,fdec)+handleH(x+w*.35,fy+Math.min(40,fh*.25),w*.3,sw)}}
+    if(m.type==='oven'){const fh=h-604-s.t;g+=R(x+2,y0+h-fh-2,w-4,fh,fdec);
       g+=`<rect x="${x+20}" y="${y0+20}" width="${w-40}" height="${595-10}" rx="${sw*4}" class="sv-ink" fill="none" stroke-width="${sw*1.5}"/><rect x="${x+70}" y="${y0+110}" width="${w-140}" height="${595-200}" rx="${sw*3}" class="sv-mut" opacity=".35"/>`}
     if(tall){const low=k.baseH;g+=fronts(x,y0+h-low,w,low,w>600?2:1,r.kh.base[i])+fronts(x,y0,w,h-low,w>600?2:1,r.kh.base[i])}
-    if(!tall&&k.worktop){g+=`<rect x="${x}" y="${y0-38}" width="${w}" height="38" class="sv-mut sv-ink" stroke-width="${sw}" opacity=".85"/>`;
-      if(m.type==='sink')g+=`<path d="M${x+w/2} ${y0-38} l0 -170 q0 -40 50 -40 l60 0" fill="none" class="sv-ink" stroke-width="${sw*3}" stroke-linecap="round"/>`}
+    if(!tall&&k.worktop){g+=`<rect x="${x}" y="${y0-tT}" width="${w}" height="${tT}" class="sv-mut sv-ink" stroke-width="${sw}" opacity=".85"/>`;
+      if(m.type==='sink')g+=`<path d="M${x+w/2} ${y0-tT} l0 -170 q0 -40 50 -40 l60 0" fill="none" class="sv-ink" stroke-width="${sw*3}" stroke-linecap="round"/>`}
     g+=`<rect class="mod-hit${key===activeSec?' on':''}" data-mod="${key}" x="${x}" y="${y0}" width="${w}" height="${h}"/>`;
     g+=`<text x="${x+w/2}" y="${F+fs*1.3}" font-size="${fs*.85}" text-anchor="middle" class="sv-mut">${modLabel('base',i,m)} · ${w}</text>`;
     x+=w});
   k.wall.forEach((m,i)=>{const x=wxs[i],w=m.w,h=k.wallH,y0=F-k.wallY-h,key='wall:'+i;
     g+=`<rect x="${x}" y="${y0}" width="${w}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`;
     if(m.type==='open'){g+=R(x,y0,s.t,h,dec)+R(x+w-s.t,y0,s.t,h,dec);for(let j=0;j<m.shelves;j++)g+=R(x,y0+h*(j+1)/(m.shelves+1),w,s.t,dec)}
-    else{const n=w>600?2:1,dw=(w-4-3*(n-1))/n,hs=r.kh.wall[i]||[];for(let j=0;j<n;j++){const fx=x+2+j*(dw+3),hg=hs[j]||(j===0?'L':'R');g+=R(fx,y0+2,dw,h-4,dec)+handleV(hg==='L'?fx+dw-40:fx+40,y0+h-200,140,sw)}
+    else{const n=w>600?2:1,dw=(w-4-3*(n-1))/n,hs=r.kh.wall[i]||[];for(let j=0;j<n;j++){const fx=x+2+j*(dw+3),hg=hs[j]||(j===0?'L':'R');g+=R(fx,y0+2,dw,h-4,fdec)+handleV(hg==='L'?fx+dw-40:fx+40,y0+h-200,140,sw)}
       if(m.type==='drying')g+=`<path d="M${x+w*.2} ${y0+h*.45} h${w*.6} M${x+w*.2} ${y0+h*.55} h${w*.6}" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*4} ${sw*3}" opacity=".6"/>`}
     g+=`<rect class="mod-hit${key===activeSec?' on':''}" data-mod="${key}" x="${x}" y="${y0}" width="${w}" height="${h}"/>`;
     g+=`<text x="${x+w/2}" y="${y0-fs*.5}" font-size="${fs*.85}" text-anchor="middle" class="sv-mut">${modLabel('wall',i,m)} · ${w}</text>`});
@@ -976,7 +1054,7 @@ function drawKitchen(p,s,r){
 
 /* ================= КОМОД, ТУМБА ================= */
 function calcChest(p,s){
-  const c=p.c,t=s.t,W=c.W,H=c.H,D=c.D,legs=Math.max(0,c.legs||0),Hb=H-legs,pl=legs?0:Math.max(0,c.plinth),n=c.cols.length,parts=[],warn=[],add=adder(parts),pr=s.p;
+  const c=p.c,t=s.t,W=c.W,H=c.H,D=c.D,legs=Math.max(0,c.legs||0),Hb=H-legs,pl=legs?0:Math.max(0,c.plinth),n=c.cols.length,parts=[],warn=[],add=adder(parts,frontMat(p,s)),pr=s.p;
   // стыки фасадов приходятся на центры перегородок: делим фасад на равные пролёты, ширины колонок выводим из них
   const inW=W-2*t,span=W/n,fz=Hb-pl-t-3,slide=slideFor(D-20),HWp=HW(p,s),sys=HWp.slide,ch=[];
   const colWs=Array.from({length:n},(_,i)=>span-(i===0?t:t/2)-(i===n-1?t:t/2));
@@ -1015,10 +1093,11 @@ function calcChest(p,s){
   hingeRows(hw,HWp.hinge,hOver,hHalf);handleRow(hw,HWp.handle,handles);slideRow(hw,sys,slide,slides);
   if(slides&&sys.maxT&&t>sys.maxT)warn.push(ERR(`Направляющие «${sys.name}» рассчитаны на боковины ящика до ${sys.maxT} мм, а ЛДСП ${t} мм. Выберите другие направляющие.`));
   if(supports)hw.push(['Полкодержатель',supports,'шт',pr.support]);
+  if(hOver+hHalf)frontChecks(p,s,HWp.hinge,warn,fz);
   return{parts:mergeParts(parts),hw,warn,mirrors:[],doorsAll:[],colWs,xs,fr,fz,span,Hb,legs,hOver,hHalf,ch};
 }
 function drawChest(p,s,r){
-  const c=p.c,t=s.t,W=c.W,Ht=c.H,H=r.Hb,lg=r.legs,pl=lg?0:Math.max(0,c.plinth),n=c.cols.length,dec=DECORS[p.decor].fill;
+  const c=p.c,t=s.t,W=c.W,Ht=c.H,H=r.Hb,lg=r.legs,pl=lg?0:Math.max(0,c.plinth),n=c.cols.length,dec=DECORS[p.decor].fill,fdec=frontFill(p);
   const M=Math.max(W,Ht,700),sw=M/380,fs=M*0.032,R=svgR(sw),padT=M*0.06,padB=M*0.1,padR=M*0.1;
   let g=`<rect x="${t}" y="${t}" width="${W-2*t}" height="${H-pl-2*t}" class="sv-cav"/>`;
   g+=R(0,0,W,t,dec)+R(0,t,t,H-t,dec)+R(W-t,t,t,H-t,dec)+R(t,H-pl-t,W-2*t,t,dec);
@@ -1026,9 +1105,9 @@ function drawChest(p,s,r){
   if(lg)g+=`<rect x="${t*2}" y="${H}" width="${t*2.5}" height="${lg}" class="sv-mut"/><rect x="${W-t*4.5}" y="${H}" width="${t*2.5}" height="${lg}" class="sv-mut"/>`;
   for(let i=1;i<n;i++)g+=R(r.xs[i]-t,t,t,H-pl-2*t,dec);
   c.cols.forEach((cl,i)=>{const fx=r.fr[i].x,fw=r.fr[i].w,fy=t+2,x0=r.xs[i],cw=r.colWs[i];
-    if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(r.fz-3*(m-1))/m;for(let j=0;j<m;j++){const y=fy+j*(fh+3);g+=R(fx,y,fw,fh,dec)+handleH(fx+fw*.35,y+fh/2,fw*.3,sw)}}
+    if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(r.fz-3*(m-1))/m;for(let j=0;j<m;j++){const y=fy+j*(fh+3);g+=R(fx,y,fw,fh,fdec)+handleH(fx+fw*.35,y+fh/2,fw*.3,sw)}}
     else if(cl.type==='door'){const nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;for(let j=0;j<nd;j++){const dx=fx+j*(dw+3),hingeL=(r.ch[i]||[])[j]?r.ch[i][j]==='L':(nd===2?j===0:i<n/2),ox=hingeL?dx+dw:dx,hx=hingeL?dx:dx+dw;
-        g+=R(dx,fy,dw,r.fz,dec)+`<path d="M${ox} ${fy} L${hx} ${fy+r.fz/2} L${ox} ${fy+r.fz}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".55"/>`+handleV(ox+(hingeL?-40:40),fy+r.fz*.15,Math.min(140,r.fz*.3),sw)}}
+        g+=R(dx,fy,dw,r.fz,fdec)+`<path d="M${ox} ${fy} L${hx} ${fy+r.fz/2} L${ox} ${fy+r.fz}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".55"/>`+handleV(ox+(hingeL?-40:40),fy+r.fz*.15,Math.min(140,r.fz*.3),sw)}}
     else{for(let j=0;j<cl.shelves;j++)g+=R(x0,t+(H-pl-2*t)*(j+1)/(cl.shelves+1),cw,t,dec)}
     const key='C:'+i;
     g+=`<rect class="mod-hit${key===activeSec?' on':''}" data-col="${i}" x="${fx}" y="${fy}" width="${fw}" height="${r.fz}"/>`;
@@ -1044,7 +1123,10 @@ function calc(p,s){
   const nails=Math.ceil(backs.reduce((a,x)=>a+x.qty*2*(x.L+x.Wd),0)/150);
   if(nails)r.hw.push(['Гвоздь/саморез для ХДФ (шаг 150 мм)',nails,'шт',s.p.nail]);
   const cf=r.hw.find(x=>x[0].startsWith('Конфирмат'));if(cf)r.hw.push(['Заглушка для конфирмата',cf[1],'шт',s.p.cap]);
-  r.edgeM=r.parts.reduce((a,x)=>a+x.qty*(x.eL*x.L+x.eW*x.Wd),0)/1000*(1+s.edgeReserve/100);
+  const em=x=>x.qty*(x.eL*x.L+x.eW*x.Wd)/1000*(1+s.edgeReserve/100),thin=p.mat&&p.mat.edge==='mix';
+  const front=x=>x.group==='Фасады'||/фасад|Крышка/i.test(x.name);
+  r.edge2=r.parts.filter(x=>!thin||front(x)).reduce((a,x)=>a+em(x),0);r.edge04=thin?r.parts.filter(x=>!front(x)).reduce((a,x)=>a+em(x),0):0;
+  r.edgeM=r.edge2+r.edge04;
   return r;
 }
 function pack(rects,s,allowRot){
@@ -1069,20 +1151,24 @@ function pack(rects,s,allowRot){
   sheets.forEach(sh=>sh.util=sh.parts.reduce((a,p)=>a+p.l*p.w,0)/area);
   return{sheets,over,cutM:ok.reduce((a,p)=>a+p.l+p.w,0)/1000};
 }
-function costs(p,s,c,cl,ch){
+function costs(p,s,c,cl,ch,cf){
+  const b=matItem('bodies',p.mat.body,s),fm=frontMat(p,s),orders=c.parts.filter(x=>x.mat==='order');
+  const minA=s.fMinArea||0,oArea=orders.reduce((a,x)=>a+x.qty*Math.max(x.L*x.Wd/1e6,minA),0);
   const rows=[
-    [`ЛДСП ${s.t} мм, ${DECORS[p.decor].name}`,cl.sheets.length,'лист',s.p.ldsp],
+    [`${b.name}, ${DECORS[p.decor].name}`,cl.sheets.length,'лист',b.price],
+    ...(cf&&cf.sheets.length?[[`ЛДСП фасадов ${s.t} мм, ${(DECORS[p.mat.frontDecor]||DECORS.white).name}`,cf.sheets.length,'лист',b.price]]:[]),
     ['ХДФ 3 мм',ch.sheets.length,'лист',s.p.hdf],
-    ['Кромка ПВХ 2 мм',+c.edgeM.toFixed(1),'м',s.p.edge],
-    ['Распил (примерно)',+(cl.cutM+ch.cutM).toFixed(1),'м',s.p.cut],
+    ...(orders.length?[[`Фасады на заказ: ${fm.f.name}${/мм/.test(fm.f.name)?'':' '+fm.t+' мм'}${p.mat.frontNote?' ('+p.mat.frontNote+')':''}`,+oArea.toFixed(2),'м²',fm.f.price]]:[]),
+    ['Кромка ПВХ 2 мм',+c.edge2.toFixed(1),'м',s.p.edge],
+    ...(c.edge04?[['Кромка ПВХ 0,4 мм',+c.edge04.toFixed(1),'м',s.p.edge04]]:[]),
+    ['Распил (примерно)',+(cl.cutM+ch.cutM+(cf?cf.cutM:0)).toFixed(1),'м',s.p.cut],
     ['Кромкование',+c.edgeM.toFixed(1),'м',s.p.edgeWork],
     ...c.hw];
   const mat=rows.reduce((a,r)=>a+r[1]*r[3],0);
   const work=mat*s.work/100,self=mat+work;
   const price=Math.ceil(self*(1+s.markup/100)/100)*100;
-  return{rows,mat,work,self,price,profit:price-self};
-}
-function drawSheet(sh,s){
+  return{rows,mat,work,self,price,profit:price-self,oArea};
+}function drawSheet(sh,s){
   const fs=46;let g=`<rect x="0" y="0" width="${s.sheetL}" height="${s.sheetW}" class="sv-cav"/>`;
   sh.parts.forEach(p=>{const x=p.x+s.trim,y=p.y+s.trim;
     g+=`<rect x="${x}" y="${y}" width="${p.l}" height="${p.w}" style="fill:var(${GROUPS[p.group]})" class="sv-ink" stroke-width="3"/>`;
@@ -1092,28 +1178,29 @@ function drawSheet(sh,s){
   return `<svg viewBox="0 0 ${s.sheetL} ${s.sheetW}" role="img" aria-label="Карта раскроя листа">${g}</svg>`;
 }
 function drawingHTML(forKp){
-  if(P.kind==='kitchen')return drawKitchen(P,settings,R.c);
-  if(P.kind==='chest')return drawChest(P,settings,R.c);
+  if(P.kind==='kitchen')return drawKitchen(P,R.S,R.c);
+  if(P.kind==='chest')return drawChest(P,R.S,R.c);
   const c=R.c;
-  if(c.corner)return `<div class="wing-title">Вид сверху</div>${drawPlan(P)}`+c.wings.map(w=>`<div class="wing-title">${wingName(w.key)}</div>${drawFront(P,settings,w)}`).join('');
-  return drawFront(P,settings,c.wings[0]);
+  if(c.corner)return `<div class="wing-title">Вид сверху</div>${drawPlan(P)}`+c.wings.map(w=>`<div class="wing-title">${wingName(w.key)}</div>${drawFront(P,R.S,w)}`).join('');
+  return drawFront(P,R.S,c.wings[0]);
 }
 
 /* ---------- отрисовка ---------- */
 let R={};
+// настройки этого заказа: толщина и формат листа — от выбранной ЛДСП корпуса
+function effSettings(p){const b=matItem('bodies',p.mat.body);return{...settings,t:b.t,sheetL:b.L,sheetW:b.W}}
 function compute(){
-  const c=calc(P,settings);
-  const ldsp=c.parts.filter(r=>r.mat==='ldsp'),hdf=c.parts.filter(r=>r.mat==='hdf');
-  const cl=pack(ldsp,settings,!settings.grain),ch=pack(hdf,settings,true);
-  R={c,ldsp,hdf,cl,ch,cost:costs(P,settings,c,cl,ch)};
-}
-const edgeTxt=r=>(r.eL||r.eW)?[r.eL?r.eL+'Д':'',r.eW?r.eW+'Ш':''].filter(Boolean).join(' '):'—';
+  const S=effSettings(P),c=calc(P,S);
+  const ldsp=c.parts.filter(r=>r.mat==='ldsp'),ldspF=c.parts.filter(r=>r.mat==='ldspF'),hdf=c.parts.filter(r=>r.mat==='hdf'),orders=c.parts.filter(r=>r.mat==='order');
+  const cl=pack(ldsp,S,!S.grain),cf=ldspF.length?pack(ldspF,S,!S.grain):null,ch=pack(hdf,S,true);
+  R={S,c,ldsp,ldspF,hdf,orders,cl,cf,ch,cost:costs(P,S,c,cl,ch,cf)};
+}const edgeTxt=r=>(r.eL||r.eW)?[r.eL?r.eL+'Д':'',r.eW?r.eW+'Ш':''].filter(Boolean).join(' '):'—';
 const wingName=k=>k==='B'?'Сторона Б':'Сторона А';
 
 // все замечания по заказу: ошибки (так делать нельзя) и предупреждения
 function issues(){const N=x=>typeof x==='string'?{t:x,lvl:'warn'}:x,list=(R.c.warn||[]).map(N);
-  const over=[...new Set([...R.cl.over,...R.ch.over].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
-  if(over.length)list.push(ERR(`Не помещаются на лист ${settings.sheetL}×${settings.sheetW}: ${over.join(', ')}. Их нет в раскрое и в смете — цена занижена.`));
+  const over=[...new Set([...R.cl.over,...R.ch.over,...(R.cf?R.cf.over:[])].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
+  if(over.length)list.push(ERR(`Не помещаются на лист ${R.S.sheetL}×${R.S.sheetW}: ${over.join(', ')}. Их нет в раскрое и в смете — цена занижена.`));
   return list}
 function renderChecks(){const all=issues(),e=all.filter(x=>x.lvl==='err').length,w=all.length-e;
   const line=e?`<button type="button" class="check bad" id="goAlerts">${plural(e,'ошибка','ошибки','ошибок')}${w?` и ${plural(w,'предупреждение','предупреждения','предупреждений')}`:''} — посмотреть</button>`
@@ -1143,9 +1230,18 @@ function renderBuild(){
   const over=[...new Set([...R.cl.over,...R.ch.over].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
   const all=issues(),errs=all.filter(x=>x.lvl==='err'),wrn=all.filter(x=>x.lvl!=='err');
   $('#buildAlerts').innerHTML=(errs.length?`<div class="alert err"><b>Так делать нельзя — исправьте:</b>${errs.map(w=>`<span>• ${esc(w.t)}</span>`).join('')}</div>`:'')+(wrn.length?`<div class="alert" style="margin-top:8px"><b>Обратите внимание:</b>${wrn.map(w=>`<span>• ${esc(w.t)}</span>`).join('')}</div>`:'')+((c.notes||[]).length?`<p class="hint" style="margin-top:8px">${c.notes.map(esc).join('<br>')}</p>`:'');
-  renderHw();
+  renderMat();renderHw();
   if(kind==='wardrobe')renderWardrobeUI(c);else if(kind==='kitchen')renderKitchenUI(c);else renderChestUI(c);
 }
+function renderMat(){
+  const m=P.mat,k=P.kind,f=matItem('fronts',m.front),b=matItem('bodies',m.body),top=matItem('tops',m.top);
+  const fill=(id,list,val,lab)=>{$(id).innerHTML=list.map(x=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(lab?lab(x):x.name)}</option>`).join('')};
+  fill('#mBody',settings.mat.bodies,m.body,x=>`${x.name} · ${x.L}×${x.W}`);fill('#mFront',settings.mat.fronts,m.front,x=>x.kind==='order'&&!/мм/.test(x.name)?`${x.name} ${x.t} мм`:x.name);
+  fill('#mFDecor',Object.entries(DECORS).map(([id,d])=>({id,name:d.name})),m.frontDecor);fill('#mFColor',Object.entries(FCOLORS).map(([id,d])=>({id,name:d.name})),m.frontColor);
+  fill('#mEdge',settings.mat.edges,m.edge);fill('#mTop',settings.mat.tops,m.top);
+  $('#mFDecorF').hidden=f.kind!=='sheet';$('#mFColorF').hidden=f.kind!=='order';$('#mFNoteF').hidden=f.kind!=='order';$('#mTopF').hidden=k!=='kitchen';
+  if(document.activeElement!==$('#mFNote'))$('#mFNote').value=m.frontNote||'';
+  $('#matInfo').textContent=[`Корпус: ${b.src}`,`Фасады: ${f.src}`,k==='kitchen'?`Столешница: ${top.src}`:''].filter(Boolean).join(' ')}
 function renderHw(){
   const k=P.kind,corner=k==='wardrobe'&&P.shape==='corner',coupe=k==='wardrobe'&&P.type==='coupe';
   const opt=(x,val)=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(x.name)}${x.proj!==undefined?` · вынос ${x.proj} мм`:''}</option>`;
@@ -1187,7 +1283,7 @@ function renderKitchenUI(c){
   const k=P.k;
   $$('[data-kk]').forEach(el=>{if(document.activeElement!==el)el.value=k[el.dataset.kk]});
   $('#kTop').checked=!!k.worktop;
-  $('#kSummary').textContent=`Нижний ряд ${c.allBase} мм, верхний ${c.wallLen} мм. Высота столешницы от пола: ${k.legs+k.baseH+38} мм.`;
+  $('#kSummary').textContent=`Нижний ряд ${c.allBase} мм, верхний ${c.wallLen} мм. Высота столешницы от пола: ${k.legs+k.baseH+(c.tT||0)} мм.`;
   $('#contentTitle').textContent='Модули кухни';$('#contentHint').textContent='Н — нижние, В — верхние, П — пенал. Нажмите на модуль на чертеже, чтобы перейти к нему.';
   const card=(zone,m,i)=>{const key=zone+':'+i,showSh=!['sink','drawers','oven','drying'].includes(m.type);
     return `<div class="sec${key===activeSec?' on':''}" id="mod-${zone}-${i}">
@@ -1218,48 +1314,52 @@ function partsTable(list,title,edges=true){
   </tbody></table></div>`;
 }
 function renderParts(){
-  const c=R.c;
-  $('#partsLdsp').innerHTML=partsTable(R.ldsp,`ЛДСП ${settings.t} мм · ${DECORS[P.decor].name}`)+`<p class="hint">Кромка ПВХ 2 мм: <b class="num">${fmt(c.edgeM,1)} м</b> с запасом ${settings.edgeReserve}%.</p>`;
+  const c=R.c,S=R.S,b=matItem('bodies',P.mat.body),fm=frontMat(P,S);
+  $('#partsLdsp').innerHTML=partsTable(R.ldsp,`${b.name} · ${DECORS[P.decor].name}`)+`<p class="hint">Кромка ПВХ 2 мм: <b class="num">${fmt(c.edge2,1)} м</b>${c.edge04?`, 0,4 мм: <b class="num">${fmt(c.edge04,1)} м</b>`:''} с запасом ${S.edgeReserve}%.</p>`;
+  const pf=$('#partsFront');pf.hidden=!R.ldspF.length&&!R.orders.length;
+  if(R.ldspF.length)pf.innerHTML=partsTable(R.ldspF,`Фасады: ЛДСП ${S.t} мм · ${(DECORS[P.mat.frontDecor]||DECORS.white).name}`);
+  else if(R.orders.length)pf.innerHTML=partsTable(R.orders,`Фасады на заказ в цех: ${fm.f.name} ${fm.t} мм`,false)+`<p class="hint">Площадь <b class="num">${fmt(R.cost.oArea,2)} м²</b>${S.fMinArea?` (мелкие фасады считаются как ${S.fMinArea} м²)`:''}. ${P.mat.frontNote?'Цвет: '+esc(P.mat.frontNote)+'. ':''}Кромка ПВХ на эти фасады не нужна.</p>`;
   $('#partsHdf').innerHTML=partsTable(R.hdf,'ХДФ 3 мм',false);
   const el=$('#partsCoupe');el.hidden=!c.coupe;
-  if(c.coupe)el.innerHTML=`<h3>Двери купе — заказ в цех профиля</h3><div class="tbl-wrap"><table><thead><tr><th>Дверь</th><th class="r">Высота</th><th class="r">Ширина</th><th>Вставка</th></tr></thead><tbody>
+  if(c.coupe){const cs=c.wings[0].coupeD.sys;el.innerHTML=`<h3>Двери купе — заказ в цех профиля</h3><div class="tbl-wrap"><table><thead><tr><th>Дверь</th><th class="r">Высота</th><th class="r">Ширина</th><th>Вставка</th></tr></thead><tbody>
     ${c.wings.flatMap(w=>w.coupeD.items.map((d,i)=>`<tr><td>${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}</td><td class="r num">${d.h}</td><td class="r num">${d.w}</td><td>${d.mirror?'зеркало':'ЛДСП'}</td></tr>`)).join('')}</tbody></table></div>
-    <p class="hint">${c.wings.map(w=>`${c.corner?wingName(w.key)+': п':'П'}роём ${Math.round(w.coupeD.ow)} × ${Math.round(w.innerH)} мм`).join('. ')}. Перехлёст дверей 25 мм. Точные размеры сверьте с таблицей вашей системы профиля.</p>`;
+    <p class="hint">Профиль: ${esc(cs.name)}. ${c.wings.map(w=>`${c.corner?wingName(w.key)+': п':'П'}роём ${Math.round(w.coupeD.ow)} × ${Math.round(w.innerH)} мм`).join('. ')}. Высота двери = проём − ${cs.dh} мм, перехлёст ${cs.ov} мм. ${cs.check||cs.custom?'Сверьте с таблицей вашего профиля.':''}</p>`}
   const em=$('#partsMirror');em.hidden=!c.mirrors.length;
   if(c.mirrors.length)em.innerHTML=partsTable(c.mirrors,'Зеркала 4 мм — в стекольную мастерскую',false)+'<p class="hint">Зеркало меньше фасада на 50 мм с каждой стороны. Клеится на специальный клей для зеркал, кромка шлифованная.</p>';
   $('#orderText').value=orderText();$('#csvText').value=csvText();
-}
-function orderText(){
-  const c=R.c,L=[`Заказ на распил: ${P.name}`,`ЛДСП ${settings.t} мм, декор «${DECORS[P.decor].name}». Кромка ПВХ 2 мм.`,`Размеры чистовые, с учётом кромки: длина (вдоль текстуры) × ширина, мм. Кромка: Д — длинная сторона, Ш — короткая.`,'','ЛДСП:'];
+}function orderText(){
+  const c=R.c,S=R.S,b=matItem('bodies',P.mat.body),fm=frontMat(P,S);
+  const L=[`Заказ на распил: ${P.name}`,`${b.name} (лист ${S.sheetL}×${S.sheetW}), декор «${DECORS[P.decor].name}». Кромка ПВХ 2 мм${c.edge04?' на фасадные торцы, 0,4 мм на корпус':''}.`,`Размеры чистовые, с учётом кромки: длина (вдоль текстуры) × ширина, мм. Кромка: Д — длинная сторона, Ш — короткая.`,'','ЛДСП корпуса:'];
   R.ldsp.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт — кромка ${edgeTxt(r)}`));
+  if(R.ldspF.length){L.push('',`ЛДСП фасадов ${S.t} мм, декор «${(DECORS[P.mat.frontDecor]||DECORS.white).name}», кромка ПВХ 2 мм:`);R.ldspF.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт — кромка ${edgeTxt(r)}`))}
   if(R.hdf.length){L.push('','ХДФ 3 мм:');R.hdf.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт`))}
+  if(R.orders.length){L.push('',`Фасады на заказ (отдельно, в цех): ${fm.f.name} ${fm.t} мм${P.mat.frontNote?', цвет '+P.mat.frontNote:''}. Высота × ширина:`);R.orders.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт`));L.push(`Площадь ~${fmt(R.cost.oArea,2)} м².`)}
   if(c.mirrors.length){L.push('','Зеркала 4 мм (отдельно, в стекольную мастерскую):');c.mirrors.forEach((r,i)=>L.push(`${i+1}. ${r.L} × ${r.Wd} — ${r.qty} шт, шлифованная кромка`))}
   if(c.coupe){L.push('','Двери купе (высота × ширина):');c.wings.forEach(w=>w.coupeD.items.forEach((d,i)=>L.push(`${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}. ${d.h} × ${d.w} — вставка ${d.mirror?'зеркало':'ЛДСП'}`)))}
-  L.push('',`Итого: ЛДСП ~${R.cl.sheets.length} л., ХДФ ~${R.ch.sheets.length} л., кромка ~${fmt(c.edgeM,1)} м.`);
+  L.push('',`Итого: ЛДСП корпуса ~${R.cl.sheets.length} л.${R.cf?`, ЛДСП фасадов ~${R.cf.sheets.length} л.`:''}, ХДФ ~${R.ch.sheets.length} л., кромка ~${fmt(c.edgeM,1)} м.`);
   return L.join('\n');
-}
-function csvText(){
+}function csvText(){
+  const S=R.S,b=matItem('bodies',P.mat.body);
   const head='№;Деталь;Длина;Ширина;Кол-во;Материал;Текстура;Кромка Д1;Кромка Д2;Кромка Ш1;Кромка Ш2';
   const q=v=>/[;"\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;
-  const rows=[...R.ldsp.map(r=>[r,`ЛДСП ${settings.t} ${DECORS[P.decor].name}`,'да']),...R.hdf.map(r=>[r,'ХДФ 3','нет'])].map(([r,m,g],i)=>
+  const rows=[...R.ldsp.map(r=>[r,`${b.name} ${DECORS[P.decor].name}`,'да']),...R.ldspF.map(r=>[r,`ЛДСП ${S.t} ${(DECORS[P.mat.frontDecor]||DECORS.white).name}`,'да']),...R.hdf.map(r=>[r,'ХДФ 3','нет'])].map(([r,m,g],i)=>
     [i+1,q(r.name),r.L,r.Wd,r.qty,q(m),g,r.eL>=1?2:'',r.eL>=2?2:'',r.eW>=1?2:'',r.eW>=2?2:''].join(';'));
   return [head,...rows].join('\n');
 }
-
 function sheetsBlock(res,title){
   if(!res.sheets.length)return `<h3>${title}</h3><p class="hint">Нет деталей.</p>`;
   return `<div class="row"><h3>${title}</h3><span class="hint num">${res.sheets.length} л.</span></div>`+res.sheets.map((sh,i)=>`<div class="sheet"><div class="row"><span>Лист ${i+1} · ${sh.parts.length} дет.</span><span class="num">заполнен ${Math.round(sh.util*100)}%</span></div>${drawSheet(sh,settings)}</div>`).join('');
 }
 function renderCut(){
-  const {cl,ch}=R;
-  const util=cl.sheets.length?cl.sheets.reduce((a,s)=>a+s.util,0)/cl.sheets.length:0;
-  $('#cutStats').innerHTML=`<div class="stat"><small>Листов ЛДСП</small><b>${cl.sheets.length}</b></div><div class="stat"><small>Листов ХДФ</small><b>${ch.sheets.length}</b></div><div class="stat"><small>Заполнение</small><b>${Math.round(util*100)}%</b></div>`;
-  const over=[...cl.over,...ch.over];
-  $('#cutAlerts').innerHTML=over.length?`<div class="alert"><span>Не помещаются на лист ${settings.sheetL}×${settings.sheetW}: ${[...new Set(over.map(o=>`${o.name} ${o.L}×${o.Wd}`))].join(', ')}.</span></div>`:'';
-  $('#cutLdsp').innerHTML=sheetsBlock(cl,`ЛДСП ${settings.sheetL}×${settings.sheetW}`)+`<div class="row" style="justify-content:flex-start;gap:12px;font-size:12px;color:var(--muted)">${Object.entries(GROUPS).map(([g,v])=>`<span><span class="grp" style="background:var(${v})"></span>${g}</span>`).join('')}</div>`;
-  $('#cutHdf').innerHTML=sheetsBlock(ch,`ХДФ ${settings.sheetL}×${settings.sheetW}`);
+  const {cl,ch,cf,S}=R;
+  const all=[...cl.sheets,...(cf?cf.sheets:[])],util=all.length?all.reduce((a,s)=>a+s.util,0)/all.length:0;
+  $('#cutStats').innerHTML=`<div class="stat"><small>Листов ЛДСП</small><b>${cl.sheets.length+(cf?cf.sheets.length:0)}</b></div><div class="stat"><small>Листов ХДФ</small><b>${ch.sheets.length}</b></div><div class="stat"><small>Заполнение</small><b>${Math.round(util*100)}%</b></div>`;
+  const over=[...cl.over,...ch.over,...(cf?cf.over:[])];
+  $('#cutAlerts').innerHTML=over.length?`<div class="alert err"><span>Не помещаются на лист ${S.sheetL}×${S.sheetW}: ${[...new Set(over.map(o=>`${o.name} ${o.L}×${o.Wd}`))].join(', ')}.</span></div>`:'';
+  $('#cutLdsp').innerHTML=sheetsBlock(cl,`ЛДСП корпуса ${S.sheetL}×${S.sheetW}`)+`<div class="row" style="justify-content:flex-start;gap:12px;font-size:12px;color:var(--muted)">${Object.entries(GROUPS).map(([g,v])=>`<span><span class="grp" style="background:var(${v})"></span>${g}</span>`).join('')}</div>`;
+  const cfe=$('#cutFront');cfe.hidden=!cf;if(cf)cfe.innerHTML=sheetsBlock(cf,`ЛДСП фасадов ${S.sheetL}×${S.sheetW}`);
+  $('#cutHdf').innerHTML=sheetsBlock(ch,`ХДФ ${S.sheetL}×${S.sheetW}`);
 }
-
 function renderCost(){
   const k=R.cost;
   $('#costTotal').innerHTML=`<small>Цена для клиента</small><b>${rub(k.price)}</b>
@@ -1276,11 +1376,13 @@ function renderCost(){
 
 /* описание изделия: список строк для КП и мессенджера */
 function describe(){
-  const p=P,c=R.c,mat=`ЛДСП ${settings.t} мм «${DECORS[p.decor].name}», кромка ПВХ 2 мм`;
+  const p=P,c=R.c,b=matItem('bodies',p.mat.body),fm=frontMat(p,R.S);
+  const fr=fm.f.kind==='body'?'фасады из той же ЛДСП':fm.f.kind==='sheet'?`фасады ЛДСП «${(DECORS[p.mat.frontDecor]||DECORS.white).name}»`:`фасады ${fm.f.name.toLowerCase()} ${fm.t} мм${p.mat.frontNote?', '+p.mat.frontNote:''}`;
+  const mat=`Корпус ${b.name} «${DECORS[p.decor].name}», ${fr}, кромка ${p.mat.edge==='mix'?'ПВХ 2 мм на фасадах и 0,4 мм на корпусе':'ПВХ 2 мм'}`;
   if(p.kind==='kitchen'){const k=p.k,tn=t=>Object.fromEntries([...K_TYPES.base,...K_TYPES.wall])[t].toLowerCase();
     return{title:'Кухня',lines:[`Нижний ряд ${c.allBase} мм, верхний ряд ${c.wallLen} мм.`,`Нижние модули: ${k.base.map((m,i)=>`${modLabel('base',i,m)} ${m.w} мм — ${tn(m.type)}`).join('; ')}.`,
       k.wall.length?`Верхние модули: ${k.wall.map((m,i)=>`${modLabel('wall',i,m)} ${m.w} мм — ${tn(m.type)}`).join('; ')}.`:'',
-      `Корпус и фасады: ${mat}. Петли с доводчиком.`,k.worktop?`Столешница 38 мм, ${fmt(c.baseLen/1000,2)} м, кухонный цоколь.`:'Кухонный цоколь.'].filter(Boolean)}}
+      `Корпус и фасады: ${mat}. Петли с доводчиком.`,k.worktop?`Столешница ${c.top.name.toLowerCase()}, ${fmt(c.baseLen/1000,2)} м, кухонный цоколь.`:'Кухонный цоколь.'].filter(Boolean)}}
   if(p.kind==='chest'){const cc=p.c,name=Object.values(PRESETS).find(x=>x.W===cc.W&&x.H===cc.H&&x.D===cc.D)?.name||'Комод';
     return{title:name,lines:[`Размер ${cc.W}×${cc.H}×${cc.D} мм (Ш×В×Г).`,`${mat}.`,
       `Наполнение: ${cc.cols.map((cl,i)=>`колонка ${i+1} — ${cl.type==='drawers'?plural(cl.drawers,'ящик','ящика','ящиков'):cl.type==='door'?'дверца, '+plural(cl.shelves,'полка','полки','полок'):'открытая, '+plural(cl.shelves,'полка','полки','полок')}`).join('; ')}.`,
@@ -1323,6 +1425,11 @@ function renderSettings(){
   const ci=(k,x,f,label,ro)=>`<div class="field"><label for="c_${k}_${x.id}_${f}">${label}</label><div class="inwrap"><input id="c_${k}_${x.id}_${f}" data-cat="${k}:${x.id}:${f}" type="number" inputmode="decimal" value="${x[f]}"${ro?' disabled':''}></div></div>`;
   const row=(nm,sub,cells)=>`<div class="cat-row"><div class="nm">${esc(nm)}${sub?`<small>${esc(sub)}</small>`:''}</div>${cells}</div>`;
   const C=settings.cat;
+  const mi=(k,x,f,label,ro)=>`<div class="field"><label for="m_${k}_${x.id}_${f}">${label}</label><div class="inwrap"><input id="m_${k}_${x.id}_${f}" data-matedit="${k}:${x.id}:${f}" type="number" inputmode="decimal" value="${x[f]}"${ro?' disabled':''}></div></div>`;
+  const M_=settings.mat;
+  $('#setMat2').innerHTML=`<h3 style="margin-top:6px">ЛДСП корпуса</h3>`+M_.bodies.map(x=>row(x.name,x.src,mi('bodies',x,'price','₽ за лист')+mi('bodies',x,'t','толщина, мм',!x.custom)+mi('bodies',x,'L','лист, длина',!x.custom)+mi('bodies',x,'W','лист, ширина',!x.custom))).join('')
+   +`<h3 style="margin-top:14px">Фасады на заказ</h3>`+M_.fronts.filter(x=>x.kind==='order').map(x=>row(x.name,x.src,mi('fronts',x,'price','₽ за м²')+mi('fronts',x,'t','толщина, мм',!x.custom)+mi('fronts',x,'kg','вес, кг/м²'))).join('')
+   +`<h3 style="margin-top:14px">Столешницы</h3>`+M_.tops.map(x=>row(x.name,x.src,mi('tops',x,'price','₽ за пог. м')+mi('tops',x,'t','толщина, мм',!x.custom)+mi('tops',x,'D','глубина, мм',!x.custom)+mi('tops',x,'maxL','длина листа, мм',!x.custom))).join('');
   $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>row(`${x.name} · ${x.seg}`,x.src||'',ci('hinges',x,'over','накладная, ₽')+ci('hinges',x,'half','полунакладная, ₽')+ci('hinges',x,'gap','зазор на перегородке, мм'))).join('')
    +`<h3 style="margin-top:14px">Направляющие</h3>`+C.slides.map(x=>row(`${x.name} · ${x.seg}`,x.src,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм',!x.custom)+ci('slides',x,'dL','короче направл., мм',!x.custom))).join('')
    +`<h3 style="margin-top:14px">Ручки</h3>`+C.handles.map(x=>row(x.name,'',ci('handles',x,'cc','межцентр, мм')+ci('handles',x,'len','длина, мм')+ci('handles',x,'proj','вынос, мм')+ci('handles',x,'price','₽ за шт'))).join('')
@@ -1359,7 +1466,7 @@ const backupJSON=()=>JSON.stringify({app:'shkaf-master',version:3,date:new Date(
 function restore(text){
   try{const d=JSON.parse(text);if(!d||!Array.isArray(d.projects))throw 0;
     d.projects.map(norm).forEach(np=>{const i=projects.findIndex(p=>p.id===np.id);if(i>=0)projects[i]=np;else projects.push(np)});
-    if(d.settings){settings=Object.assign(clone(DEFAULT_SETTINGS),d.settings);settings.cat=catMerge(d.settings.cat);settings.p=Object.assign({},DEFAULT_SETTINGS.p,d.settings.p||{});settings.company=Object.assign({},DEFAULT_SETTINGS.company,d.settings.company||{})}
+    if(d.settings){settings=Object.assign(clone(DEFAULT_SETTINGS),d.settings);settings.cat=catMerge(d.settings.cat);settings.mat=matMerge(d.settings.mat||null,d.settings.p);settings.p=Object.assign({},DEFAULT_SETTINGS.p,d.settings.p||{});settings.company=Object.assign({},DEFAULT_SETTINGS.company,d.settings.company||{})}
     P=projects.find(p=>p.id===curId)||projects[0];curId=P.id;renderSettings();change();toast(`Восстановлено заказов: ${d.projects.length}`)}
   catch(e){toast('Это не файл копии Шкаф-Мастера')}
 }
@@ -1382,6 +1489,8 @@ document.addEventListener('input',e=>{
   if(d.ck){const v=num(el);if(inLim(v,CLIM[d.ck])){P.c[d.ck]=v;change()}return}
   if(d.mw){const [z,i]=d.mw.split(':'),v=num(el);if(inLim(v,[100,1500])){P.k[z][+i].w=v;activeSec=d.mw;change()}return}
   if(d.co){settings.company[d.co]=el.value;save();return}
+  if(d.matnote){P.mat.frontNote=el.value;change();return}
+  if(d.matedit){const [k,id,f]=d.matedit.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.mat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
   if(d.cat){const [k,id,f]=d.cat.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.cat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
   if(d.s){const [g,k]=d.s.split(':');const v=+el.value;if(el.value===''||isNaN(v)||v<0)return;
     if(g==='p')settings.p[k]=v;else settings[k]=v;change();}
@@ -1396,6 +1505,7 @@ document.addEventListener('change',e=>{
   else if(el.id==='sGrain'){settings.grain=el.checked;change()}
   else if(el.id==='kTop'){P.k.worktop=el.checked;change()}
   else if(d.hw){P.hw[d.hw]=el.value;change()}
+  else if(d.mat){P.mat[d.mat]=el.value;change()}
   else if(d.wall){P.walls[d.wall]=el.checked;change()}
   else if(el.id==='restoreFile'){const f=el.files&&el.files[0];if(f){const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f)}el.value=''}
   else if(d.rod){const [w,i]=d.rod.split(':');secsOf(w)[+i].rod=el.checked;change()}
@@ -1447,7 +1557,7 @@ document.addEventListener('click',e=>{
   if(b.id==='copyBackup'){copy(backupJSON(),$('#backupText'),'Копия скопирована');return}
   if(b.id==='restoreText'){const v=$('#backupText').value.trim();if(v)restore(v);else toast('Вставьте текст копии в поле');return}
   if(b.id==='installBtn'&&installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;renderSettings()});return}
-  if(b.id==='resetSet'){if(d.armed){const co=settings.company;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.cat=catMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
+  if(b.id==='resetSet'){if(d.armed){const co=settings.company;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.cat=catMerge(null);settings.mat=matMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
     else{d.armed=1;b.textContent='Нажмите ещё раз, чтобы сбросить'}return}
   if(b.id==='openProjects'){renderProjects();$('#projOverlay').hidden=false;return}
   if(b.id==='closeProjects'){$('#projOverlay').hidden=true;return}
@@ -1468,7 +1578,7 @@ window.addEventListener('appinstalled',()=>{installEvt=null;toast('Прилож�
 if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&document.querySelector('link[rel="manifest"]')){
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={calc,pack,costs,newProject,norm,settings:()=>settings,DEFAULT_SETTINGS};
+window.ShkafMaster={calc,pack,costs,newProject,norm,effSettings,settings:()=>settings,DEFAULT_SETTINGS};
 renderAll();
 })();
 </script>

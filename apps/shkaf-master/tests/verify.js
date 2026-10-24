@@ -4,7 +4,7 @@ const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8').replace(/^[\s\S]*<body>/,'').replace(/<\/body>[\s\S]*$/,'')+'</body></html>');
 await pg.waitForTimeout(500);
 const res=await pg.evaluate(()=>{
- const M=window.ShkafMaster,S=M.settings(),t=S.t,S_cat=(k,id)=>S.cat[k].find(x=>x.id===id),fails=[];let checks=0;
+ const M=window.ShkafMaster,S=M.settings(),t=S.t,S_cat=(k,id)=>S.cat[k].find(x=>x.id===id),S_mat=(k,id)=>S.mat[k].find(x=>x.id===id),fails=[];let checks=0;
  const eq=(a,b,msg,tol=0.02)=>{checks++;if(!(Math.abs(a-b)<=tol))fails.push(`${msg}: ${(+a).toFixed(2)} ≠ ${(+b).toFixed(2)}`)};
  const ok=(c,msg)=>{checks++;if(!c)fails.push(msg)};
  const base=()=>M.newProject();
@@ -44,7 +44,7 @@ const res=await pg.evaluate(()=>{
    const p=base();p.shape='corner';p.cornerSide=side;p.W=W;p.W2=W2;p.mirrors=0;
    p.sections=Array.from({length:nA},()=>({shelves:3,rod:false,drawers:0,baskets:0}));p.sectionsB=Array.from({length:nB},()=>({shelves:3,rod:false,drawers:0,baskets:0}));
    const r=M.calc(p,S),[A,B]=r.wings,tag=`угол ${side} ${W}×${W2}`;
-   eq(B.W,W2-p.D-20,tag+' длина стороны Б');
+   eq(B.W,W2-p.D-(t+4),tag+' длина стороны Б');
    eq(A.ws.reduce((a,b)=>a+b,0)+t*(nA+1),W,tag+' сумма секций А');eq(B.ws.reduce((a,b)=>a+b,0)+t*(nB+1),B.W,tag+' сумма секций Б');
    const ds=[...A.doors].sort((a,b)=>a.x-b.x),blk=p.D+60;
    if(side==='L'){eq(ds[0].x,blk+3,tag+' первая дверь А после планки');eq(ds.at(-1).x+ds.at(-1).w,W-2,tag+' край А')}
@@ -190,6 +190,38 @@ const res=await pg.evaluate(()=>{
  for(const h of S.cat.hinges){const p=base();p.mirrors=0;p.hw.hinge=h.id;const w=M.calc(p,S).wings[0],ds=[...w.doors].sort((a,b)=>a.x-b.x);
    for(let i=1;i<3;i++){const c=w.xs[i]-t/2,l=ds.filter(d=>d.sec===i-1).at(-1),f=ds.find(d=>d.sec===i);eq((l.x+l.w+f.x)/2,c,`${h.id}: стык на перегородке`);eq(f.x-(l.x+l.w),h.gap,`${h.id}: зазор на перегородке ${h.gap}`)}
    ok(M.calc(p,S).hw.some(x=>x[0].includes(h.name)),`${h.id}: в смете`)}
+
+ // ---- материалы фасадов
+ {const p=base();p.mirrors=0;p.mat.front='mdfmat';const r=M.calc(p,S),fr=r.parts.filter(x=>x.group==='Фасады');
+  ok(fr.length&&fr.every(x=>x.mat==='order'&&x.eL===0&&x.eW===0),'МДФ: фасады идут в заказ, без кромки');
+  ok(!r.parts.some(x=>x.mat==='ldsp'&&x.group==='Фасады'),'МДФ: фасадов нет в раскрое ЛДСП');
+  const cl=M.pack(r.parts.filter(x=>x.mat==='ldsp'),S,false),ch=M.pack(r.parts.filter(x=>x.mat==='hdf'),S,true),k=M.costs(p,S,r,cl,ch,null);
+  const area=fr.reduce((a,x)=>a+x.qty*x.L*x.Wd/1e6,0);ok(k.rows.some(x=>/Фасады на заказ/.test(x[0])&&Math.abs(x[1]-+area.toFixed(2))<0.011&&x[3]===S_mat('fronts','mdfmat').price),'МДФ: площадь и цена в смете');
+  const p0=base();p0.mirrors=0;const r0=M.calc(p0,S);ok(r.edgeM<r0.edgeM,'МДФ: кромки меньше, чем с фасадами ЛДСП');
+  ok(r.wings[0].doors.every(d=>Math.abs(d.h-(p.H-p.plinth-4))<0.01),'МДФ: размеры дверей те же')}
+ {const p=base();p.mirrors=0;p.mat.front='ldsp';p.mat.frontDecor='white';const r=M.calc(p,S);
+  ok(r.parts.filter(x=>x.group==='Фасады').every(x=>x.mat==='ldspF'&&x.eL===2),'ЛДСП другого декора: отдельная пачка, кромка 2 мм');
+  const cl=M.pack(r.parts.filter(x=>x.mat==='ldsp'),S,false),cf=M.pack(r.parts.filter(x=>x.mat==='ldspF'),S,false),ch=M.pack(r.parts.filter(x=>x.mat==='hdf'),S,true);
+  ok(M.costs(p,S,r,cl,ch,cf).rows.some(x=>/ЛДСП фасадов/.test(x[0])&&x[1]===cf.sheets.length),'ЛДСП другого декора: листы в смете')}
+ // ---- угол с толстыми фасадами: сторона Б сдвигается на фасад + 4
+ {const p=base();p.shape='corner';p.mirrors=0;p.mat.front='mdfmat';const r=M.calc(p,S);eq(r.wings[1].W,p.W2-p.D-(19+4),'угол, фасад 19: сторона Б короче на 23')}
+ // ---- столешницы
+ {const mk=(top,len,front)=>{const p=base();p.kind='kitchen';p.mat.top=top;if(front)p.mat.front=front;p.k.base=[{type:'doors',w:len-600,shelves:1,drawers:3},{type:'drawers',w:600,shelves:0,drawers:3}];return M.calc(p,S)};
+  const a=mk('pf38',3200);ok(a.hw.some(h=>/Столешница/.test(h[0])&&Math.abs(h[1]-3.2)<.001&&h[3]===S_mat('tops','pf38').price),'столешница 3,2 м по цене постформинга 38');
+  ok(a.hw.some(h=>/соединительная/.test(h[0])&&h[1]===1),'3200 > 3050: одна соединительная планка');ok(a.warn.some(x=>/стык/.test((x.t||x))),'3200: предупреждение о стыке');
+  ok(!mk('pf38l',3200).hw.some(h=>/соединительная/.test(h[0])),'4200: без стыка');ok(!mk('stone',3200).hw.some(h=>/Планка/.test(h[0])),'камень: без планок');
+  eq(mk('pf26',2400).tT,26,'толщина столешницы 26');
+  const p=base();p.kind='kitchen';p.k.baseD=580;p.mat.front='mdf22';ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/не закроет фасады/.test(x.t)),'корпус 580 + фасад 22: столешница 600 не закроет')}
+ // ---- толщина фасада под петли
+ {const p=base();p.mirrors=0;p.mat.front='custom';S_mat('fronts','custom').t=26;p.hw.hinge='gtv';ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/рассчитаны на фасады/.test(x.t)),'фасад 26 мм и петли до 24: ошибка');
+  p.hw.hinge='kdm';ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/14–25/.test(x.t)),'фасад 26 мм и КДМ 14–25: ошибка');S_mat('fronts','custom').t=19;
+  p.mat.front='mdf22';p.hw.hinge='gtv';ok(!M.calc(p,S).warn.some(x=>/рассчитаны на фасады/.test(x.t)),'фасад 22 мм и петли до 24: нормально')}
+ // ---- корпус Lamarty 2750×1830
+ {const p=base();p.mat.body='lamarty16';const E=M.effSettings(p);eq(E.sheetL,2750,'Lamarty: длина листа');eq(E.sheetW,1830,'Lamarty: ширина листа');
+  const r=M.calc(p,E),cl=M.pack(r.parts.filter(x=>x.mat==='ldsp'),E,false);ok(cl.sheets.every(sh=>sh.parts.every(a=>a.x+a.l<=2750-2*E.trim+.01&&a.y+a.w<=1830-2*E.trim+.01)),'Lamarty: раскрой в лист 2750×1830');
+  const p2=base();p2.mat.body='egger18';eq(M.effSettings(p2).t,18,'Egger 18: толщина 18')}
+ // ---- кромка 0,4 на корпус
+ {const p=base();p.mat.edge='mix';const r=M.calc(p,S);ok(r.edge04>0&&r.edge2>0,'смешанная кромка: обе');const p0=base();const r0=M.calc(p0,S);eq(r.edge2+r.edge04,r0.edgeM,'смешанная кромка: общая длина та же',0.01)}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

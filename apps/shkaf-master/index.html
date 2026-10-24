@@ -23,7 +23,7 @@
 :root{
   --bg:#ECEFEE; --surface:#FFFFFF; --ink:#1D2227; --muted:#5C666E; --line:#D2D8D6;
   --accent:#F2B705; --accent-ink:#1D2227; --accent-soft:#FBEBB0;
-  --cavity:#E2E6E4; --warn:#B4400C; --warn-soft:#FCE7DA; --ok:#157A3A;
+  --cavity:#E2E6E4; --warn:#B4400C; --warn-soft:#FCE7DA; --ok:#157A3A; --ok-soft:#DDF2E3; --err:#B3261E; --err-soft:#FBE1DE;
   --g1:#CFE0F5; --g2:#F8DDA6; --g3:#D7EBCF; --g4:#EED6E8; --g5:#DADFE3;
   --f-display:"Unbounded","Onest",system-ui,sans-serif;
   --f-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -33,13 +33,13 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#15181B; --surface:#1E2226; --ink:#E6E9EB; --muted:#98A1A8; --line:#30363B;
   --accent:#F2B705; --accent-ink:#15181B; --accent-soft:#3B3216;
-  --cavity:#262B30; --warn:#FB8A4C; --warn-soft:#3A2418; --ok:#4ADE80;
+  --cavity:#262B30; --warn:#FB8A4C; --warn-soft:#3A2418; --ok:#4ADE80; --ok-soft:#163A22; --err:#FF8A80; --err-soft:#401B18;
   --g1:#27405E; --g2:#5A4618; --g3:#2C4A2C; --g4:#4D2F48; --g5:#373E44;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#15181B; --surface:#1E2226; --ink:#E6E9EB; --muted:#98A1A8; --line:#30363B;
   --accent:#F2B705; --accent-ink:#15181B; --accent-soft:#3B3216;
-  --cavity:#262B30; --warn:#FB8A4C; --warn-soft:#3A2418; --ok:#4ADE80;
+  --cavity:#262B30; --warn:#FB8A4C; --warn-soft:#3A2418; --ok:#4ADE80; --ok-soft:#163A22; --err:#FF8A80; --err-soft:#401B18;
   --g1:#27405E; --g2:#5A4618; --g3:#2C4A2C; --g4:#4D2F48; --g5:#373E44;
   color-scheme:dark}
 *{box-sizing:border-box}
@@ -80,6 +80,18 @@ h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
 .inwrap select{font-family:var(--f-body);font-size:15px}
 .inwrap span{color:var(--muted);font-size:12px;padding-left:4px}
 .inwrap:focus-within{border-color:var(--accent)}
+.alert.err{background:var(--err-soft);color:var(--err)}
+.alert b{font-weight:600}
+.check{display:block;width:100%;text-align:left;border:0;border-radius:10px;padding:10px 12px;font-weight:600;font-size:14px}
+.check.ok{background:var(--ok-soft);color:var(--ok)}
+.check.warn{background:var(--warn-soft);color:var(--warn)}
+.check.bad{background:var(--err-soft);color:var(--err)}
+.price-chip.bad{box-shadow:0 0 0 3px var(--err)}
+.cat-row{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,1fr));gap:8px;align-items:end;padding-block:8px;border-bottom:1px solid var(--line)}
+.cat-row:last-child{border-bottom:0}
+.cat-row .nm{font-size:14px;font-weight:500;min-width:0}
+.cat-row .nm small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+@media (max-width:520px){.cat-row{grid-template-columns:repeat(2,minmax(0,1fr))}.cat-row .nm{grid-column:1/-1}}
 .inwrap.bad,.inwrap.bad:focus-within{border-color:var(--warn);background:var(--warn-soft)}
 .text input{font-family:var(--f-body)}
 
@@ -231,6 +243,24 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
       <button type="button" data-kind="chest">Комод, тумба</button>
     </div>
 
+    <div id="checkLine"></div>
+
+    <div class="card" id="hwPanel">
+      <h3>Фурнитура и стены</h3>
+      <div class="grid2">
+        <div class="field"><label for="hwHinge">Петли</label><div class="inwrap"><select id="hwHinge" data-hw="hinge"></select></div></div>
+        <div class="field"><label for="hwSlide">Направляющие ящиков</label><div class="inwrap"><select id="hwSlide" data-hw="slide"></select></div></div>
+        <div class="field"><label for="hwHandle" id="lblHandle">Ручки</label><div class="inwrap"><select id="hwHandle" data-hw="handle"></select></div></div>
+        <div class="field" id="hwInField"><label for="hwHandleIn">Ручки внутренних ящиков</label><div class="inwrap"><select id="hwHandleIn" data-hw="handleIn"></select></div></div>
+        <div class="field" id="hwCoupeField"><label for="hwCoupe">Профиль купе</label><div class="inwrap"><select id="hwCoupe" data-hw="coupe"></select></div></div>
+      </div>
+      <p class="hint" id="hwInfo"></p>
+      <div class="row" style="justify-content:flex-start;gap:16px">
+        <label class="switch"><input type="checkbox" id="wallL" data-wall="L"> <span id="lblWallL">Слева стена вплотную</span></label>
+        <label class="switch"><input type="checkbox" id="wallR" data-wall="R"> <span id="lblWallR">Справа стена вплотную</span></label>
+      </div>
+    </div>
+
     <!-- шкаф -->
     <div class="card" id="wPanel">
       <h3>Шкаф: тип и габариты</h3>
@@ -337,6 +367,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
   <!-- ДЕТАЛИ -->
   <section class="view" id="view-parts" hidden>
     <h2>Деталировка</h2>
+    <div id="partsErr"></div>
     <p class="hint">Размеры чистовые, с учётом кромки. Первый размер — вдоль текстуры. Кромка: Д — длинная сторона, Ш — короткая. Скажите поставщику, что размеры даны с кромкой.</p>
     <div class="card" id="partsLdsp"></div>
     <div class="card" id="partsHdf"></div>
@@ -369,6 +400,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
   <!-- СМЕТА -->
   <section class="view" id="view-cost" hidden>
     <h2>Смета</h2>
+    <div id="costErr"></div>
     <div class="total" id="costTotal"></div>
     <div class="card app-card">
       <h3>Коммерческое предложение</h3>
@@ -407,6 +439,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     </div>
     <div class="card"><h3>Материал и раскрой</h3><div class="grid2" id="setMat"></div>
       <label class="switch"><input type="checkbox" id="sGrain"> Учитывать текстуру (детали не поворачиваются)</label></div>
+    <div class="card"><h3>Каталог фурнитуры</h3>
+      <p class="hint">Поставьте цены вашего поставщика. Размеры ручек и вычеты для направляющих влияют на расчёт и проверки — берите их из карточки товара или инструкции.</p>
+      <div id="setCat"></div></div>
     <div class="card"><h3>Цены, ₽</h3><div class="grid2" id="setPrice"></div></div>
     <div class="card"><h3>Работа и прибыль</h3><div class="grid2" id="setWork"></div></div>
     <div class="card"><h3>Резервная копия</h3>
@@ -446,6 +481,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
       <button class="btn" type="button" id="kpPrint" hidden>Сохранить PDF</button>
     </div>
   </div>
+  <div id="kpErr" style="max-width:760px;margin:0 auto 12px"></div>
   <article class="kp-sheet" id="kpSheet"></article>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -475,11 +511,42 @@ const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,e
      coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10}};
 const SET_MAT=[['t','Толщина ЛДСП','мм'],['sheetL','Лист, длина','мм'],['sheetW','Лист, ширина','мм'],['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%']];
 const SET_PRICE=[['ldsp','Лист ЛДСП','₽/лист'],['hdf','Лист ХДФ','₽/лист'],['edge','Кромка ПВХ 2 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
-  ['hinge','Петля с доводчиком','₽/шт'],['handle','Ручка','₽/шт'],['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
-  ['slides','Направляющие','₽/пара'],['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['mirror','Зеркало на фасад','₽/м²'],
+  ['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
+  ['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['mirror','Зеркало на фасад','₽/м²'],
   ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeRail','Рельсы купе','₽/м'],
   ['worktop','Столешница 38 мм','₽/м'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт']];
 const SET_WORK=[['work','Сборка и доставка','% от материалов'],['markup','Наценка','%']];
+
+/* ---------- каталог фурнитуры ----------
+   Технические параметры влияют на размеры деталей, поэтому у каждой позиции указан источник.
+   Цены — примерные, мастер ставит цены своего поставщика в «Настройках». */
+const rail=(cc,price)=>({id:'r'+cc,name:`Скоба ${cc} мм`,cc,len:cc+40,proj:35,price});
+const CATALOG={
+  hinges:[
+    {id:'boyard',name:'Boyard, с доводчиком',over:180,half:180},
+    {id:'gtv',name:'GTV, с доводчиком',over:150,half:150},
+    {id:'amix',name:'AMIX, с доводчиком',over:250,half:250},
+    {id:'hettich',name:'Hettich Sensys',over:550,half:550},
+    {id:'blum',name:'Blum CLIP top BLUMOTION',over:750,half:750}],
+  slides:[
+    {id:'ball',name:'Шариковые, полное выдвижение',kind:'side',dW:26,dL:0,price:650,src:'Зазор 12,5–13 мм на сторону: ящик на 26 мм уже проёма, длина ящика = длине направляющей.'},
+    {id:'roller',name:'Роликовые, частичное выдвижение',kind:'side',dW:26,dL:0,price:250,src:'Зазор 12,5 мм на сторону: ящик на 25–26 мм уже проёма.'},
+    {id:'blum',name:'Blum TANDEM / MOVENTO, скрытого монтажа',kind:'hidden',dW:42,dL:10,maxT:16,price:3500,src:'Каталог Blum 2024–2025, с. 441: внутренняя ширина ящика = проём − 42 мм, длина ящика = длина направляющей − 10 мм, боковины ящика 11–16 мм. Дно между боковинами, отступ снизу 13 мм.'},
+    {id:'custom',name:'Свои — по инструкции к артикулу',kind:'side',dW:26,dL:0,price:650,custom:true,src:'Впишите вычеты из инструкции к вашим направляющим (например, к метабоксу — у каждой серии свои).'}],
+  handles:[rail(96,180),rail(128,200),rail(160,230),rail(192,260),rail(224,290),rail(256,320),rail(320,380),
+    {id:'knob',name:'Кнопка',cc:0,len:30,proj:28,price:120},
+    {id:'flush',name:'Врезная / профиль заподлицо',cc:0,len:100,proj:0,price:250}],
+  coupe:[
+    {id:'std',name:'Типовой алюминиевый профиль',dh:40,ov:26,src:'Высота двери = проём − 40 мм; ширина = (проём + 26 × число перехлёстов) / число дверей.'},
+    {id:'aristo',name:'Aristo',dh:40,ov:27,check:true,src:'По таблице расчёта Aristo: высота = проём − 40, ширина = (проём + 27 × перехлёсты) / двери. В других источниках перехлёст другой — сверьте с таблицей вашего профиля.'},
+    {id:'absolut',name:'ABSOLUT',dh:40,ov:21,src:'Инструкция ABSOLUT: высота = проём − 40 мм, ширина двери = (проём + 21) / 2.'},
+    {id:'custom',name:'Свой профиль — по таблице поставщика',dh:40,ov:26,custom:true,src:'Впишите вычет по высоте и перехлёст из таблицы вашего профиля.'}]};
+const CAT_EDIT={hinges:['over','half'],slides:['price'],handles:['cc','len','proj','price'],coupe:[]};
+const CAT_EDIT_CUSTOM={slides:['dW','dL'],coupe:['dh','ov']};
+function catMerge(saved){const out={};
+  for(const k of Object.keys(CATALOG)){const sv=(saved&&saved[k])||[];
+    out[k]=CATALOG[k].map(d=>{const o={...d},x=sv.find(y=>y.id===d.id);if(x)[...CAT_EDIT[k],...(d.custom?CAT_EDIT_CUSTOM[k]||[]:[])].forEach(f=>{if(Number.isFinite(+x[f]))o[f]=+x[f]});return o})}
+  return out}
 
 /* ---------- модели ---------- */
 const sec=(shelves,rod,drawers,baskets)=>({shelves,rod,drawers,baskets});
@@ -504,12 +571,14 @@ function norm(p){
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
+  p.hw=Object.assign({hinge:'boyard',slide:'ball',handle:'r128',handleIn:'knob',coupe:'std'},p.hw||{});p.walls=Object.assign({L:false,R:false,A:false,B:false},p.walls||{});
   p.k=Object.assign(kDefaults(),p.k||{});p.c=Object.assign(cDefaults(),p.c||{});if(p.c.legs===undefined)p.c.legs=0;
   return p}
 
 let settings=Object.assign(clone(DEFAULT_SETTINGS),LS.get('shkaf.settings',{}));
 settings.p=Object.assign({},DEFAULT_SETTINGS.p,settings.p||{});
 settings.company=Object.assign({},DEFAULT_SETTINGS.company,settings.company||{});
+settings.cat=catMerge(settings.cat);
 let projects=LS.get('shkaf.projects',[]).map(norm);
 let curId=LS.get('shkaf.current',null);
 const storageOk=LS.set('shkaf.probe',1);
@@ -517,19 +586,31 @@ if(!projects.length){const p=newProject();p.name='Пример: шкаф в пр
 let P=projects.find(p=>p.id===curId)||projects[0];curId=P.id;
 let tab='build',activeSec='',showDoors=false;
 const secsOf=k=>k==='B'?P.sectionsB:P.sections;
+const catItem=(k,id,st)=>{const c=(st||settings).cat||settings.cat;return c[k].find(x=>x.id===id)||c[k][0]};
+const HW=(p,st)=>({hinge:catItem('hinges',p.hw.hinge,st),slide:catItem('slides',p.hw.slide,st),handle:catItem('handles',p.hw.handle,st),handleIn:catItem('handles',p.hw.handleIn,st),coupe:catItem('coupe',p.hw.coupe,st)});
 
 /* ---------- общие помощники ---------- */
 // петель на дверь: по высоте, а зеркало утяжеляет дверь — плюс одна петля
+const ERR=t=>({t,lvl:'err'});
 const hingeCount=(h,mirror)=>(h<=1000?2:h<=1500?3:h<=2000?4:h<=2400?5:6)+(mirror&&h>1000?1:0);
 const slideFor=d=>[550,500,450,400,350,300,250].find(v=>v<=d-10)||0;
 const boxHFor=fh=>Math.max(80,Math.min(200,Math.floor((fh-50)/10)*10));
 // фасады округляем вниз: иначе ряд дверей может выйти на миллиметр шире корпуса
 function adder(parts){return(name,group,L,Wd,qty,mat,eL,eW)=>{if(qty>0&&L>0&&Wd>0){const r=group==='Фасады'||/фасад/i.test(name)?Math.floor:Math.round;
   parts.push({name,group,L:r(L+1e-6),Wd:r(Wd+1e-6),qty,mat:mat||'ldsp',eL:eL||0,eW:eW||0})}}}
-function drawerBoxes(add,t,cw,boxH,slide,qty){const bw=cw-26;
-  add('Ящик: боковина','Ящики',slide,boxH,2*qty,'ldsp',1,0);
+// Короб ящика под выбранную систему. opening — чистый проём между стенками (или проставками).
+function drawerBoxes(add,t,opening,boxH,slide,qty,sys){
+  if(sys.kind==='hidden'){const skw=opening-sys.dW,skl=slide-sys.dL;
+    add('Ящик: боковина','Ящики',skl,boxH,2*qty,'ldsp',1,0);
+    add('Ящик: перед и зад','Ящики',skw,boxH-13-t,2*qty,'ldsp',1,0);
+    add('Ящик: дно (ЛДСП, между боковинами)','Ящики',skl,skw,qty,'ldsp',0,0);return}
+  const bw=opening-sys.dW,bl=slide-sys.dL;
+  add('Ящик: боковина','Ящики',bl,boxH,2*qty,'ldsp',1,0);
   add('Ящик: перед и зад','Ящики',bw-2*t,boxH,2*qty,'ldsp',1,0);
-  add('Ящик: дно','Ящики',slide,bw,qty,'hdf')}
+  add('Ящик: дно','Ящики',bl,bw,qty,'hdf')}
+function hingeRows(hw,h,over,half){if(over)hw.push([`Петля накладная с доводчиком, ${h.name}`,over,'шт',h.over]);if(half)hw.push([`Петля полунакладная с доводчиком, ${h.name}`,half,'шт',h.half])}
+const handleRow=(hw,h,n,what)=>{if(n)hw.push([`Ручка ${what?what+': ':''}${h.name.toLowerCase()}${h.cc?'':''}`,n,'шт',h.price])};
+const slideRow=(hw,sys,len,n)=>{if(n)hw.push([`Направляющие ${len} мм — ${sys.name.toLowerCase()}`,n,'пара',sys.price])};
 // Задняя стенка из ХДФ. Если не влезает в лист одним куском, режем только по центрам перегородок:
 // стык без опоры болтается. cuts — центры перегородок от левого края стенки.
 function backPanels(add,s,h,w,cuts){const Ls=s.sheetL-2*s.trim,Ws=s.sheetW-2*s.trim;
@@ -556,7 +637,8 @@ const handleH=(x,y,len,sw)=>`<line x1="${x}" x2="${x+len}" y1="${y}" y2="${y}" c
 
 /* ================= ШКАФ ================= */
 const FILLER=60; // доборная планка в углу: разводит двери и ручки двух сторон
-function calcWing(p,s,W,sections,blk,key){
+function calcWing(p,s,W,sections,blk,key,walls){
+  walls=walls||{};const HWp=HW(p,s),sys=HWp.slide;
   const t=s.t,H=p.H,D=p.D,n=sections.length,pl=Math.max(0,p.plinth),coupe=p.type==='coupe';
   const inW=W-2*t,partD=coupe?D-100:D,shelfD=partD-20,innerH=H-pl-2*t,net=inW-(n-1)*t;
   const bL=blk.side==='L'?blk.w:0,bR=blk.side==='R'?blk.w:0,ci=blk.w?(bL?0:n-1):-1;
@@ -583,17 +665,23 @@ function calcWing(p,s,W,sections,blk,key){
   const total=k=>sections.reduce((a,c)=>a+c[k],0);
   const shelves=total('shelves'),nd=total('drawers'),nb=total('baskets'),mezzN=p.mezz?n:0;
   let slide=0;
-  if(nd){slide=slideFor(shelfD);if(!slide)warn.push('ящики не помещаются по глубине — увеличьте глубину шкафа.')}
+  if(nd){slide=slideFor(shelfD);if(!slide)warn.push(ERR('ящики не помещаются по глубине — увеличьте глубину шкафа.'))}
   // за распашными дверями ящики и корзины ставят на проставки, иначе они упрутся в петли
   const sp=coupe?0:t;
   sections.forEach((c,i)=>{const sw=ws[i];
     if(p.mezz)add('Полка антресоли','Полки',sw-2,shelfD,1,'ldsp',1,0);
     add('Полка','Полки',sw-2,shelfD,c.shelves,'ldsp',1,0);
     if(sp&&(c.drawers||c.baskets))add('Проставка под направляющие (у задней стенки)','Ящики',(c.drawers+c.baskets)*200,slideFor(shelfD)||shelfD,2,'ldsp',1,0);
-    if(c.drawers&&slide){drawerBoxes(add,t,sw-2*sp,150,slide,c.drawers);add('Ящик: фасад','Ящики',sw-2*sp-4,176,c.drawers,'ldsp',2,2)}});
+    if(c.drawers&&slide){drawerBoxes(add,t,sw-2*sp,150,slide,c.drawers,sys);add('Ящик: фасад','Ящики',sw-2*sp-4,176,c.drawers,'ldsp',2,2);
+      if(HWp.handleIn.len+40>sw-2*sp-4)warn.push(ERR(`секция ${i+1}: ручка внутреннего ящика (${HWp.handleIn.len} мм) не помещается на фасад ${Math.floor(sw-2*sp-4)} мм. Выберите ручку короче.`))}});
+  if(nd&&slide){
+    if(sys.maxT&&t>sys.maxT)warn.push(ERR(`направляющие «${sys.name}» рассчитаны на боковины ящика до ${sys.maxT} мм, а ЛДСП ${t} мм. Выберите другие направляющие.`));
+    // внутренний ящик за распашной дверью: перед ним остаётся место, куда не должна доставать ручка
+    if(!coupe){const room=partD-slide-t;if(HWp.handleIn.proj>room-3){const fit=(s.cat||settings.cat).handles.filter(h=>h.proj<=room-3).map(h=>`«${h.name}»`);warn.push(ERR(`ручка внутреннего ящика выступает на ${HWp.handleIn.proj} мм, а перед ящиком всего ${room} мм — дверь упрётся в ручку и не закроется. ${fit.length?'Подойдут: '+fit.join(', ')+'.':'Увеличьте глубину шкафа.'}`))}}}
+  if(sections.some(c=>c.rod)&&partD<500)warn.push(`глубина под штангой ${partD} мм — плечики (около 450 мм) встанут впритык или не поместятся. Нужна глубина корпуса от ${coupe?600:500} мм или выдвижная торцевая штанга.`);
   const bk=backPanels(add,s,H-pl-4,W-4,xs.slice(1).map(x=>x-t/2-2));
   if(bk.noSupport)warn.push(`задняя стенка из ${bk.k} частей, стык не попадает на перегородку — за стыком добавлена планка 60 мм.`);
-  if(bk.tall)warn.push('задняя стенка выше листа ХДФ — нужна стенка из двух частей по высоте с горизонтальной планкой.');
+  if(bk.tall)warn.push(ERR('задняя стенка выше листа ХДФ — нужна стенка из двух частей по высоте с горизонтальной планкой.'));
   if(blk.planka)add('Доборная планка','Фасады',H-pl-4,FILLER,1,'ldsp',2,2);
   const doors=[];let coupeD=null,doorH=0;
   if(!coupe){
@@ -604,29 +692,35 @@ function calcWing(p,s,W,sections,blk,key){
       const lo=a===0?2:(bL&&a===bL)?3:1.5,ro=Math.abs(b-W)<.01?2:(bR&&b===W-bR)?3:1.5;
       // у планки нет стенки под петли, поэтому дверь угловой секции всегда одна и висит на дальней стороне
       const reg=b-a-lo-ro,d=i===ci?1:reg>620?2:1,dw=(reg-3*(d-1))/d;
-      if(i===ci&&reg>620)warn.push(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`);
+      if(i===ci&&reg>620)warn.push(ERR(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`));
       // у угловой секции петли ставим с дальней от угла стороны: дверь открывается от угла, а не на соседнюю сторону
-      const single=i===ci?(bL?'R':'L'):(i<n/2?'L':'R');
+      let single=i===ci?(bL?'R':'L'):(i<n/2?'L':'R');
+      // одиночную дверь у стены вешаем на дальнюю от стены сторону, иначе она упрётся в стену
+      if(i!==ci){if(i===0&&walls.L&&single==='L'&&!(i===n-1&&walls.R))single='R';if(i===n-1&&walls.R&&single==='R'&&!(i===0&&walls.L))single='L'}
       for(let j=0;j<d;j++)doors.push({sec:i,w:dw,h:doorH,x:a+lo+j*(dw+3),hinge:d===2?(j===0?'L':'R'):single});
+      const atWall=doors.filter(x=>x.sec===i).filter(x=>(x.hinge==='L'&&walls.L&&x.x<5)||(x.hinge==='R'&&walls.R&&x.x+x.w>W-5));
+      if(atWall.length){const inner=c.drawers||c.baskets;
+        warn.push(inner?ERR(`секция ${i+1}: дверь на петлях у стены откроется только на 90°, ящики и корзины за ней не выдвинутся. Поставьте у стены доборную планку 50 мм (сделайте шкаф уже на 50 мм) или сделайте в секции одну дверь.`)
+          :`секция ${i+1}: дверь на петлях у стены откроется только на 90° и может задевать стену. Лучше оставить у стены зазор или поставить доборную планку 50 мм.`)}
       add('Дверь','Фасады',doorH,dw,d,'ldsp',2,2);
-      if(i===ci&&reg<350)warn.push(`угловая секция открывается только на ${Math.max(0,Math.round(reg))} мм. Увеличьте проём угловой секции или ширину стороны.`);
+      if(i===ci&&reg<350)warn.push(ERR(`угловая секция открывается только на ${Math.max(0,Math.round(reg))} мм. Увеличьте проём угловой секции или ширину стороны.`));
     });
   }else{
     const ox0=bL||t,ox1=bR?W-bR:W-t,ow=ox1-ox0;
     const cn=+p.coupeN||(ow<=1600?2:ow<=2500?3:4);
-    const dw=Math.round((ow+25*(cn-1))/cn),dh=Math.round(innerH-40);
-    coupeD={n:cn,w:dw,h:dh,ow,items:Array.from({length:cn},(_,i)=>({x:ox0+i*(dw-25),w:dw,h:dh}))};
-    if(dw>1100)warn.push(`двери купе получаются ${dw} мм — шире 1100 мм профиль не выдержит. Увеличьте число дверей.`);
+    const cs=HWp.coupe,dw=Math.floor((ow+cs.ov*(cn-1))/cn),dh=Math.floor(innerH-cs.dh);
+    coupeD={n:cn,w:dw,h:dh,ow,sys:cs,items:Array.from({length:cn},(_,i)=>({x:ox0+i*(dw-cs.ov),w:dw,h:dh}))};
+    if(dw>1100)warn.push(ERR(`двери купе получаются ${dw} мм — шире 1100 мм профиль не выдержит. Увеличьте число дверей.`));
     if(dw<500)warn.push(`двери купе получаются ${dw} мм — уже 500 мм неудобно. Уменьшите число дверей.`);
-    sections.forEach((c,i)=>{if((c.drawers||c.baskets)&&ws[i]>dw-60)warn.push(`секция ${i+1} (${Math.round(ws[i])} мм) шире, чем открывает дверь купе (${dw-60} мм): ящики и корзины упрутся в профиль двери. Поставьте их в более узкую секцию или добавьте секцию.`)});
+    sections.forEach((c,i)=>{if((c.drawers||c.baskets)&&ws[i]>dw-60)warn.push(ERR(`секция ${i+1} (${Math.round(ws[i])} мм) шире, чем открывает дверь купе (${dw-60} мм): ящики и корзины упрутся в профиль двери. Поставьте их в более узкую секцию или добавьте секцию.`))});
   }
-  if(ci>=0&&(sections[ci].drawers||sections[ci].baskets))warn.push('ящики и корзины в угловой секции упрутся в соседнюю сторону — перенесите их в другую секцию.');
+  if(ci>=0&&(sections[ci].drawers||sections[ci].baskets))warn.push(ERR('ящики и корзины в угловой секции упрутся в соседнюю сторону — перенесите их в другую секцию.'));
   const per=D>450?4:3;
   const zTop=p.mezz?p.mezzH+t:t,zBot=H-pl-t,zoneH=zBot-zTop;
-  if(p.mezz&&zoneH<600)warn.push(`под антресолью остаётся ${Math.max(0,Math.round(zoneH))} мм — антресоль опущена слишком низко. Уменьшите «Антресоль от верха».`);
-  sections.forEach((c,i)=>{const need=(c.drawers+c.baskets)*200+(c.rod?1050:0)+c.shelves*180;if(need>zoneH)warn.push(`секция ${i+1}: наполнение не помещается по высоте.`)});
-  if(nb&&shelfD<400)warn.push('для корзин нужна глубина полки от 400 мм.');
-  if(Math.min(...ws)<250)warn.push('секции слишком узкие — уменьшите число секций.');
+  if(p.mezz&&zoneH<600)warn.push(ERR(`под антресолью остаётся ${Math.max(0,Math.round(zoneH))} мм — антресоль опущена слишком низко. Уменьшите «Антресоль от верха».`));
+  sections.forEach((c,i)=>{const need=(c.drawers+c.baskets)*200+(c.rod?1050:0)+c.shelves*180;if(need>zoneH)warn.push(ERR(`секция ${i+1}: наполнение не помещается по высоте.`))});
+  if(nb&&shelfD<400)warn.push(ERR('для корзин нужна глубина полки от 400 мм.'));
+  if(Math.min(...ws)<250)warn.push(ERR('секции слишком узкие — уменьшите число секций.'));
   const wide=ws.findIndex(w=>w>1000);if(wide>=0)warn.push(`секция ${wide+1} шириной ${Math.round(ws[wide])} мм — полки длиннее 900 мм прогибаются. Добавьте секцию.`);
   const rodSecs=sections.map((c,i)=>c.rod?ws[i]:0).filter(Boolean);
   const baskets=sections.map((c,i)=>c.baskets?{n:c.baskets,w:Math.round(ws[i]-2*sp)}:null).filter(Boolean);
@@ -639,17 +733,22 @@ function calcWardrobe(p,s){
   // Угол распашного шкафа: сторона Б отодвигается на толщину двери А (20 мм), на обеих сторонах доборные планки.
   // Угол купе: двери внутри корпуса, сторона Б примыкает к стороне А вплотную.
   const blkA=!corner?{side:'L',w:0}:coupe?{side:p.cornerSide,w:p.D}:{side:p.cornerSide,w:p.D+FILLER,open:p.cornerOpen||450,planka:true};
-  const wings=[calcWing(p,s,p.W,p.sections,blkA,'A')];
+  // стены у краёв: у прямого шкафа — слева и справа, у углового — у свободных концов сторон А и Б
+  const wA=!corner?{L:p.walls.L,R:p.walls.R}:{[A_L?'R':'L']:p.walls.A},wB=corner?{[A_L?'L':'R']:p.walls.B}:{};
+  const HWp=HW(p,s);
+  const wings=[calcWing(p,s,p.W,p.sections,blkA,'A',wA)];
   const lenB=corner?(coupe?p.W2-p.D:p.W2-p.D-20):0;
-  if(corner)wings.push(calcWing(p,s,lenB,p.sectionsB,coupe?{side:'L',w:0}:{side:A_L?'R':'L',w:FILLER,planka:true},'B'));
+  if(corner)wings.push(calcWing(p,s,lenB,p.sectionsB,coupe?{side:'L',w:0}:{side:A_L?'R':'L',w:FILLER,planka:true},'B',wB));
   const parts=mergeParts(wings.flatMap(w=>w.parts));
   const warn=[];
-  wings.forEach(w=>w.warn.forEach(x=>warn.push(corner?`Сторона ${w.key==='A'?'А':'Б'}: ${x}`:x[0].toUpperCase()+x.slice(1))));
-  if(p.H>s.sheetL-2*s.trim)warn.push(`Высота ${p.H} мм больше длины листа — боковины не выкроить из одного листа.`);
+  const W_=x=>typeof x==='string'?{t:x,lvl:'warn'}:x;
+  wings.forEach(w=>w.warn.forEach(x=>{const o=W_(x);warn.push({...o,t:corner?`Сторона ${w.key==='A'?'А':'Б'}: ${o.t}`:o.t[0].toUpperCase()+o.t.slice(1)})}));
+  if(p.H>s.sheetL-2*s.trim)warn.push(ERR(`Высота ${p.H} мм больше длины листа — боковины не выкроить из одного листа.`));
   if(coupe&&p.D<450)warn.push('Для купе глубина корпуса обычно от 450 мм: 100 мм уходит под двери.');
   // корпус собирают лёжа и поднимают: потолок должен быть выше диагонали боковины
   const notes=[`Шкаф собирают лёжа и поднимают. Потолок в месте установки должен быть не ниже ${Math.ceil(Math.hypot(p.H,p.D))+10} мм — замерьте до заказа.`];
-  if(corner&&lenB<500)warn.push(`Сторона Б слишком короткая: корпус выходит ${Math.round(lenB)} мм. Увеличьте ширину стороны Б.`);
+  if(corner&&!coupe&&HWp.handle.proj>FILLER-15)warn.push(ERR(`Ручки выступают на ${HWp.handle.proj} мм — в углу двери сторон А и Б заденут ручки друг друга (планка ${FILLER} мм рассчитана на вынос до ${FILLER-15} мм). Выберите ручку с меньшим выносом.`));
+  if(corner&&lenB<500)warn.push(ERR(`Сторона Б слишком короткая: корпус выходит ${Math.round(lenB)} мм. Увеличьте ширину стороны Б.`));
   const doorsAll=coupe?wings.flatMap(w=>w.coupeD.items):wings.flatMap(w=>w.doors);
   const nm=Math.min(p.mirrors||0,doorsAll.length);
   doorsAll.forEach(d=>d.mirror=false);
@@ -664,9 +763,8 @@ function calcWardrobe(p,s){
   if(!coupe){
     // петля на боковине — накладная; где на одну перегородку садятся две двери — полунакладная
     let hOver=0,hHalf=0;wings.forEach(w=>w.doors.forEach(d=>{const bx=d.hinge==='L'?d.x:d.x+d.w,outer=bx<5||bx>w.W-5;outer?hOver+=hingeCount(d.h,d.mirror):hHalf+=hingeCount(d.h,d.mirror)}));
-    if(hOver)hw.push(['Петля накладная с доводчиком',hOver,'шт',pr.hinge]);
-    if(hHalf)hw.push(['Петля полунакладная с доводчиком',hHalf,'шт',pr.hinge]);
-    hw.push(['Ручка',doorsAll.length+nd,'шт',pr.handle]);
+    hingeRows(hw,HWp.hinge,hOver,hHalf);
+    handleRow(hw,HWp.handle,doorsAll.length,'двери');handleRow(hw,HWp.handleIn,nd,'внутренние ящики');
     const mm=new Map();doorsAll.filter(d=>d.mirror).forEach(d=>{const L=Math.round(d.h-100),Wd=Math.round(d.w-100),k=L+'x'+Wd;mm.has(k)?mm.get(k).qty++:mm.set(k,{name:'Зеркало на дверь',L,Wd,qty:1})});
     mirrors.push(...mm.values());
     const ma=mirrors.reduce((a,m)=>a+m.qty*m.L*m.Wd,0)/1e6;
@@ -678,12 +776,12 @@ function calcWardrobe(p,s){
     if(la)hw.push(['Вставка ЛДСП в двери купе',+la.toFixed(2),'м²',pr.coupeFill]);
     if(ma)hw.push(['Вставка зеркало в двери купе',+ma.toFixed(2),'м²',pr.coupeMirror]);
     hw.push(['Рельсы верх + низ',+(2*sum(w=>w.coupeD.ow)/1000).toFixed(2),'м',pr.coupeRail]);
-    if(nd)hw.push(['Ручка для ящика',nd,'шт',pr.handle]);
+    handleRow(hw,HWp.handleIn,nd,'внутренние ящики');
   }
   const rods=sum(w=>w.rods);
   if(rods){hw.push(['Штанга овальная',+sum(w=>w.rodM).toFixed(2),'м',pr.rod]);hw.push(['Флянец штанги',2*rods,'шт',pr.flange])}
   const slide=wings[0].slide;
-  if(nd&&slide)hw.push([`Направляющие ${slide} мм`,nd,'пара',pr.slides]);
+  if(slide)slideRow(hw,HWp.slide,slide,nd);
   const bm=new Map();wings.forEach(w=>w.baskets.forEach(b=>bm.set(b.w,(bm.get(b.w)||0)+b.n)));
   bm.forEach((q,w)=>hw.push([`Корзина выдвижная с направляющими, под проём ${w} мм`,q,'шт',pr.basket]));
   return{wings,parts,hw,warn,notes,mirrors,doorsAll,corner,coupe,lenB};
@@ -769,10 +867,17 @@ const modLabel=(zone,i,m)=>(m.type==='tall'?'П':zone==='wall'?'В':'Н')+(i+1);
 function calcKitchen(p,s){
   const k=p.k,t=s.t,parts=[],warn=[],add=adder(parts),pr=s.p;
   let legs=0,hinges=0,handles=0,slides=0,supports=0,conf=0,hangers=0,dry=0,sink=0;
-  const slide=slideFor(k.baseD-20);
-  const doorsFront=(h,w,label)=>{const n=w>600?2:1,dw=(w-4-3*(n-1))/n;add(label||'Фасад','Фасады',h,dw,n,'ldsp',2,2);hinges+=n*hingeCount(h);handles+=n;return n};
-  const drawerFronts=(H,w,n,iw)=>{const fh=(H-3*(n-1))/n;add('Фасад ящика','Фасады',w-4,fh,n,'ldsp',2,2);
-    if(!slide)return;drawerBoxes(add,t,iw,boxHFor(fh),slide,n);slides+=n;handles+=n;conf+=8*n;if(fh<100)warn.push('ящики ниже 100 мм — уменьшите их число.')};
+  const slide=slideFor(k.baseD-20),HWp=HW(p,s),sys=HWp.slide,kh={base:[],wall:[]};
+  // двери модуля: у крайнего модуля возле стены петли ставим со стороны от стены
+  const doorsFront=(h,w,zone,i,cnt,lab)=>{const n=w>600?2:1,dw=(w-4-3*(n-1))/n;add('Фасад','Фасады',h,dw,n,'ldsp',2,2);hinges+=n*hingeCount(h);handles+=n;
+    const wl=p.walls.L&&i===0,wr=p.walls.R&&i===cnt-1;let hs=n===2?['L','R']:[i<cnt/2?'L':'R'];
+    if(n===1){if(wl&&hs[0]==='L'&&!wr)hs=['R'];if(wr&&hs[0]==='R'&&!wl)hs=['L']}
+    if((wl&&hs[0]==='L')||(wr&&hs[hs.length-1]==='R'))warn.push(`${lab}: дверь на петлях у стены откроется только на 90° и может задевать стену. Оставьте у стены зазор или поставьте доборную планку.`);
+    kh[zone][i]=hs;return hs};
+  const drawerFronts=(H,w,n,iw,lab)=>{const fh=(H-3*(n-1))/n;add('Фасад ящика','Фасады',w-4,fh,n,'ldsp',2,2);handles+=n;
+    if(HWp.handle.len+40>w-4)warn.push(ERR(`${lab}: ручка ${HWp.handle.len} мм не помещается на фасад ящика ${Math.floor(w-4)} мм. Выберите ручку короче.`));
+    if(fh<100)warn.push(ERR(`${lab}: ящики ниже 100 мм — уменьшите их число.`));
+    if(!slide)return;drawerBoxes(add,t,iw,boxHFor(fh),slide,n,sys);slides+=n;conf+=8*n};
   k.base.forEach((m,i)=>{
     const tall=m.type==='tall',h=tall?k.tallH-k.legs:k.baseH,d=k.baseD,w=m.w,iw=w-2*t,lab=modLabel('base',i,m);
     add('Боковина','Корпус',h,d,2,'ldsp',1,0);
@@ -780,16 +885,16 @@ function calcKitchen(p,s){
     if(tall)add('Крыша','Корпус',iw,d,1,'ldsp',1,0);else add('Царга','Корпус',iw,100,2,'ldsp',1,0);
     if(m.type!=='oven')backPanels(add,s,h-4,w-4);
     conf+=16;legs+=w>800?6:4;
-    if(m.type==='doors'||m.type==='sink'){doorsFront(h-4,w);if(m.type==='sink')sink++;else{add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);supports+=4*m.shelves}}
-    if(m.type==='drawers')drawerFronts(h-4,w,Math.max(1,m.drawers),iw);
+    if(m.type==='doors'||m.type==='sink'){doorsFront(h-4,w,'base',i,k.base.length,lab);if(m.type==='sink')sink++;else{add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);supports+=4*m.shelves}}
+    if(m.type==='drawers')drawerFronts(h-4,w,Math.max(1,m.drawers),iw,lab);
     // духовке нужна ниша 595 мм в свету: от полки до нижней кромки верхней царги
     if(m.type==='oven'){add('Полка под духовку','Полки',iw,d-20,1,'ldsp',1,0);conf+=4;
-      const ofh=h-604-t;add('Фальш-фасад под духовкой','Фасады',w-4,ofh,1,'ldsp',2,2);if(ofh<60)warn.push(`${lab}: корпус низкий — под духовку (ниша 600 мм) не остаётся места. Нужна высота корпуса от ${664+t} мм.`)}
-    if(tall){const low=k.baseH-4,up=h-4-low-3;doorsFront(low,w);doorsFront(up,w);add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);supports+=4*m.shelves;
-      if(h>s.sheetL-2*s.trim)warn.push(`${lab}: пенал выше длины листа.`)}
-    if(w<150)warn.push(`${lab}: модуль уже 150 мм.`);
-    if(m.type==='sink'&&w<500)warn.push(`${lab}: под мойку нужен модуль от 500 мм.`);
-    if(m.type==='oven'&&w!==600)warn.push(`${lab}: духовки встраиваются в модуль 600 мм.`);
+      const ofh=h-604-t;add('Фальш-фасад под духовкой','Фасады',w-4,ofh,1,'ldsp',2,2);if(ofh<60)warn.push(ERR(`${lab}: корпус низкий — под духовку (ниша 600 мм) не остаётся места. Нужна высота корпуса от ${664+t} мм.`))}
+    if(tall){const low=k.baseH-4,up=h-4-low-3;doorsFront(low,w,'base',i,k.base.length,lab);doorsFront(up,w,'base',i,k.base.length,lab);add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);supports+=4*m.shelves;
+      if(h>s.sheetL-2*s.trim)warn.push(ERR(`${lab}: пенал выше длины листа.`))}
+    if(w<150)warn.push(ERR(`${lab}: модуль уже 150 мм.`));
+    if(m.type==='sink'&&w<500)warn.push(ERR(`${lab}: под мойку нужен модуль от 500 мм.`));
+    if(m.type==='oven'&&w!==600)warn.push(ERR(`${lab}: духовки встраиваются в модуль 600 мм.`));
     if(iw>900&&(m.type==='doors'||tall)&&m.shelves)warn.push(`${lab}: полка длиннее 900 мм прогнётся.`);
   });
   k.wall.forEach((m,i)=>{
@@ -798,48 +903,47 @@ function calcKitchen(p,s){
     add('Крыша','Корпус',iw,d,1,'ldsp',1,0);
     add('Дно','Корпус',iw,d,1,'ldsp',1,0);
     backPanels(add,s,h-4,w-4);conf+=16;hangers+=2;
-    if(m.type!=='open')doorsFront(h-4,w);
+    if(m.type!=='open')doorsFront(h-4,w,'wall',i,k.wall.length,lab);
     if(m.type==='drying')dry++;else{add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);supports+=4*m.shelves}
-    if(w<150)warn.push(`${lab}: модуль уже 150 мм.`);
+    if(w<150)warn.push(ERR(`${lab}: модуль уже 150 мм.`));
   });
   const baseLen=k.base.filter(m=>m.type!=='tall').reduce((a,m)=>a+m.w,0),allBase=k.base.reduce((a,m)=>a+m.w,0);
   if(k.worktop&&baseLen>3000)warn.push(`Столешница ${baseLen} мм длиннее 3 м — понадобится стык.`);
-  if(!slide&&k.base.some(m=>m.type==='drawers'||m.type==='oven'))warn.push('Ящики не помещаются по глубине — увеличьте глубину нижних модулей.');
+  if(!slide&&k.base.some(m=>m.type==='drawers'||m.type==='oven'))warn.push(ERR('Ящики не помещаются по глубине — увеличьте глубину нижних модулей.'));
   const hw=[];
   hw.push(['Конфирмат 7×50',conf,'шт',pr.confirmat]);
   if(legs)hw.push(['Ножка кухонная регулируемая',legs,'шт',pr.leg]);
   if(allBase)hw.push(['Цоколь кухонный ПВХ',+(allBase/1000).toFixed(2),'м',pr.kplinth]);
   if(k.worktop&&baseLen)hw.push(['Столешница 38 мм',+(baseLen/1000).toFixed(2),'м',pr.worktop]);
   if(sink)hw.push(['Врезка мойки в столешницу',sink,'шт',pr.sinkCut]);
-  if(hinges)hw.push(['Петля накладная с доводчиком',hinges,'шт',pr.hinge]);
-  if(handles)hw.push(['Ручка',handles,'шт',pr.handle]);
-  if(slides)hw.push([`Направляющие ${slide} мм`,slides,'пара',pr.slides]);
+  hingeRows(hw,HWp.hinge,hinges,0);handleRow(hw,HWp.handle,handles);slideRow(hw,sys,slide,slides);
+  if(slides&&sys.maxT&&t>sys.maxT)warn.push(ERR(`Направляющие «${sys.name}» рассчитаны на боковины ящика до ${sys.maxT} мм, а ЛДСП ${t} мм. Выберите другие направляющие.`));
   if(supports)hw.push(['Полкодержатель',supports,'шт',pr.support]);
   if(hangers)hw.push(['Навес регулируемый',hangers,'шт',pr.hanger]);
   if(dry)hw.push(['Сушка для посуды',dry,'шт',pr.drying]);
   const tallM=k.base.find(m=>m.type==='tall'),notes=tallM?[`Пенал собирают лёжа и поднимают: потолок должен быть не ниже ${Math.ceil(Math.hypot(k.tallH-k.legs,k.baseD))+k.legs+10} мм.`]:[];
   if(k.wallY-(k.legs+k.baseH+38)<450)warn.push(`Между столешницей и верхними шкафами ${k.wallY-(k.legs+k.baseH+38)} мм — меньше 450 мм неудобно работать. Поднимите верхние модули.`);
-  return{parts:mergeParts(parts),hw,warn,notes,mirrors:[],doorsAll:[],baseLen,allBase,wallLen:k.wall.reduce((a,m)=>a+m.w,0)};
+  return{parts:mergeParts(parts),hw,warn,notes,mirrors:[],doorsAll:[],baseLen,allBase,kh,wallLen:k.wall.reduce((a,m)=>a+m.w,0)};
 }
 function wallLayout(k){
   const tallR=[];let x=0;k.base.forEach(m=>{if(m.type==='tall')tallR.push([x,x+m.w]);x+=m.w});
   const xs=[];x=0;k.wall.forEach(m=>{let moved=true;while(moved){moved=false;for(const [a,b] of tallR)if(x<b&&x+m.w>a){x=b;moved=true}}xs.push(x);x+=m.w});return xs}
-function drawKitchen(p,s){
+function drawKitchen(p,s,r){
   const k=p.k,dec=DECORS[p.decor].fill,wxs=wallLayout(k);
   const baseW=k.base.reduce((a,m)=>a+m.w,0),wallEnd=k.wall.length?wxs[wxs.length-1]+k.wall[k.wall.length-1].w:0;
   const W=Math.max(baseW,wallEnd,600),Ht=Math.max(k.tallH,k.wallY+k.wallH,k.legs+k.baseH+38);
   const M=Math.max(W,Ht),sw=M/380,fs=M*0.026,R=svgR(sw),F=Ht,padT=M*0.06,padB=M*0.09,padR=M*0.08;
   let g=`<line x1="${-M*.02}" x2="${W+M*.02}" y1="${F}" y2="${F}" class="sv-ink" stroke-width="${sw*1.5}"/>`;
-  const fronts=(x,y,w,h,n)=>{const dw=(w-4-3*(n-1))/n;let o='';for(let j=0;j<n;j++){const fx=x+2+j*(dw+3);o+=R(fx,y+2,dw,h-4,dec)+handleV(n===2&&j===0?fx+dw-40:fx+40,y+h*.08,Math.min(160,h*.25),sw)}return o};
+  const fronts=(x,y,w,h,n,hs)=>{const dw=(w-4-3*(n-1))/n;let o='';for(let j=0;j<n;j++){const fx=x+2+j*(dw+3),hg=(hs&&hs[j])||(j===0?'L':'R');o+=R(fx,y+2,dw,h-4,dec)+handleV(hg==='L'?fx+dw-40:fx+40,y+h*.08,Math.min(160,h*.25),sw)}return o};
   let x=0;
   k.base.forEach((m,i)=>{const tall=m.type==='tall',h=tall?k.tallH-k.legs:k.baseH,y0=F-k.legs-h,w=m.w,key='base:'+i;
     g+=`<rect x="${x}" y="${F-k.legs}" width="${w}" height="${k.legs}" class="sv-mut" opacity=".35"/>`;
     g+=`<rect x="${x}" y="${y0}" width="${w}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`;
-    if(m.type==='doors'||m.type==='sink')g+=fronts(x,y0,w,h,w>600?2:1);
+    if(m.type==='doors'||m.type==='sink')g+=fronts(x,y0,w,h,w>600?2:1,r.kh.base[i]);
     if(m.type==='drawers'){const n=Math.max(1,m.drawers),fh=(h-4-3*(n-1))/n;for(let j=0;j<n;j++){const fy=y0+2+j*(fh+3);g+=R(x+2,fy,w-4,fh,dec)+handleH(x+w*.35,fy+Math.min(40,fh*.25),w*.3,sw)}}
     if(m.type==='oven'){const fh=h-604-s.t;g+=R(x+2,y0+h-fh-2,w-4,fh,dec);
       g+=`<rect x="${x+20}" y="${y0+20}" width="${w-40}" height="${595-10}" rx="${sw*4}" class="sv-ink" fill="none" stroke-width="${sw*1.5}"/><rect x="${x+70}" y="${y0+110}" width="${w-140}" height="${595-200}" rx="${sw*3}" class="sv-mut" opacity=".35"/>`}
-    if(tall){const low=k.baseH;g+=fronts(x,y0+h-low,w,low,w>600?2:1)+fronts(x,y0,w,h-low,w>600?2:1)}
+    if(tall){const low=k.baseH;g+=fronts(x,y0+h-low,w,low,w>600?2:1,r.kh.base[i])+fronts(x,y0,w,h-low,w>600?2:1,r.kh.base[i])}
     if(!tall&&k.worktop){g+=`<rect x="${x}" y="${y0-38}" width="${w}" height="38" class="sv-mut sv-ink" stroke-width="${sw}" opacity=".85"/>`;
       if(m.type==='sink')g+=`<path d="M${x+w/2} ${y0-38} l0 -170 q0 -40 50 -40 l60 0" fill="none" class="sv-ink" stroke-width="${sw*3}" stroke-linecap="round"/>`}
     g+=`<rect class="mod-hit${key===activeSec?' on':''}" data-mod="${key}" x="${x}" y="${y0}" width="${w}" height="${h}"/>`;
@@ -848,7 +952,7 @@ function drawKitchen(p,s){
   k.wall.forEach((m,i)=>{const x=wxs[i],w=m.w,h=k.wallH,y0=F-k.wallY-h,key='wall:'+i;
     g+=`<rect x="${x}" y="${y0}" width="${w}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`;
     if(m.type==='open'){g+=R(x,y0,s.t,h,dec)+R(x+w-s.t,y0,s.t,h,dec);for(let j=0;j<m.shelves;j++)g+=R(x,y0+h*(j+1)/(m.shelves+1),w,s.t,dec)}
-    else{const n=w>600?2:1,dw=(w-4-3*(n-1))/n;for(let j=0;j<n;j++){const fx=x+2+j*(dw+3);g+=R(fx,y0+2,dw,h-4,dec)+handleV(n===2&&j===0?fx+dw-40:fx+40,y0+h-200,140,sw)}
+    else{const n=w>600?2:1,dw=(w-4-3*(n-1))/n,hs=r.kh.wall[i]||[];for(let j=0;j<n;j++){const fx=x+2+j*(dw+3),hg=hs[j]||(j===0?'L':'R');g+=R(fx,y0+2,dw,h-4,dec)+handleV(hg==='L'?fx+dw-40:fx+40,y0+h-200,140,sw)}
       if(m.type==='drying')g+=`<path d="M${x+w*.2} ${y0+h*.45} h${w*.6} M${x+w*.2} ${y0+h*.55} h${w*.6}" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*4} ${sw*3}" opacity=".6"/>`}
     g+=`<rect class="mod-hit${key===activeSec?' on':''}" data-mod="${key}" x="${x}" y="${y0}" width="${w}" height="${h}"/>`;
     g+=`<text x="${x+w/2}" y="${y0-fs*.5}" font-size="${fs*.85}" text-anchor="middle" class="sv-mut">${modLabel('wall',i,m)} · ${w}</text>`});
@@ -862,7 +966,7 @@ function drawKitchen(p,s){
 function calcChest(p,s){
   const c=p.c,t=s.t,W=c.W,H=c.H,D=c.D,legs=Math.max(0,c.legs||0),Hb=H-legs,pl=legs?0:Math.max(0,c.plinth),n=c.cols.length,parts=[],warn=[],add=adder(parts),pr=s.p;
   // стыки фасадов приходятся на центры перегородок: делим фасад на равные пролёты, ширины колонок выводим из них
-  const inW=W-2*t,span=W/n,fz=Hb-pl-t-3,slide=slideFor(D-20);
+  const inW=W-2*t,span=W/n,fz=Hb-pl-t-3,slide=slideFor(D-20),HWp=HW(p,s),sys=HWp.slide,ch=[];
   const colWs=Array.from({length:n},(_,i)=>span-(i===0?t:t/2)-(i===n-1?t:t/2));
   const xs=[];colWs.reduce((x,w,i)=>(xs[i]=x,x+w+t),t);
   const fr=Array.from({length:n},(_,i)=>{const lo=i===0?2:1.5,ro=i===n-1?2:1.5;return{x:i*span+lo,w:span-lo-ro}});
@@ -877,27 +981,29 @@ function calcChest(p,s){
   c.cols.forEach((cl,i)=>{const cw=colWs[i],fw=fr[i].w;
     if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(fz-3*(m-1))/m;
       add('Фасад ящика','Фасады',fw,fh,m,'ldsp',2,2);handles+=m;
-      if(slide){drawerBoxes(add,t,cw,boxHFor(fh),slide,m);slides+=m;conf+=8*m}
-      if(fh<100)warn.push(`Колонка ${i+1}: ящики ниже 100 мм — уменьшите их число.`)}
+      if(slide){drawerBoxes(add,t,cw,boxHFor(fh),slide,m,sys);slides+=m;conf+=8*m}
+      if(HWp.handle.len+40>fw)warn.push(ERR(`Колонка ${i+1}: ручка ${HWp.handle.len} мм не помещается на фасад ящика ${Math.floor(fw)} мм. Выберите ручку короче.`));
+      if(fh<100)warn.push(ERR(`Колонка ${i+1}: ящики ниже 100 мм — уменьшите их число.`))}
     else{if(cl.type==='door'){const nd=fw>600?2:1;add('Дверца','Фасады',fz,(fw-3*(nd-1))/nd,nd,'ldsp',2,2);handles+=nd;
-        for(let j=0;j<nd;j++){const left=nd===2?j===0:i<n/2,outer=left?i===0:i===n-1;outer?hOver+=hingeCount(fz):hHalf+=hingeCount(fz)}}
+        const wl=p.walls.L&&i===0,wr=p.walls.R&&i===n-1;let hs=nd===2?['L','R']:[i<n/2?'L':'R'];
+        if(nd===1){if(wl&&hs[0]==='L'&&!wr)hs=['R'];if(wr&&hs[0]==='R'&&!wl)hs=['L']}
+        if((wl&&hs[0]==='L')||(wr&&hs[hs.length-1]==='R'))warn.push(`Колонка ${i+1}: дверца на петлях у стены откроется только на 90° и может задевать стену.`);
+        ch[i]=hs;hs.forEach(hg=>{const outer=hg==='L'?i===0:i===n-1;outer?hOver+=hingeCount(fz):hHalf+=hingeCount(fz)})}
       add('Полка','Полки',cw-2,D-20,cl.shelves,'ldsp',1,0);supports+=4*cl.shelves}
     if(cw>900&&cl.type!=='drawers'&&cl.shelves)warn.push(`Колонка ${i+1}: полка длиннее 900 мм прогнётся.`);
     if(cw>900&&cl.type==='drawers')warn.push(`Колонка ${i+1}: ящик шире 900 мм будет перекашиваться. Добавьте колонку.`);
   });
-  if(!slide&&c.cols.some(x=>x.type==='drawers'))warn.push('Ящики не помещаются по глубине — увеличьте глубину.');
-  if(Math.min(...colWs)<200)warn.push('Колонки слишком узкие — уменьшите их число.');
-  if(Hb-t>s.sheetL-2*s.trim)warn.push('Изделие выше длины листа.');
+  if(!slide&&c.cols.some(x=>x.type==='drawers'))warn.push(ERR('Ящики не помещаются по глубине — увеличьте глубину.'));
+  if(Math.min(...colWs)<200)warn.push(ERR('Колонки слишком узкие — уменьшите их число.'));
+  if(Hb-t>s.sheetL-2*s.trim)warn.push(ERR('Изделие выше длины листа.'));
   if(legs&&c.plinth)warn.push('Выбраны ножки — цоколь не делается.');
   const hw=[['Конфирмат 7×50',conf,'шт',pr.confirmat],['Эксцентриковая стяжка (крышка)',minifix,'шт',pr.minifix]];
   if(legs)hw.push([`Ножка мебельная ${legs} мм`,W>1000?6:4,'шт',pr.leg]);
   else if(!pl)hw.push(['Подпятник',4,'шт',pr.glide]);
-  if(hOver)hw.push(['Петля накладная с доводчиком',hOver,'шт',pr.hinge]);
-  if(hHalf)hw.push(['Петля полунакладная с доводчиком',hHalf,'шт',pr.hinge]);
-  if(handles)hw.push(['Ручка',handles,'шт',pr.handle]);
-  if(slides)hw.push([`Направляющие ${slide} мм`,slides,'пара',pr.slides]);
+  hingeRows(hw,HWp.hinge,hOver,hHalf);handleRow(hw,HWp.handle,handles);slideRow(hw,sys,slide,slides);
+  if(slides&&sys.maxT&&t>sys.maxT)warn.push(ERR(`Направляющие «${sys.name}» рассчитаны на боковины ящика до ${sys.maxT} мм, а ЛДСП ${t} мм. Выберите другие направляющие.`));
   if(supports)hw.push(['Полкодержатель',supports,'шт',pr.support]);
-  return{parts:mergeParts(parts),hw,warn,mirrors:[],doorsAll:[],colWs,xs,fr,fz,span,Hb,legs,hOver,hHalf};
+  return{parts:mergeParts(parts),hw,warn,mirrors:[],doorsAll:[],colWs,xs,fr,fz,span,Hb,legs,hOver,hHalf,ch};
 }
 function drawChest(p,s,r){
   const c=p.c,t=s.t,W=c.W,Ht=c.H,H=r.Hb,lg=r.legs,pl=lg?0:Math.max(0,c.plinth),n=c.cols.length,dec=DECORS[p.decor].fill;
@@ -909,7 +1015,7 @@ function drawChest(p,s,r){
   for(let i=1;i<n;i++)g+=R(r.xs[i]-t,t,t,H-pl-2*t,dec);
   c.cols.forEach((cl,i)=>{const fx=r.fr[i].x,fw=r.fr[i].w,fy=t+2,x0=r.xs[i],cw=r.colWs[i];
     if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(r.fz-3*(m-1))/m;for(let j=0;j<m;j++){const y=fy+j*(fh+3);g+=R(fx,y,fw,fh,dec)+handleH(fx+fw*.35,y+fh/2,fw*.3,sw)}}
-    else if(cl.type==='door'){const nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;for(let j=0;j<nd;j++){const dx=fx+j*(dw+3),hingeL=nd===2?j===0:i<n/2,ox=hingeL?dx+dw:dx,hx=hingeL?dx:dx+dw;
+    else if(cl.type==='door'){const nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;for(let j=0;j<nd;j++){const dx=fx+j*(dw+3),hingeL=(r.ch[i]||[])[j]?r.ch[i][j]==='L':(nd===2?j===0:i<n/2),ox=hingeL?dx+dw:dx,hx=hingeL?dx:dx+dw;
         g+=R(dx,fy,dw,r.fz,dec)+`<path d="M${ox} ${fy} L${hx} ${fy+r.fz/2} L${ox} ${fy+r.fz}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".55"/>`+handleV(ox+(hingeL?-40:40),fy+r.fz*.15,Math.min(140,r.fz*.3),sw)}}
     else{for(let j=0;j<cl.shelves;j++)g+=R(x0,t+(H-pl-2*t)*(j+1)/(cl.shelves+1),cw,t,dec)}
     const key='C:'+i;
@@ -974,7 +1080,7 @@ function drawSheet(sh,s){
   return `<svg viewBox="0 0 ${s.sheetL} ${s.sheetW}" role="img" aria-label="Карта раскроя листа">${g}</svg>`;
 }
 function drawingHTML(forKp){
-  if(P.kind==='kitchen')return drawKitchen(P,settings);
+  if(P.kind==='kitchen')return drawKitchen(P,settings,R.c);
   if(P.kind==='chest')return drawChest(P,settings,R.c);
   const c=R.c;
   if(c.corner)return `<div class="wing-title">Вид сверху</div>${drawPlan(P)}`+c.wings.map(w=>`<div class="wing-title">${wingName(w.key)}</div>${drawFront(P,settings,w)}`).join('');
@@ -992,12 +1098,24 @@ function compute(){
 const edgeTxt=r=>(r.eL||r.eW)?[r.eL?r.eL+'Д':'',r.eW?r.eW+'Ш':''].filter(Boolean).join(' '):'—';
 const wingName=k=>k==='B'?'Сторона Б':'Сторона А';
 
+// все замечания по заказу: ошибки (так делать нельзя) и предупреждения
+function issues(){const N=x=>typeof x==='string'?{t:x,lvl:'warn'}:x,list=(R.c.warn||[]).map(N);
+  const over=[...new Set([...R.cl.over,...R.ch.over].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
+  if(over.length)list.push(ERR(`Не помещаются на лист ${settings.sheetL}×${settings.sheetW}: ${over.join(', ')}. Их нет в раскрое и в смете — цена занижена.`));
+  return list}
+function renderChecks(){const all=issues(),e=all.filter(x=>x.lvl==='err').length,w=all.length-e;
+  const line=e?`<button type="button" class="check bad" id="goAlerts">${plural(e,'ошибка','ошибки','ошибок')}${w?` и ${plural(w,'предупреждение','предупреждения','предупреждений')}`:''} — посмотреть</button>`
+    :w?`<button type="button" class="check warn" id="goAlerts">Ошибок нет, ${plural(w,'предупреждение','предупреждения','предупреждений')} — посмотреть</button>`:`<div class="check ok">✓ Проверено: ошибок нет</div>`;
+  $('#checkLine').innerHTML=line;
+  const ban=e?`<div class="alert err"><b>В заказе ${plural(e,'ошибка','ошибки','ошибок')}.</b><span>Сначала исправьте на вкладке «Изделие», потом отправляйте заказ поставщику или цену клиенту.</span></div>`:'';
+  ['#partsErr','#costErr','#kpErr'].forEach(id=>{const el=$(id);if(el)el.innerHTML=ban});
+  $('#hdrPrice').classList.toggle('bad',!!e)}
 function renderAll(){
   compute();
   if(P.kind==='wardrobe'&&P.mirrors>R.c.doorsAll.length){P.mirrors=R.c.doorsAll.length;compute()}
   $('#hdrName').textContent=P.name||'Без названия';
   $('#hdrPrice').textContent=rub(R.cost.price);
-  renderBuild();renderParts();renderCut();renderCost();
+  renderBuild();renderParts();renderCut();renderCost();renderChecks();
 }
 const stepRow=(label,attr,v)=>`<div class="row"><span>${label}</span><div class="stepper"><button type="button" ${attr}:-1" aria-label="${label}: меньше">−</button><output class="num">${v}</output><button type="button" ${attr}:1" aria-label="${label}: больше">+</button></div></div>`;
 const opts=(list,v)=>list.map(([k,l])=>`<option value="${k}"${k===v?' selected':''}>${l}</option>`).join('');
@@ -1011,10 +1129,26 @@ function renderBuild(){
   $('#decors').innerHTML=Object.entries(DECORS).map(([k,d])=>`<button type="button" data-decor="${k}" aria-pressed="${P.decor===k}" title="${d.name}" aria-label="${d.name}" style="background:${d.fill}"></button>`).join('');
   $('#front').innerHTML=drawingHTML();
   const over=[...new Set([...R.cl.over,...R.ch.over].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
-  const warnAll=over.length?[...c.warn,`Не помещаются на лист ${settings.sheetL}×${settings.sheetW}: ${over.join(', ')}. Их нет в раскрое и в смете — цена занижена.`]:c.warn;
-  $('#buildAlerts').innerHTML=(warnAll.length?`<div class="alert">${warnAll.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'')+((c.notes||[]).length?`<p class="hint" style="margin-top:8px">${c.notes.map(esc).join('<br>')}</p>`:'');
+  const all=issues(),errs=all.filter(x=>x.lvl==='err'),wrn=all.filter(x=>x.lvl!=='err');
+  $('#buildAlerts').innerHTML=(errs.length?`<div class="alert err"><b>Так делать нельзя — исправьте:</b>${errs.map(w=>`<span>• ${esc(w.t)}</span>`).join('')}</div>`:'')+(wrn.length?`<div class="alert" style="margin-top:8px"><b>Обратите внимание:</b>${wrn.map(w=>`<span>• ${esc(w.t)}</span>`).join('')}</div>`:'')+((c.notes||[]).length?`<p class="hint" style="margin-top:8px">${c.notes.map(esc).join('<br>')}</p>`:'');
+  renderHw();
   if(kind==='wardrobe')renderWardrobeUI(c);else if(kind==='kitchen')renderKitchenUI(c);else renderChestUI(c);
 }
+function renderHw(){
+  const k=P.kind,corner=k==='wardrobe'&&P.shape==='corner',coupe=k==='wardrobe'&&P.type==='coupe';
+  const fill=(id,list,val)=>{const el=$(id);el.innerHTML=list.map(x=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(x.name)}${x.proj!==undefined?` · вынос ${x.proj} мм`:''}</option>`).join('')};
+  fill('#hwHinge',settings.cat.hinges,P.hw.hinge);fill('#hwSlide',settings.cat.slides,P.hw.slide);
+  fill('#hwHandle',settings.cat.handles,P.hw.handle);fill('#hwHandleIn',settings.cat.handles,P.hw.handleIn);fill('#hwCoupe',settings.cat.coupe,P.hw.coupe);
+  $('#hwInField').hidden=k!=='wardrobe';$('#hwCoupeField').hidden=!coupe;
+  $('#hwHinge').closest('.field').hidden=coupe&&k==='wardrobe';
+  $('#lblHandle').textContent=k==='wardrobe'?(coupe?'Ручки (не нужны для купе)':'Ручки дверей'):'Ручки фасадов';
+  const H_=HW(P),info=[`Направляющие: ${H_.slide.src}`];
+  if(coupe)info.push(`Профиль купе: ${H_.coupe.src}${H_.coupe.check||H_.coupe.custom?' Перед заказом дверей сверьте с таблицей поставщика.':''}`);
+  $('#hwInfo').textContent=info.join(' ');
+  const wl=$('#wallL'),wr=$('#wallR');wl.dataset.wall=corner?'A':'L';wr.dataset.wall=corner?'B':'R';
+  wl.checked=!!P.walls[wl.dataset.wall];wr.checked=!!P.walls[wr.dataset.wall];
+  $('#lblWallL').textContent=corner?'Стена у свободного края стороны А':'Слева стена вплотную';
+  $('#lblWallR').textContent=corner?'Стена у свободного края стороны Б':'Справа стена вплотную'}
 function renderWardrobeUI(c){
   const corner=c.corner;
   $$('[data-type]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.type===P.type));
@@ -1144,8 +1278,11 @@ function describe(){
     c.coupe?`Двери купе: ${nDoors} шт${p.mirrors?`, из них с зеркалом: ${p.mirrors}`:''}.`:`Дверей: ${nDoors}, петли с доводчиком${p.mirrors?`, зеркало на ${p.mirrors}`:''}.`,
     p.mezz?'Антресоль.':'',`Наполнение — ${fill.join('. ')}.`].filter(Boolean)}
 }
+function hwLine(){const H_=HW(P),k=P.kind,coupe=k==='wardrobe'&&P.type==='coupe',r=[];
+  if(!coupe)r.push(`петли ${H_.hinge.name}`);if(coupe)r.push(`профиль купе ${H_.coupe.name}`);
+  if(R.c.hw.some(h=>h[0].startsWith('Направляющие')))r.push(`направляющие: ${H_.slide.name.toLowerCase()}`);if(!coupe)r.push(`ручки: ${H_.handle.name.toLowerCase()}`);return `Фурнитура: ${r.join(', ')}.`}
 function offerText(){const d=describe();
-  return [`${P.name}${P.client?' — '+P.client:''}`,d.title+'.',...d.lines,'',`Стоимость с изготовлением, доставкой и сборкой: ${rub(R.cost.price)}.`,settings.company.lead?`Срок изготовления: ${settings.company.lead}.`:'',settings.company.phone?`Телефон: ${settings.company.phone}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim()}
+  return [`${P.name}${P.client?' — '+P.client:''}`,d.title+'.',...d.lines,hwLine(),'',`Стоимость с изготовлением, доставкой и сборкой: ${rub(R.cost.price)}.`,settings.company.lead?`Срок изготовления: ${settings.company.lead}.`:'',settings.company.phone?`Телефон: ${settings.company.phone}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim()}
 
 function renderKp(){
   const co=settings.company,d=describe(),today=new Date();
@@ -1156,7 +1293,7 @@ function renderKp(){
     <div class="kp-meta">Коммерческое предложение<br>№ ${esc(P.id.slice(-5).toUpperCase())} от ${today.toLocaleDateString('ru-RU')}</div></div>
     <div><h1>${esc(d.title)}</h1><div class="kp-small">${esc(P.name)}${P.client?' · Заказчик: '+esc(P.client):''}${P.address?' · '+esc(P.address):''}</div></div>
     <div class="kp-draw">${drawDoors}</div>${drawIn?`<div class="kp-draw"><div class="kp-small" style="margin-bottom:6px">Внутреннее наполнение</div>${drawIn}</div>`:''}
-    <ul>${d.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
+    <ul>${[...d.lines,hwLine()].map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
     <div class="kp-price"><span>Стоимость с изготовлением, доставкой и сборкой</span><b>${rub(R.cost.price)}</b></div>
     <div class="kp-small"><span>Срок изготовления: ${esc(co.lead||'по договорённости')}.</span><span>Предоплата 50%, остаток после установки.</span><span>Предложение действительно до ${valid}.</span></div>
     <div class="kp-sign"><span>Исполнитель: ____________</span><span>Заказчик: ____________</span></div>`;
@@ -1169,6 +1306,13 @@ function renderSettings(){
   $('#setPrice').innerHTML=SET_PRICE.map(([k,l,u])=>inp(k,l,u,settings.p[k],'p')).join('');
   $('#setWork').innerHTML=SET_WORK.map(([k,l,u])=>inp(k,l,u,settings[k],'')).join('');
   $('#sGrain').checked=settings.grain;
+  const ci=(k,x,f,label,ro)=>`<div class="field"><label for="c_${k}_${x.id}_${f}">${label}</label><div class="inwrap"><input id="c_${k}_${x.id}_${f}" data-cat="${k}:${x.id}:${f}" type="number" inputmode="decimal" value="${x[f]}"${ro?' disabled':''}></div></div>`;
+  const row=(nm,sub,cells)=>`<div class="cat-row"><div class="nm">${esc(nm)}${sub?`<small>${esc(sub)}</small>`:''}</div>${cells}</div>`;
+  const C=settings.cat;
+  $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>row(x.name,'',ci('hinges',x,'over','накладная')+ci('hinges',x,'half','полунакладная'))).join('')
+   +`<h3 style="margin-top:14px">Направляющие</h3>`+C.slides.map(x=>row(x.name,x.src,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм',!x.custom)+ci('slides',x,'dL','короче направл., мм',!x.custom))).join('')
+   +`<h3 style="margin-top:14px">Ручки</h3>`+C.handles.map(x=>row(x.name,'',ci('handles',x,'cc','межцентр, мм')+ci('handles',x,'len','длина, мм')+ci('handles',x,'proj','вынос, мм')+ci('handles',x,'price','₽ за шт'))).join('')
+   +`<h3 style="margin-top:14px">Профили купе</h3>`+C.coupe.map(x=>row(x.name,x.src,ci('coupe',x,'dh','проём − , мм',!x.custom)+ci('coupe',x,'ov','перехлёст, мм',!x.custom))).join('');
   $$('[data-co]').forEach(el=>el.value=settings.company[el.dataset.co]||'');
   $('#installBtn').hidden=!installEvt;
   if(standalone)$('#installCard').hidden=true;
@@ -1201,7 +1345,7 @@ const backupJSON=()=>JSON.stringify({app:'shkaf-master',version:3,date:new Date(
 function restore(text){
   try{const d=JSON.parse(text);if(!d||!Array.isArray(d.projects))throw 0;
     d.projects.map(norm).forEach(np=>{const i=projects.findIndex(p=>p.id===np.id);if(i>=0)projects[i]=np;else projects.push(np)});
-    if(d.settings){settings=Object.assign(clone(DEFAULT_SETTINGS),d.settings);settings.p=Object.assign({},DEFAULT_SETTINGS.p,d.settings.p||{});settings.company=Object.assign({},DEFAULT_SETTINGS.company,d.settings.company||{})}
+    if(d.settings){settings=Object.assign(clone(DEFAULT_SETTINGS),d.settings);settings.cat=catMerge(d.settings.cat);settings.p=Object.assign({},DEFAULT_SETTINGS.p,d.settings.p||{});settings.company=Object.assign({},DEFAULT_SETTINGS.company,d.settings.company||{})}
     P=projects.find(p=>p.id===curId)||projects[0];curId=P.id;renderSettings();change();toast(`Восстановлено заказов: ${d.projects.length}`)}
   catch(e){toast('Это не файл копии Шкаф-Мастера')}
 }
@@ -1224,6 +1368,7 @@ document.addEventListener('input',e=>{
   if(d.ck){const v=num(el);if(inLim(v,CLIM[d.ck])){P.c[d.ck]=v;change()}return}
   if(d.mw){const [z,i]=d.mw.split(':'),v=num(el);if(inLim(v,[100,1500])){P.k[z][+i].w=v;activeSec=d.mw;change()}return}
   if(d.co){settings.company[d.co]=el.value;save();return}
+  if(d.cat){const [k,id,f]=d.cat.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.cat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
   if(d.s){const [g,k]=d.s.split(':');const v=+el.value;if(el.value===''||isNaN(v)||v<0)return;
     if(g==='p')settings.p[k]=v;else settings[k]=v;change();}
 });
@@ -1236,6 +1381,8 @@ document.addEventListener('change',e=>{
   else if(el.id==='showDoors'){showDoors=el.checked;renderBuild()}
   else if(el.id==='sGrain'){settings.grain=el.checked;change()}
   else if(el.id==='kTop'){P.k.worktop=el.checked;change()}
+  else if(d.hw){P.hw[d.hw]=el.value;change()}
+  else if(d.wall){P.walls[d.wall]=el.checked;change()}
   else if(el.id==='restoreFile'){const f=el.files&&el.files[0];if(f){const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f)}el.value=''}
   else if(d.rod){const [w,i]=d.rod.split(':');secsOf(w)[+i].rod=el.checked;change()}
   else if(d.mtype){const [z,i]=d.mtype.split(':'),m=P.k[z][+i];m.type=el.value;if(m.type==='tall'){m.shelves=Math.max(m.shelves,4)}if(m.type==='oven')m.w=600;activeSec=d.mtype;change()}
@@ -1250,6 +1397,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('button,[data-sec],[data-mod],[data-col]');if(!b)return;const d=b.dataset;
   if(d.tab){openTab(d.tab);return}
   if(b.id==='hdrPrice'){openTab('cost');return}
+  if(b.id==='goAlerts'){const el=$('#buildAlerts');el&&el.scrollIntoView({behavior:'smooth',block:'center'});return}
   if(d.kind){P.kind=d.kind;activeSec='';change();return}
   if(d.type){P.type=d.type;change();return}
   if(d.shape){P.shape=d.shape;activeSec='';change();return}
@@ -1285,7 +1433,7 @@ document.addEventListener('click',e=>{
   if(b.id==='copyBackup'){copy(backupJSON(),$('#backupText'),'Копия скопирована');return}
   if(b.id==='restoreText'){const v=$('#backupText').value.trim();if(v)restore(v);else toast('Вставьте текст копии в поле');return}
   if(b.id==='installBtn'&&installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;renderSettings()});return}
-  if(b.id==='resetSet'){if(d.armed){const co=settings.company;settings=clone(DEFAULT_SETTINGS);settings.company=co;delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
+  if(b.id==='resetSet'){if(d.armed){const co=settings.company;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.cat=catMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
     else{d.armed=1;b.textContent='Нажмите ещё раз, чтобы сбросить'}return}
   if(b.id==='openProjects'){renderProjects();$('#projOverlay').hidden=false;return}
   if(b.id==='closeProjects'){$('#projOverlay').hidden=true;return}

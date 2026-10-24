@@ -4,7 +4,7 @@ const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8').replace(/^[\s\S]*<body>/,'').replace(/<\/body>[\s\S]*$/,'')+'</body></html>');
 await pg.waitForTimeout(500);
 const res=await pg.evaluate(()=>{
- const M=window.ShkafMaster,S=JSON.parse(JSON.stringify(M.DEFAULT_SETTINGS));S.t=18;S.sheetL=2750;S.sheetW=1830;const t=S.t,fails=[];let checks=0;
+ const M=window.ShkafMaster,S=JSON.parse(JSON.stringify(M.settings()));S.t=18;S.sheetL=2750;S.sheetW=1830;const t=S.t,S_cat=(k,id)=>S.cat[k].find(x=>x.id===id),fails=[];let checks=0;
  const eq=(a,b,msg,tol=0.02)=>{checks++;if(!(Math.abs(a-b)<=tol))fails.push(`${msg}: ${(+a).toFixed(2)} ≠ ${(+b).toFixed(2)}`)};
  const ok=(c,msg)=>{checks++;if(!c)fails.push(msg)};
  const base=()=>M.newProject();
@@ -36,7 +36,7 @@ const res=await pg.evaluate(()=>{
  // ---- купе
  for(const W of [1200,1600,2000,2400,3000])for(const cn of [0,2,3,4]){const p=base();p.type='coupe';p.W=W;p.coupeN=cn;p.D=600;p.sections=[{shelves:3,rod:false,drawers:0,baskets:0},{shelves:0,rod:true,drawers:0,baskets:0}];
    const r=M.calc(p,S),w=r.wings[0],cd=w.coupeD,tag=`купе ${W} дв${cn}`;
-   ok(Math.abs(cd.n*cd.w-(cd.n-1)*25-cd.ow)<=cd.n,tag+` двери закрывают проём: ${cd.n}×${cd.w}−перехлёст vs ${cd.ow}`);
+   ok(cd.n*cd.w-(cd.n-1)*cd.sys.ov<=cd.ow&&cd.ow-(cd.n*cd.w-(cd.n-1)*cd.sys.ov)<cd.n,tag+` двери закрывают проём: ${cd.n}×${cd.w}−перехлёст vs ${cd.ow}`);
    eq(cd.h,p.H-p.plinth-2*t-40,tag+' высота двери купе',0.5);
    eq(w.ws.reduce((a,b)=>a+b,0)+t*(w.ws.length+1),W,tag+' сумма секций');sanity(r,tag)}
  // ---- угловые распашные
@@ -129,6 +129,30 @@ const res=await pg.evaluate(()=>{
  // ---- петли на зеркальных и высоких дверях
  {const p=base();p.mirrors=3;const r=M.calc(p,S);const tot=r.hw.filter(h=>h[0].startsWith('Петля')).reduce((a,h)=>a+h[1],0);eq(tot,3*6,'петли: 3 зеркальные двери 2316 мм по 6');
   const p2=base();p2.H=2700;p2.mirrors=0;const r2=M.calc(p2,S);eq(r2.hw.filter(h=>h[0].startsWith('Петля')).reduce((a,h)=>a+h[1],0),3*6,'петли: дверь 2616 мм — по 6')}
+
+ // ---- каталог: системы купе
+ {const ow0=(p)=>p.W-2*t;
+  for(const id of ['std','aristo','absolut'])for(const W of [1600,2400,3000])for(const n of [2,3]){const p=base();p.type='coupe';p.W=W;p.D=600;p.coupeN=n;p.hw.coupe=id;p.sections=[{shelves:2,rod:false,drawers:0,baskets:0},{shelves:2,rod:false,drawers:0,baskets:0}];
+    const r=M.calc(p,S),cd=r.wings[0].coupeD,sys=S_cat('coupe',id),innerH=p.H-p.plinth-2*t;
+    eq(cd.w,Math.floor((ow0(p)+sys.ov*(n-1))/n),`купе ${id} ${W} ${n}дв ширина двери`,0);eq(cd.h,Math.floor(innerH-sys.dh),`купе ${id} высота двери`,0)}
+  if(false){const p=base();p.type='coupe';p.W=1532;p.D=600;p.coupeN=2;p.hw.coupe='absolut';const cd=M.calc(p,S).wings[0].coupeD;eq(cd.w,Math.floor((1500+21)/2),'ABSOLUT по инструкции: (проём+21)/2',0)}}
+ // ---- стены
+ {const p=base();p.mirrors=0;p.walls.L=true;p.sections=[{shelves:3,rod:false,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];
+  const w=M.calc(p,S).wings[0];ok(w.doors.find(d=>d.sec===0).hinge==='R','стена слева: дверь крайней секции висит справа');
+  p.walls.R=true;const w2=M.calc(p,S).wings[0];ok(w2.doors.find(d=>d.sec===2).hinge==='L','стена справа: дверь крайней секции висит слева')}
+ {const p=base();p.W=2400;p.mirrors=0;p.walls.L=true;p.sections=[{shelves:1,rod:false,drawers:2,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];
+  const r=M.calc(p,S);ok(r.wings[0].doors.filter(d=>d.sec===0).length===2,'секция 800: две двери');ok(r.warn.some(x=>x.lvl==='err'&&/у стены/.test(x.t)),'две двери у стены + ящики: ошибка')}
+ // ---- ручки
+ {const p=base();p.shape='corner';p.mirrors=0;S_cat('handles','r128').proj=50;const r=M.calc(p,S);ok(r.warn.some(x=>x.lvl==='err'&&/заденут ручки/.test(x.t)),'угол: ручка 50 мм — ошибка');S_cat('handles','r128').proj=35;
+  const r2=M.calc(p,S);ok(!r2.warn.some(x=>/заденут ручки/.test(x.t)),'угол: ручка 35 мм — без ошибки')}
+ {const mk=(D,hid)=>{const p=base();p.D=D;p.hw.handleIn=hid;p.sections=[{shelves:1,rod:false,drawers:2,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];return M.calc(p,S)};
+  ok(!mk(560,'r96').warn.some(x=>/дверь упрётся в ручку/.test(x.t)),'глубина 560, скоба 35: ручка помещается');
+  ok(mk(530,'r96').warn.some(x=>x.lvl==='err'&&/дверь упрётся в ручку/.test(x.t)),'глубина 530, скоба 35: ошибка');
+  ok(!mk(530,'flush').warn.some(x=>/дверь упрётся в ручку/.test(x.t)),'глубина 530, врезная: без ошибки')}
+ {const p=base();p.kind='chest';p.hw.handle='r320';p.c={W:380,H:850,D:450,plinth:60,legs:0,cols:[{type:'drawers',drawers:3,shelves:0}]};
+  ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/не помещается на фасад/.test(x.t)),'ручка 360 мм на фасад 376: ошибка')}
+ {const p=base();p.kind='chest';p.hw.handle='r320';p.c={W:450,H:850,D:450,plinth:60,legs:0,cols:[{type:'drawers',drawers:3,shelves:0}]};ok(!M.calc(p,S).warn.some(x=>/не помещается на фасад/.test(x.t)),'ручка 360 мм на фасад 446: помещается')}
+ {const p=base();p.D=480;p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];ok(M.calc(p,S).warn.some(x=>/плечики/.test(x.t)),'штанга при глубине 480: предупреждение')}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

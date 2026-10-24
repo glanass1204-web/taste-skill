@@ -292,7 +292,8 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
         <div class="field" id="mFDecorF"><label for="mFDecor">Декор фасадов</label><div class="inwrap"><select id="mFDecor" data-mat="frontDecor"></select></div></div>
         <div class="field" id="mFColorF"><label for="mFColor">Цвет фасадов на чертеже</label><div class="inwrap"><select id="mFColor" data-mat="frontColor"></select></div></div>
         <div class="field text" id="mFNoteF"><label for="mFNote">Цвет / плёнка по каталогу цеха</label><div class="inwrap"><input id="mFNote" data-matnote="1" type="text" autocomplete="off" placeholder="Например, RAL 9003 матовый"></div></div>
-        <div class="field"><label for="mEdge">Кромка</label><div class="inwrap"><select id="mEdge" data-mat="edge"></select></div></div>
+        <div class="field" id="mEdgeFF"><label for="mEdgeF">Кромка фасадов</label><div class="inwrap"><select id="mEdgeF" data-mat="edgeF"></select></div></div>
+        <div class="field"><label for="mEdgeB">Кромка корпуса</label><div class="inwrap"><select id="mEdgeB" data-mat="edgeB"></select></div></div>
         <div class="field" id="mTopF"><label for="mTop">Столешница</label><div class="inwrap"><select id="mTop" data-mat="top"></select></div></div>
       </div>
       <p class="hint" id="matInfo"></p>
@@ -582,10 +583,10 @@ const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, т�
 
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день'},
-  p:{ldsp:4800,hdf:1100,edge:40,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,basket:1900,mirror:3200,tie:30,
+  p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,basket:1900,mirror:3200,tie:30,
      coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,edge04:12,topEnd:150,topJoint:300}};
 const SET_MAT=[['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%'],['fMinArea','Мин. площадь заказного фасада','м²']];
-const SET_PRICE=[['hdf','Лист ХДФ','₽/лист'],['edge','Кромка ПВХ 2 мм','₽/м'],['edge04','Кромка ПВХ 0,4 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
+const SET_PRICE=[['hdf','Лист ХДФ','₽/лист'],['edge04','Кромка ПВХ 0,4 мм','₽/м'],['edge08','Кромка ПВХ 0,8 мм','₽/м'],['edge1','Кромка ПВХ 1 мм','₽/м'],['edge','Кромка ПВХ 2 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
   ['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
   ['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['mirror','Зеркало на фасад','₽/м²'],
   ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeRail','Рельсы купе','₽/м'],
@@ -640,8 +641,8 @@ const MATERIALS={
     {id:'lamarty18',name:'ЛДСП Lamarty 18 мм',t:18,L:2750,W:1830,price:3900,src:'Формат Lamarty 2750×1830 мм. Цена примерная.'},
     {id:'custom',name:'Свой лист',t:16,L:2800,W:2070,price:4800,custom:true,src:'Впишите толщину, формат и цену вашего листа.'}],
   fronts:[
-    {id:'body',kind:'body',name:'ЛДСП, как корпус',src:'Фасады выкраиваются из тех же листов, кромка ПВХ 2 мм.'},
-    {id:'ldsp',kind:'sheet',name:'ЛДСП другого декора',src:'Отдельные листы того же формата и толщины, что корпус. Кромка ПВХ 2 мм.'},
+    {id:'body',kind:'body',name:'ЛДСП, как корпус',src:'Фасады выкраиваются из тех же листов, кромка — как выбрано для фасадов.'},
+    {id:'ldsp',kind:'sheet',name:'ЛДСП другого декора',src:'Отдельные листы того же формата и толщины, что корпус. Кромка — как выбрано для фасадов.'},
     {id:'mdfpvc',kind:'order',name:'МДФ в плёнке ПВХ',t:19,price:8500,kg:16,src:'Заказ в цех по м². Цена от 8 500 ₽/м² (mofasad.ru). Вес МДФ 19 мм — около 15–16 кг/м².'},
     {id:'mdfmat',kind:'order',name:'МДФ эмаль матовая',t:19,price:10000,kg:16,src:'Заказ в цех по м². Эмаль матовая гладкая 16/19 мм — 9 000/10 000 ₽/м² (fasadneva.ru).'},
     {id:'mdfgloss',kind:'order',name:'МДФ эмаль глянец',t:19,price:14000,kg:16,src:'Заказ в цех по м². Эмаль глянцевая гладкая 16/19 мм — 14 000 ₽/м² (fasadneva.ru).'},
@@ -656,9 +657,11 @@ const MATERIALS={
     {id:'stone',name:'Искусственный камень (акрил), край 38 мм',t:38,D:600,maxL:0,price:25000,src:'Изготавливается по замеру, швы склеиваются незаметно. Цена примерная за погонный метр.'},
     {id:'quartz',name:'Кварцевый агломерат 20 мм',t:20,D:600,maxL:0,price:35000,src:'Изготавливается по замеру. Цена примерная за погонный метр.'},
     {id:'custom',name:'Своя столешница',t:38,D:600,maxL:3050,price:3500,planks:true,custom:true,src:'Впишите толщину, глубину, длину листа и цену за погонный метр.'}],
-  edges:[
-    {id:'all2',name:'ПВХ 2 мм на все видимые торцы'},
-    {id:'mix',name:'ПВХ 2 мм на фасады, 0,4 мм на корпус'}]};
+  edges:[]};
+// толщины кромки ПВХ: значение в проекте → ключ цены в настройках
+const EDGES=[{id:'0.4',name:'ПВХ 0,4 мм',price:'edge04'},{id:'0.8',name:'ПВХ 0,8 мм',price:'edge08'},{id:'1',name:'ПВХ 1 мм',price:'edge1'},{id:'2',name:'ПВХ 2 мм',price:'edge'}];
+const edgeItem=id=>EDGES.find(e=>e.id===String(id))||EDGES[2];
+const edgeMM=id=>edgeItem(id).id.replace('.',',');
 const MAT_EDIT={bodies:['price'],fronts:['price','kg'],tops:['price'],edges:[]},MAT_EDIT_CUSTOM={bodies:['t','L','W'],fronts:['t'],tops:['t','D','maxL']};
 function matMerge(saved,oldP){const out={};
   for(const k of Object.keys(MATERIALS)){const sv=(saved&&saved[k])||[];
@@ -694,14 +697,17 @@ function kDefaults(){return{baseH:720,baseD:560,legs:100,wallH:720,wallD:300,wal
 function cDefaults(){const p=clone(PRESETS.komod);delete p.name;return p}
 function newProject(){return norm({id:uid(),name:'Новый заказ',client:'',phone:'',address:'',kind:'wardrobe',
   shape:'straight',type:'swing',W:1800,H:2400,D:560,W2:1400,cornerSide:'L',cornerOpen:450,plinth:80,mezz:true,mezzH:450,coupeN:0,decor:'sonoma',mirrors:1,
-  sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],updated:Date.now()})}
+  sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],mat:{edgeF:'1',edgeB:'0.8'},updated:Date.now()})}
 function norm(p){
   p.kind=p.kind||'wardrobe';p.address=p.address||'';
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
   p.meas=Object.assign({w:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]},p.meas||{});
-  p.mat=Object.assign({body:'krono16',front:'body',frontDecor:'white',frontColor:'white',frontNote:'',top:'pf38',edge:'all2'},p.mat||{});
+  p.mat=Object.assign({body:'krono16',front:'body',frontDecor:'white',frontColor:'white',frontNote:'',top:'pf38',edgeF:'2',edgeB:'2'},p.mat||{});
+  // заказы прошлых версий были посчитаны с кромкой 2 мм (или 2 мм + 0,4 мм) — сохраняем как было; новый заказ: фасады 1 мм, корпус 0,8 мм
+  if(p.mat.edge!==undefined){if(p.mat.edge==='mix'){p.mat.edgeF='2';p.mat.edgeB='0.4'}else{p.mat.edgeF='2';p.mat.edgeB='2'}delete p.mat.edge}
+  p.mat.edgeF=edgeItem(p.mat.edgeF).id;p.mat.edgeB=edgeItem(p.mat.edgeB).id;
   p.hw=Object.assign({hinge:'boyard',slide:'ball',handle:'r128',handleIn:'knob',coupe:'std'},p.hw||{});p.walls=Object.assign({L:false,R:false,A:false,B:false},p.walls||{});
   p.k=Object.assign(kDefaults(),p.k||{});p.c=Object.assign(cDefaults(),p.c||{});if(p.c.legs===undefined)p.c.legs=0;
   return p}
@@ -1375,6 +1381,7 @@ function snapshot3D(){try{const r=new THREE.WebGLRenderer({antialias:true,preser
   cam.lookAt(new THREE.Box3().setFromObject(S3.model).getCenter(new THREE.Vector3()));r.render(S3.scene,cam);const url=r.domElement.toDataURL('image/png');
   S3.scene.traverse(o=>{if(o.geometry)o.geometry.dispose()});r.dispose();return url}catch(e){return null}}
 
+const isFrontPart=x=>x.group==='Фасады'||/фасад|Крышка/i.test(x.name);
 /* ---------- общий расчёт ---------- */
 function calc(p,s){
   const r=p.kind==='kitchen'?calcKitchen(p,s):p.kind==='chest'?calcChest(p,s):calcWardrobe(p,s);
@@ -1382,10 +1389,12 @@ function calc(p,s){
   const nails=Math.ceil(backs.reduce((a,x)=>a+x.qty*2*(x.L+x.Wd),0)/150);
   if(nails)r.hw.push(['Гвоздь/саморез для ХДФ (шаг 150 мм)',nails,'шт',s.p.nail]);
   const cf=r.hw.find(x=>x[0].startsWith('Конфирмат'));if(cf)r.hw.push(['Заглушка для конфирмата',cf[1],'шт',s.p.cap]);
-  const em=x=>x.qty*(x.eL*x.L+x.eW*x.Wd)/1000*(1+s.edgeReserve/100),thin=p.mat&&p.mat.edge==='mix';
-  const front=x=>x.group==='Фасады'||/фасад|Крышка/i.test(x.name);
-  r.edge2=r.parts.filter(x=>!thin||front(x)).reduce((a,x)=>a+em(x),0);r.edge04=thin?r.parts.filter(x=>!front(x)).reduce((a,x)=>a+em(x),0):0;
-  r.edgeM=r.edge2+r.edge04;
+  const em=x=>x.qty*(x.eL*x.L+x.eW*x.Wd)/1000*(1+s.edgeReserve/100);
+  // толщина кромки детали: фасады из ЛДСП (и крышка комода) — кромка фасадов, остальное — кромка корпуса
+  const fe=frontMat(p,s).edge;
+  r.parts.forEach(x=>{x.eT=x.eL||x.eW?edgeItem(fe&&isFrontPart(x)?p.mat.edgeF:p.mat.edgeB).id:''});
+  r.edges=EDGES.map(e=>({...e,m:r.parts.filter(x=>x.eT===e.id).reduce((a,x)=>a+em(x),0)})).filter(e=>e.m>0);
+  r.edgeM=r.edges.reduce((a,e)=>a+e.m,0);
   measChecks(p,s,r);
   return r;
 }
@@ -1456,8 +1465,7 @@ function costs(p,s,c,cl,ch,cf){
     ...(cf&&cf.sheets.length?[[`ЛДСП фасадов ${s.t} мм, ${(DECORS[p.mat.frontDecor]||DECORS.white).name}`,cf.sheets.length,'лист',b.price]]:[]),
     ['ХДФ 3 мм',ch.sheets.length,'лист',s.p.hdf],
     ...(orders.length?[[`Фасады на заказ: ${fm.f.name}${/мм/.test(fm.f.name)?'':' '+fm.t+' мм'}${p.mat.frontNote?' ('+p.mat.frontNote+')':''}`,+oArea.toFixed(2),'м²',fm.f.price]]:[]),
-    ['Кромка ПВХ 2 мм',+c.edge2.toFixed(1),'м',s.p.edge],
-    ...(c.edge04?[['Кромка ПВХ 0,4 мм',+c.edge04.toFixed(1),'м',s.p.edge04]]:[]),
+    ...c.edges.map(e=>[`Кромка ${e.name}`,+e.m.toFixed(1),'м',s.p[e.price]]),
     ['Распил (примерно)',+(cl.cutM+ch.cutM+(cf?cf.cutM:0)).toFixed(1),'м',s.p.cut],
     ['Кромкование',+c.edgeM.toFixed(1),'м',s.p.edgeWork],
     ...c.hw];
@@ -1491,7 +1499,8 @@ function compute(){
   const ldsp=c.parts.filter(r=>r.mat==='ldsp'),ldspF=c.parts.filter(r=>r.mat==='ldspF'),hdf=c.parts.filter(r=>r.mat==='hdf'),orders=c.parts.filter(r=>r.mat==='order');
   const cl=pack(ldsp,S,!S.grain),cf=ldspF.length?pack(ldspF,S,!S.grain):null,ch=pack(hdf,S,true);
   R={S,c,ldsp,ldspF,hdf,orders,cl,cf,ch,cost:costs(P,S,c,cl,ch,cf)};
-}const edgeTxt=r=>(r.eL||r.eW)?[r.eL?r.eL+'Д':'',r.eW?r.eW+'Ш':''].filter(Boolean).join(' '):'—';
+}const edgeTxt=r=>(r.eL||r.eW)?[r.eL?r.eL+'Д':'',r.eW?r.eW+'Ш':''].filter(Boolean).join(' ')+(r.eT?` · ${r.eT.replace('.',',')} мм`:''):'—';
+const edgeSum=c=>c.edges.map(e=>`${e.name} — ${fmt(e.m,1)} м`).join(', ');
 const wingName=k=>k==='B'?'Сторона Б':'Сторона А';
 
 // все замечания по заказу: ошибки (так делать нельзя) и предупреждения
@@ -1536,7 +1545,7 @@ function renderMat(){
   const fill=(id,list,val,lab)=>{$(id).innerHTML=list.map(x=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(lab?lab(x):x.name)}</option>`).join('')};
   fill('#mBody',settings.mat.bodies,m.body,x=>`${x.name} · ${x.L}×${x.W}`);fill('#mFront',settings.mat.fronts,m.front,x=>x.kind==='order'&&!/мм/.test(x.name)?`${x.name} ${x.t} мм`:x.name);
   fill('#mFDecor',Object.entries(DECORS).map(([id,d])=>({id,name:d.name})),m.frontDecor);fill('#mFColor',Object.entries(FCOLORS).map(([id,d])=>({id,name:d.name})),m.frontColor);
-  fill('#mEdge',settings.mat.edges,m.edge);fill('#mTop',settings.mat.tops,m.top);
+  fill('#mEdgeF',EDGES,m.edgeF);fill('#mEdgeB',EDGES,m.edgeB);$('#mEdgeFF').hidden=f.kind==='order';fill('#mTop',settings.mat.tops,m.top);
   $('#mFDecorF').hidden=f.kind!=='sheet';$('#mFColorF').hidden=f.kind!=='order';$('#mFNoteF').hidden=f.kind!=='order';$('#mTopF').hidden=k!=='kitchen';
   if(document.activeElement!==$('#mFNote'))$('#mFNote').value=m.frontNote||'';
   $('#matInfo').textContent=[`Корпус: ${b.src}`,`Фасады: ${f.src}`,k==='kitchen'?`Столешница: ${top.src}`:''].filter(Boolean).join(' ')}
@@ -1613,7 +1622,7 @@ function partsTable(list,title,edges=true){
 }
 function renderParts(){
   const c=R.c,S=R.S,b=matItem('bodies',P.mat.body),fm=frontMat(P,S);
-  $('#partsLdsp').innerHTML=partsTable(R.ldsp,`${b.name} · ${DECORS[P.decor].name}`)+`<p class="hint">Кромка ПВХ 2 мм: <b class="num">${fmt(c.edge2,1)} м</b>${c.edge04?`, 0,4 мм: <b class="num">${fmt(c.edge04,1)} м</b>`:''} с запасом ${S.edgeReserve}%.</p>`;
+  $('#partsLdsp').innerHTML=partsTable(R.ldsp,`${b.name} · ${DECORS[P.decor].name}`)+`<p class="hint">${c.edges.length?`Кромка: ${c.edges.map(e=>`${e.name} — <b class="num">${fmt(e.m,1)} м</b>`).join(', ')} с запасом ${S.edgeReserve}%.`:'Кромки нет.'}</p>`;
   const pf=$('#partsFront');pf.hidden=!R.ldspF.length&&!R.orders.length;
   if(R.ldspF.length)pf.innerHTML=partsTable(R.ldspF,`Фасады: ЛДСП ${S.t} мм · ${(DECORS[P.mat.frontDecor]||DECORS.white).name}`);
   else if(R.orders.length)pf.innerHTML=partsTable(R.orders,`Фасады на заказ в цех: ${fm.f.name} ${fm.t} мм`,false)+`<p class="hint">Площадь <b class="num">${fmt(R.cost.oArea,2)} м²</b>${S.fMinArea?` (мелкие фасады считаются как ${S.fMinArea} м²)`:''}. ${P.mat.frontNote?'Цвет: '+esc(P.mat.frontNote)+'. ':''}Кромка ПВХ на эти фасады не нужна.</p>`;
@@ -1628,21 +1637,21 @@ function renderParts(){
   const dm=drillMap(P,R.S,R.c);$('#drillList').innerHTML=dm.map(g=>`<details class="drill"><summary><b>${esc(g.name)}</b> <span class="num hint">${g.size} · ${g.qty} шт</span></summary><ul>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`).join('');
 }function orderText(){
   const c=R.c,S=R.S,b=matItem('bodies',P.mat.body),fm=frontMat(P,S);
-  const L=[`Заказ на распил: ${P.name}`,`${b.name} (лист ${S.sheetL}×${S.sheetW}), декор «${DECORS[P.decor].name}». Кромка ПВХ 2 мм${c.edge04?' на фасадные торцы, 0,4 мм на корпус':''}.`,`Размеры чистовые, с учётом кромки: длина (вдоль текстуры) × ширина, мм. Кромка: Д — длинная сторона, Ш — короткая.`,'','ЛДСП корпуса:'];
+  const L=[`Заказ на распил: ${P.name}`,`${b.name} (лист ${S.sheetL}×${S.sheetW}), декор «${DECORS[P.decor].name}». Кромка ПВХ: корпус ${edgeMM(P.mat.edgeB)} мм${fm.edge?`, фасады ${edgeMM(P.mat.edgeF)} мм`:''}. Толщина указана у каждой детали.`,`Размеры чистовые, с учётом кромки: длина (вдоль текстуры) × ширина, мм. Кромка: Д — длинная сторона, Ш — короткая.`,'','ЛДСП корпуса:'];
   R.ldsp.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт — кромка ${edgeTxt(r)}`));
-  if(R.ldspF.length){L.push('',`ЛДСП фасадов ${S.t} мм, декор «${(DECORS[P.mat.frontDecor]||DECORS.white).name}», кромка ПВХ 2 мм:`);R.ldspF.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт — кромка ${edgeTxt(r)}`))}
+  if(R.ldspF.length){L.push('',`ЛДСП фасадов ${S.t} мм, декор «${(DECORS[P.mat.frontDecor]||DECORS.white).name}», кромка ПВХ ${edgeMM(P.mat.edgeF)} мм:`);R.ldspF.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт — кромка ${edgeTxt(r)}`))}
   if(R.hdf.length){L.push('','ХДФ 3 мм:');R.hdf.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт`))}
   if(R.orders.length){L.push('',`Фасады на заказ (отдельно, в цех): ${fm.f.name} ${fm.t} мм${P.mat.frontNote?', цвет '+P.mat.frontNote:''}. Высота × ширина:`);R.orders.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт`));L.push(`Площадь ~${fmt(R.cost.oArea,2)} м².`)}
   if(c.mirrors.length){L.push('','Зеркала 4 мм (отдельно, в стекольную мастерскую):');c.mirrors.forEach((r,i)=>L.push(`${i+1}. ${r.L} × ${r.Wd} — ${r.qty} шт, шлифованная кромка`))}
   if(c.coupe){L.push('','Двери купе (высота × ширина):');c.wings.forEach(w=>w.coupeD.items.forEach((d,i)=>L.push(`${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}. ${d.h} × ${d.w} — вставка ${d.mirror?'зеркало':'ЛДСП'}`)))}
-  L.push('',`Итого: ЛДСП корпуса ~${R.cl.sheets.length} л.${R.cf?`, ЛДСП фасадов ~${R.cf.sheets.length} л.`:''}, ХДФ ~${R.ch.sheets.length} л., кромка ~${fmt(c.edgeM,1)} м.`);
+  L.push('',`Итого: ЛДСП корпуса ~${R.cl.sheets.length} л.${R.cf?`, ЛДСП фасадов ~${R.cf.sheets.length} л.`:''}, ХДФ ~${R.ch.sheets.length} л.${c.edges.length?`, кромка: ${edgeSum(c)}`:''}.`);
   return L.join('\n');
 }function csvText(){
   const S=R.S,b=matItem('bodies',P.mat.body);
   const head='№;Деталь;Длина;Ширина;Кол-во;Материал;Текстура;Кромка Д1;Кромка Д2;Кромка Ш1;Кромка Ш2';
   const q=v=>/[;"\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;
-  const rows=[...R.ldsp.map(r=>[r,`${b.name} ${DECORS[P.decor].name}`,'да']),...R.ldspF.map(r=>[r,`ЛДСП ${S.t} ${(DECORS[P.mat.frontDecor]||DECORS.white).name}`,'да']),...R.hdf.map(r=>[r,'ХДФ 3','нет'])].map(([r,m,g],i)=>
-    [i+1,q(r.name),r.L,r.Wd,r.qty,q(m),g,r.eL>=1?2:'',r.eL>=2?2:'',r.eW>=1?2:'',r.eW>=2?2:''].join(';'));
+  const rows=[...R.ldsp.map(r=>[r,`${b.name} ${DECORS[P.decor].name}`,'да']),...R.ldspF.map(r=>[r,`ЛДСП ${S.t} ${(DECORS[P.mat.frontDecor]||DECORS.white).name}`,'да']),...R.hdf.map(r=>[r,'ХДФ 3','нет'])].map(([r,m,g],i,_,eC=(r.eT||'').replace('.',','))=>
+    [i+1,q(r.name),r.L,r.Wd,r.qty,q(m),g,r.eL>=1?eC:'',r.eL>=2?eC:'',r.eW>=1?eC:'',r.eW>=2?eC:''].join(';'));
   return [head,...rows].join('\n');
 }
 function sheetsBlock(res,title){
@@ -1677,7 +1686,7 @@ function renderCost(){
 function describe(){
   const p=P,c=R.c,b=matItem('bodies',p.mat.body),fm=frontMat(p,R.S);
   const fr=fm.f.kind==='body'?'фасады из той же ЛДСП':fm.f.kind==='sheet'?`фасады ЛДСП «${(DECORS[p.mat.frontDecor]||DECORS.white).name}»`:`фасады ${fm.f.name.toLowerCase()} ${fm.t} мм${p.mat.frontNote?', '+p.mat.frontNote:''}`;
-  const mat=`Корпус ${b.name} «${DECORS[p.decor].name}», ${fr}, кромка ${p.mat.edge==='mix'?'ПВХ 2 мм на фасадах и 0,4 мм на корпусе':'ПВХ 2 мм'}`;
+  const mat=`Корпус ${b.name} «${DECORS[p.decor].name}», ${fr}, кромка ПВХ ${fm.edge?(p.mat.edgeF===p.mat.edgeB?edgeMM(p.mat.edgeB)+' мм':`${edgeMM(p.mat.edgeF)} мм на фасадах и ${edgeMM(p.mat.edgeB)} мм на корпусе`):edgeMM(p.mat.edgeB)+' мм на корпусе'}`;
   if(p.kind==='kitchen'){const k=p.k,tn=t=>Object.fromEntries([...K_TYPES.base,...K_TYPES.wall])[t].toLowerCase();
     return{title:'Кухня',lines:[`Нижний ряд ${c.allBase} мм, верхний ряд ${c.wallLen} мм.`,`Нижние модули: ${k.base.map((m,i)=>`${modLabel('base',i,m)} ${m.w} мм — ${tn(m.type)}`).join('; ')}.`,
       k.wall.length?`Верхние модули: ${k.wall.map((m,i)=>`${modLabel('wall',i,m)} ${m.w} мм — ${tn(m.type)}`).join('; ')}.`:'',

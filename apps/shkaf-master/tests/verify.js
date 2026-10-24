@@ -220,8 +220,21 @@ const res=await pg.evaluate(()=>{
  {const p=base();p.mat.body='lamarty16';const E=M.effSettings(p);eq(E.sheetL,2750,'Lamarty: длина листа');eq(E.sheetW,1830,'Lamarty: ширина листа');
   const r=M.calc(p,E),cl=M.pack(r.parts.filter(x=>x.mat==='ldsp'),E,false);ok(cl.sheets.every(sh=>sh.parts.every(a=>a.x+a.l<=2750-2*E.trim+.01&&a.y+a.w<=1830-2*E.trim+.01)),'Lamarty: раскрой в лист 2750×1830');
   const p2=base();p2.mat.body='egger18';eq(M.effSettings(p2).t,18,'Egger 18: толщина 18')}
- // ---- кромка 0,4 на корпус
- {const p=base();p.mat.edge='mix';const r=M.calc(p,S);ok(r.edge04>0&&r.edge2>0,'смешанная кромка: обе');const p0=base();const r0=M.calc(p0,S);eq(r.edge2+r.edge04,r0.edgeM,'смешанная кромка: общая длина та же',0.01)}
+ // ---- кромка: толщины 0,4 / 0,8 / 1 / 2 мм, отдельно фасады и корпус
+ {const p=base();eq(+p.mat.edgeF,1,'новый заказ: кромка фасадов 1 мм');eq(+p.mat.edgeB,0.8,'новый заказ: кромка корпуса 0,8 мм');p.mirrors=0;
+  const r=M.calc(p,S),ids=r.edges.map(e=>e.id).join(',');ok(ids==='0.8,1','по умолчанию две кромки: '+ids);
+  eq(r.edges.reduce((a,e)=>a+e.m,0),r.edgeM,'кромка: сумма толщин = общая длина',0.001);
+  r.parts.forEach(x=>{const fr=x.group==='Фасады'||/фасад|Крышка/i.test(x.name);ok((x.eL||x.eW)?x.eT===(fr?'1':'0.8'):x.eT==='',`кромка детали ${x.name}: ${x.eT}`)});
+  const cl=M.pack(r.parts.filter(x=>x.mat==='ldsp'),S,false),ch=M.pack(r.parts.filter(x=>x.mat==='hdf'),S,true),k=M.costs(p,S,r,cl,ch);
+  const r08=k.rows.find(x=>x[0]==='Кромка ПВХ 0,8 мм'),r1=k.rows.find(x=>x[0]==='Кромка ПВХ 1 мм');
+  ok(r08&&r08[3]===S.p.edge08&&Math.abs(r08[1]-r.edges[0].m)<0.06,'смета: строка кромки 0,8 мм по своей цене');ok(r1&&r1[3]===S.p.edge1,'смета: строка кромки 1 мм по своей цене');
+  ok(!k.rows.some(x=>x[0]==='Кромка ПВХ 2 мм'),'смета: нет лишней кромки 2 мм');
+  const p2=base();p2.mirrors=0;p2.mat.edgeF='2';p2.mat.edgeB='2';const r2=M.calc(p2,S);ok(r2.edges.length===1&&r2.edges[0].id==='2','2 мм везде: одна кромка');eq(r2.edgeM,r.edgeM,'толщина не меняет длину кромки',0.001);
+  const p3=base();p3.mirrors=0;p3.mat.edgeF='0.8';const r3=M.calc(p3,S);ok(r3.edges.length===1&&r3.edges[0].id==='0.8','0,8 мм везде: одна кромка');
+  const p4=base();p4.mirrors=0;p4.mat.front='mdfpvc';const r4=M.calc(p4,S);ok(r4.edges.every(e=>e.id==='0.8'),'фасады МДФ: только кромка корпуса');
+  const pc=base();pc.kind='chest';pc.mat.front='mdfpvc';M.norm(pc);const rc=M.calc(pc,M.effSettings(pc));const top=rc.parts.find(x=>x.name==='Крышка');ok(top&&top.eT==='0.8','комод с МДФ: крышка с кромкой корпуса');
+  const m1=M.norm({...base(),mat:{edge:'mix'}}).mat,m2=M.norm({...base(),mat:{edge:'all2'}}).mat;ok(m1.edgeF==='2'&&m1.edgeB==='0.4'&&m1.edge===undefined,'старый заказ «2 + 0,4» сохранён');ok(m2.edgeF==='2'&&m2.edgeB==='2','старый заказ «2 мм везде» сохранён');
+  ok(M.norm({...base(),mat:{edgeF:1,edgeB:'5'}}).mat.edgeF==='1','кромка числом читается');ok(M.norm({...base(),mat:{edgeF:'1',edgeB:'5'}}).mat.edgeB==='1','неизвестная толщина → 1 мм');const pn={...base()};delete pn.mat;const mn=M.norm(pn).mat;ok(mn.edgeF==='2'&&mn.edgeB==='2','заказ без материалов (ранняя версия): кромка 2 мм как было');ok(M.norm({...base(),mat:{body:'krono16'}}).mat.edgeF==='2','материалы без кромки: 2 мм')}
 
  // ---- присадка: планки на стенке на той же высоте, что чашки на двери
  const nums=s=>(s.match(/-?\d+(?:[.,]\d+)?/g)||[]).map(x=>+x.replace(',','.'));

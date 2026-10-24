@@ -78,6 +78,39 @@ const res=await pg.evaluate(()=>{
    for(let i=1;i<n;i++)eq((r.fr[i-1].x+r.fr[i-1].w+r.fr[i].x)/2,r.xs[i]-t/2,tag+` стык фасадов на перегородке ${i}`);
    eq(r.parts.find(x=>x.name==='Боковина').L+t,H,tag+' боковина под крышкой');
    sanity(r,tag)}
+
+ // ---- задняя стенка: стыки только на перегородках
+ for(const W of [1800,2100,2400,2700,3000,3600])for(const n of [1,2,3,4,5]){const p=base();p.W=W;p.mirrors=0;p.sections=Array.from({length:n},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
+   for(const type of ['swing','coupe']){p.type=type;const r=M.calc(p,S),w=r.wings[0],tag=`задняя ${type} ${W} ${n}с`;if(w.ws.some(x=>x<150))continue;
+     const backs=[];r.parts.filter(x=>x.name==='Задняя стенка').forEach(x=>{for(let i=0;i<x.qty;i++)backs.push(x.Wd)});
+     const plank=r.parts.some(x=>x.name==='Планка под стык ХДФ');
+     ok(backs.every(b=>b<=S.sheetL-2*S.trim),tag+' кусок влезает в лист');
+     if(!plank&&backs.length>1){const raw=r.wings[0];let acc=0;const centers=raw.xs.slice(1).map(x=>x-t/2-2);
+       // восстановим реальные (не округлённые) стыки по порядку
+       ok(Math.abs(backs.reduce((a,b)=>a+b,0)+2*(backs.length-1)-(W-4))<=backs.length,tag+' стенка закрывает всю ширину');
+       let pos=0;const order=r.parts.filter(x=>x.name==='Задняя стенка');
+       ok(backs.length-1<=centers.length,tag+' стыков не больше, чем перегородок')
+       const pcs=w.bk.cutsAt;let q=0;for(let i=0;i<pcs.length-1;i++){q+=pcs[i];const jc=q+1;ok(centers.some(c=>Math.abs(c-jc)<.01),tag+` стык ХДФ №${i+1} на перегородке (${jc.toFixed(1)})`);q+=2}
+       eq(pcs.reduce((a,b)=>a+b,0)+2*(pcs.length-1),W-4,tag+' куски + зазоры = ширина')}
+     if(backs.length===1)eq(backs[0],W-4,tag+' стенка целиком',0.5)}}
+ // ---- петли: накладные на боковинах, полунакладные на перегородках
+ for(const n of [1,2,3,4]){const p=base();p.W=600*n;p.mirrors=0;p.sections=Array.from({length:n},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
+   const r=M.calc(p,S),ds=r.wings[0].doors,hc=h=>h<=1000?2:h<=1500?3:h<=2000?4:5;
+   const over=r.hw.find(h=>h[0].startsWith('Петля накладная'))?.[1]||0,half=r.hw.find(h=>h[0].startsWith('Петля полунакладная'))?.[1]||0;
+   eq(over+half,ds.length*hc(ds[0].h),`петли ${n}с всего`,0);
+   const expOuter=ds.filter(d=>{const bx=d.hinge==='L'?d.x:d.x+d.w;return bx<5||bx>p.W-5}).length*hc(ds[0].h);eq(over,expOuter,`петли ${n}с накладные`,0);
+   if(n>=3)ok(half>0,`петли ${n}с: есть полунакладные`)}
+ // ---- проставки глубиной с направляющую
+ {const p=base();p.sections=[{shelves:1,rod:false,drawers:2,baskets:1},{shelves:3,rod:false,drawers:0,baskets:0}];const r=M.calc(p,S),spc=r.parts.find(x=>x.name.startsWith('Проставка'));
+   eq(spc.L,600,'проставка высота = 3×200');eq(spc.Wd,500,'проставка глубина = направляющая 500')}
+ // ---- верхние кухонные: кромка на нижнем торце боковины
+ {const p=base();p.kind='kitchen';const r=M.calc(p,S);ok(r.parts.some(x=>x.name==='Боковина'&&x.L===720&&x.Wd===300&&x.eW===1),'боковина верхнего модуля с кромкой снизу')}
+ // ---- комод на ножках: общая высота сохраняется
+ for(const legs of [0,100,150])for(const pl of [0,60]){const p=base();p.kind='chest';p.c={W:800,H:850,D:450,plinth:pl,legs,cols:[{type:'drawers',drawers:4,shelves:0},{type:'door',drawers:0,shelves:2}]};
+   const r=M.calc(p,S),tag=`комод ножки${legs} цоколь${pl}`,side=r.parts.find(x=>x.name==='Боковина');
+   eq(side.L+t+legs,850,tag+' высота с ножками');eq(r.fz+(legs?0:pl)+t+3+legs,850,tag+' фасады по высоте');
+   ok(r.hw.some(h=>h[0].startsWith('Эксцентриковая')),tag+' крышка на эксцентриках');
+   if(legs)ok(r.hw.some(h=>h[0].startsWith('Ножка')),tag+' ножки в смете');sanity(r,tag)}
  return{checks,fails};
 });
 console.log('Проверок:',res.checks,'Ошибок:',res.fails.length);[...new Set(res.fails)].slice(0,40).forEach(f=>console.log(' -',f));console.log('js errors',errs);await b.close();})();

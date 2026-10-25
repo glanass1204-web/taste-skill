@@ -214,6 +214,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
 .kp-sheet .kp-draw svg{width:100%;height:auto;max-height:520px;display:block}
 .kp-sheet .kp-draw .sv-ink{stroke:#1D2227}.kp-sheet .kp-draw .sv-txt{fill:#1D2227}.kp-sheet .kp-draw .sv-mut{fill:#5C666E}.kp-sheet .kp-draw .sv-cav{fill:#E2E6E4}
 .kp-sheet ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.kp-sheet .kp-specs{width:100%;border-collapse:collapse;font-size:13px}.kp-sheet .kp-specs td{padding:5px 0;border-bottom:1px solid #E2E6E4;vertical-align:top}.kp-sheet .kp-specs td:first-child{color:#5C666E;width:42%;padding-right:10px}
 .kp-sheet .kp-price{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;background:#1D2227;color:#FFFFFF;border-radius:10px;padding:16px}
 .kp-sheet .kp-price b{font-family:var(--f-display);font-size:28px}
 .kp-sheet .kp-small{font-size:13px;color:#5C666E;display:flex;flex-direction:column;gap:2px}
@@ -628,13 +629,13 @@ const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, т�
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день',warranty:''},
   p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,basket:1900,mirror:3200,tie:30,
-     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
+     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
 const SET_MAT=[['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%'],['fMinArea','Мин. площадь заказного фасада','м²']];
 const SET_PRICE=[['hdf','Лист ХДФ','₽/лист'],['edge04','Кромка ПВХ 0,4 мм','₽/м'],['edge08','Кромка ПВХ 0,8 мм','₽/м'],['edge1','Кромка ПВХ 1 мм','₽/м'],['edge','Кромка ПВХ 2 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
   ['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
   ['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['mirror','Зеркало на фасад','₽/м²'],
   ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeRail','Рельсы купе','₽/м'],
-  ['topEnd','Планка торцевая столешницы','₽/шт'],['topJoint','Планка соединительная столешницы','₽/шт'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['hobCut','Вырез под варочную панель','₽/шт'],['grille','Решётка вентиляционная','₽/шт'],['hinge170','Петля 165–170° для угловых створок','₽/шт'],['hingeFold','Петля для складного фасада','₽/шт'],['plinthCorner','Угловой элемент цоколя','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт'],['hook','Крючок мебельный','₽/шт'],['gaslift','Газлифт','₽/шт'],['golaL','Профиль Gola L','₽/м'],['golaC','Профиль Gola C','₽/м'],['apron','Стеновая панель (фартук)','₽/м²'],['topPlinth','Плинтус для столешницы','₽/м'],['led','Подсветка (лента с профилем)','₽/м'],['ledPsu','Блок питания подсветки','₽/шт']];
+  ['topEnd','Планка торцевая столешницы','₽/шт'],['topJoint','Планка соединительная столешницы','₽/шт'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['hobCut','Вырез под варочную панель','₽/шт'],['grille','Решётка вентиляционная','₽/шт'],['hinge170','Петля 165–170° для угловых створок','₽/шт'],['hingeFold','Петля для складного фасада','₽/шт'],['plinthCorner','Угловой элемент цоколя','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт'],['hook','Крючок мебельный','₽/шт'],['wallFix','Крепление к стене (уголок с дюбелем)','₽/шт'],['gaslift','Газлифт','₽/шт'],['golaL','Профиль Gola L','₽/м'],['golaC','Профиль Gola C','₽/м'],['apron','Стеновая панель (фартук)','₽/м²'],['topPlinth','Плинтус для столешницы','₽/м'],['led','Подсветка (лента с профилем)','₽/м'],['ledPsu','Блок питания подсветки','₽/шт']];
 const SET_WORK=[['work','Сборка и доставка','% от материалов'],['markup','Наценка','%']];
 
 /* ---------- каталог фурнитуры ----------
@@ -957,7 +958,7 @@ function calcWardrobe(p,s){
   if(p.H>s.sheetL-2*s.trim)warn.push(ERR(`Высота ${p.H} мм больше длины листа — боковины не выкроить из одного листа.`));
   if(coupe&&p.D<450)warn.push('Для купе глубина корпуса обычно от 450 мм: 100 мм уходит под двери.');
   // корпус собирают лёжа и поднимают: потолок должен быть выше диагонали боковины
-  const notes=[`Шкаф собирают лёжа и поднимают. Потолок в месте установки должен быть не ниже ${Math.ceil(Math.hypot(p.H,p.D))+10} мм — замерьте до заказа.`];
+  const notes=[`Шкаф собирают лёжа и поднимают. Потолок в месте установки должен быть не ниже ${Math.ceil(Math.hypot(p.H,p.D))+10} мм — замерьте до заказа.`,'Шкаф обязательно крепится к стене двумя уголками — от опрокидывания (в смете есть).'];
   if(corner&&!coupe&&HWp.handle.proj>FILLER-15)warn.push(ERR(`Ручки выступают на ${HWp.handle.proj} мм — в углу двери сторон А и Б заденут ручки друг друга (планка ${FILLER} мм рассчитана на вынос до ${FILLER-15} мм). Выберите ручку с меньшим выносом.`));
   if(corner&&lenB<500)warn.push(ERR(`Сторона Б слишком короткая: корпус выходит ${Math.round(lenB)} мм. Увеличьте ширину стороны Б.`));
   const doorsAll=coupe?wings.flatMap(w=>w.coupeD.items):wings.flatMap(w=>w.doors);
@@ -971,6 +972,8 @@ function calcWardrobe(p,s){
   if(corner)hw.push(['Стяжка межсекционная (соединить стороны)',6,'шт',pr.tie]);
   if(corner&&!coupe)hw.push(['Уголок для доборной планки',8,'шт',pr.bracket]);
   hw.push(['Полкодержатель',sum(w=>w.supports),'шт',pr.support]);
+  // высокий шкаф крепят к стене — от опрокидывания
+  hw.push(['Крепление к стене от опрокидывания (уголок с дюбелем)',2*wings.length,'шт',pr.wallFix]);
   const mirrors=[];
   if(!coupe){
     // петля на боковине — накладная; где на одну перегородку садятся две двери — полунакладная
@@ -1370,6 +1373,7 @@ function calcKitchen(p,s){
   if(k.topPlinth&&k.worktop&&baseLen>0){const ends=corner?(p.walls.A?1:0)+(p.walls.B?1:0):(p.walls.L?1:0)+(p.walls.R?1:0);hw.push(['Плинтус для столешницы (у стен)',+((baseLen+ends*top.D)/1000).toFixed(2),'м',pr.topPlinth])}
   if(k.led){const ledM=mods.filter(x=>['wall','wallB','cWall'].includes(x.zone)&&x.carcass).reduce((a,x)=>a+x.w,0)/1000;if(ledM){hw.push(['Подсветка под верхними шкафами (лента с профилем)',+ledM.toFixed(2),'м',pr.led]);hw.push(['Блок питания подсветки',1,'шт',pr.ledPsu])}}
   if(C.grilles)hw.push(['Решётка вентиляционная (цоколь, крыша пенала)',2*C.grilles,'шт',pr.grille]);
+  const nT=L.sides.reduce((a,sd)=>a+sd.base.filter(o=>isTall(o.m)).length,0);if(nT)hw.push(['Крепление пенала к стене (уголок с дюбелем)',2*nT,'шт',pr.wallFix]);
   if(anyTall)notes.unshift(`Пенал собирают лёжа и поднимают: потолок должен быть не ниже ${Math.ceil(Math.hypot(k.tallH-k.legs,k.baseD))+k.legs+10} мм.`);
   if(k.wallY-(k.legs+k.baseH+tT)<450)warn.push(`Между столешницей и верхними шкафами ${k.wallY-(k.legs+k.baseH+tT)} мм — меньше 450 мм неудобно работать. Поднимите верхние модули.`);
   // длина стороны от угла: по нижнему или верхнему ряду, что длиннее
@@ -1826,7 +1830,11 @@ function calc(p,s){
   r.parts.forEach(x=>{x.eT=x.eL||x.eW||x.eX?edgeItem(fe&&isFrontPart(x)?p.mat.edgeF:p.mat.edgeB).id:''});
   r.edges=EDGES.map(e=>({...e,m:r.parts.filter(x=>x.eT===e.id).reduce((a,x)=>a+em(x),0)})).filter(e=>e.m>0);
   r.edgeM=r.edges.reduce((a,e)=>a+e.m,0);
-  if(HW(p,s).handle.push&&!(p.kind==='kitchen'&&p.k.gola&&false))(r.notes=r.notes||[]).push('Толкатели push-to-open: петли ставьте без доводчика (иначе толкатель не откроет дверь), ящики — на направляющих с открыванием от нажатия.');
+  // вес изделия: ЛДСП ~0,7 кг/м² на 1 мм, ХДФ 3 мм ~2,6 кг/м², фасады на заказ — по весу из настроек, зеркало 4 мм ~10 кг/м²
+  {const fm=frontMat(p,s),kgm=x=>x.mat==='hdf'?2.6:x.mat==='order'?(fm.f.kg||15):0.7*s.t;
+    r.weight=r.parts.reduce((a,x)=>a+x.qty*x.L*x.Wd/1e6*kgm(x),0)+(r.mirrors||[]).reduce((a,m)=>a+m.qty*m.L*m.Wd/1e6*10,0);
+    const big=r.parts.filter(x=>x.mat!=='hdf').reduce((a,x)=>x.L>a.L?x:a,{L:0,Wd:0,name:''});r.maxPart=big}
+  if(HW(p,s).handle.push)(r.notes=r.notes||[]).push('Толкатели push-to-open: петли ставьте без доводчика (иначе толкатель не откроет дверь), ящики — на направляющих с открыванием от нажатия.');
   measChecks(p,s,r);
   return r;
 }
@@ -2145,6 +2153,7 @@ function renderCost(){
   const k=R.cost;
   $('#costTotal').innerHTML=`<small>Цена для клиента${k.disc?` со скидкой ${k.disc}%`:''}</small><b>${rub(k.price)}</b>
     ${k.disc?`<div class="row"><span>Без скидки</span><span class="num">${rub(k.priceFull)}</span></div>`:''}
+    ${R.c.weight?`<div class="row"><span>Вес изделия, примерно</span><span class="num">${fmt(Math.round(R.c.weight))} кг</span></div>`:''}
     ${k.perM?`<div class="row"><span>За погонный метр</span><span class="num">${rub(k.perM)}</span></div>`:''}
     ${k.profit<0?`<div class="row" style="color:var(--warn)"><b>Скидка больше прибыли — продаёте в убыток</b></div>`:''}
     <div class="row"><span>Себестоимость</span><span class="num">${rub(k.self)}</span></div>
@@ -2187,6 +2196,20 @@ function describe(){
 function hwLine(){const H_=HW(P),k=P.kind,coupe=k==='wardrobe'&&P.type==='coupe',r=[];
   if(!coupe)r.push(`петли ${H_.hinge.name}`);if(coupe)r.push(`профиль купе ${H_.coupe.name}`);
   if(R.c.hw.some(h=>h[0].startsWith('Направляющие')))r.push(`направляющие: ${H_.slide.name.toLowerCase()}`);if(!coupe)r.push(`ручки: ${H_.handle.name.toLowerCase()}`);return `Фурнитура: ${r.join(', ')}.`}
+// характеристики изделия для клиента — как в карточке товара
+function specRows(){const p=P,c=R.c,S=R.S,b=matItem('bodies',p.mat.body,S),fm=frontMat(p,S),H_=HW(p,S),rows=[];
+  if(p.kind==='wardrobe')rows.push(['Размеры (Ш × В × Г)',p.shape==='corner'?`${p.W} и ${p.W2} × ${p.H} × ${p.D} мм`:`${p.W} × ${p.H} × ${p.D} мм`]);
+  else if(p.kind==='chest')rows.push(['Размеры (Ш × В × Г)',`${p.c.W} × ${p.c.H} × ${p.c.D} мм`]);
+  else rows.push(['Размеры',c.corner?`сторона А ${Math.round(c.lenA)} мм, сторона Б ${Math.round(c.lenB)} мм`:`длина ${c.allBase} мм`],['Высота столешницы',`${p.k.legs+p.k.baseH+(c.tT||0)} мм от пола`]);
+  rows.push(['Корпус',`${b.name}, «${DECORS[p.decor].name}»`],['Фасады',fm.f.kind==='body'?`ЛДСП ${S.t} мм, как корпус`:fm.f.kind==='sheet'?`ЛДСП ${S.t} мм, «${(DECORS[p.mat.frontDecor]||DECORS.white).name}»`:`${fm.f.name}${/мм/.test(fm.f.name)?'':', '+fm.t+' мм'}`],['Задняя стенка','ХДФ 3 мм'],
+    ['Кромка',`ПВХ ${edgeMM(p.mat.edgeB)} мм на корпусе${fm.edge?`, ${edgeMM(p.mat.edgeF)} мм на фасадах`:''}`]);
+  const coupe=p.kind==='wardrobe'&&p.type==='coupe',gola=p.kind==='kitchen'&&p.k.gola;
+  if(!coupe)rows.push(['Петли',H_.hinge.name+(H_.handle.push?' (под толкатели — без доводчика)':'')]);else rows.push(['Двери',`купе, профиль ${H_.coupe.name}`]);
+  if(!coupe)rows.push(['Открывание',gola?'без ручек, профиль Gola':H_.handle.push?'без ручек, нажатием (push-to-open)':`ручки: ${H_.handle.name.toLowerCase()}`]);
+  if(c.weight)rows.push(['Вес',`около ${fmt(Math.round(c.weight))} кг${p.kind==='kitchen'?' (без техники и столешницы)':''}`]);
+  if(p.kind==='wardrobe'||(p.kind==='kitchen'&&c.mods.some(m=>isTall(m.m))))rows.push(['Крепление к стене','обязательно — от опрокидывания']);
+  if(settings.company.warranty)rows.push(['Гарантия',settings.company.warranty]);
+  return rows}
 function offerText(){const d=describe();
   return [`${P.name}${P.client?' — '+P.client:''}`,d.title+'.',...d.lines,hwLine(),'',`Стоимость с изготовлением, доставкой и сборкой${R.cost.disc?` со скидкой ${R.cost.disc}%`:''}: ${rub(R.cost.price)}.`,R.cost.perM?`Около ${rub(R.cost.perM)} за погонный метр.`:'',settings.company.warranty?`Гарантия: ${settings.company.warranty}.`:'',settings.company.lead?`Срок изготовления: ${settings.company.lead}.`:'',settings.company.phone?`Телефон: ${settings.company.phone}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim()}
 
@@ -2202,6 +2225,7 @@ function renderKp(){
     ${kpShot?`<div class="kp-draw"><img src="${kpShot}" alt="3D-вид изделия" style="width:100%;display:block;border-radius:6px"></div>`:''}
     <div class="kp-draw">${drawDoors}</div>${drawIn?`<div class="kp-draw"><div class="kp-small" style="margin-bottom:6px">Внутреннее наполнение</div>${drawIn}</div>`:''}
     <ul>${[...d.lines,hwLine()].map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
+    <div><div class="kp-small" style="margin-bottom:4px"><b>Характеристики</b></div><table class="kp-specs">${specRows().map(([a,b])=>`<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table></div>
     ${R.cost.disc?`<div class="kp-small"><span>Цена без скидки: ${rub(R.cost.priceFull)}. Скидка ${R.cost.disc}%.</span></div>`:''}
     <div class="kp-price"><span>Стоимость с изготовлением, доставкой и сборкой${R.cost.disc?`, со скидкой ${R.cost.disc}%`:''}</span><b>${rub(R.cost.price)}</b></div>
     <div class="kp-small">${R.cost.perM?`<span>Это около ${rub(R.cost.perM)} за погонный метр.</span>`:''}<span>Как работаем: замер → проект и 3D → договор → изготовление → доставка и сборка.</span><span>Срок изготовления: ${esc(co.lead||'по договорённости')}.</span>${co.warranty?`<span>Гарантия: ${esc(co.warranty)}.</span>`:''}<span>Предоплата 50%, остаток после установки.</span><span>Предложение действительно до ${valid}.</span></div>
@@ -2422,7 +2446,7 @@ window.addEventListener('appinstalled',()=>{installEvt=null;toast('Прилож�
 if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&document.querySelector('link[rel="manifest"]')){
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};
+window.ShkafMaster={__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};
 renderAll();
 })();
 </script>

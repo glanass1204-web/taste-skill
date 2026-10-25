@@ -276,7 +276,9 @@ details.mini-fold[open] summary{margin-bottom:8px}
         <div class="field text"><label for="pClient">Клиент</label><div class="inwrap"><input id="pClient" data-k="client" type="text" autocomplete="off" placeholder="Имя"></div></div>
         <div class="field text"><label for="pPhone">Телефон</label><div class="inwrap"><input id="pPhone" data-k="phone" type="tel" autocomplete="off" placeholder="+7"></div></div>
       </div>
-      <div class="field"><label for="pStatus">Этап заказа</label><div class="inwrap"><select id="pStatus" data-status="1"></select></div></div>
+      <div class="grid2"><div class="field"><label for="pStatus">Этап заказа</label><div class="inwrap"><select id="pStatus" data-status="1"></select></div></div>
+      <div class="field"><label for="pInst">Дата установки</label><div class="inwrap"><input id="pInst" data-inst="1" type="date"></div></div></div>
+      <div class="field"><label for="pPay">Предоплата</label><div class="inwrap"><input id="pPay" data-pay="1" type="number" inputmode="numeric" min="0" placeholder="0"><span>₽</span></div><p class="hint" id="payLeft"></p></div>
       <div class="field text"><label for="pAddr">Адрес</label><div class="inwrap"><input id="pAddr" data-k="address" type="text" autocomplete="off" placeholder="Город, улица, дом"></div></div>
     </details>
 
@@ -622,6 +624,7 @@ details.mini-fold[open] summary{margin-bottom:8px}
     <div class="btns"><button class="btn" type="button" id="newProject">+ Новый заказ</button><button class="btn ghost" type="button" id="dupProject">Копия текущего</button></div>
     <h3 style="margin-top:10px">Мои заказы</h3>
     <p class="hint" id="storageNote"></p>
+    <div id="backupNag"></div>
     <div class="presets" id="stFilter" role="group" aria-label="Этап заказа"></div>
     <div id="projList" style="display:flex;flex-direction:column;gap:8px"></div>
     <h3 style="margin-top:10px">Новый заказ из шаблона</h3>
@@ -661,7 +664,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='22 от 25.10.2026';
+const APP_VER='23 от 25.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -806,7 +809,7 @@ function newProject(){return norm({id:uid(),name:'Новый заказ',client:
   shape:'straight',type:'swing',W:1800,H:2400,D:560,W2:1400,cornerSide:'L',cornerOpen:450,plinth:80,mezz:true,mezzH:450,coupeN:0,decor:'sonoma',mirrors:1,
   sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],mat:{edgeF:'1',edgeB:'0.8'},updated:Date.now()})}
 function norm(p){
-  p.kind=p.kind||'wardrobe';p.address=p.address||'';p.hall=!!p.hall;if(!STATUS_NAME[p.status])p.status='calc';
+  p.kind=p.kind||'wardrobe';p.address=p.address||'';p.hall=!!p.hall;if(!STATUS_NAME[p.status])p.status='calc';p.prepay=Math.max(0,+p.prepay||0);p.installDate=p.installDate||'';
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
@@ -2007,7 +2010,7 @@ function measText(){const m=P.meas,ws=measNum(m.w),hs=measNum(m.h),CH={sockets:'
   return [`Замер: ${P.name}${P.address?' — '+P.address:''}`,ws.length?`${P.kind==='kitchen'?(P.k.shape==='corner'?'Длина стены А':'Длина стены'):'Ширина'}: ${m.w.filter(Boolean).join(' / ')} мм (берём ${Math.min(...ws)})`:'',P.kind==='kitchen'&&P.k.shape==='corner'&&measNum(m.wB).length?`Длина стены Б: ${m.wB.filter(Boolean).join(' / ')} мм (берём ${Math.min(...measNum(m.wB))})`:'',hs.length?`Высота до потолка: ${m.h.filter(Boolean).join(' / ')} мм (берём ${Math.min(...hs)})`:'',
     +m.depth?`Глубина ниши: ${m.depth} мм`:'',+m.bbT||+m.bbH?`Плинтус:${+m.bbH?' высота '+m.bbH+' мм':''}${+m.bbH&&+m.bbT?',':''}${+m.bbT?' толщина '+m.bbT+' мм':''}`:'',Object.keys(CH).filter(k=>m.checks[k]).map(k=>'• '+CH[k]).join('\n'),m.notes?'Заметки: '+m.notes:''].filter(Boolean).join('\n')}
 
-function pack(rects,s,allowRot){
+function packRows(rects,s,allowRot){
   const Ls=s.sheetL-2*s.trim,Ws=s.sheetW-2*s.trim,k=s.kerf;
   const items=[];rects.forEach(r=>{for(let i=0;i<r.qty;i++)items.push({name:r.name,group:r.group,L:r.L,Wd:r.Wd,l:r.L,w:r.Wd})});
   items.forEach(it=>{
@@ -2029,6 +2032,35 @@ function pack(rects,s,allowRot){
   sheets.forEach(sh=>sh.util=sh.parts.reduce((a,p)=>a+p.l*p.w,0)/area);
   return{sheets,over,cutM:ok.reduce((a,p)=>a+p.l+p.w,0)/1000};
 }
+// Раскрой под форматно-раскроечный станок: полосы поперёк листа, в полосе — столбики, в столбике детали одна над другой
+// (три этапа резов). Перебираем полосы вдоль и поперёк листа, разные порядки деталей и два способа подбора места,
+// плюс прежний простой раскрой — берём вариант с наименьшим числом листов. Хуже прежнего быть не может: он тоже в переборе.
+function packStrips(items,Ls,Ws,k,cols,order,best){
+  const A=cols?Ws:Ls,B=cols?Ls:Ws,sheets=[];
+  const its=items.map(it=>({it,a:cols?it.w:it.l,b:cols?it.l:it.w}));
+  its.sort(order===0?(p,q)=>q.b-p.b||q.a-p.a:order===1?(p,q)=>q.a-p.a||q.b-p.b:(p,q)=>q.a*q.b-p.a*p.b||q.b-p.b);
+  const put=(sh,x,y,o)=>sh.parts.push({...o.it,x:cols?y:x,y:cols?x:y});
+  for(const o of its){let pick=null;
+    for(const sh of sheets){
+      for(const st of sh.strips){if(o.b>st.h)continue;
+        for(const sl of st.slots)if(o.a<=sl.w&&sl.used+o.b<=st.h){const sc=(sl.w-o.a)+(st.h-sl.used-o.b)*0.001;if(!pick||sc<pick.sc)pick={sc,f:()=>{put(sh,sl.a0,st.b0+sl.used,o);sl.used+=o.b+k}};if(!best)break}
+        if(pick&&!best)break;
+        if(st.aUsed+o.a<=A){const sc=1e6+(st.h-o.b);if(!pick||sc<pick.sc)pick={sc,f:()=>{put(sh,st.aUsed,st.b0,o);st.slots.push({a0:st.aUsed,w:o.a,used:o.b+k});st.aUsed+=o.a+k}};if(!best)break}}
+      if(pick&&!best)break;
+      if(sh.bUsed+o.b<=B){const sc=2e6+(B-sh.bUsed-o.b)*0.001;if(!pick||sc<pick.sc)pick={sc,f:()=>{put(sh,0,sh.bUsed,o);sh.strips.push({b0:sh.bUsed,h:o.b,aUsed:o.a+k,slots:[{a0:0,w:o.a,used:o.b+k}]});sh.bUsed+=o.b+k}};if(!best)break}}
+    if(pick)pick.f();else{const sh={strips:[],bUsed:0,parts:[]};sheets.push(sh);put(sh,0,0,o);sh.strips.push({b0:0,h:o.b,aUsed:o.a+k,slots:[{a0:0,w:o.a,used:o.b+k}]});sh.bUsed=o.b+k}}
+  return sheets}
+function pack(rects,s,allowRot){
+  const base=packRows(rects,s,allowRot),Ls=s.sheetL-2*s.trim,Ws=s.sheetW-2*s.trim,k=s.kerf;
+  const ok=base.sheets.flatMap(sh=>sh.parts.map(p=>({name:p.name,group:p.group,L:p.L,Wd:p.Wd,l:p.l,w:p.w})));
+  if(ok.length<2)return base;
+  const area=s.sheetL*s.sheetW,last=sh=>sh.length?sh[sh.length-1].parts.reduce((a,p)=>a+p.l*p.w,0):0;
+  let win=base.sheets;
+  for(const cols of [false,true])for(const order of [0,1,2])for(const best of [false,true]){
+    const r=packStrips(ok,Ls,Ws,k,cols,order,best);
+    if(r.length<win.length||(r.length===win.length&&last(r)<last(win)-1))win=r}
+  win.forEach(sh=>{sh.util=sh.parts.reduce((a,p)=>a+p.l*p.w,0)/area});
+  return{sheets:win,over:base.over,cutM:base.cutM}}
 function costs(p,s,c,cl,ch,cf){
   const b=matItem('bodies',p.mat.body,s),fm=frontMat(p,s),orders=c.parts.filter(x=>x.mat==='order');
   const minA=s.fMinArea||0,oArea=orders.reduce((a,x)=>a+x.qty*Math.max(x.L*x.Wd/1e6,minA),0);
@@ -2125,7 +2157,11 @@ function renderBuild(){
 function renderOrderSum(){
   const sel=$('#pStatus');if(sel.options.length!==STATUS.length)sel.innerHTML=STATUS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
   if(document.activeElement!==sel)sel.value=P.status;
-  $('#orderSum').innerHTML=`<span class="st st-${P.status}">${STATUS_NAME[P.status]}</span>`+esc([P.client,P.phone].filter(Boolean).join(' · ')||'клиент не указан')}
+  const pay=$('#pPay'),inst=$('#pInst');if(document.activeElement!==pay)pay.value=P.prepay||'';if(document.activeElement!==inst)inst.value=P.installDate||'';
+  const left=R&&R.cost?Math.max(0,R.cost.price-P.prepay):0;
+  $('#payLeft').textContent=P.prepay?(P.prepay>R.cost.price?`Предоплата больше цены заказа (${rub(R.cost.price)}) — проверьте сумму.`:`Остаток к оплате: ${rub(left)}`):'';
+  $('#orderSum').innerHTML=`<span class="st st-${P.status}">${STATUS_NAME[P.status]}</span>`+esc([P.client,P.phone,P.installDate?'установка '+dateRu(P.installDate):'',P.prepay&&P.status!=='done'?'остаток '+rub(left):''].filter(Boolean).join(' · ')||'клиент не указан')}
+const dateRu=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||'');return m?`${m[3]}.${m[2]}.${m[1]}`:''};
 function renderMat(){
   const m=P.mat,k=P.kind,f=matItem('fronts',m.front),b=matItem('bodies',m.body),top=matItem('tops',m.top);
   const fill=(id,list,val,lab)=>{$(id).innerHTML=list.map(x=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(lab?lab(x):x.name)}</option>`).join('')};
@@ -2368,6 +2404,7 @@ function renderKp(){
     <div><div class="kp-small" style="margin-bottom:4px"><b>Характеристики</b></div><table class="kp-specs">${specRows().map(([a,b])=>`<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table></div>
     ${R.cost.disc?`<div class="kp-small"><span>Цена без скидки: ${rub(R.cost.priceFull)}. Скидка ${R.cost.disc}%.</span></div>`:''}
     <div class="kp-price"><span>Стоимость с изготовлением, доставкой и сборкой${R.cost.disc?`, со скидкой ${R.cost.disc}%`:''}</span><b>${rub(R.cost.price)}</b></div>
+    ${P.prepay?`<div class="kp-small"><span>Внесена предоплата: ${rub(P.prepay)}. Остаток к оплате: ${rub(Math.max(0,R.cost.price-P.prepay))}.</span></div>`:''}
     <div class="kp-small">${R.cost.perM?`<span>Это около ${rub(R.cost.perM)} за погонный метр.</span>`:''}<span>Как работаем: замер → проект и 3D → договор → изготовление → доставка и сборка.</span><span>Срок изготовления: ${esc(co.lead||'по договорённости')}.</span>${co.warranty?`<span>Гарантия: ${esc(co.warranty)}.</span>`:''}<span>Предоплата 50%, остаток после установки.</span><span>Предложение действительно до ${valid}.</span></div>
     <div class="kp-sign"><span>Исполнитель: ____________</span><span>Заказчик: ____________</span></div>`;
   $('#kpPrint').hidden=inFrame;$('#kpShare').hidden=inFrame||!navigator.share;
@@ -2418,15 +2455,17 @@ function builtinTemplates(){const t=[],mk=(name,f)=>{const p=newProject();f(p);t
   Object.entries(PRESETS).forEach(([k,v])=>mk(v.name,p=>{p.kind='chest';const c=clone(v);delete c.name;p.c=c}));
   return t}
 const allTemplates=()=>[...builtinTemplates(),...(settings.templates||[])];
-function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',status:'calc',updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
+function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',status:'calc',prepay:0,installDate:'',updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
 function renderProjects(){
   $('#storageNote').textContent=storageOk?'Заказы сохраняются на этом телефоне. Делайте резервную копию в настройках.':'Сохранение недоступно в этом окне. Скопируйте заказ, чтобы не потерять расчёт.';
   const meta=p=>p.kind==='kitchen'?(p.k.shape==='corner'?`кухня угловая · А ${p.k.base.reduce((a,m)=>a+m.w,0)+p.k.cBaseW} · Б ${p.k.baseB.reduce((a,m)=>a+m.w,0)} мм`:`кухня · ${p.k.base.reduce((a,m)=>a+m.w,0)} мм`):p.kind==='chest'?`комод, тумба · ${p.c.W}×${p.c.H}×${p.c.D}`:`${p.shape==='corner'?`${p.W}×${p.W2}`:p.W}×${p.H}×${p.D} · ${p.shape==='corner'?'угловой, ':''}${p.type==='coupe'?'купе':'распашной'}`;
   $('#tplList').innerHTML=allTemplates().map(t=>`<div class="proj"><div class="meta"><b>${esc(t.name)}</b><span>${t.builtin?'встроенный':'мой шаблон'} · ${kindName(t.data)}</span></div><button class="btn ghost" type="button" data-tpl="${t.id}">Создать</button>${t.builtin?'':`<button class="btn ghost" type="button" data-deltpl="${t.id}" aria-label="Удалить шаблон">✕</button>`}</div>`).join('');
   const cnt=st=>projects.filter(p=>!st||p.status===st).length;if(stFilter&&!cnt(stFilter))stFilter='';
+  {const lb=settings.lastBackup||0,days=Math.floor((Date.now()-lb)/864e5);
+   $('#backupNag').innerHTML=storageOk&&projects.length>=3&&(!lb||days>=7)?`<div class="alert"><b>${lb?`Резервной копии не было ${plural(days,'день','дня','дней')}`:'Резервной копии ещё не было'}.</b><span>Заказы хранятся только на этом телефоне. Если очистить браузер или сменить телефон — они пропадут.</span><div class="btns" style="margin-top:6px"><button class="btn" type="button" data-backupnow="1">Сохранить копию сейчас</button></div></div>`:''}
   $('#stFilter').innerHTML=[['','Все'],...STATUS].filter(([k])=>!k||cnt(k)).map(([k,l])=>`<button class="chip" type="button" data-stf="${k}" aria-pressed="${stFilter===k}">${l} <span class="num">${cnt(k)}</span></button>`).join('');
   $('#projList').innerHTML=[...projects].filter(p=>!stFilter||p.status===stFilter).sort((a,b)=>b.updated-a.updated).map(p=>`<div class="proj${p.id===curId?' cur':''}">
-    <div class="meta"><b>${esc(p.name||'Без названия')}</b><span class="num">${meta(p)}${p.client?' · '+esc(p.client):''}</span><span class="st st-${p.status}">${STATUS_NAME[p.status]}</span></div>
+    <div class="meta"><b>${esc(p.name||'Без названия')}</b><span class="num">${meta(p)}${p.client?' · '+esc(p.client):''}</span><span class="st st-${p.status}">${STATUS_NAME[p.status]}</span>${p.installDate&&p.status!=='done'?`<span class="num"> · установка ${dateRu(p.installDate)}</span>`:''}${p.prepay&&p.status!=='done'?`<span class="num"> · предоплата ${rub(p.prepay)}</span>`:''}</div>
     ${p.id===curId?'<span class="hint">открыт</span>':`<button class="btn ghost" type="button" data-open="${p.id}">Открыть</button>`}
     <button class="btn ghost" type="button" data-del="${p.id}" aria-label="Удалить">✕</button></div>`).join('');
 }
@@ -2474,6 +2513,8 @@ document.addEventListener('input',e=>{
   if(d.mw){const [z,i]=d.mw.split(':'),v=num(el);if(inLim(v,[100,1500])){P.k[z][+i].w=v;activeSec=d.mw;change()}return}
   if(d.mnum){const [z,i,f]=d.mnum.split(':'),v=num(el);if(inLim(v,MNUM[f])){P.k[z][+i][f]=v;activeSec=z+':'+i;change()}return}
   if(d.co){settings.company[d.co]=el.value;save();return}
+  if(d.pay){const v=el.value===''?0:Math.round(+el.value);if(v>=0&&Number.isFinite(v)){P.prepay=v;renderOrderSum();save()}return}
+  if(d.inst){P.installDate=el.value;renderOrderSum();save();return}
   if(d.disc){const v=el.value===''?0:Math.round(+el.value);if(v>=0&&v<=50){P.discount=v;change()}return}
   if(d.matnote){P.mat.frontNote=el.value;change();return}
   if(d.meas){const [k,i]=d.meas.split(':'),v=el.value.replace(/[^0-9]/g,'');if(i!==undefined)P.meas[k][+i]=v;else P.meas[k]=v;change();return}
@@ -2570,8 +2611,9 @@ document.addEventListener('click',e=>{
   if(b.id==='kpCopy'){copy(offerText(),$('#offerText'),'Текст скопирован');return}
   if(b.id==='kpPrint'){try{window.print()}catch(e){}return}
   if(b.id==='kpShare'){navigator.share({title:describe().title,text:offerText()}).catch(()=>{});return}
-  if(b.id==='dlBackup'){download('shkaf-master-kopiya-'+new Date().toISOString().slice(0,10)+'.json',backupJSON(),'application/json');return}
-  if(b.id==='copyBackup'){copy(backupJSON(),$('#backupText'),'Копия скопирована');return}
+  if(d.backupnow){settings.lastBackup=Date.now();save();download('shkaf-master-kopiya-'+new Date().toISOString().slice(0,10)+'.json',backupJSON(),'application/json');renderProjects();return}
+  if(b.id==='dlBackup'){settings.lastBackup=Date.now();save();download('shkaf-master-kopiya-'+new Date().toISOString().slice(0,10)+'.json',backupJSON(),'application/json');return}
+  if(b.id==='copyBackup'){settings.lastBackup=Date.now();save();copy(backupJSON(),$('#backupText'),'Копия скопирована');return}
   if(b.id==='restoreText'){const v=$('#backupText').value.trim();if(v)restore(v);else toast('Вставьте текст копии в поле');return}
   if(b.id==='installBtn'&&installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;renderSettings()});return}
   if(b.id==='resetSet'){if(d.armed){const co=settings.company;const tpl=settings.templates;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.templates=tpl;settings.cat=catMerge(null);settings.mat=matMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
@@ -2579,7 +2621,7 @@ document.addEventListener('click',e=>{
   if(b.id==='openProjects'){renderProjects();$('#projOverlay').hidden=false;return}
   if(d.stf!==undefined){stFilter=d.stf;renderProjects();return}
   if(b.id==='closeProjects'){$('#projOverlay').hidden=true;return}
-  if(b.id==='newProject'||b.id==='dupProject'){const np=b.id==='newProject'?newProject():Object.assign(clone(P),{id:uid(),name:(P.name||'Заказ')+' (копия)',status:'calc'});
+  if(b.id==='newProject'||b.id==='dupProject'){const np=b.id==='newProject'?newProject():Object.assign(clone(P),{id:uid(),name:(P.name||'Заказ')+' (копия)',status:'calc',prepay:0,installDate:''});
     if(b.id==='newProject')np.kind=P.kind;projects.push(np);P=np;curId=np.id;activeSec='';$('#projOverlay').hidden=true;change();openTab('build');toast('Заказ создан');return}
   if(d.tpl){const tp=allTemplates().find(x=>x.id===d.tpl);if(!tp)return;const np=fromTemplate(tp);projects.push(np);P=np;curId=np.id;activeSec='';$('#projOverlay').hidden=true;change();openTab('build');toast('Заказ создан из шаблона');return}
   if(b.id==='tplSave'){const nm=($('#tplName').value||'').trim()||P.name||'Мой шаблон',data=clone(P);data.meas=null;settings.templates=settings.templates||[];settings.templates.push({id:'u_'+uid(),name:nm,data});$('#tplName').value='';save();renderProjects();toast('Шаблон сохранён');return}

@@ -393,6 +393,22 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
       <label class="switch"><input type="checkbox" data-kchk="topPlinth"> Плинтус для столешницы</label>
       <label class="switch"><input type="checkbox" data-kchk="led"> Подсветка под верхними шкафами</label>
       <p class="hint" id="kSummary"></p>
+      <details class="cornerbox" id="kAutoBox">
+        <summary><b>Собрать кухню под размер</b> <span class="hint">— длина, класс и техника, остальное программа разложит сама</span></summary>
+        <div class="grid3">
+          <div class="field"><label for="kaLA" id="kaLAl">Длина кухни</label><div class="inwrap"><input id="kaLA" type="number" inputmode="numeric"><span>мм</span></div></div>
+          <div class="field" id="kaLBF"><label for="kaLB">Сторона Б</label><div class="inwrap"><input id="kaLB" type="number" inputmode="numeric"><span>мм</span></div></div>
+          <div class="field"><label for="kaCls">Класс</label><div class="inwrap"><select id="kaCls"><option value="">Оставить фурнитуру и фасады</option><option value="econ">Эконом: ЛДСП, КДМ, шариковые</option><option value="mid">Средний: МДФ ПВХ, Boyard</option><option value="prem">Премиум: эмаль, Blum</option></select></div></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label for="kaDw">Посудомойка</label><div class="inwrap"><select id="kaDw"><option value="">Нет</option><option value="450">45 см</option><option value="600" selected>60 см</option></select></div></div>
+          <div class="field"><label for="kaOv">Духовка</label><div class="inwrap"><select id="kaOv"><option value="">Нет</option><option value="under" selected>Под варочной панелью</option><option value="tall">В пенале с СВЧ</option></select></div></div>
+        </div>
+        <label class="switch"><input type="checkbox" id="kaHob" checked> Варочная панель и вытяжка</label>
+        <label class="switch"><input type="checkbox" id="kaFr"> Холодильник в пенале</label>
+        <div class="btns"><button class="btn" type="button" id="kaGo">Собрать</button></div>
+        <p class="hint" id="kaMsg">Программа подберёт порядок модулей без ошибок: мойка, посудомойка рядом, панель с вытяжкой, остальное — модули до 600 мм ровно в размер. Текущие модули заменятся.</p>
+      </details>
     </div>
 
     <!-- комод / тумба -->
@@ -497,6 +513,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     <h2>Смета</h2>
     <div id="costErr"></div>
     <div class="total" id="costTotal"></div>
+    <div class="field" style="max-width:220px"><label for="pDisc">Скидка клиенту</label><div class="inwrap"><input id="pDisc" data-disc="1" type="number" inputmode="numeric" min="0" max="50" placeholder="0"><span>%</span></div></div>
     <div class="card app-card">
       <h3>Коммерческое предложение</h3>
       <p class="hint">Красивый лист для клиента: чертёж, описание, цена и ваши контакты.</p>
@@ -530,6 +547,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
         <div class="field text"><label for="coPhone">Телефон</label><div class="inwrap"><input id="coPhone" data-co="phone" type="tel" autocomplete="off" placeholder="+7"></div></div>
         <div class="field text"><label for="coCity">Город</label><div class="inwrap"><input id="coCity" data-co="city" type="text" autocomplete="off"></div></div>
         <div class="field text"><label for="coLead">Срок изготовления</label><div class="inwrap"><input id="coLead" data-co="lead" type="text" autocomplete="off"></div></div>
+        <div class="field text"><label for="coWar">Гарантия</label><div class="inwrap"><input id="coWar" data-co="warranty" type="text" autocomplete="off" placeholder="Например, 2 года на корпус и фурнитуру"></div></div>
       </div>
     </div>
     <div class="card"><h3>Материал и раскрой</h3><div class="grid2" id="setMat"></div>
@@ -608,7 +626,7 @@ const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','�
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
-  company:{name:'',phone:'',city:'',lead:'14–21 рабочий день'},
+  company:{name:'',phone:'',city:'',lead:'14–21 рабочий день',warranty:''},
   p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,basket:1900,mirror:3200,tie:30,
      coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
 const SET_MAT=[['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%'],['fMinArea','Мин. площадь заказного фасада','м²']];
@@ -675,6 +693,10 @@ const MATERIALS={
     {id:'mdfgloss',kind:'order',name:'МДФ эмаль глянец',t:19,price:14000,kg:16,src:'Заказ в цех по м². Эмаль глянцевая гладкая 16/19 мм — 14 000 ₽/м² (fasadneva.ru).'},
     {id:'mdf22',kind:'order',name:'МДФ эмаль матовая 22 мм',t:22,price:11500,kg:19,src:'Заказ в цех по м². Эмаль матовая 22 мм — 11 500 ₽/м² (fasadneva.ru). Вес 22 мм — около 18–19 кг/м².'},
     {id:'plastic',kind:'order',name:'Пластик (AGT, HPL) на МДФ',t:18,price:7500,kg:15,src:'Заказ в цех по м². Цена примерная.'},
+    {id:'agt',kind:'order',name:'AGT суперматовый на МДФ 18 мм',t:18,price:6700,kg:14,src:'Заказ в цех по м². AGT 18 мм — 5 900–7 200 ₽/м² в зависимости от декора (akam-hpl.ru). Вес МДФ 18 мм — около 14 кг/м².'},
+    {id:'fenix',kind:'order',name:'Fenix NTM (пластик) на МДФ',t:19,price:17140,kg:15,src:'Заказ в цех по м². Fenix — около 17 000 ₽/м² (intalika.ru, Fenix 0029). Матовый, не оставляет отпечатков.'},
+    {id:'arpa',kind:'order',name:'HPL-пластик Arpa на МДФ',t:19,price:12000,kg:15,src:'Заказ в цех по м². По примерам цехов — 10 000–14 500 ₽/м². Цена примерная — поставьте цену вашего цеха.'},
+    {id:'veneer',kind:'order',name:'Шпон натуральный под лаком',t:19,price:9000,kg:15,src:'Заказ в цех по м². Шпон под лаком — от 9 000 ₽/м² (amurles.ru); тонировка и редкие породы дороже.'},
     {id:'custom',kind:'order',name:'Свои фасады на заказ',t:19,price:9000,kg:16,custom:true,src:'Впишите толщину, цену за м² и вес по данным вашего цеха.'}],
   tops:[
     {id:'pf26',name:'Постформинг 26 мм, длина 3050',t:26,D:600,maxL:3050,price:2500,planks:true,src:'Стандарт: глубина 600 мм, длина 3050 или 4200 мм, толщина 26 или 38 мм. Цена примерная.'},
@@ -1356,6 +1378,49 @@ function calcKitchen(p,s){
     mods,L,corner,lenA:corner?sideLen2(L.sides[0]):allBase,lenB:corner?sideLen2(L.sides[1]):0,topA,topB};
 }
 
+// Быстро собрать кухню под длину стены: техника по выбору, остальное — модули до 600 мм, точно в размер.
+const K_CLASS={econ:{name:'Эконом',hinge:'kdm',slide:'ball',front:'body',top:'pf38'},mid:{name:'Средний',hinge:'boyard',slide:'boyard',front:'mdfpvc',top:'pf38l'},prem:{name:'Премиум',hinge:'blum',slide:'blum',front:'mdfmat',top:'egger38'}};
+function kFill(R,startDrawers){if(R<=0)return[];const n=Math.max(1,Math.ceil(R/600)),w=Math.floor(R/n),out=[];
+  for(let i=0;i<n;i++){const wi=i===n-1?R-w*(n-1):w;out.push((i+(startDrawers?0:1))%2===0&&wi>=300?km('drawers',wi,0,3):km('doors',wi,1))}return out}
+function kWallFor(base){return base.filter(m=>!isTall(m)).map(m=>m.type==='sink'?km(m.w<=900?'drying':'doors',m.w,2):m.hob?km('hood',m.w,0):km('doors',m.w,2))}
+function kAuto(o){const p=clone(P),k=p.k,cls=K_CLASS[o.cls];
+  if(cls){p.hw.hinge=cls.hinge;p.hw.slide=cls.slide;p.mat.front=cls.front;p.mat.top=cls.top}
+  const S=effSettings(p),fT=frontMat(p,S).t,corner=k.shape==='corner',D=k.baseD,Dw=k.wallD;
+  const hobM=()=>Object.assign(km(o.oven==='under'?'oven':'drawers',600,0,3),o.hob?{hob:'i60'}:{});
+  const sink=()=>km('sink',600,0),dw=()=>o.dw?km('dw',+o.dw):null,fr=()=>o.fridge?km('fridge',600,1):null,ov=()=>o.oven==='tall'?Object.assign(km('tallOven',600,1),{top2:'mw'}):null;
+  // меньше ошибок — лучше; посудомойка рядом с мойкой — удобнее (шланги и загрузка посуды)
+  const score=q=>{M_norm(q);const r=calc(q,effSettings(q)),sk=r.mods.find(m=>m.type==='sink'),dm=r.mods.find(m=>m.type==='dw');
+    const far=sk&&dm&&!(sk.side===dm.side&&(Math.abs(sk.x+sk.w-dm.x)<1||Math.abs(dm.x+dm.w-sk.x)<1));return r.warn.filter(w=>w.lvl==='err').length*100+r.warn.length+(far?5:0)};
+  const M_norm=q=>norm(q);
+  let best=null;
+  const tryIt=q=>{const sc=score(q);if(!best||sc<best.sc)best={q:clone(q),sc}};
+  if(!corner){const fixed=[fr(),sink(),dw(),(o.hob||o.oven==='under')?hobM():null,ov()].filter(Boolean),sum=fixed.reduce((a,m)=>a+m.w,0);let R=o.LA-sum;
+    if(R<0)return{err:`Не помещается: выбранная техника и мойка занимают ${sum} мм, а длина ${o.LA} мм.`};
+    // остаток меньше 150 мм: мойку сужаем (до 500), чтобы остался узкий модуль 150 мм — иначе панель окажется у края столешницы
+    const s0=fixed.find(m=>m.type==='sink');if(R>0&&R<150){if(o.hob&&s0.w-(150-R)>=500){s0.w-=150-R;R=150}else{s0.w+=R;R=0}}
+    const f=kFill(R,true),F_=x=>x.filter(Boolean);
+    const hb=fixed.find(m=>m.hob||m.type==='oven');
+    const orders=[F_([fr(),s0,dw(),hb,...f,ov()]),F_([fr(),...f.slice(0,1),s0,dw(),hb,...f.slice(1),ov()]),F_([fr(),hb,...f,dw(),s0,ov()]),F_([fr(),...f,hb,dw(),s0,ov()]),F_([fr(),s0,dw(),...f.slice(0,1),hb,...f.slice(1),ov()]),F_([fr(),s0,hb,dw(),...f,ov()]),F_([fr(),dw(),s0,hb,...f,ov()])];
+    orders.forEach(b=>{const q=clone(p);q.k.base=clone(b);q.k.wall=kWallFor(b);tryIt(q)})}
+  else{const AL=k.cornerSide!=='R',blkB=D+2+fT;k.cBase='blind';k.cBaseW=Math.max(k.cBaseW||1100,D+fT+FILLER+6+300);k.cWall='blind';k.cWallW=Math.min(Math.max(800,Dw+fT+FILLER+6+250),Dw+fT+FILLER+6+600);
+    const RA0=o.LA-k.cBaseW,RB0=o.LB-blkB;
+    const fixA=[sink(),dw(),(o.hob||o.oven==='under')?hobM():null].filter(Boolean),endA=fr(),endB=ov(),b1=km('doors',600,1);
+    const sA=fixA.reduce((a,m)=>a+m.w,0)+(endA?600:0),sB=600+(endB?600:0);
+    if(RA0<sA)return{err:`Сторона А не помещается: нужно от ${k.cBaseW+sA} мм (угловой модуль ${k.cBaseW} + мойка и техника).`};
+    if(RB0<sB)return{err:`Сторона Б не помещается: нужно от ${blkB+sB} мм.`};
+    let RA=RA0-sA,RB=RB0-sB;const s0=fixA[0];if(RA>0&&RA<150){if(o.hob&&s0.w-(150-RA)>=500){s0.w-=150-RA;RA=150}else{s0.w+=RA;RA=0}}if(RB>0&&RB<150){b1.w+=RB;RB=0}
+    const fA=kFill(RA,true),fB=kFill(RB,true);
+    const hb=fixA.find(m=>m.hob||m.type==='oven'),F_=x=>x.filter(Boolean),dwm=fixA.find(m=>m.type==='dw');
+    // от угла наружу
+    const outA=[F_([s0,dwm,hb,...fA,endA]),F_([...fA.slice(0,1),s0,dwm,hb,...fA.slice(1),endA]),F_([hb,...fA,dwm,s0,endA]),F_([s0,dwm,...fA.slice(0,1),hb,...fA.slice(1),endA])];
+    const outB=F_([b1,...fB,endB]);
+    const vis=(a,isA)=>(isA?AL:!AL)?a:[...a].reverse();
+    // верхний ряд: у стороны А сначала добор до ширины углового низа, у стороны Б — у угла два модуля поровну
+    const wallA=a=>{const w=kWallFor(a),ex=k.cBaseW-k.cWallW;return ex>=150?[km('doors',ex,2),...w]:w};
+    const wallB=b=>{const w=kWallFor(b),chunk=(blkB-(Dw+2+fT))+w[0].w,h1=Math.floor(chunk/2);return[km('doors',h1,2),km('doors',chunk-h1,2),...w.slice(1)]};
+    outA.forEach(a=>{const q=clone(p);Object.assign(q.k,{base:vis(clone(a),true),wall:vis(wallA(clone(a)),true),baseB:vis(clone(outB),false),wallB:vis(wallB(clone(outB)),false)});tryIt(q)})}
+  return{p:best.q,sc:best.sc}}
+
 function drawKitchenSide(p,s,r,sd){
   const k=p.k,dec=DECORS[p.decor].fill,fdec=frontFill(p),tT=r.tT||0,fT=r.L.fT,t=s.t,ms=r.mods.filter(m=>m.side===sd.key);
   const W=Math.max(sd.len,600),Ht=Math.max(k.tallH,k.wallY+k.wallH,k.legs+k.baseH+tT);
@@ -1843,8 +1908,11 @@ function costs(p,s,c,cl,ch,cf){
     ...c.hw];
   const mat=rows.reduce((a,r)=>a+r[1]*r[3],0);
   const work=mat*s.work/100,self=mat+work;
-  const price=Math.ceil(self*(1+s.markup/100)/100)*100;
-  return{rows,mat,work,self,price,profit:price-self,oArea};
+  const priceFull=Math.ceil(self*(1+s.markup/100)/100)*100,disc=Math.min(50,Math.max(0,+p.discount||0));
+  const price=disc?Math.ceil(priceFull*(1-disc/100)/100)*100:priceFull;
+  // погонный метр кухни — по длине нижнего ряда (в угловой — обе стороны)
+  const run=p.kind==='kitchen'?(c.corner?c.lenA+c.lenB:c.allBase):0;
+  return{rows,mat,work,self,price,priceFull,disc,profit:price-self,oArea,perM:run?Math.round(price/(run/1000)):0};
 }function drawSheet(sh,s){
   const fs=46;let g=`<rect x="0" y="0" width="${s.sheetL}" height="${s.sheetW}" class="sv-cav"/>`;
   sh.parts.forEach(p=>{const x=p.x+s.trim,y=p.y+s.trim;
@@ -1998,6 +2066,8 @@ function renderKitchenUI(c){
     ${type==='none'?'':`<div class="grid2">${numF(`kcw-${key}`,`data-kk="${isB?'cBaseW':'cWallW'}"`,isB?k.cBaseW:k.cWallW,'По стороне А')}${type==='L'?numF(`kcw2-${key}`,`data-kk="${isB?'cBaseW2':'cWallW2'}"`,isB?k.cBaseW2:k.cWallW2,'По стороне Б'):''}</div>`}
     <p class="hint">${type==='blind'?`Глухая часть уходит за сторону Б, рядом — доборная планка ${FILLER} мм, чтобы фасады и ручки двух сторон не бились. Модуль стороны Б у угла — с дверцами, у него тоже планка.`:type==='L'?'Два корпуса в одном: дно и крыша Г-образные, две створки на складных петлях.':'Верхних шкафов на стороне Б быть не должно.'}</p></div>`};
   const grp=(t,zone)=>`<h3 class="sec-group">${t}</h3>`+(k[zone].map((m,i)=>card(zone,m,i)).join('')||'<p class="hint">Модулей нет.</p>');
+  {const ws=measNum(P.meas.w),wb=measNum(P.meas.wB||[]);$('#kaLBF').hidden=!corner;$('#kaLAl').textContent=corner?'Сторона А от угла':'Длина кухни';
+    if(document.activeElement!==$('#kaLA')&&!$('#kaLA').dataset.touched)$('#kaLA').value=ws.length?Math.min(...ws)-10:Math.round(c.lenA);if(document.activeElement!==$('#kaLB')&&!$('#kaLB').dataset.touched)$('#kaLB').value=wb.length?Math.min(...wb)-10:Math.round(c.lenB||0)}
   $('#kAddB').hidden=!corner;$('#kCs').value=k.cornerSide;$('#kCsF').hidden=!corner;
   // пока работник набирает число в карточке, карточки не перерисовываем — иначе поле теряет фокус и цифры пропадают
   const ae=document.activeElement;if(ae&&ae.tagName==='INPUT'&&$('#sections').contains(ae))return;
@@ -2073,7 +2143,10 @@ function renderCut(){
 }
 function renderCost(){
   const k=R.cost;
-  $('#costTotal').innerHTML=`<small>Цена для клиента</small><b>${rub(k.price)}</b>
+  $('#costTotal').innerHTML=`<small>Цена для клиента${k.disc?` со скидкой ${k.disc}%`:''}</small><b>${rub(k.price)}</b>
+    ${k.disc?`<div class="row"><span>Без скидки</span><span class="num">${rub(k.priceFull)}</span></div>`:''}
+    ${k.perM?`<div class="row"><span>За погонный метр</span><span class="num">${rub(k.perM)}</span></div>`:''}
+    ${k.profit<0?`<div class="row" style="color:var(--warn)"><b>Скидка больше прибыли — продаёте в убыток</b></div>`:''}
     <div class="row"><span>Себестоимость</span><span class="num">${rub(k.self)}</span></div>
     <div class="row"><span>Ваша прибыль</span><span class="num">${rub(k.profit)}</span></div>`;
   $('#costTable').innerHTML=`<h3>Материалы и фурнитура</h3><div class="tbl-wrap"><table><thead><tr><th>Позиция</th><th class="r">Кол-во</th><th class="r">Цена</th><th class="r">Сумма</th></tr></thead><tbody>
@@ -2082,6 +2155,7 @@ function renderCost(){
     <tr><td>Сборка и доставка, ${settings.work}%</td><td></td><td></td><td class="r num">${fmt(k.work)}</td></tr>
     <tr><td>Наценка, ${settings.markup}%</td><td></td><td></td><td class="r num">${fmt(k.profit)}</td></tr>
     </tbody></table></div>`;
+  if(document.activeElement!==$('#pDisc'))$('#pDisc').value=P.discount||'';
   $('#offerText').value=offerText();
 }
 
@@ -2114,7 +2188,7 @@ function hwLine(){const H_=HW(P),k=P.kind,coupe=k==='wardrobe'&&P.type==='coupe'
   if(!coupe)r.push(`петли ${H_.hinge.name}`);if(coupe)r.push(`профиль купе ${H_.coupe.name}`);
   if(R.c.hw.some(h=>h[0].startsWith('Направляющие')))r.push(`направляющие: ${H_.slide.name.toLowerCase()}`);if(!coupe)r.push(`ручки: ${H_.handle.name.toLowerCase()}`);return `Фурнитура: ${r.join(', ')}.`}
 function offerText(){const d=describe();
-  return [`${P.name}${P.client?' — '+P.client:''}`,d.title+'.',...d.lines,hwLine(),'',`Стоимость с изготовлением, доставкой и сборкой: ${rub(R.cost.price)}.`,settings.company.lead?`Срок изготовления: ${settings.company.lead}.`:'',settings.company.phone?`Телефон: ${settings.company.phone}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim()}
+  return [`${P.name}${P.client?' — '+P.client:''}`,d.title+'.',...d.lines,hwLine(),'',`Стоимость с изготовлением, доставкой и сборкой${R.cost.disc?` со скидкой ${R.cost.disc}%`:''}: ${rub(R.cost.price)}.`,R.cost.perM?`Около ${rub(R.cost.perM)} за погонный метр.`:'',settings.company.warranty?`Гарантия: ${settings.company.warranty}.`:'',settings.company.lead?`Срок изготовления: ${settings.company.lead}.`:'',settings.company.phone?`Телефон: ${settings.company.phone}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim()}
 
 let kpShot=null;
 function renderKp(){
@@ -2128,8 +2202,9 @@ function renderKp(){
     ${kpShot?`<div class="kp-draw"><img src="${kpShot}" alt="3D-вид изделия" style="width:100%;display:block;border-radius:6px"></div>`:''}
     <div class="kp-draw">${drawDoors}</div>${drawIn?`<div class="kp-draw"><div class="kp-small" style="margin-bottom:6px">Внутреннее наполнение</div>${drawIn}</div>`:''}
     <ul>${[...d.lines,hwLine()].map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
-    <div class="kp-price"><span>Стоимость с изготовлением, доставкой и сборкой</span><b>${rub(R.cost.price)}</b></div>
-    <div class="kp-small"><span>Срок изготовления: ${esc(co.lead||'по договорённости')}.</span><span>Предоплата 50%, остаток после установки.</span><span>Предложение действительно до ${valid}.</span></div>
+    ${R.cost.disc?`<div class="kp-small"><span>Цена без скидки: ${rub(R.cost.priceFull)}. Скидка ${R.cost.disc}%.</span></div>`:''}
+    <div class="kp-price"><span>Стоимость с изготовлением, доставкой и сборкой${R.cost.disc?`, со скидкой ${R.cost.disc}%`:''}</span><b>${rub(R.cost.price)}</b></div>
+    <div class="kp-small">${R.cost.perM?`<span>Это около ${rub(R.cost.perM)} за погонный метр.</span>`:''}<span>Как работаем: замер → проект и 3D → договор → изготовление → доставка и сборка.</span><span>Срок изготовления: ${esc(co.lead||'по договорённости')}.</span>${co.warranty?`<span>Гарантия: ${esc(co.warranty)}.</span>`:''}<span>Предоплата 50%, остаток после установки.</span><span>Предложение действительно до ${valid}.</span></div>
     <div class="kp-sign"><span>Исполнитель: ____________</span><span>Заказчик: ____________</span></div>`;
   $('#kpPrint').hidden=inFrame;$('#kpShare').hidden=inFrame||!navigator.share;
 }
@@ -2231,6 +2306,7 @@ document.addEventListener('input',e=>{
   if(d.mw){const [z,i]=d.mw.split(':'),v=num(el);if(inLim(v,[100,1500])){P.k[z][+i].w=v;activeSec=d.mw;change()}return}
   if(d.mnum){const [z,i,f]=d.mnum.split(':'),v=num(el);if(inLim(v,MNUM[f])){P.k[z][+i][f]=v;activeSec=z+':'+i;change()}return}
   if(d.co){settings.company[d.co]=el.value;save();return}
+  if(d.disc){const v=el.value===''?0:Math.round(+el.value);if(v>=0&&v<=50){P.discount=v;change()}return}
   if(d.matnote){P.mat.frontNote=el.value;change();return}
   if(d.meas){const [k,i]=d.meas.split(':'),v=el.value.replace(/[^0-9]/g,'');if(i!==undefined)P.meas[k][+i]=v;else P.meas[k]=v;change();return}
   if(d.measnote){P.meas.notes=el.value;save();return}
@@ -2248,6 +2324,7 @@ document.addEventListener('change',e=>{
   else if(el.id==='showDoors'){showDoors=el.checked;renderBuild()}
   else if(el.id==='sGrain'){settings.grain=el.checked;change()}
   else if(el.id==='kTop'){P.k.worktop=el.checked;change()}
+  else if(el.id==='kaLA'||el.id==='kaLB'){el.dataset.touched=1}
   else if(d.kchk){P.k[d.kchk]=el.checked;change()}
   else if(d.ksel){P.k[d.ksel]=el.value;activeSec='';change()}
   else if(d.mopt){const [z,i,f]=d.mopt.split(':');P.k[z][+i][f]=el.value;activeSec=z+':'+i;change()}
@@ -2291,6 +2368,11 @@ document.addEventListener('click',e=>{
   if(d.cstep){const [i,k,dd]=d.cstep.split(':');const cl=P.c.cols[+i];cl[k]=Math.min(k==='drawers'?8:8,Math.max(k==='drawers'?1:0,cl[k]+ +dd));activeSec='C:'+i;change();return}
   if(d.mmove){const [z,i,dd]=d.mmove.split(':'),a=P.k[z],j=+i+ +dd;if(j<0||j>=a.length)return;[a[+i],a[j]]=[a[j],a[+i]];activeSec=z+':'+j;change();return}
   if(d.mdel){const [z,i]=d.mdel.split(':');if(z==='base'&&P.k.base.length<=1){toast('Нужен хотя бы один нижний модуль');return}P.k[z].splice(+i,1);activeSec='';change();toast('Модуль удалён');return}
+  if(b.id==='kaGo'){if(!d.armed){d.armed=1;b.textContent='Модули заменятся — нажмите ещё раз';return}delete d.armed;b.textContent='Собрать';
+    const o={LA:Math.round(+$('#kaLA').value),LB:Math.round(+$('#kaLB').value),cls:$('#kaCls').value,dw:$('#kaDw').value,oven:$('#kaOv').value,hob:$('#kaHob').checked,fridge:$('#kaFr').checked};
+    if(!(o.LA>=1000&&o.LA<=8000)||(P.k.shape==='corner'&&!(o.LB>=1000&&o.LB<=8000))){toast('Введите длину от 1000 до 8000 мм');return}
+    const res=kAuto(o);if(res.err){$('#kaMsg').textContent=res.err;toast('Не помещается');return}
+    P.k=res.p.k;P.hw=res.p.hw;P.mat=res.p.mat;activeSec='';change();$('#kaMsg').textContent=res.sc>=100?'Собрано, но есть ошибки — посмотрите список ниже и поправьте.':'Собрано без ошибок. Модули можно править ниже.';toast('Кухня собрана');return}
   if(d.kshape){P.k.shape=d.kshape;activeSec='';change();return}
   if(d.kadd){const a=d.kadd,z=a==='wall'||a==='wallB'?a:a.endsWith('B')?'baseB':'base',m=a.startsWith('tall')?km('tall',600,4):z.startsWith('wall')?km('doors',600,2):km('doors',600,1);P.k[z].push(m);activeSec=z+':'+(P.k[z].length-1);change();focusCard('mod-'+activeSec.replace(':','-'));return}
   if(d.preset){const pr=clone(PRESETS[d.preset]);if(/^Новый|^Пример/.test(P.name)||!P.name)P.name=pr.name;delete pr.name;P.c=pr;activeSec='';change();return}
@@ -2340,7 +2422,7 @@ window.addEventListener('appinstalled',()=>{installEvt=null;toast('Прилож�
 if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&document.querySelector('link[rel="manifest"]')){
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};
+window.ShkafMaster={kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};
 renderAll();
 })();
 </script>

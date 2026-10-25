@@ -695,7 +695,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='24 от 25.10.2026';
+const APP_VER='25 от 25.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -2128,20 +2128,42 @@ function packRows(rects,s,allowRot){
 // Раскрой под форматно-раскроечный станок: полосы поперёк листа, в полосе — столбики, в столбике детали одна над другой
 // (три этапа резов). Перебираем полосы вдоль и поперёк листа, разные порядки деталей и два способа подбора места,
 // плюс прежний простой раскрой — берём вариант с наименьшим числом листов. Хуже прежнего быть не может: он тоже в переборе.
-function packStrips(items,Ls,Ws,k,cols,order,best){
+function packStrips(items,Ls,Ws,k,cols,order,best,rot,flip){
+  // rot — детали можно поворачивать (нет текстуры): на каждом месте пробуем деталь и вдоль, и поперёк
   const A=cols?Ws:Ls,B=cols?Ls:Ws,sheets=[];
   const its=items.map(it=>({it,a:cols?it.w:it.l,b:cols?it.l:it.w}));
   its.sort(order===0?(p,q)=>q.b-p.b||q.a-p.a:order===1?(p,q)=>q.a-p.a||q.b-p.b:(p,q)=>q.a*q.b-p.a*p.b||q.b-p.b);
-  const put=(sh,x,y,o)=>sh.parts.push({...o.it,x:cols?y:x,y:cols?x:y});
-  for(const o of its){let pick=null;
+  const put=(sh,x,y,o,a,b)=>sh.parts.push({...o.it,l:cols?b:a,w:cols?a:b,x:cols?y:x,y:cols?x:y});
+  for(const o of its){let pick=null;const dims=rot&&o.a!==o.b?(flip?[[o.b,o.a],[o.a,o.b]]:[[o.a,o.b],[o.b,o.a]]):[[o.a,o.b]];
+    const offer=(sc,f)=>{if(!pick||sc<pick.sc)pick={sc,f}};
     for(const sh of sheets){
-      for(const st of sh.strips){if(o.b>st.h)continue;
-        for(const sl of st.slots)if(o.a<=sl.w&&sl.used+o.b<=st.h){const sc=(sl.w-o.a)+(st.h-sl.used-o.b)*0.001;if(!pick||sc<pick.sc)pick={sc,f:()=>{put(sh,sl.a0,st.b0+sl.used,o);sl.used+=o.b+k}};if(!best)break}
+      for(const st of sh.strips){
+        for(const sl of st.slots)for(const [a,b] of dims)if(a<=sl.w&&sl.used+b<=st.h)offer((sl.w-a)+(st.h-sl.used-b)*0.001,()=>{put(sh,sl.a0,st.b0+sl.used,o,a,b);sl.used+=b+k});
         if(pick&&!best)break;
-        if(st.aUsed+o.a<=A){const sc=1e6+(st.h-o.b);if(!pick||sc<pick.sc)pick={sc,f:()=>{put(sh,st.aUsed,st.b0,o);st.slots.push({a0:st.aUsed,w:o.a,used:o.b+k});st.aUsed+=o.a+k}};if(!best)break}}
+        for(const [a,b] of dims)if(b<=st.h&&st.aUsed+a<=A)offer(1e6+(st.h-b)+a*1e-6,()=>{put(sh,st.aUsed,st.b0,o,a,b);st.slots.push({a0:st.aUsed,w:a,used:b+k});st.aUsed+=a+k});
+        if(pick&&!best)break}
       if(pick&&!best)break;
-      if(sh.bUsed+o.b<=B){const sc=2e6+(B-sh.bUsed-o.b)*0.001;if(!pick||sc<pick.sc)pick={sc,f:()=>{put(sh,0,sh.bUsed,o);sh.strips.push({b0:sh.bUsed,h:o.b,aUsed:o.a+k,slots:[{a0:0,w:o.a,used:o.b+k}]});sh.bUsed+=o.b+k}};if(!best)break}}
-    if(pick)pick.f();else{const sh={strips:[],bUsed:0,parts:[]};sheets.push(sh);put(sh,0,0,o);sh.strips.push({b0:0,h:o.b,aUsed:o.a+k,slots:[{a0:0,w:o.a,used:o.b+k}]});sh.bUsed=o.b+k}}
+      for(const [a,b] of dims)if(a<=A&&sh.bUsed+b<=B)offer(2e6+(B-sh.bUsed-b)*0.001,()=>{put(sh,0,sh.bUsed,o,a,b);sh.strips.push({b0:sh.bUsed,h:b,aUsed:a+k,slots:[{a0:0,w:a,used:b+k}]});sh.bUsed+=b+k});
+      if(pick&&!best)break}
+    if(pick)pick.f();else{const [a,b]=dims.find(([a,b])=>a<=A&&b<=B)||dims[0];const sh={strips:[],bUsed:0,parts:[]};sheets.push(sh);put(sh,0,0,o,a,b);sh.strips.push({b0:0,h:b,aUsed:a+k,slots:[{a0:0,w:a,used:b+k}]});sh.bUsed=b+k}}
+  return sheets}
+// Раскрой «свободными кусками»: после каждой детали остаток куска режется сквозным резом на два куска (как режет пила),
+// следующая деталь идёт в кусок, где после неё остаётся меньше всего обрезков. order — порядок деталей, fit — как выбирать кусок,
+// split — какой рез делать первым, rot — можно ли поворачивать деталь.
+function packGuillo(items,Ls,Ws,k,order,fit,split,rot){
+  const key=[o=>o.w*1e5+o.l,o=>o.l*1e5+o.w,o=>o.l*o.w,o=>o.l+o.w][order];const its=items.slice().sort((p,q)=>key(q)-key(p)),sheets=[];
+  const place=(sh,F,l,w,o)=>{sh.parts.push({...o,l,w,x:F.x,y:F.y});sh.free.splice(sh.free.indexOf(F),1);
+    const rw=F.w-l-k,bh=F.h-w-k,horiz=split===0?(F.w-l)<(F.h-w):(F.w-l)>=(F.h-w);
+    const add=r=>{if(r.w>0&&r.h>0)sh.free.push(r)};
+    if(horiz){add({x:F.x,y:F.y+w+k,w:F.w,h:bh});add({x:F.x+l+k,y:F.y,w:rw,h:w})}
+    else{add({x:F.x+l+k,y:F.y,w:rw,h:F.h});add({x:F.x,y:F.y+w+k,w:l,h:bh})}};
+  for(const o of its){let best=null;const dims=rot&&o.l!==o.w?[[o.l,o.w],[o.w,o.l]]:[[o.l,o.w]];
+    for(const sh of sheets){for(const F of sh.free)for(const [l,w] of dims)if(l<=F.w&&w<=F.h){
+        const sc=fit===0?(F.w*F.h-l*w)*1e3+Math.min(F.w-l,F.h-w):Math.min(F.w-l,F.h-w)*1e7+Math.max(F.w-l,F.h-w);
+        if(!best||sc<best.sc)best={sc,sh,F,l,w}}
+      if(best)break}
+    if(best)place(best.sh,best.F,best.l,best.w,o);
+    else{const [l,w]=dims.find(([l,w])=>l<=Ls&&w<=Ws)||dims[0],sh={parts:[],free:[{x:0,y:0,w:Ls,h:Ws}]};sheets.push(sh);place(sh,sh.free[0],l,w,o)}}
   return sheets}
 function pack(rects,s,allowRot){
   const base=packRows(rects,s,allowRot),Ls=s.sheetL-2*s.trim,Ws=s.sheetW-2*s.trim,k=s.kerf;
@@ -2149,8 +2171,12 @@ function pack(rects,s,allowRot){
   if(ok.length<2)return base;
   const area=s.sheetL*s.sheetW,last=sh=>sh.length?sh[sh.length-1].parts.reduce((a,p)=>a+p.l*p.w,0):0;
   let win=base.sheets;
-  for(const cols of [false,true])for(const order of [0,1,2])for(const best of [false,true]){
-    const r=packStrips(ok,Ls,Ws,k,cols,order,best);
+  for(const cols of [false,true])for(const order of [0,1,2])for(const best of [false,true])for(const rot of allowRot?[0,1,2]:[0]){
+    // 0 — без поворотов, 1 — поворот где выгодно, 2 — то же, но сначала пробуем деталь повёрнутой (так большая стенка встаёт поперёк)
+    const r=packStrips(ok,Ls,Ws,k,cols,order,best,rot>0,rot===2);
+    if(r.length<win.length||(r.length===win.length&&last(r)<last(win)-1))win=r}
+  for(const order of [0,1,2,3])for(const fit of [0,1])for(const split of [0,1])for(const rot of allowRot?[false,true]:[false]){
+    const r=packGuillo(ok,Ls,Ws,k,order,fit,split,rot);
     if(r.length<win.length||(r.length===win.length&&last(r)<last(win)-1))win=r}
   win.forEach(sh=>{sh.util=sh.parts.reduce((a,p)=>a+p.l*p.w,0)/area});
   return{sheets:win,over:base.over,cutM:base.cutM}}

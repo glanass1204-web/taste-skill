@@ -212,6 +212,16 @@ details.mini-fold[open] summary{margin-bottom:8px}
 .sumstrip i{font-style:normal;font-size:12px;color:var(--muted);font-weight:500}
 .sumstrip button{cursor:pointer}
 .sumstrip button:active,.kind-seg button:active,nav.tabs button:active{transform:scale(.97)}
+.try-cta{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;border:0;border-radius:var(--r);background:var(--accent-soft);color:var(--ink);padding:12px 14px;text-align:left}
+.try-cta svg{width:30px;height:30px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+.try-cta span{display:flex;flex-direction:column;gap:2px;min-width:0}.try-cta b{font-size:15px}.try-cta small{font-size:12.5px;color:var(--muted)}
+.try-box{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.try-stage{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:var(--r);overflow:hidden;background:var(--cavity)}
+#tryPhoto{display:block;width:100%;height:auto;pointer-events:none}
+#tryFurn{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none}
+#tryLines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.try-h{position:absolute;left:0;top:0;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;touch-action:none;cursor:grab}
+.try-h::after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--accent);border:3px solid #FFFFFF;box-shadow:0 1px 5px rgb(0 0 0 / .55)}
 .mark{width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;flex:none}
 .mark svg{width:21px;height:21px;fill:none;stroke:var(--accent-ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .presets{display:flex;gap:8px;flex-wrap:wrap}
@@ -454,6 +464,7 @@ details.mini-fold[open] summary{margin-bottom:8px}
         <div class="btns" style="margin-top:8px"><button class="chip" type="button" id="v3open">Открыть двери и ящики</button><button class="chip" type="button" id="v3asm">Собрать на глазах</button><button class="chip" type="button" id="v3spin">Обойти вокруг</button><button class="chip" type="button" id="v3reset">Сбросить вид</button></div>
         <p class="hint" id="v3msg"></p>
       </div>
+      <button class="try-cta" type="button" id="openTry"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span><b>Примерить на фото комнаты</b><small>Сфотографируйте место — изделие встанет на фото в нужном цвете</small></span></button>
     </div>
     <div class="sumstrip" id="sumStrip"></div>
     <div id="buildAlerts"></div>
@@ -645,6 +656,26 @@ details.mini-fold[open] summary{margin-bottom:8px}
   <div id="kpErr" style="max-width:760px;margin:0 auto 12px"></div>
   <article class="kp-sheet" id="kpSheet"></article>
 </div>
+<div class="kp-wrap" id="tryWrap" hidden>
+  <div class="kp-tools">
+    <button class="btn ghost" type="button" id="closeTry">← Назад</button>
+    <div class="btns"><button class="btn" type="button" id="tryShare" hidden>Отправить</button><button class="btn ghost" type="button" id="trySave" hidden>Сохранить картинку</button></div>
+  </div>
+  <div class="try-box">
+    <h2>Примерка на фото</h2>
+    <p class="hint" id="tryHint">Сфотографируйте место, где будет стоять изделие. Отойдите подальше, чтобы в кадр попали пол и потолок.</p>
+    <div class="try-stage" id="tryStage" hidden><img id="tryPhoto" alt="Фото комнаты"><img id="tryFurn" alt=""><svg id="tryLines" aria-hidden="true"></svg>
+      <div class="try-h" data-th="0" aria-label="Левый верхний угол"></div><div class="try-h" data-th="1" aria-label="Правый верхний угол"></div><div class="try-h" data-th="2" aria-label="Правый нижний угол"></div><div class="try-h" data-th="3" aria-label="Левый нижний угол"></div></div>
+    <div class="btns"><label class="btn" for="tryCam" style="cursor:pointer">Сфотографировать</label><input id="tryCam" type="file" accept="image/*" capture="environment" hidden>
+      <label class="btn ghost" for="tryFile" style="cursor:pointer">Выбрать из галереи</label><input id="tryFile" type="file" accept="image/*" hidden></div>
+    <div id="tryThumbsBox" hidden><p class="hint">Или фото с замера:</p><div class="photos" id="tryThumbs"></div></div>
+    <div id="tryCtl" hidden style="display:flex;flex-direction:column;gap:10px">
+      <div class="field"><label for="tryOp">Прозрачность изделия — чтобы сверить с местом</label><input type="range" id="tryOp" min="35" max="100" step="5" value="100"></div>
+      <div class="btns"><button class="chip" type="button" id="tryReset">Поставить заново</button></div>
+      <label class="switch"><input type="checkbox" id="tryKp" checked> Добавить картинку в коммерческое предложение</label>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -664,7 +695,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='23 от 25.10.2026';
+const APP_VER='24 от 25.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -809,7 +840,7 @@ function newProject(){return norm({id:uid(),name:'Новый заказ',client:
   shape:'straight',type:'swing',W:1800,H:2400,D:560,W2:1400,cornerSide:'L',cornerOpen:450,plinth:80,mezz:true,mezzH:450,coupeN:0,decor:'sonoma',mirrors:1,
   sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],mat:{edgeF:'1',edgeB:'0.8'},updated:Date.now()})}
 function norm(p){
-  p.kind=p.kind||'wardrobe';p.address=p.address||'';p.hall=!!p.hall;if(!STATUS_NAME[p.status])p.status='calc';p.prepay=Math.max(0,+p.prepay||0);p.installDate=p.installDate||'';
+  p.kind=p.kind||'wardrobe';p.address=p.address||'';p.hall=!!p.hall;if(!STATUS_NAME[p.status])p.status='calc';p.prepay=Math.max(0,+p.prepay||0);p.tryon=p.tryon&&p.tryon.photo?p.tryon:null;p.installDate=p.installDate||'';
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
@@ -1762,8 +1793,14 @@ function secLayout(p,s,w,i){const sc=w.sections[i],t=s.t,zT=w.zTop,zB=w.zBot;
   const low=hookY!==null?hookY-250:seatY!==null?seatY:dTop;
   const span=low-shTop,shelves=[];for(let j=0;j<sc.shelves;j++){const y=sc.rod?shTop+span*j/sc.shelves:shTop+span*(j+1)/(sc.shelves+1)-t/2;shelves.push(Math.min(y,zB-t))}
   return{drawers,baskets,shelves,rodY,seatY,hookY,shoes}}
+// ручка в 3D: планка на двух ножках (или кнопка), по выносу из каталога; ext — к какой двери или ящику прикреплена
+function handle3D(A,hd,cx,cy,z,vertical,ext){if(!hd||!hd.proj)return;const th=12,zb=z+Math.max(0,hd.proj-th);
+  if(!hd.cc){A(cx-11,cy-11,z,22,22,hd.proj,'metal',ext);return}
+  const L=Math.max(hd.len||0,hd.cc+20);
+  if(vertical){A(cx-th/2,cy-L/2,zb,th,L,th,'metal',ext);[-1,1].forEach(k=>A(cx-4,cy+k*hd.cc/2-4,z,8,8,zb-z,'metal',ext))}
+  else{A(cx-L/2,cy-th/2,zb,L,th,th,'metal',ext);[-1,1].forEach(k=>A(cx+k*hd.cc/2-4,cy-4,z,8,8,zb-z,'metal',ext))}}
 function itemAdder(it){let did=0;const A=(x,y,z,w,h,d,m,e)=>{if(w>0&&h>0&&d>0)it.push(Object.assign({x,y,z,w,h,d,m},e||{}))};A.door=()=>++did;return A}
-function scene3dWardrobe(p,s,c){const t=s.t,H=p.H,D=p.D,pl=Math.max(0,p.plinth),fT=frontMat(p,s).t,groups=[];
+function scene3dWardrobe(p,s,c){const HD=HW(p,s).handle,t=s.t,H=p.H,D=p.D,pl=Math.max(0,p.plinth),fT=frontMat(p,s).t,groups=[];
   c.wings.forEach(w=>{const it=[],A=itemAdder(it),W=w.W,pD=w.partD,shD=w.shelfD,sp=w.sp||0;
     A(0,0,0,t,H,D,'body');A(W-t,0,0,t,H,D,'body');A(t,H-t,0,W-2*t,t,D,'body');A(t,pl,0,W-2*t,t,D,'body');
     if(pl>0)A(t,0,D-t-20,W-2*t,pl,t,'body');
@@ -1779,7 +1816,7 @@ function scene3dWardrobe(p,s,c){const t=s.t,H=p.H,D=p.D,pl=Math.max(0,p.plinth),
       L.baskets.forEach(b=>A(x0+sp+13,H-b.y-b.h,0,cw-2*sp-26,b.h,shD-20,'wire',{drawer:1}));
       if(L.rodY!==null){const pu=w.pull.find(x=>x.i===i);if(!w.rodPull)A(x0+10,H-L.rodY-8,shD/2-8,cw-20,16,16,'metal',{cyl:1});else if(pu)for(let q=0;q<pu.q;q++)A(x0+cw*(q+.5)/pu.q-8,H-L.rodY-8,Math.max(0,shD-10-pu.L),16,16,pu.L,'metal')}});
     if(!c.coupe){w.doors.forEach(d=>{const id=A.door(),door={id,hx:d.hinge==='L'?d.x:d.x+d.w,dir:d.hinge==='L'?-1:1,z:D+1};
-        A(d.x,pl+2,D+1,d.w,d.h,fT,'front',{door});if(d.mirror)A(d.x+50,pl+52,D+1+fT,d.w-100,d.h-100,2,'mirror',{door})});
+        A(d.x,pl+2,D+1,d.w,d.h,fT,'front',{door});handle3D(A,HD,d.hinge==='L'?d.x+d.w-50:d.x+50,pl+2+d.h*0.5,D+1+fT,true,{door});if(d.mirror)A(d.x+50,pl+52,D+1+fT,d.w-100,d.h-100,2,'mirror',{door})});
       if(w.blk.planka){const bx=w.blk.side==='L'?w.blk.w-FILLER:W-w.blk.w;A(bx,pl+2,D+1,FILLER,H-pl-4,fT,'front')}}
     else w.coupeD.items.forEach(d=>{const z=D-24-(d.track?0:30),secs=d.secs||[{mat:d.mirror?'mirror':'ldsp',h:d.h}];let top=pl+t+20+d.h;secs.forEach(sc=>{top-=sc.h;A(d.x,top,z,d.w,sc.h,22,sc.mat!=='ldsp'?'mirror':'front',{coupe:1})})});
     let rot=0,pos=[0,0,0];
@@ -1787,7 +1824,7 @@ function scene3dWardrobe(p,s,c){const t=s.t,H=p.H,D=p.D,pl=Math.max(0,p.plinth),
     groups.push({items:it,rot,pos})});
   const walls=[{x:0,z:0,len:p.W,rot:0}];if(c.corner)walls.push(p.cornerSide==='L'?{x:0,z:0,len:p.W2,rot:-Math.PI/2}:{x:p.W,z:0,len:p.W2,rot:-Math.PI/2,right:true});
   return{groups,walls}}
-function scene3dKitchen(p,s,c){const k=p.k,t=s.t,fT=frontMat(p,s).t,tT=c.tT||0,top=c.top,L=c.L,groups=[];
+function scene3dKitchen(p,s,c){const HD=HW(p,s).handle,k=p.k,t=s.t,fT=frontMat(p,s).t,tT=c.tT||0,top=c.top,L=c.L,groups=[];
   L.sides.forEach(sd=>{const it=[],A=itemAdder(it);
     c.mods.filter(m=>m.side===sd.key).forEach(mod=>{const x=mod.x,w=mod.w,h=mod.h,d=mod.d,y0=mod.y0,iw=w-2*t,isWall=mod.zone.startsWith('wall')||mod.zone==='cWall',tall=isTall(mod.m);
       if(mod.corner&&mod.corner.type==='L'){const WA=mod.corner.WA,WB=mod.corner.WB,AL=mod.corner.AL,x0=AL?x:x+w,sx=AL?1:-1,X=(a,ww)=>AL?x0+a:x0-a-ww;
@@ -1811,9 +1848,10 @@ function scene3dKitchen(p,s,c){const k=p.k,t=s.t,fT=frontMat(p,s).t,tT=c.tT||0,t
       if(mod.panelL)A(x-t,0,0,t,k.legs+k.baseH,d,'body');if(mod.panelR)A(x+w,0,0,t,k.legs+k.baseH,d,'body');
       mod.boxes.forEach(b=>A(x+t+13,y0+b.y,20,iw-26,b.h,d-60,'box',{drawer:1}));
       mod.fronts.forEach(f=>{const fx=x+f.x;
-        if(f.kind==='door'){const id=A.door();A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{door:{id,hx:f.hinge==='L'?fx:fx+f.w,dir:f.hinge==='L'?-1:1,z:d+1}})}
-        else if(f.kind==='drawer')A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{drawer:1});
-        else if(f.kind==='lift')A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{lift:{hy:y0+f.y+f.h,z:d+1}});
+        if(f.kind==='door'){const id=A.door(),door={id,hx:f.hinge==='L'?fx:fx+f.w,dir:f.hinge==='L'?-1:1,z:d+1};A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{door});
+          if(!f.noHandle){const hl=Math.max(HD.len||0,(HD.cc||0)+20);handle3D(A,HD,f.hinge==='L'?fx+f.w-40:fx+40,isWall?y0+f.y+130:y0+f.y+f.h-f.h*0.08-Math.min(hl,f.h*0.5)/2,d+1+fT,true,{door})}}
+        else if(f.kind==='drawer'){A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{drawer:1});if(!f.noHandle)handle3D(A,HD,fx+f.w/2,y0+f.y+f.h-Math.min(40,f.h*.25),d+1+fT,false,{drawer:1})}
+        else if(f.kind==='lift'){const lift={id:A.door(),hy:y0+f.y+f.h,z:d+1};A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{lift});if(!f.noHandle)handle3D(A,HD,fx+f.w/2,y0+f.y+Math.min(40,f.h*.2),d+1+fT,false,{lift})}
         else A(fx,y0+f.y,d+1,f.w,f.h,fT,'front')});
       mod.appl.forEach(a=>{
         if(a.kind==='dw')A(x+3,k.legs+10,10,w-6,h-14,d-20,'appliance');
@@ -1831,16 +1869,16 @@ function scene3dKitchen(p,s,c){const k=p.k,t=s.t,fT=frontMat(p,s).t,tT=c.tT||0,t
   if(c.corner){const B=L.sides[1];walls.push(L.AL?{x:0,z:0,len:B.len,rot:-Math.PI/2}:{x:A.cx,z:0,len:B.len,rot:-Math.PI/2,right:true})}
   return{groups,walls}}
 
-function scene3dChest(p,s,c){const cc=p.c,t=s.t,W=cc.W,Hb=c.Hb,lg=c.legs,pl=lg?0:Math.max(0,cc.plinth),D=cc.D,fT=frontMat(p,s).t,it=[],A=itemAdder(it),yb=lg;
+function scene3dChest(p,s,c){const HD=HW(p,s).handle,cc=p.c,t=s.t,W=cc.W,Hb=c.Hb,lg=c.legs,pl=lg?0:Math.max(0,cc.plinth),D=cc.D,fT=frontMat(p,s).t,it=[],A=itemAdder(it),yb=lg;
   A(0,yb+Hb-t,0,W,t,D,'body');A(0,yb,0,t,Hb-t,D,'body');A(W-t,yb,0,t,Hb-t,D,'body');A(t,yb+pl,0,W-2*t,t,D,'body');
   if(pl)A(t,yb,D-t-20,W-2*t,pl,t,'body');
   if(lg)[[30,30],[W-60,30],[30,D-60],[W-60,D-60]].forEach(([lx,lz])=>A(lx,0,lz,30,lg,30,'metal'));
   A(2,yb+pl,-3,W-4,Hb-t-pl-2,3,'back');
   for(let i=1;i<cc.cols.length;i++)A(c.xs[i]-t,yb+pl+t,0,t,Hb-2*t-pl,D,'body');
   cc.cols.forEach((cl,i)=>{const fr=c.fr[i],fz=c.fz,y0=yb+pl,x0=c.xs[i],cw=c.colWs[i];
-    if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(fz-3*(m-1))/m;for(let j=0;j<m;j++){const yT=y0+fz-j*(fh+3);A(x0+13,yT-fh+25,20,cw-26,Math.max(60,fh-60),D-60,'box',{drawer:1});A(fr.x,yT-fh,D+1,fr.w,fh,fT,'front',{drawer:1})}}
+    if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(fz-3*(m-1))/m;for(let j=0;j<m;j++){const yT=y0+fz-j*(fh+3);A(x0+13,yT-fh+25,20,cw-26,Math.max(60,fh-60),D-60,'box',{drawer:1});A(fr.x,yT-fh,D+1,fr.w,fh,fT,'front',{drawer:1});handle3D(A,HD,fr.x+fr.w/2,yT-fh/2,D+1+fT,false,{drawer:1})}}
     else{for(let j=0;j<cl.shelves;j++)A(x0,y0+t+(Hb-pl-2*t)*(j+1)/(cl.shelves+1),0,cw,t,D-20,'body');
-      if(cl.type==='door'){const nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),id=A.door();A(dx,y0,D+1,dw,fz,fT,'front',{door:{id,hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1}})}}}});
+      if(cl.type==='door'){const nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),id=A.door();const door={id,hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1};A(dx,y0,D+1,dw,fz,fT,'front',{door});handle3D(A,HD,hg==='L'?dx+dw-40:dx+40,y0+fz-fz*.15-Math.min(140,fz*.3)/2,D+1+fT,true,{door})}}}});
   return{groups:[{items:it,rot:0,pos:[0,0,0]}],walls:[{x:0,z:0,len:W,rot:0}]}}
 function scene3dData(){return P.kind==='kitchen'?scene3dKitchen(P,R.S,R.c):P.kind==='chest'?scene3dChest(P,R.S,R.c):scene3dWardrobe(P,R.S,R.c)}
 
@@ -1857,7 +1895,7 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
     :m==='back'?new THREE.MeshStandardMaterial({color:'#E7E3DC',roughness:.9}):m==='metal'?new THREE.MeshStandardMaterial({color:'#A7ADB3',roughness:.35,metalness:.7}):m==='wire'?new THREE.MeshStandardMaterial({color:'#A7ADB3',roughness:.4,metalness:.6,wireframe:true})
     :m==='top'?new THREE.MeshStandardMaterial({color:topColor(),roughness:.5}):m==='appliance'?new THREE.MeshStandardMaterial({color:'#2B2E33',roughness:.4,metalness:.3}):m==='plinth'?new THREE.MeshStandardMaterial({color:'#8E9194',roughness:.6})
     :m==='box'?new THREE.MeshStandardMaterial({color:'#EDE9E2',roughness:.85}):new THREE.MeshStandardMaterial({color:dec,roughness:.8}));
-  const line=new THREE.LineBasicMaterial({color:0x2a2f35,transparent:true,opacity:.35});
+  const line=new THREE.LineBasicMaterial({color:0x2a2f35,transparent:true,opacity:opts.edge||.35});
   const mesh=b=>{let g;if(b.cyl){g=new THREE.CylinderGeometry(b.h/2*M,b.h/2*M,b.w*M,12);const o=new THREE.Mesh(g,mat(b.m));o.rotation.z=Math.PI/2;o.position.set((b.x+b.w/2)*M,(b.y+b.h/2)*M,(b.z+b.d/2)*M);return o}
     g=new THREE.BoxGeometry(b.w*M,b.h*M,b.d*M);const o=new THREE.Mesh(g,mat(b.m));o.position.set((b.x+b.w/2)*M,(b.y+b.h/2)*M,(b.z+b.d/2)*M);
     if(b.m!=='wire'&&b.m!=='mirror')o.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),line));return o};
@@ -1866,7 +1904,7 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
     gr.items.forEach(b=>{const o=mesh(b);
       if(b.door){let pv=piv[b.door.id];if(!pv){pv=new THREE.Group();pv.position.set(b.door.hx*M,0,b.door.z*M);pv.userData.dir=b.door.dir;piv[b.door.id]=pv;G.add(pv);doors.push(pv)}
         o.position.x-=b.door.hx*M;o.position.z-=b.door.z*M;pv.add(o)}
-      else if(b.lift){const pv=new THREE.Group();pv.position.set(0,b.lift.hy*M,b.lift.z*M);o.position.y-=b.lift.hy*M;o.position.z-=b.lift.z*M;pv.add(o);G.add(pv);lifts.push(pv)}
+      else if(b.lift){let pv=piv['L'+b.lift.id];if(!pv){pv=new THREE.Group();pv.position.set(0,b.lift.hy*M,b.lift.z*M);piv['L'+b.lift.id]=pv;G.add(pv);lifts.push(pv)}o.position.y-=b.lift.hy*M;o.position.z-=b.lift.z*M;pv.add(o)}
       else if(b.drawer){const dg=new THREE.Group();dg.add(o);G.add(dg);drawers.push(dg)}
       else{if(b.coupe)coupe.push(o);G.add(o)}});
     model.add(G)});
@@ -1946,6 +1984,61 @@ function snapshot3D(){try{const r=new THREE.WebGLRenderer({antialias:true,preser
   cam.lookAt(new THREE.Box3().setFromObject(S3.model).getCenter(new THREE.Vector3()));r.render(S3.scene,cam);const url=r.domElement.toDataURL('image/png');
   S3.scene.traverse(o=>{if(o.geometry)o.geometry.dispose()});r.dispose();return url}catch(e){return null}}
 
+/* ---------- примерка на фото ----------
+   Изделие рисуется спереди (без перспективы), потом натягивается на 4 угла, которые мастер ставит на фото:
+   преобразование «прямоугольник → четырёхугольник» даёт правильную перспективу. */
+function frontImage(){const S3=makeScene(scene3dData(),{edge:.75});setOpen(S3,false,true);
+  S3.scene.children.slice().forEach(o=>{if(o!==S3.model&&!o.isLight)S3.scene.remove(o)});
+  const box=new THREE.Box3().setFromObject(S3.model),sz=box.getSize(new THREE.Vector3()),k=1400/Math.max(sz.x,sz.y),w=Math.max(2,Math.round(sz.x*k)),h=Math.max(2,Math.round(sz.y*k));
+  const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});r.setClearColor(0x000000,0);r.setSize(w,h,false);
+  const cam=new THREE.OrthographicCamera(box.min.x,box.max.x,box.max.y,box.min.y,0.01,100);cam.position.set(0,0,box.max.z+5);cam.lookAt(0,0,box.max.z);
+  r.render(S3.scene,cam);const url=r.domElement.toDataURL('image/png');S3.scene.traverse(o=>{if(o.geometry)o.geometry.dispose()});r.dispose();
+  return{url,w,h,mmW:Math.round(sz.x*1000),mmH:Math.round(sz.y*1000)}}
+// единичный квадрат → четырёхугольник q (ЛВ, ПВ, ПН, ЛН)
+function homog(q){const [[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=q,dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3;
+  let g=0,h=0;if(Math.abs(dx3)>1e-9||Math.abs(dy3)>1e-9){const den=dx1*dy2-dx2*dy1||1e-9;g=(dx3*dy2-dx2*dy3)/den;h=(dx1*dy3-dx3*dy1)/den}
+  return{a:x1-x0+g*x1,b:x3-x0+h*x3,c:x0,d:y1-y0+g*y1,e:y3-y0+h*y3,f:y0,g,h}}
+const hmap=(H,u,v)=>{const z=H.g*u+H.h*v+1;return[(H.a*u+H.b*v+H.c)/z,(H.d*u+H.e*v+H.f)/z]};
+let TRY=null;
+function tryDefaultQuad(){const ar=TRY.front.mmH/TRY.front.mmW,ph=$('#tryPhoto'),pa=ph.naturalHeight/ph.naturalWidth;
+  let w=0.5,h=w*ar/pa;if(h>0.75){h=0.75;w=h*pa/ar}const x=(1-w)/2,y=0.88-h;return[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]}
+function tryDraw(){if(!TRY||!P.tryon)return;const st=$('#tryStage'),W=st.clientWidth,Hh=st.clientHeight,q=P.tryon.quad.map(([x,y])=>[x*W,y*Hh]),F=TRY.front,fu=$('#tryFurn');
+  const H=homog(q);fu.style.width=F.w+'px';fu.style.height=F.h+'px';
+  fu.style.transform=`matrix3d(${H.a/F.w},${H.d/F.w},0,${H.g/F.w},${H.b/F.h},${H.e/F.h},0,${H.h/F.h},0,0,1,0,${H.c},${H.f},0,1)`;fu.style.opacity=(P.tryon.op||100)/100;
+  $$('#tryStage .try-h').forEach((el,i)=>{el.style.left=q[i][0]+'px';el.style.top=q[i][1]+'px'});
+  const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2],mb=mid(q[2],q[3]),ml=mid(q[0],q[3]);
+  $('#tryLines').innerHTML=`<polygon points="${q.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#F2B705" stroke-width="2" stroke-dasharray="6 5"/>
+    <g font-size="13" font-weight="700" font-family="JetBrains Mono,monospace" paint-order="stroke" stroke="#1D2227" stroke-width="3" fill="#FFFFFF"><text x="${mb[0]}" y="${mb[1]+20}" text-anchor="middle">${fmt(TRY.front.mmW)}</text><text x="${ml[0]-8}" y="${ml[1]}" text-anchor="end">${fmt(TRY.front.mmH)}</text></g>`}
+function tryRender(){const has=!!(P.tryon&&P.tryon.photo);$('#tryStage').hidden=!has;$('#tryCtl').hidden=!has;$('#trySave').hidden=!has;$('#tryShare').hidden=!has||!tryCanShare();
+  $('#tryHint').textContent=has?'Перетащите 4 жёлтые точки в углы места, где встанет изделие: нижние — на пол у стены, верхние — на высоту изделия.':'Сфотографируйте место, где будет стоять изделие. Отойдите подальше, чтобы в кадр попали пол и верх изделия.';
+  const ph=P.meas.photos||[];$('#tryThumbsBox').hidden=!ph.length;$('#tryThumbs').innerHTML=ph.map((u,i)=>`<button type="button" class="ph" data-tryph="${i}" style="padding:0;border:0;background:none"><img src="${u}" alt="Фото замера ${i+1}"></button>`).join('');
+  if(!has)return;$('#tryOp').value=P.tryon.op||100;$('#tryKp').checked=P.tryon.kp!==false;
+  const im=$('#tryPhoto');const go=()=>{if(!P.tryon.quad)P.tryon.quad=tryDefaultQuad();tryDraw()};if(im.getAttribute('src')!==P.tryon.photo){im.onload=go;im.src=P.tryon.photo}else go()}
+function trySetPhoto(url){const im=new Image();im.onload=()=>{const k=Math.min(1,1400/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);
+  cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);P.tryon={photo:cv.toDataURL('image/jpeg',0.72),quad:null,op:100,kp:true};save();
+  setTimeout(()=>{if(!LS.set('shkaf.projects',projects))toast('Память телефона заполнена — фото может не сохраниться. Удалите старые фото или заказы.')},400);tryRender()};im.src=url}
+function openTry(){$('#tryWrap').hidden=false;document.body.style.overflow='hidden';$('#tryHint').textContent='Готовлю изображение изделия…';
+  loadThree().then(()=>{TRY={front:frontImage()};$('#tryFurn').src=TRY.front.url;tryRender()}).catch(()=>{$('#tryHint').textContent='Не удалось загрузить 3D: нужен интернет при первом открытии.'})}
+// готовая картинка: фото + изделие в перспективе (сетка треугольников — у холста нет перспективного преобразования)
+function tryComposite(maxW){return new Promise(ok=>{if(!P.tryon||!P.tryon.photo||!P.tryon.quad)return ok(null);const front=TRY&&TRY.front||frontImage(),ph=new Image(),fi=new Image();let n=0;
+  const done=()=>{if(++n<2)return;const k=Math.min(1,(maxW||1600)/ph.width),W=Math.round(ph.width*k),Hh=Math.round(ph.height*k),cv=document.createElement('canvas');cv.width=W;cv.height=Hh;const c=cv.getContext('2d');
+    c.drawImage(ph,0,0,W,Hh);const q=P.tryon.quad.map(([x,y])=>[x*W,y*Hh]),H=homog(q);
+    // мягкая тень у пола
+    c.save();c.filter=`blur(${Math.round(W/90)}px)`;c.fillStyle='rgba(0,0,0,.28)';c.beginPath();const sh=W/160;q.forEach((p,i)=>c[i?'lineTo':'moveTo'](p[0]+sh,p[1]+sh*1.5));c.closePath();c.fill();c.restore();
+    c.globalAlpha=(P.tryon.op||100)/100;const N=24,fw=fi.width,fh=fi.height;
+    for(let i=0;i<N;i++)for(let j=0;j<N;j++){const u0=i/N,u1=(i+1)/N,v0=j/N,v1=(j+1)/N,s=[[u0*fw,v0*fh],[u1*fw,v0*fh],[u1*fw,v1*fh],[u0*fw,v1*fh]],d=[hmap(H,u0,v0),hmap(H,u1,v0),hmap(H,u1,v1),hmap(H,u0,v1)];
+      triDraw(c,fi,s[0],s[1],s[2],d[0],d[1],d[2]);triDraw(c,fi,s[0],s[2],s[3],d[0],d[2],d[3])}
+    ok(cv.toDataURL('image/jpeg',0.85))};
+  ph.onload=done;fi.onload=done;ph.src=P.tryon.photo;fi.src=front.url})}
+function triDraw(c,img,s0,s1,s2,d0,d1,d2){
+  // аффинное преобразование треугольника источника в треугольник на фото (правило Крамера)
+  const det=s0[0]*(s1[1]-s2[1])-s0[1]*(s1[0]-s2[0])+(s1[0]*s2[1]-s2[0]*s1[1]);if(Math.abs(det)<1e-9)return;
+  const sol=(a0,a1,a2)=>[(a0*(s1[1]-s2[1])-s0[1]*(a1-a2)+(a1*s2[1]-a2*s1[1]))/det,(s0[0]*(a1-a2)-a0*(s1[0]-s2[0])+(s1[0]*a2-s2[0]*a1))/det,(s0[0]*(s1[1]*a2-s2[1]*a1)-s0[1]*(s1[0]*a2-s2[0]*a1)+a0*(s1[0]*s2[1]-s2[0]*s1[1]))/det];
+  const [a,cc,e]=sol(d0[0],d1[0],d2[0]),[b,dd,f]=sol(d0[1],d1[1],d2[1]);
+  const cx=(d0[0]+d1[0]+d2[0])/3,cy=(d0[1]+d1[1]+d2[1])/3,gr=p=>{const dx=p[0]-cx,dy=p[1]-cy,l=Math.hypot(dx,dy)||1;return[p[0]+dx/l*.7,p[1]+dy/l*.7]};
+  c.save();c.beginPath();[d0,d1,d2].map(gr).forEach((p,i)=>c[i?'lineTo':'moveTo'](p[0],p[1]));c.closePath();c.clip();c.transform(a,b,cc,dd,e,f);c.drawImage(img,0,0);c.restore()}
+let tryFile=null;const tryCanShare=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([new Blob(['x'],{type:'image/jpeg'})],'a.jpg',{type:'image/jpeg'})]}))}catch(e){return false}};
+function tryBlob(){return tryComposite(1600).then(url=>url?fetch(url).then(r=>r.blob()):null)}
 const isFrontPart=x=>x.group==='Фасады'||/фасад|Крышка/i.test(x.name);
 /* ---------- общий расчёт ---------- */
 function calc(p,s){
@@ -2389,7 +2482,7 @@ function specRows(){const p=P,c=R.c,S=R.S,b=matItem('bodies',p.mat.body,S),fm=fr
 function offerText(){const d=describe();
   return [`${P.name}${P.client?' — '+P.client:''}`,d.title+'.',...d.lines,hwLine(),'',`Стоимость с изготовлением, доставкой и сборкой${R.cost.disc?` со скидкой ${R.cost.disc}%`:''}: ${rub(R.cost.price)}.`,R.cost.perM?`Около ${rub(R.cost.perM)} за погонный метр.`:'',settings.company.warranty?`Гарантия: ${settings.company.warranty}.`:'',settings.company.lead?`Срок изготовления: ${settings.company.lead}.`:'',settings.company.phone?`Телефон: ${settings.company.phone}`:''].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim()}
 
-let kpShot=null;
+let kpShot=null,tryShot=null;
 function renderKp(){
   const co=settings.company,d=describe(),today=new Date();
   const valid=new Date(today.getTime()+14*864e5).toLocaleDateString('ru-RU');
@@ -2398,6 +2491,7 @@ function renderKp(){
   $('#kpSheet').innerHTML=`<div class="kp-head"><div><div class="kp-co">${esc(co.name||'Мебель на заказ')}</div><div class="kp-small">${[co.city,co.phone].filter(Boolean).map(esc).join(' · ')}</div></div>
     <div class="kp-meta">Коммерческое предложение<br>№ ${esc(P.id.slice(-5).toUpperCase())} от ${today.toLocaleDateString('ru-RU')}</div></div>
     <div><h1>${esc(d.title)}</h1><div class="kp-small">${esc(P.name)}${P.client?' · Заказчик: '+esc(P.client):''}${P.address?' · '+esc(P.address):''}</div></div>
+    ${tryShot?`<div class="kp-draw"><div class="kp-small" style="margin-bottom:6px">Как это будет выглядеть у вас</div><img src="${tryShot}" alt="Изделие на фото помещения" style="width:100%;display:block;border-radius:6px"></div>`:''}
     ${kpShot?`<div class="kp-draw"><img src="${kpShot}" alt="3D-вид изделия" style="width:100%;display:block;border-radius:6px"></div>`:''}
     <div class="kp-draw">${drawDoors}</div>${drawIn?`<div class="kp-draw"><div class="kp-small" style="margin-bottom:6px">Внутреннее наполнение</div>${drawIn}</div>`:''}
     <ul>${[...d.lines,hwLine()].map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
@@ -2455,7 +2549,7 @@ function builtinTemplates(){const t=[],mk=(name,f)=>{const p=newProject();f(p);t
   Object.entries(PRESETS).forEach(([k,v])=>mk(v.name,p=>{p.kind='chest';const c=clone(v);delete c.name;p.c=c}));
   return t}
 const allTemplates=()=>[...builtinTemplates(),...(settings.templates||[])];
-function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',status:'calc',prepay:0,installDate:'',updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
+function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',status:'calc',prepay:0,installDate:'',tryon:null,updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
 function renderProjects(){
   $('#storageNote').textContent=storageOk?'Заказы сохраняются на этом телефоне. Делайте резервную копию в настройках.':'Сохранение недоступно в этом окне. Скопируйте заказ, чтобы не потерять расчёт.';
   const meta=p=>p.kind==='kitchen'?(p.k.shape==='corner'?`кухня угловая · А ${p.k.base.reduce((a,m)=>a+m.w,0)+p.k.cBaseW} · Б ${p.k.baseB.reduce((a,m)=>a+m.w,0)} мм`:`кухня · ${p.k.base.reduce((a,m)=>a+m.w,0)} мм`):p.kind==='chest'?`комод, тумба · ${p.c.W}×${p.c.H}×${p.c.D}`:`${p.shape==='corner'?`${p.W}×${p.W2}`:p.W}×${p.H}×${p.D} · ${p.shape==='corner'?'угловой, ':''}${p.type==='coupe'?'купе':'распашной'}`;
@@ -2494,6 +2588,12 @@ function restore(text){
 }
 
 /* ---------- события ---------- */
+{let drag=null;
+  document.addEventListener('pointerdown',e=>{const h=e.target.closest('.try-h');if(!h||!P.tryon)return;e.preventDefault();drag={i:+h.dataset.th,id:e.pointerId};try{h.setPointerCapture(e.pointerId)}catch(x){}});
+  document.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const rc=$('#tryStage').getBoundingClientRect();
+    P.tryon.quad[drag.i]=[Math.min(1,Math.max(0,(e.clientX-rc.left)/rc.width)),Math.min(1,Math.max(0,(e.clientY-rc.top)/rc.height))];tryDraw()});
+  const end=e=>{if(drag&&e.pointerId===drag.id){drag=null;save()}};document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+  window.addEventListener('resize',()=>{if(!$('#tryWrap').hidden)tryDraw()})}
 const LIM={cornerOpen:[300,600],W:[300,5000],W2:[600,5000],H:[300,3000],D:[250,900],plinth:[0,200],mezzH:[200,900]};
 const KLIM={golaL:[20,60],golaC:[20,50],golaW:[0,40],wall2H:[0,800],baseH:[500,900],baseD:[300,700],legs:[0,200],wallH:[300,1000],wallD:[200,450],wallY:[1100,1900],tallH:[1500,2700],fridgeH:[1200,2000],cBaseW:[700,1500],cBaseW2:[600,1200],cWallW:[400,1200],cWallW2:[400,900]};
 const MNUM={hobW:[200,900],hobD:[300,560],split:[0,1500]};
@@ -2515,6 +2615,7 @@ document.addEventListener('input',e=>{
   if(d.co){settings.company[d.co]=el.value;save();return}
   if(d.pay){const v=el.value===''?0:Math.round(+el.value);if(v>=0&&Number.isFinite(v)){P.prepay=v;renderOrderSum();save()}return}
   if(d.inst){P.installDate=el.value;renderOrderSum();save();return}
+  if(el.id==='tryOp'){if(P.tryon){P.tryon.op=+el.value;tryDraw();save()}return}
   if(d.disc){const v=el.value===''?0:Math.round(+el.value);if(v>=0&&v<=50){P.discount=v;change()}return}
   if(d.matnote){P.mat.frontNote=el.value;change();return}
   if(d.meas){const [k,i]=d.meas.split(':'),v=el.value.replace(/[^0-9]/g,'');if(i!==undefined)P.meas[k][+i]=v;else P.meas[k]=v;change();return}
@@ -2541,6 +2642,8 @@ document.addEventListener('change',e=>{
   else if(d.mat){P.mat[d.mat]=el.value;change()}
   else if(d.wall){P.walls[d.wall]=el.checked;change()}
   else if(d.mcheck){P.meas.checks[d.mcheck]=el.checked;save()}
+  else if(el.id==='tryCam'||el.id==='tryFile'){const f=el.files&&el.files[0];if(f){const rd=new FileReader();rd.onload=()=>trySetPhoto(rd.result);rd.readAsDataURL(f)}el.value=''}
+  else if(el.id==='tryKp'){if(P.tryon){P.tryon.kp=el.checked;save()}}
   else if(el.id==='msFile'){if(el.files&&el.files.length)addPhotos(el.files);el.value=''}
   else if(el.id==='restoreFile'){const f=el.files&&el.files[0];if(f){const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f)}el.value=''}
   else if(d.rod){const [w,i]=d.rod.split(':');secsOf(w)[+i].rod=el.checked;change()}
@@ -2606,7 +2709,13 @@ document.addEventListener('click',e=>{
   if(b.id==='dlCsv'){download(safeName(P.name)+'-raspil.csv','﻿'+csvText(),'text/csv;charset=utf-8');return}
   if(b.id==='copyOffer'){copy(offerText(),$('#offerText'),'Текст скопирован');return}
   if(b.id==='openKp'){kpShot=null;renderKp();$('#kpWrap').hidden=false;document.body.style.overflow='hidden';
-    loadThree().then(()=>{kpShot=snapshot3D();if(kpShot&&!$('#kpWrap').hidden)renderKp()}).catch(()=>{});return}
+    tryShot=null;loadThree().then(()=>{kpShot=snapshot3D();if(kpShot&&!$('#kpWrap').hidden)renderKp();if(P.tryon&&P.tryon.kp!==false){TRY=null;tryComposite(1200).then(u=>{tryShot=u;if(u&&!$('#kpWrap').hidden)renderKp()})}}).catch(()=>{});return}
+  if(b.id==='openTry'){openTry();return}
+  if(b.id==='closeTry'){$('#tryWrap').hidden=true;document.body.style.overflow='';return}
+  if(d.tryph!==undefined){trySetPhoto(P.meas.photos[+d.tryph]);return}
+  if(b.id==='tryReset'){if(P.tryon){P.tryon.quad=tryDefaultQuad();save();tryDraw()}return}
+  if(b.id==='trySave'){tryBlob().then(bl=>{if(!bl)return;try{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=safeName(P.name)+'-na-foto.jpg';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);toast('Картинка сохранена')}catch(e){toast('Не удалось сохранить картинку')}});return}
+  if(b.id==='tryShare'){tryBlob().then(bl=>{if(!bl)return;const f=new File([bl],safeName(P.name)+'-na-foto.jpg',{type:'image/jpeg'});navigator.share({files:[f],title:describe().title,text:describe().title+' — '+rub(R.cost.price)}).catch(()=>{})});return}
   if(b.id==='closeKp'){$('#kpWrap').hidden=true;document.body.style.overflow='';return}
   if(b.id==='kpCopy'){copy(offerText(),$('#offerText'),'Текст скопирован');return}
   if(b.id==='kpPrint'){try{window.print()}catch(e){}return}

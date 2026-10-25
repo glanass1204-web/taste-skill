@@ -162,7 +162,14 @@ const res=await pg.evaluate(()=>{
  {const p=base();p.kind='chest';p.hw.handle='r320';p.c={W:380,H:850,D:450,plinth:60,legs:0,cols:[{type:'drawers',drawers:3,shelves:0}]};
   ok(M.calc(p,S).warn.some(x=>x.lvl==='err'&&/не помещается на фасад/.test(x.t)),'ручка 360 мм на фасад 376: ошибка')}
  {const p=base();p.kind='chest';p.hw.handle='r320';p.c={W:450,H:850,D:450,plinth:60,legs:0,cols:[{type:'drawers',drawers:3,shelves:0}]};ok(!M.calc(p,S).warn.some(x=>/не помещается на фасад/.test(x.t)),'ручка 360 мм на фасад 446: помещается')}
- {const p=base();p.D=480;p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];ok(M.calc(p,S).warn.some(x=>/плечики/.test(x.t)),'штанга при глубине 480: предупреждение')}
+ {const p=base();p.D=480;p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];const c=M.calc(p,S),w=c.wings[0],q=Math.min(3,Math.max(1,Math.floor(w.ws[0]/480))),row=c.hw.find(h=>/Штанга выдвижная/.test(h[0]));
+   // глубина 480: полка 460, ближайшая стандартная штанга не длиннее — 450; овальной штанги и флянцев нет
+   ok(row&&row[0]==='Штанга выдвижная (торцевая) 450 мм'&&row[1]===q,'глубина 480: выдвижная штанга 450 мм, '+q+' шт');ok(!c.hw.some(h=>/овальная|Флянец/.test(h[0])),'глубина 480: без овальной штанги и флянцев')}
+ {const L=D=>{const p=base();p.D=D;p.type='swing';p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];const c=M.calc(p,S);return{c,row:c.hw.find(h=>/Штанга/.test(h[0]))}};
+  ok(L(500).row[0]==='Штанга овальная','глубина 500: обычная штанга поперёк');ok(L(350).row[0]==='Штанга выдвижная (торцевая) 300 мм','глубина 350: полка 330 → штанга 300 мм');
+  ok(L(270).row[0]==='Штанга выдвижная (торцевая) 250 мм','глубина 270: полка 250 → штанга 250 мм');const e=L(260);ok(!e.row&&e.c.warn.some(x=>x.lvl==='err'&&/выдвижная штанга/.test(x.t)),'глубина 260: штанга не помещается — ошибка');
+  const pc=base();pc.type='coupe';pc.D=450;pc.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];ok(M.calc(pc,S).hw.some(h=>h[0]==='Штанга выдвижная (торцевая) 300 мм'),'купе 450: внутри 350, полка 330 → штанга 300 мм');
+  const pn=base();pn.D=400;pn.W=1300;pn.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];ok(M.calc(pn,S).warn.some(x=>/плечики 450 мм висят вдоль фасада/.test(x.t)),'узкая секция с выдвижной штангой: предупреждение про плечики')}
 
  // ---- КДМ: зазор между дверями на перегородке 4 мм
  {const p=base();p.mirrors=0;p.hw.hinge='kdm';const w=M.calc(p,S).wings[0],ds=[...w.doors].sort((a,b)=>a.x-b.x);

@@ -34,8 +34,8 @@ const res=await pg.evaluate(()=>{
    checks++;if(shift)return n;
    let ns=0;[[A.ex.sw,sB],[B.ex.sw,sA]].forEach(([sw,st])=>sw.forEach(s=>st.forEach(q=>{if(q.door||q.drawer)return;if(hit(s,q)){ns++;if(ns<3)fails.push(`${tag}: открывание ${s.of} задевает ${q.m} стороны напротив`)}})));
    checks++};
- const inModule=(r,tag)=>r.mods.forEach(mod=>{if(!mod.carcass&&mod.type!=='dw')return;
-   mod.fronts.forEach(f=>ok(f.x>=-0.01&&f.x+f.w<=mod.w+0.01&&f.y>=-0.01&&f.y+f.h<=mod.h+0.01&&f.w>0&&f.h>0,`${tag} ${mod.lab}: фасад ${f.kind} вне модуля ${f.x}..${f.x+f.w} / ${mod.w}`));
+ const inModule=(r,tag,gw=0)=>r.mods.forEach(mod=>{if(!mod.carcass&&mod.type!=='dw')return;const lo=mod.zone.startsWith('wall')||mod.zone==='cWall'?-gw:0;
+   mod.fronts.forEach(f=>ok(f.x>=-0.01&&f.x+f.w<=mod.w+0.01&&f.y>=lo-0.01&&f.y+f.h<=mod.h+0.01&&f.w>0&&f.h>0,`${tag} ${mod.lab}: фасад ${f.kind} вне модуля ${f.x}..${f.x+f.w} / ${mod.w}`));
    const fr=mod.fronts;for(let i=0;i<fr.length;i++)for(let j=i+1;j<fr.length;j++){const a=fr[i],c=fr[j];ok(!(a.x<c.x+c.w-0.01&&c.x<a.x+a.w-0.01&&a.y<c.y+c.h-0.01&&c.y<a.y+a.h-0.01),`${tag} ${mod.lab}: фасады перекрываются`)}
    // петли — только на краю модуля, где есть боковина
    fr.filter(f=>f.kind==='door').forEach(f=>ok(f.hinge==='L'?Math.abs(f.x-2)<1:Math.abs(f.x+f.w-(mod.w-2))<1,`${tag} ${mod.lab}: петли не у боковины (x ${f.x}, ${f.hinge})`))});
@@ -62,22 +62,23 @@ const res=await pg.evaluate(()=>{
    const AL=rnd()>.5,cb=pick(['blind','L']),cw=pick(['blind','L','none']),front=pick(['body','mdfpvc','mdf22','ldsp']),handle=pick(['r128','r96','knob','flush','r160']),body=pick(['krono16','egger18']);
    const bTypes=['doors','drawers','sink','doors','dw','oven'],wTypes=['doors','open','drying','doors'];
    const mkRow=(n,types,wall)=>Array.from({length:n},()=>{const type=pick(types);return km(type,type==='dw'?pick([450,600]):type==='oven'?600:pick([300,400,450,500,600,800]),wall?2:1,3)});
-   const base=mkRow(1+Math.floor(rnd()*4),bTypes),wall=mkRow(Math.floor(rnd()*4),wTypes,true),baseB=mkRow(1+Math.floor(rnd()*3),bTypes),wallB=cw==='none'?[]:mkRow(Math.floor(rnd()*3),wTypes,true);
+   const gola=rnd()>.6,w2=pick([0,0,360]),base=mkRow(1+Math.floor(rnd()*4),bTypes),wall=mkRow(Math.floor(rnd()*4),wTypes,true),baseB=mkRow(1+Math.floor(rnd()*3),bTypes),wallB=cw==='none'?[]:mkRow(Math.floor(rnd()*3),wTypes,true);
    // у глухого угла модуль стороны Б — с дверцами (в половине случаев проверяем и неправильный)
    const adjB=AL?baseB.length-1:0,good=rnd()>.25;if(cb==='blind'&&good)baseB[adjB]=km(pick(['doors','sink']),pick([450,600,800]),1);
    const adjW=AL?wallB.length-1:0;if(wallB.length&&cw!=='L'&&good)wallB[adjW]=km('doors',pick([400,600,800]),2);
    const {p,S,r}=mk(p=>{const k=p.k;Object.assign(k,{shape:'corner',cornerSide:AL?'L':'R',cBase:cb,cWall:cw,cBaseW:cb==='L'?pick([850,900,1000]):pick([1000,1050,1100,1200]),cBaseW2:pick([850,900,1000]),cWallW:cw==='L'?pick([550,600,700]):pick([700,800,900]),cWallW2:pick([550,600,700]),base,wall,baseB,wallB});
+     k.gola=gola;k.wall2H=w2;[...k.wall,...k.wallB].forEach(m=>{if(m.type==='doors'&&rnd()>.6)m.open='lift'});k.wallH=pick([720,720,360,600]);
      p.mat.front=front;p.mat.body=body;p.hw.handle=handle;p.walls.A=rnd()>.5;p.walls.B=rnd()>.5});
    const tag=`угол ${AL?'L':'R'} ${cb}/${cw} ${front} ${handle}`,E=errsOf(r),fT=r.L.fT,F=M.FILLER,D=p.k.baseD;
-   sanity(p,S,r,tag);inModule(r,tag);sideFronts(r,tag);
+   sanity(p,S,r,tag);inModule(r,tag,gola?p.k.golaW:0);sideFronts(r,tag);
    const H=S.cat.handles.find(h=>h.id===handle);
    // ошибки там, где должны быть
    if(cb==='blind'&&!['doors','sink'].includes(baseB[adjB].type))ok(E.some(t=>/глухого угла/.test(t)),`${tag}: нет ошибки про модуль у глухого угла`);
-   if((cb==='blind'||cw==='blind')&&H.proj>F-15)ok(E.some(t=>/Ручки выступают/.test(t)),`${tag}: нет ошибки про ручки в углу`);
+   if(!gola&&(cb==='blind'||cw==='blind')&&H.proj>F-15)ok(E.some(t=>/Ручки выступают/.test(t)),`${tag}: нет ошибки про ручки в углу`);
    if(!E.length){valid++;collide(p,S,r,tag)}
    // формулы угла
    const cB=r.mods.find(m=>m.zone==='cBase');ok(!!cB,tag+': угловой нижний есть');
-   if(cB&&cb==='blind'){const door=cB.fronts.find(f=>f.kind==='door'),fl=cB.fronts.find(f=>f.kind==='filler');eq(door.w,p.k.cBaseW-D-fT-F-6,tag+': дверь глухого угла');eq(fl.w,fT+F,tag+': планка угла А');ok(door.hinge===(AL?'R':'L'),tag+': петли углового модуля на дальней стороне')}
+   if(cB&&cb==='blind'){const door=cB.fronts.find(f=>f.kind==='door'),fl=cB.fronts.find(f=>f.kind==='filler');eq(door.w,p.k.cBaseW-D-fT-F-6,tag+': дверь глухого угла');eq(door.h,p.k.baseH-4-(gola?p.k.golaL:0),tag+': высота двери угла');eq(fl.w,fT+F,tag+': планка угла А');ok(door.hinge===(AL?'R':'L'),tag+': петли углового модуля на дальней стороне')}
    if(cB&&cb==='L'){eq(cB.fronts[0].w,p.k.cBaseW-D-3,tag+': створка А');eq(cB.leafB.w,p.k.cBaseW2-D-fT-4,tag+': створка Б')}
    if(cb==='blind'){const b1=r.mods.find(m=>m.zone==='baseB'&&m.i===adjB);if(b1&&['doors','sink'].includes(b1.type)){const fl=b1.fronts.find(f=>f.kind==='filler'),dr=b1.fronts.filter(f=>f.kind==='door');eq(fl.w,F,tag+': планка Б');
      ok(Math.abs(AL?fl.x+fl.w-b1.w:fl.x)<0.01,tag+': планка Б со стороны угла');if(dr.length===1){eq(dr[0].w,b1.w-F-5,tag+': дверь у планки Б');ok(dr[0].hinge===(AL?'L':'R'),tag+': дверь у угла на дальних петлях')}}}

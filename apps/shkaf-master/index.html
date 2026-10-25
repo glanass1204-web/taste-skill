@@ -719,7 +719,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='29 от 26.10.2026';
+const APP_VER='30 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -1256,7 +1256,10 @@ const modLabel=(zone,i,m)=>(zone.endsWith('B')?'Б-':'')+(isTall(m)?'П':zone.st
 // Ниши техники — по каталогу встраиваемой техники Bosch: духовой шкаф 575–597 (серии 6 и 8: 585–595) × 560–568 × 550 мм,
 // компактный духовой шкаф 450–455, микроволновка 362–382, посудомойка 815–875 × 450/600 × 550, холодильник 1775 × 560 × 550.
 // Вырезы под варочные панели: 60 см — 560 × 490–500 (газ 560 × 480–490), 30 см — 270 × 490–500, 80 см — 750–780 × 490–500, 45 см — 420 × 490.
-const K_OVEN_N=590,K_TOP2={mw:{name:'Микроволновка встраиваемая (ниша 380 мм)',n:380},c45:{name:'Компактный духовой шкаф или СВЧ 45 см (ниша 452 мм)',n:452}};
+const K_OVEN_N=590,K_TOP2={mw:{name:'Микроволновка встраиваемая (ниша 380 мм)',n:380},c45:{name:'Компактный духовой шкаф или СВЧ 45 см (ниша 452 мм)',n:452},cust:{name:'Своя техника — ниша по инструкции',n:380}};
+// размеры техники из инструкции к модели; пусто — типовые
+const AP_F=['apN','apW','apD','apH','dwMin','dwMax','top2N'];
+const top2Of=m=>m.top2==='cust'?{...K_TOP2.cust,n:+m.top2N||380}:K_TOP2[m.top2];
 const K_HOBS=[{id:'i60',name:'Электрическая или индукционная 60 см',w:560,d:490},{id:'g60',name:'Газовая 60 см',w:560,d:480,gas:true},
   {id:'i45',name:'45 см',w:420,d:490},{id:'d30',name:'Домино 30 см',w:270,d:490},{id:'i80',name:'80 см',w:750,d:490},
   {id:'cust',name:'Свой вырез, электрическая',custom:true},{id:'custG',name:'Свой вырез, газовая',custom:true,gas:true}];
@@ -1349,15 +1352,16 @@ function calcKitchen(p,s){
       if(m.type==='drawers')drawers(mod,x0,x1-x0,2,h-4-gL,Math.max(1,m.drawers),iw,gC,G);
       // духовке нужна ниша 600 мм от полки до царги
       if(m.type==='oven'){add('Полка под духовку','Полки',iw,d-20,1,'ldsp',1,0);C.conf+=4;
-        const ofh=h-604-t;add('Фальш-фасад под духовкой','Фасады',w-4,ofh,1,'ldsp',2,2);mod.fronts.push({x:2,y:2,w:w-4,h:ofh,kind:'false'});
-        mod.fixed.push(ofh+4-t);mod.appl.push({kind:'oven',y:ofh+4,h:592});
-        if(ofh<60)warn.push(ERR(`${lab}: корпус низкий — под духовку (ниша 600 мм) не остаётся места. Нужна высота корпуса от ${664+t} мм.`));
-        if(w!==600)warn.push(ERR(`${lab}: духовки встраиваются в модуль 600 мм.`));
-        else if(iw<560||iw>568)warn.push(ERR(`${lab}: ниша под духовку между боковинами ${iw} мм, а нужна 560–568 мм.`))}
+        const N=+m.apN||600,Wn=+m.apW||560,Dn=+m.apD||550,ofh=h-(N+4)-t;add('Фальш-фасад под духовкой','Фасады',w-4,ofh,1,'ldsp',2,2);mod.fronts.push({x:2,y:2,w:w-4,h:ofh,kind:'false'});
+        mod.fixed.push(ofh+4-t);mod.appl.push({kind:'oven',y:ofh+4,h:N-8});
+        if(ofh<60)warn.push(ERR(`${lab}: корпус низкий — под духовку (ниша ${N} мм) не остаётся места. Нужна высота корпуса от ${N+64+t} мм.`));
+        if(w!==600&&!m.apW)warn.push(ERR(`${lab}: духовки встраиваются в модуль 600 мм.`));
+        else if(iw<Wn||iw>Wn+8)warn.push(ERR(`${lab}: ниша под духовку между боковинами ${iw} мм, а по инструкции нужна ${Wn}–${Wn+8} мм.`));
+        if(D<Dn)warn.push(ERR(`${lab}: для духовки нужна глубина ниши от ${Dn} мм, а корпус ${D} мм.`))}
       if(m.type==='dw'){add('Фасад посудомойки','Фасады',h-4-gL,w-4,1,'ldsp',2,2);if(!G)C.handles++;mod.fronts.push({x:2,y:2,w:w-4,h:h-4-gL,kind:'dw',noHandle:G});mod.appl.push({kind:'dw',y:-k.legs,h:k.legs+h});
         if(w!==450&&w!==600)warn.push(ERR(`${lab}: посудомойки бывают шириной 450 и 600 мм — поставьте ширину модуля 450 или 600.`));
-        const nh=k.legs+k.baseH;if(nh<DW_H[0]||nh>DW_H[1])warn.push(ERR(`${lab}: ниша под посудомойку по высоте ${nh} мм (от пола до столешницы), а нужна ${DW_H[0]}–${DW_H[1]} мм. Измените высоту ножек или нижних корпусов.`));
-        if(D<550)warn.push(ERR(`${lab}: для посудомойки нужна глубина ниши от 550 мм — увеличьте глубину нижних модулей.`));
+        const nh=k.legs+k.baseH,h0=+m.dwMin||DW_H[0],h1=+m.dwMax||DW_H[1],Dn=+m.apD||550;if(nh<h0||nh>h1)warn.push(ERR(`${lab}: ниша под посудомойку по высоте ${nh} мм (от пола до столешницы), а ${m.dwMin||m.dwMax?'по инструкции машины':''} нужна ${h0}–${h1} мм. Измените высоту ножек или нижних корпусов.`));
+        if(D<Dn)warn.push(ERR(`${lab}: для посудомойки нужна глубина ниши от ${Dn} мм — увеличьте глубину нижних модулей.`));
         // посудомойку крепят к боковинам соседей: с открытого края нужна боковая панель
         const nb=x=>sd.base.some(q=>q!==o&&Math.abs((x==='L'?q.x+q.w:q.x)-(x==='L'?o.x:o.x+o.w))<1)||(sd.cz&&Math.abs((x==='L'?sd.cz.base[1]:sd.cz.base[0])-(x==='L'?o.x:o.x+o.w))<1&&sd.cz.base[1]-sd.cz.base[0]>0);
         ['L','R'].forEach(x=>{if(!nb(x)&&!(x==='L'?bl:br)){add('Боковая панель у посудомойки','Корпус',nh,d,1,'ldsp',1,0);C.dwPanels++;mod[x==='L'?'panelL':'panelR']=true;
@@ -1368,9 +1372,9 @@ function calcKitchen(p,s){
         add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);C.supports+=4*m.shelves;mod.shelves=shelfYs(t,h-t,m.shelves);backPanels(add,s,h-4,w-4);mod.backs.push({y:2,h:h-4})}
       if(m.type==='tallOven'){
         // духовка над нижним рядом: нижние фасады в линию с нижними модулями, кромки полок видны над и под техникой
-        const So=k.baseH+t,top2=K_TOP2[m.top2],sh=[So-t,So+K_OVEN_N];if(top2)sh.push(So+K_OVEN_N+t+top2.n);const Su=sh[sh.length-1]+t,n=w>600?2:1,hs=pick(n,first,bl,br,null);
+        const ON=+m.apN||K_OVEN_N,Wn=+m.apW||560,Dn=+m.apD||550,So=k.baseH+t,top2=top2Of(m),sh=[So-t,So+ON];if(top2)sh.push(So+ON+t+top2.n);const Su=sh[sh.length-1]+t,n=w>600?2:1,hs=pick(n,first,bl,br,null);
         add('Полка под духовку','Полки',iw,d-20,1,'ldsp',1,0);add('Полка над духовкой','Полки',iw,d-20,1,'ldsp',1,0);if(top2)add('Полка над микроволновкой','Полки',iw,d-20,1,'ldsp',1,0);
-        C.conf+=4*sh.length;mod.fixed.push(...sh);mod.appl.push({kind:'oven',y:So,h:K_OVEN_N});if(top2)mod.appl.push({kind:m.top2,y:So+K_OVEN_N+t,h:top2.n});
+        C.conf+=4*sh.length;mod.fixed.push(...sh);mod.appl.push({kind:'oven',y:So,h:ON});if(top2)mod.appl.push({kind:m.top2,y:So+ON+t,h:top2.n});
         const lowH=So-t-4;
         if(m.low==='drawers')drawers(mod,2,w-4,2,lowH,Math.max(1,m.drawers),iw);
         else{doorRow(mod,2,w-2,2,lowH,hs,' нижний');add('Полка','Полки',iw-2,d-20,1,'ldsp',1,0);C.supports+=4;mod.shelves.push(...shelfYs(t,So-t,1))}
@@ -1379,11 +1383,13 @@ function calcKitchen(p,s){
         kh[zone][i]=hs;blockWarn(mod,hs,bl,br,why);
         backPanels(add,s,So-4,w-4);mod.backs.push({y:2,h:So-4});if(h-Su+t-4>0){backPanels(add,s,h-Su+t-4,w-4);mod.backs.push({y:Su-t+2,h:h-Su+t-4})}
         if(upH<150)warn.push(ERR(`${lab}: над техникой остаётся ${Math.max(0,Math.round(upH))} мм — мало для дверцы. Нужна высота пенала от ${Math.ceil(k.legs+Su+4+150)} мм (сейчас ${k.tallH}).`));
-        if(iw<560||iw>568)warn.push(ERR(`${lab}: ниша под духовку между боковинами ${iw} мм, а нужна 560–568 мм — поставьте модуль 600 мм.`));
-        if(D<550)warn.push(ERR(`${lab}: для духовки нужна глубина ниши от 550 мм.`))}
+        if(iw<Wn||iw>Wn+8)warn.push(ERR(`${lab}: ниша под духовку между боковинами ${iw} мм, а ${m.apW?'по инструкции':''} нужна ${Wn}–${Wn+8} мм${m.apW?'':' — поставьте модуль 600 мм'}.`));
+        if(D<Dn)warn.push(ERR(`${lab}: для духовки нужна глубина ниши от ${Dn} мм.`))}
       if(m.type==='fridge'){
         const Hf=k.fridgeH,Ys=2*t+Hf,n=w>600?2:1,hs=pick(n,first,bl,br,null),tot=Ys-4,sp=+m.split||0;
         add('Полка над холодильником','Полки',iw,d-70,1,'ldsp',1,0);C.conf+=4;mod.fixed.push(t+Hf);mod.appl.push({kind:'fridge',y:t,h:Hf});
+        if(m.apW&&iw<m.apW)warn.push(ERR(`${lab}: по инструкции холодильнику нужна ниша шириной от ${m.apW} мм, а между боковинами ${iw} мм.`));
+        if(m.apD&&d<m.apD)warn.push(ERR(`${lab}: по инструкции холодильнику нужна глубина ниши от ${m.apD} мм, а корпус ${d} мм.`));
         if(sp>0){add('Фасад холодильника','Фасады',sp,w-4,1,'ldsp',2,2);add('Фасад холодильника','Фасады',tot-sp-3,w-4,1,'ldsp',2,2);C.handles+=2;
           mod.fronts.push({x:2,y:2,w:w-4,h:sp,kind:'fridge'},{x:2,y:2+sp+3,w:w-4,h:tot-sp-3,kind:'fridge'});
           if(sp<300||tot-sp-3<300)warn.push(ERR(`${lab}: нижний фасад холодильника ${sp} мм — фасады выходят ${sp} и ${Math.round(tot-sp-3)} мм. Возьмите высоту нижнего фасада из инструкции холодильника.`))}
@@ -1431,8 +1437,11 @@ function calcKitchen(p,s){
       if(m.type!=='open'){if(m.open==='lift')liftFront(mod,x0,x1,2-gW,h-4+gW,G);
         else{const n=forced?1:x1-x0>596?2:1,hs=pick(n,first,bl,br,forced);doorRow(mod,x0,x1,2-gW,h-4+gW,hs,'',G);kh[zone][i]=hs;blockWarn(mod,hs,bl,br,why)}}
       if(m.type==='drying')C.dry++;else if(m.type!=='hood'){add('Полка','Полки',iw-2,d-20,m.shelves,'ldsp',1,0);C.supports+=4*m.shelves;mod.shelves=shelfYs(t,h-t,m.shelves)}
-      if(m.type==='hood'){mod.appl.push({kind:'hood',y:0,h:Math.min(h,320)});
-        if(w!==600&&w!==900)warn.push(ERR(`${lab}: встраиваемые вытяжки бывают 60 и 90 см — поставьте ширину модуля 600 или 900 мм.`));
+      if(m.type==='hood'){mod.appl.push({kind:'hood',y:0,h:+m.apH||Math.min(h,320)});
+        if(!m.apW&&w!==600&&w!==900)warn.push(ERR(`${lab}: встраиваемые вытяжки бывают 60 и 90 см — поставьте ширину модуля 600 или 900 мм или впишите ширину вытяжки из её инструкции.`));
+        if(m.apW&&m.apW>iw)warn.push(ERR(`${lab}: вытяжка шириной ${m.apW} мм не входит между боковинами (${iw} мм). Нужен модуль шире.`));
+        if(m.apD&&m.apD>d-4)warn.push(ERR(`${lab}: вытяжка глубиной ${m.apD} мм не входит в шкаф глубиной ${d} мм (с задней стенкой — ${d-4} мм).`));
+        if(m.apH&&m.apH>h-t)warn.push(ERR(`${lab}: вытяжка высотой ${m.apH} мм выше шкафа (внутри ${h-t} мм).`));
         noteOnce('Шкаф под встраиваемую вытяжку — без дна. В крыше (и полке, если она есть) вырежьте отверстие под воздуховод по инструкции вытяжки.')}
       if(w<150)warn.push(ERR(`${lab}: модуль уже 150 мм.`));
       // антресоль (второй ярус) над верхним модулем
@@ -1612,7 +1621,7 @@ function drawKitchenSide(p,s,r,sd){
     if(mod.type==='open'){g+=R(x,yT,t,h,dec)+R(x+w-t,yT,t,h,dec);mod.shelves.forEach(y=>g+=R(x,Y(y,t),w,t,dec))}
     mod.appl.forEach(a=>{
       if(a.kind==='oven'){const ay=Y(a.y,a.h);g+=`<rect x="${x+20}" y="${ay+4}" width="${w-40}" height="${a.h-10}" rx="${sw*4}" class="sv-ink" fill="none" stroke-width="${sw*1.5}"/><rect x="${x+70}" y="${ay+a.h*.18}" width="${w-140}" height="${a.h*.62}" rx="${sw*3}" class="sv-mut" opacity=".35"/>`}
-      if(a.kind==='mw'||a.kind==='c45'){const ay=Y(a.y,a.h);g+=`<rect x="${x+20}" y="${ay+3}" width="${w-40}" height="${a.h-6}" rx="${sw*4}" class="sv-ink" fill="none" stroke-width="${sw*1.5}"/><rect x="${x+50}" y="${ay+a.h*.2}" width="${(w-100)*.68}" height="${a.h*.6}" rx="${sw*3}" class="sv-mut" opacity=".35"/>`}
+      if(a.kind==='mw'||a.kind==='c45'||a.kind==='cust'){const ay=Y(a.y,a.h);g+=`<rect x="${x+20}" y="${ay+3}" width="${w-40}" height="${a.h-6}" rx="${sw*4}" class="sv-ink" fill="none" stroke-width="${sw*1.5}"/><rect x="${x+50}" y="${ay+a.h*.2}" width="${(w-100)*.68}" height="${a.h*.6}" rx="${sw*3}" class="sv-mut" opacity=".35"/>`}
       if(a.kind==='hood')g+=`<rect x="${x+t+10}" y="${F-mod.y0}" width="${w-2*t-20}" height="${Math.max(20,fs*.6)}" class="sv-mut sv-ink" stroke-width="${sw}" opacity=".7"/>`});
     mod.fronts.forEach(f=>{const fx=x+f.x,fy=Y(f.y,f.h);
       g+=R(fx,fy,f.w,f.h,fdec);
@@ -1912,7 +1921,7 @@ function scene3dKitchen(p,s,c){const HD=HW(p,s).handle,k=p.k,t=s.t,fT=frontMat(p
         if(a.kind==='dw')A(x+3,k.legs+10,10,w-6,h-14,d-20,'appliance');
         else if(a.kind==='fridge')A(x+t+2,y0+a.y,15,iw-4,a.h,d-25,'appliance');
         else if(a.kind==='hood')A(x+t+2,y0-4,20,iw-4,a.h,d-40,'metal');
-        else A(x+t+2,y0+a.y+(a.kind==='oven'&&!tall?0:2),10,iw-4,a.kind==='oven'&&!tall?592:a.h-4,d-10,'appliance')});
+        else A(x+t+2,y0+a.y+(a.kind==='oven'&&!tall?0:2),10,iw-4,a.kind==='oven'&&!tall?a.h:a.h-4,d-10,'appliance')});
       if(!isWall&&!tall&&k.worktop){A(x,y0+h,0,w,tT,top.D,'top');
         if(mod.type==='sink')A(x+w/2-220,y0+h+tT-1,top.D/2-200,440,2,380,'metal');
         if(mod.hob)A(x+mod.hob.cx-mod.hob.w/2-20,y0+h+tT,(top.D-mod.hob.d)/2-20,mod.hob.w+40,5,mod.hob.d+40,'appliance')}
@@ -2512,6 +2521,12 @@ function renderKitchenUI(c){
       extra+=sel(`mlo-${id}`,`data-mopt="${key}:low"`,[['doors','Дверца'],['drawers','Ящики']],m.low||'doors','Под духовкой')}
     if(z==='wall'&&['doors','drying','hood'].includes(m.type))extra+=sel(`mop-${id}`,`data-mopt="${key}:open"`,[['swing','Распашная дверь'],['lift','Подъёмный фасад (газлифт)']],m.open||'swing','Открывание');
     if(m.type==='fridge')extra+=numF(`msp-${id}`,`data-mnum="${key}:split"`,m.split||0,'Нижний фасад (0 — один фасад)');
+    {const apF=(f,label,ph)=>`<div class="field"><label for="ap${f}-${id}">${label}</label><div class="inwrap"><input id="ap${f}-${id}" data-mnum="${key}:${f}" type="number" inputmode="numeric" value="${m[f]??''}" placeholder="${ph}"><span>мм</span></div></div>`;
+     const box=(fl)=>`<details class="acc" data-acc="ap-${key}" ${accOpen.has('ap-'+key)||fl.some(f=>m[f])?'open':''}><summary>Размеры техники по инструкции${fl.filter(f=>m[f]).length?' · '+fl.filter(f=>m[f]).length:''}</summary><p class="hint">Пусто — типовые размеры. Возьмите из инструкции к модели: раздел «Встраивание».</p><div class="grid3">`;
+     if(m.type==='oven'||m.type==='tallOven')extra+=box(['apN','apW','apD','top2N'])+apF('apN','Ниша, высота',m.type==='oven'?600:K_OVEN_N)+apF('apW','Ниша, ширина от',560)+apF('apD','Ниша, глубина от',550)+'</div>'+(m.type==='tallOven'&&m.top2==='cust'?`<div class="grid3">${apF('top2N','Ниша над духовкой',380)}</div>`:'')+'</details>';
+     if(m.type==='dw')extra+=box(['dwMin','dwMax','apD'])+apF('dwMin','Высота ниши от',DW_H[0])+apF('dwMax','Высота ниши до',DW_H[1])+apF('apD','Глубина от',550)+'</div></details>';
+     if(m.type==='fridge')extra+=box(['apW','apD'])+apF('apW','Ниша, ширина от',560)+apF('apD','Ниша, глубина от',550)+'</div><p class="hint">Высота ниши — в размерах кухни («Ниша холодильника»).</p></details>';
+     if(m.type==='hood')extra+=box(['apW','apH','apD'])+apF('apW','Вытяжка, ширина',m.w===900?860:560)+apF('apH','Вытяжка, высота',320)+apF('apD','Вытяжка, глубина',280)+'</div></details>'}
     const hint=m.type==='dw'?`<p class="hint">Ширина 450 или 600 мм. Корпуса нет — только фасад на дверь машины.</p>`:m.type==='fridge'?`<p class="hint">Ниша ${k.fridgeH} мм (меняется в размерах кухни). Высоту нижнего фасада возьмите из инструкции холодильника.</p>`:m.type==='gap'?`<p class="hint">Пустое место в верхнем ряду: под каминную вытяжку или полку.</p>`:'';
     return `<div class="sec${key===activeSec?' on':''}" id="mod-${id}">
     <header><b>${modLabel(zone,i,m)}</b><span class="hint">${z==='wall'?'верхний':tall?'пенал':'нижний'}${zone.endsWith('B')?' · сторона Б':corner?' · сторона А':''}</span></header>
@@ -2636,7 +2651,7 @@ function describe(){
   const fr=fm.f.kind==='body'?'фасады из той же ЛДСП':fm.f.kind==='sheet'?`фасады ЛДСП «${(DECORS[p.mat.frontDecor]||DECORS.white).name}»`:`фасады ${fm.f.name.toLowerCase()} ${fm.t} мм${p.mat.frontNote?', '+p.mat.frontNote:''}`;
   const mat=`Корпус ${b.name} «${DECORS[p.decor].name}», ${fr}, кромка ПВХ ${fm.edge?(p.mat.edgeF===p.mat.edgeB?edgeMM(p.mat.edgeB)+' мм':`${edgeMM(p.mat.edgeF)} мм на фасадах и ${edgeMM(p.mat.edgeB)} мм на корпусе`):edgeMM(p.mat.edgeB)+' мм на корпусе'}`;
   if(p.kind==='kitchen'){const k=p.k,tn=t=>Object.fromEntries([...K_TYPES.base,...K_TYPES.wall])[t].toLowerCase(),corner=c.corner;
-    const row=(z,lab)=>k[z].length?`${lab}: ${k[z].map((m,i)=>`${modLabel(z,i,m)} ${m.w} мм — ${tn(m.type)}${HOB_ON.includes(m.type)&&hobOf(m)?', варочная панель':''}${m.type==='tallOven'&&K_TOP2[m.top2]?', '+K_TOP2[m.top2].name.replace(/ \(.*\)/,'').toLowerCase():''}`).join('; ')}.`:'';
+    const row=(z,lab)=>k[z].length?`${lab}: ${k[z].map((m,i)=>`${modLabel(z,i,m)} ${m.w} мм — ${tn(m.type)}${HOB_ON.includes(m.type)&&hobOf(m)?', варочная панель':''}${m.type==='tallOven'&&top2Of(m)?', '+top2Of(m).name.replace(/ \(.*\)/,'').toLowerCase():''}`).join('; ')}.`:'';
     const cn={blind:'глухой угловой модуль',L:'Г-образный угловой модуль со складными створками'};
     const tech=[...new Set(c.mods.flatMap(x=>[x.type==='dw'?'посудомоечная машина':'',x.type==='fridge'?'холодильник':'',x.type==='oven'||x.type==='tallOven'?'духовой шкаф':'',x.type==='hood'?'встраиваемая вытяжка':'',x.hob?'варочная панель':'',...x.appl.filter(a=>K_TOP2[a.kind]).map(a=>K_TOP2[a.kind].name.replace(/ \(.*\)/,'').toLowerCase())]).filter(Boolean))];
     return{title:corner?'Кухня угловая':'Кухня',lines:[corner?`Сторона А от угла ${Math.round(c.lenA)} мм, сторона Б от угла ${Math.round(c.lenB)} мм.`:`Нижний ряд ${c.allBase} мм, верхний ряд ${c.wallLen} мм.`,
@@ -2792,12 +2807,12 @@ function restore(text){
   window.addEventListener('resize',()=>{if(!$('#tryWrap').hidden)tryDraw()})}
 const LIM={cornerOpen:[300,600],W:[300,5000],W2:[600,5000],H:[300,3000],D:[250,900],plinth:[0,200],mezzH:[200,900]};
 const KLIM={golaL:[20,60],golaC:[20,50],golaW:[0,40],wall2H:[0,800],baseH:[500,900],baseD:[300,700],legs:[0,200],wallH:[300,1000],wallD:[200,450],wallY:[1100,1900],tallH:[1500,2700],fridgeH:[1200,2000],cBaseW:[700,1500],cBaseW2:[600,1200],cWallW:[400,1200],cWallW2:[400,900]};
-const MNUM={hobW:[200,900],hobD:[300,560],split:[0,1500]};
+const MNUM={hobW:[200,900],hobD:[300,560],split:[0,1500],apN:[300,1000],apW:[200,900],apD:[200,700],apH:[50,700],dwMin:[700,900],dwMax:[700,950],top2N:[300,700]};
 const CLIM={W:[300,2400],H:[300,1600],D:[250,700],plinth:[0,150],legs:[0,250]};
 const num=el=>{const v=Math.round(+el.value);return el.value===''||isNaN(v)?null:v};
 const inLim=(v,l)=>v!==null&&v>=l[0]&&v<=l[1];
 function limitsOf(el){const d=el.dataset;if(d.k&&LIM[d.k])return LIM[d.k];if(d.kk)return KLIM[d.kk];if(d.ck)return CLIM[d.ck];if(d.mw)return[100,1500];if(d.mnum)return MNUM[d.mnum.split(':')[2]];return null}
-function storedOf(el){const d=el.dataset;if(d.k)return P[d.k];if(d.kk)return P.k[d.kk];if(d.ck)return P.c[d.ck];if(d.mw){const [z,i]=d.mw.split(':');return P.k[z][+i].w}if(d.mnum){const [z,i,f]=d.mnum.split(':');return P.k[z][+i][f]||0}}
+function storedOf(el){const d=el.dataset;if(d.k)return P[d.k];if(d.kk)return P.k[d.kk];if(d.ck)return P.c[d.ck];if(d.mw){const [z,i]=d.mw.split(':');return P.k[z][+i].w}if(d.mnum){const [z,i,f]=d.mnum.split(':'),v=P.k[z][+i][f];return v??(AP_F.includes(f)?'':0)}}
 document.addEventListener('input',e=>{
   const el=e.target,d=el.dataset,lim=limitsOf(el);
   if(lim){const box=el.closest('.inwrap');if(box)box.classList.toggle('bad',!inLim(num(el),lim))}
@@ -2807,6 +2822,7 @@ document.addEventListener('input',e=>{
   if(d.kk){const v=num(el);if(inLim(v,KLIM[d.kk])){P.k[d.kk]=v;change()}return}
   if(d.ck){const v=num(el);if(inLim(v,CLIM[d.ck])){P.c[d.ck]=v;change()}return}
   if(d.mw){const [z,i]=d.mw.split(':'),v=num(el);if(inLim(v,[100,1500])){P.k[z][+i].w=v;activeSec=d.mw;change()}return}
+  if(d.mnum&&el.value===''&&AP_F.includes(d.mnum.split(':')[2])){const [z,i,f]=d.mnum.split(':');delete P.k[z][+i][f];activeSec=z+':'+i;change();return}
   if(d.mnum){const [z,i,f]=d.mnum.split(':'),v=num(el);if(inLim(v,MNUM[f])){P.k[z][+i][f]=v;activeSec=z+':'+i;change()}return}
   if(d.co){settings.company[d.co]=el.value;save();return}
   if(d.svc&&el.type==='number'){const v=el.value===''?(d.svc==='floor'?1:0):Math.round(+el.value);if(Number.isFinite(v)&&v>=0&&v<=(d.svc==='floor'?60:500)){P.svc[d.svc]=d.svc==='floor'?Math.max(1,v):v;change()}return}
@@ -2825,7 +2841,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const el=e.target,d=el.dataset,lim=limitsOf(el);
   // число вне допустимого: возвращаем то, по которому реально идёт расчёт, и говорим об этом
-  if(lim&&el.tagName==='INPUT'&&!inLim(num(el),lim)){el.value=storedOf(el);const box=el.closest('.inwrap');if(box)box.classList.remove('bad');
+  if(lim&&el.tagName==='INPUT'&&!(el.value===''&&d.mnum&&AP_F.includes(d.mnum.split(':')[2]))&&!inLim(num(el),lim)){el.value=storedOf(el);const box=el.closest('.inwrap');if(box)box.classList.remove('bad');
     toast(`Можно от ${lim[0]} до ${lim[1]} мм. Оставлено ${el.value} мм`);return}
   if(el.id==='pMezz'){P.mezz=el.checked;change()}
   else if(el.id==='showDoors'){showDoors=el.checked;renderBuild()}

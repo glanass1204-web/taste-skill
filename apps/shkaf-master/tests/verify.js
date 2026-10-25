@@ -165,6 +165,11 @@ const res=await pg.evaluate(()=>{
  {const p=base();p.D=480;p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];const c=M.calc(p,S),w=c.wings[0],q=Math.min(3,Math.max(1,Math.floor(w.ws[0]/480))),row=c.hw.find(h=>/Штанга выдвижная/.test(h[0]));
    // глубина 480: полка 460, ближайшая стандартная штанга не длиннее — 450; овальной штанги и флянцев нет
    ok(row&&row[0]==='Штанга выдвижная (торцевая) 450 мм'&&row[1]===q,'глубина 480: выдвижная штанга 450 мм, '+q+' шт');ok(!c.hw.some(h=>/овальная|Флянец/.test(h[0])),'глубина 480: без овальной штанги и флянцев')}
+ // удобство: штанга выше 1950 мм от пола; без антресоли верх зоны = толщина крыши, штанга на 70 ниже: 2700 − t − 70
+ {const p=base();p.H=2700;p.mezz=false;p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];const rh=2700-S.t-70;ok(M.calc(p,S).warn.some(x=>new RegExp('штанга на высоте '+rh+' мм').test(x.t)),'штанга '+rh+' мм от пола: предупреждение');
+  const q=base();q.H=2400;q.mezz=true;q.mezzH=450;q.sections=p.sections;ok(!M.calc(q,S).warn.some(x=>/штанга на высоте/.test(x.t)),'штанга 2400 − (450 + t) − 70 мм: без предупреждения');
+  const r=base();r.W=2000;r.sections=[{shelves:0,rod:false,drawers:2,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];ok(M.calc(r,S).warn.some(x=>/ящик шире 900 мм/.test(x.t)),'ящики в секции ~960 мм: предупреждение');
+  const m=base();m.meas.checks={radiator:true,door:true};const mw=M.calc(m,S).warn.map(x=>typeof x==='string'?x:x.t).join(' ');ok(/батарея/.test(mw)&&/дверь или окно/.test(mw),'отметки замера: напоминания про батарею и дверь')}
  {const L=D=>{const p=base();p.D=D;p.type='swing';p.sections=[{shelves:1,rod:true,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];const c=M.calc(p,S);return{c,row:c.hw.find(h=>/Штанга/.test(h[0]))}};
   ok(L(500).row[0]==='Штанга овальная','глубина 500: обычная штанга поперёк');ok(L(350).row[0]==='Штанга выдвижная (торцевая) 300 мм','глубина 350: полка 330 → штанга 300 мм');
   ok(L(270).row[0]==='Штанга выдвижная (торцевая) 250 мм','глубина 270: полка 250 → штанга 250 мм');const e=L(260);ok(!e.row&&e.c.warn.some(x=>x.lvl==='err'&&/выдвижная штанга/.test(x.t)),'глубина 260: штанга не помещается — ошибка');

@@ -538,6 +538,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     <h2>Настройки</h2>
     <div class="card app-card" id="installCard">
       <h3>Приложение на телефон</h3>
+      <p class="hint">Версия программы: <b id="appVer"></b>. Адрес всегда один и тот же — обновления приходят сами. Если видите старую версию, закройте программу совсем и откройте снова.</p>
       <div class="btns"><button class="btn" type="button" id="installBtn" hidden>Установить приложение</button></div>
       <ol class="steps" id="installSteps">
         <li><b>Android:</b> откройте приложение в Chrome → меню ⋮ → «Установить приложение» или «Добавить на главный экран».</li>
@@ -628,6 +629,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
+const APP_VER='19 от 25.10.2026';
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
@@ -2255,6 +2257,7 @@ function renderKp(){
 }
 
 function renderSettings(){
+  $('#appVer').textContent=APP_VER;
   const inp=(k,label,unit,val,grp)=>`<div class="field"><label for="s_${k}">${label}</label><div class="inwrap"><input id="s_${k}" data-s="${grp}:${k}" type="number" inputmode="decimal" value="${val}"><span>${unit}</span></div></div>`;
   $('#setMat').innerHTML=SET_MAT.map(([k,l,u])=>inp(k,l,u,settings[k],'')).join('');
   $('#setPrice').innerHTML=SET_PRICE.map(([k,l,u])=>inp(k,l,u,settings.p[k],'p')).join('');
@@ -2465,6 +2468,7 @@ const standalone=(()=>{try{return matchMedia('(display-mode: standalone)').match
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(tab==='set')renderSettings()});
 window.addEventListener('appinstalled',()=>{installEvt=null;toast('Приложение установлено')});
 if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&document.querySelector('link[rel="manifest"]')){
+  const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
 window.ShkafMaster={__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};

@@ -1,0 +1,32 @@
+const {chromium}=require('playwright');const fs=require('fs');
+const U='http://localhost:8770/taste-skill/apps/shkaf-master/';
+(async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});const ctx=await b.newContext({viewport:{width:390,height:844}});
+await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:'http://localhost:8770'});
+const pg=await ctx.newPage();const errs=[];pg.on('pageerror',e=>errs.push(e.message));const R=(k,v)=>console.log((v?'✓ ':'✗ ')+k);
+await pg.goto(U);await pg.evaluate(()=>navigator.serviceWorker.ready);await pg.reload();await pg.waitForTimeout(1500);
+R('приложение под управлением офлайн-кэша',await pg.evaluate(()=>!!navigator.serviceWorker.controller));
+const keys=await pg.evaluate(async()=>{const k=await caches.keys();const c=await caches.open(k[0]);return [k,(await c.keys()).map(r=>r.url.replace(location.origin,''))]});console.log('  кэш:',JSON.stringify(keys));
+// ===== без интернета =====
+await ctx.setOffline(true);await pg.waitForTimeout(300);R('сообщение «Нет интернета»',/Нет интернета/.test(await pg.$eval('#toast',e=>e.textContent)));
+await pg.reload();await pg.waitForTimeout(1500);
+R('открывается без сети',/₽/.test(await pg.$eval('#hdrPrice',e=>e.textContent)));
+R('шрифт Onest из кэша',await pg.evaluate(()=>document.fonts.check('16px Onest')));
+for(const t of ['parts','cut','cost','set','build']){await pg.click(`nav [data-tab="${t}"]`);await pg.waitForTimeout(200)}
+R('все вкладки открываются',!errs.length);
+await pg.click('#openProjects');await pg.click('#newProject');await pg.waitForTimeout(300);await pg.click('[data-kind="kitchen"]');await pg.waitForTimeout(300);
+R('новый заказ (кухня) считается',/₽/.test(await pg.$eval('#hdrPrice',e=>e.textContent)));
+await pg.click('[data-view="3d"]');await pg.waitForTimeout(4000);
+R('3D работает без сети',await pg.evaluate(()=>!!window.THREE&&!!document.querySelector('#v3canvas canvas')&&!/Не удалось/.test(document.querySelector('#v3msg').textContent)));
+await pg.click('#v3open');await pg.waitForTimeout(500);
+await pg.click('#openTry');await pg.waitForTimeout(1500);await pg.setInputFiles('#tryFile','room.jpg');await pg.waitForTimeout(1500);
+R('примерка на фото без сети',await pg.$eval('#tryStage',e=>!e.hidden)&&await pg.$eval('#tryFurn',e=>e.naturalWidth>0));
+await pg.click('#closeTry');
+await pg.click('nav [data-tab="cost"]');await pg.click('#openKp');await pg.waitForTimeout(3000);
+R('КП с 3D и фото без сети',await pg.$$eval('#kpSheet img',x=>x.length)>=2);await pg.click('#closeKp');
+await pg.click('#openProjects');await pg.click('#shareOrder');await pg.waitForTimeout(800);
+const link=await pg.evaluate(()=>navigator.clipboard.readText().catch(()=>document.querySelector('#shareText').value));R('ссылка коллеге без сети',/#o=z/.test(link));
+await pg.click('#closeProjects');
+await pg.reload();await pg.waitForTimeout(1500);
+R('заказ сохранился после перезапуска без сети',(await pg.$eval('#hdrName',e=>e.textContent))==='Новый заказ'&&await pg.evaluate(()=>JSON.parse(localStorage.getItem('shkaf.projects')).length)===2);
+console.log('ошибки страницы:',errs);
+await ctx.setOffline(false);await b.close()})();

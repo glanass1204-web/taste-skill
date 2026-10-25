@@ -704,7 +704,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='26 от 26.10.2026';
+const APP_VER='27 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -2833,6 +2833,10 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
 window.ShkafMaster={__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};
+// работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persisted().then(p=>{if(!p)navigator.storage.persist()}).catch(()=>{})}catch(e){}
+window.addEventListener('offline',()=>toast('Нет интернета — программа работает дальше, всё сохраняется на телефоне'));
+window.addEventListener('online',()=>toast('Интернет снова есть'));
 renderAll();
 checkInbox();window.addEventListener('hashchange',checkInbox);
 })();

@@ -11,7 +11,7 @@ const res=await pg.evaluate(N=>{const M=window.ShkafMaster,fails=[];let checks=0
  for(let n=0;n<N;n++){const p=M.newProject();const kind=pick(['wardrobe','kitchen','chest']);p.kind=kind;
   p.mat.body=pick(S.mat.bodies.map(x=>x.id));p.mat.front=pick(S.mat.fronts.map(x=>x.id));p.mat.top=pick(S.mat.tops.map(x=>x.id));p.mat.edgeF=pick(['0.4','0.8','1','2']);p.mat.edgeB=pick(['0.4','0.8','1','2']);
   p.hw.hinge=pick(S.cat.hinges.map(x=>x.id));p.hw.slide=pick(S.cat.slides.map(x=>x.id));p.hw.handle=pick(S.cat.handles.map(x=>x.id));p.hw.coupe=pick(S.cat.coupe.map(x=>x.id));
-  p.discount=pick([0,0,5,15]);p.walls={L:rnd()>.5,R:rnd()>.5,A:rnd()>.5,B:rnd()>.5};
+  p.discount=pick([0,0,5,15]);p.coupeSplit=pick([1,2,3]);p.coupeMat=pick(['mirror','tint','sand','photo']);p.walls={L:rnd()>.5,R:rnd()>.5,A:rnd()>.5,B:rnd()>.5};
   if(rnd()>.6)p.meas.w=[String(int(1200,5000)),'',''];if(rnd()>.6)p.meas.h=[String(int(2300,3000)),'',''];if(rnd()>.8)p.meas.wB=[String(int(1500,3500)),'',''];
   if(kind==='wardrobe'){p.shape=pick(['straight','straight','corner']);p.type=pick(['swing','swing','coupe']);p.W=int(800,4000);p.H=int(1600,2800);p.D=pick([350,450,560,600,650]);p.W2=int(900,2500);p.plinth=pick([0,60,80,100]);p.mezz=rnd()>.4;p.mezzH=int(300,600);
     p.sections=Array.from({length:int(1,5)},sec);p.sectionsB=Array.from({length:int(1,3)},sec);p.mirrors=int(0,3)}

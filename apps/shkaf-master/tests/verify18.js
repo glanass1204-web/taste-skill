@@ -36,7 +36,8 @@ const res=await pg.evaluate(()=>{
  // ---- купе
  for(const W of [1200,1600,2000,2400,3000])for(const cn of [0,2,3,4]){const p=base();p.type='coupe';p.W=W;p.coupeN=cn;p.D=600;p.sections=[{shelves:3,rod:false,drawers:0,baskets:0},{shelves:0,rod:true,drawers:0,baskets:0}];
    const r=M.calc(p,S),w=r.wings[0],cd=w.coupeD,tag=`купе ${W} дв${cn}`;
-   ok(cd.n*cd.w-(cd.n-1)*cd.sys.ov<=cd.ow&&cd.ow-(cd.n*cd.w-(cd.n-1)*cd.sys.ov)<cd.n,tag+` двери закрывают проём: ${cd.n}×${cd.w}−перехлёст vs ${cd.ow}`);
+   const ADD=cd.sys.addN&&cd.sys.addN[cd.n]!==undefined?cd.sys.addN[cd.n]:cd.sys.ov*({2:1,3:2,4:2,5:4}[cd.n]);ok(cd.add===ADD,tag+' сумма перехлёстов '+cd.add+' ≠ '+ADD);const last=cd.items[cd.n-1];ok(last.x+last.w<=cd.ow+cd.items[0].x+0.01&&cd.ow+cd.items[0].x-(last.x+last.w)<cd.n,tag+' последняя дверь доходит до края проёма');
+   ok(cd.n*cd.w-ADD<=cd.ow&&cd.ow-(cd.n*cd.w-ADD)<cd.n,tag+` двери закрывают проём: ${cd.n}×${cd.w}−перехлёст vs ${cd.ow}`);
    eq(cd.h,p.H-p.plinth-2*t-40,tag+' высота двери купе',0.5);
    eq(w.ws.reduce((a,b)=>a+b,0)+t*(w.ws.length+1),W,tag+' сумма секций');sanity(r,tag)}
  // ---- угловые распашные
@@ -134,7 +135,7 @@ const res=await pg.evaluate(()=>{
  {const ow0=(p)=>p.W-2*t;
   for(const id of ['std','aristo','absolut'])for(const W of [1600,2400,3000])for(const n of [2,3]){const p=base();p.type='coupe';p.W=W;p.D=600;p.coupeN=n;p.hw.coupe=id;p.sections=[{shelves:2,rod:false,drawers:0,baskets:0},{shelves:2,rod:false,drawers:0,baskets:0}];
     const r=M.calc(p,S),cd=r.wings[0].coupeD,sys=S_cat('coupe',id),innerH=p.H-p.plinth-2*t;
-    eq(cd.w,Math.floor((ow0(p)+sys.ov*(n-1))/n),`купе ${id} ${W} ${n}дв ширина двери`,0);eq(cd.h,Math.floor(innerH-sys.dh),`купе ${id} высота двери`,0)}
+    eq(cd.w,Math.floor((ow0(p)+(sys.addN&&sys.addN[n]!==undefined?sys.addN[n]:sys.ov*({2:1,3:2,4:2,5:4}[n])))/n),`купе ${id} ${W} ${n}дв ширина двери`,0);eq(cd.h,Math.floor(innerH-sys.dh),`купе ${id} высота двери`,0)}
   if(false){const p=base();p.type='coupe';p.W=1532;p.D=600;p.coupeN=2;p.hw.coupe='absolut';const cd=M.calc(p,S).wings[0].coupeD;eq(cd.w,Math.floor((1500+21)/2),'ABSOLUT по инструкции: (проём+21)/2',0)}}
  // ---- стены
  {const p=base();p.mirrors=0;p.walls.L=true;p.sections=[{shelves:3,rod:false,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0},{shelves:3,rod:false,drawers:0,baskets:0}];

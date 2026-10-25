@@ -349,6 +349,10 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
         <div class="field"><label for="pMz">Антресоль от верха</label><div class="inwrap"><input id="pMz" data-k="mezzH" inputmode="numeric" type="number"><span>мм</span></div></div>
         <div class="field" id="coupeNField"><label for="pCn">Дверей купе</label><div class="inwrap"><select id="pCn" data-k="coupeN"><option value="0">Авто</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div>
       </div>
+      <div class="grid2" id="coupeFillBox">
+        <div class="field"><label for="pCs2">Двери купе: вставки</label><div class="inwrap"><select id="pCs2" data-k="coupeSplit"><option value="1">Цельные</option><option value="2">Из 2 частей</option><option value="3">Из 3 частей (зеркало в середине)</option></select></div></div>
+        <div class="field"><label for="pCm">Зеркальная вставка</label><div class="inwrap"><select id="pCm" data-k="coupeMat"><option value="mirror">Зеркало серебро</option><option value="tint">Зеркало бронза / графит</option><option value="sand">Зеркало с пескоструйным рисунком</option><option value="photo">Стекло с фотопечатью</option></select></div></div>
+      </div>
       <label class="switch"><input type="checkbox" id="pMezz"> Антресольная полка</label>
       <div class="row"><span class="hint" id="lblSecA">Секций</span>
         <div class="stepper"><button type="button" id="secMinus" aria-label="Меньше секций">−</button><output id="secCount" class="num">3</output><button type="button" id="secPlus" aria-label="Больше секций">+</button></div></div>
@@ -629,12 +633,12 @@ const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, т�
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день',warranty:''},
   p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,basket:1900,mirror:3200,tie:30,
-     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
+     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeTint:4500,coupeSand:5500,coupePhoto:6500,coupeDiv:300,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
 const SET_MAT=[['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%'],['fMinArea','Мин. площадь заказного фасада','м²']];
 const SET_PRICE=[['hdf','Лист ХДФ','₽/лист'],['edge04','Кромка ПВХ 0,4 мм','₽/м'],['edge08','Кромка ПВХ 0,8 мм','₽/м'],['edge1','Кромка ПВХ 1 мм','₽/м'],['edge','Кромка ПВХ 2 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
   ['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
   ['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['mirror','Зеркало на фасад','₽/м²'],
-  ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeRail','Рельсы купе','₽/м'],
+  ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeTint','Купе: зеркало бронза/графит','₽/м²'],['coupeSand','Купе: зеркало с пескоструйным рисунком','₽/м²'],['coupePhoto','Купе: стекло с фотопечатью','₽/м²'],['coupeDiv','Купе: профиль разделительный','₽/м'],['coupeRail','Рельсы купе','₽/м'],
   ['topEnd','Планка торцевая столешницы','₽/шт'],['topJoint','Планка соединительная столешницы','₽/шт'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['hobCut','Вырез под варочную панель','₽/шт'],['grille','Решётка вентиляционная','₽/шт'],['hinge170','Петля 165–170° для угловых створок','₽/шт'],['hingeFold','Петля для складного фасада','₽/шт'],['plinthCorner','Угловой элемент цоколя','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт'],['hook','Крючок мебельный','₽/шт'],['wallFix','Крепление к стене (уголок с дюбелем)','₽/шт'],['gaslift','Газлифт','₽/шт'],['golaL','Профиль Gola L','₽/м'],['golaC','Профиль Gola C','₽/м'],['apron','Стеновая панель (фартук)','₽/м²'],['topPlinth','Плинтус для столешницы','₽/м'],['led','Подсветка (лента с профилем)','₽/м'],['ledPsu','Блок питания подсветки','₽/шт']];
 const SET_WORK=[['work','Сборка и доставка','% от материалов'],['markup','Наценка','%']];
 
@@ -669,10 +673,10 @@ const CATALOG={
     {id:'flush',name:'Врезная / профиль заподлицо',cc:0,len:100,proj:0,price:250},
     {id:'push',name:'Без ручек: толкатель push-to-open',cc:0,len:0,proj:0,price:300,push:true}],
   coupe:[
-    {id:'std',seg:'эконом',name:'Типовой алюминиевый профиль',dh:40,ov:26,src:'Высота двери = проём − 40 мм; ширина = (проём + 26 × число перехлёстов) / число дверей.'},
+    {id:'std',seg:'эконом',name:'Типовой алюминиевый профиль',dh:40,ov:26,src:'Высота двери = проём − 40 мм; ширина = (проём + 26 × число перехлёстов) / число дверей. Перехлёстов: 2 двери — 1, 3 двери — 2, 4 двери — 2 (передняя, задняя, задняя, передняя), 5 дверей — 4.'},
     {id:'aristo',seg:'средний',name:'Aristo',dh:40,ov:27,check:true,src:'По таблице расчёта Aristo: высота = проём − 40, ширина = (проём + 27 × перехлёсты) / двери. В других источниках перехлёст другой — сверьте с таблицей вашего профиля.'},
-    {id:'absolut',seg:'средний',name:'ABSOLUT',dh:40,ov:21,src:'Инструкция ABSOLUT: высота = проём − 40 мм, ширина двери = (проём + 21) / 2.'},
-    {id:'custom',seg:'другое',name:'Свой профиль — по таблице поставщика',dh:40,ov:26,custom:true,src:'Впишите вычет по высоте и перехлёст из таблицы вашего профиля.'}]};
+    {id:'absolut',seg:'средний',name:'ABSOLUT',dh:40,ov:21,addN:{2:21,3:49,4:42,5:105},iwL:39,iwG:41,ihL:59,ihG:61,itL:16,itG:18,imL:9,imG:11,ibL:51,ibG:53,idv:54,src:'Инструкция ABSOLUT (ручка Classic): высота = проём − 40 мм, ширина двери: 2 двери — (проём + 21) / 2, 3 — (проём + 49) / 3, 4 — (проём + 42) / 4, 5 — (проём + 105) / 5. Вставка ЛДСП 10 мм: ширина = дверь − 39, высота = дверь − 59; стекло/зеркало 4 мм: − 41 и − 61. С разделителем: верхняя вставка = до оси разделителя − 16 (стекло − 18), средняя − 9 (− 11), нижняя − 51 (− 53). Разделитель = дверь − 54.'},
+    {id:'custom',seg:'другое',name:'Свой профиль — по таблице поставщика',dh:40,ov:26,iwL:39,iwG:41,ihL:59,ihG:61,itL:16,itG:18,imL:9,imG:11,ibL:51,ibG:53,idv:54,custom:true,src:'Впишите вычет по высоте, перехлёст и вычеты для вставок из таблицы вашего профиля (по умолчанию — как у ABSOLUT).'}]};
 /* ---------- материалы ----------
    Формат листа и толщина корпуса влияют на раскрой и все размеры. Фасады бывают из той же ЛДСП,
    из ЛДСП другого декора (отдельные листы) или заказные (МДФ и др. — заказ в цех по м², без кромки ПВХ). */
@@ -724,7 +728,7 @@ const matItem=(k,id,st)=>{const m=(st||settings).mat||settings.mat;return m[k].f
 function frontMat(p,s){const f=matItem('fronts',p.mat.front,s);return{f,mat:f.kind==='body'?'ldsp':f.kind==='sheet'?'ldspF':'order',edge:f.kind!=='order',t:f.kind==='order'?f.t:s.t}}
 const frontFill=p=>{const f=matItem('fronts',p.mat.front);return f.kind==='body'?DECORS[p.decor].fill:f.kind==='sheet'?(DECORS[p.mat.frontDecor]||DECORS.white).fill:(FCOLORS[p.mat.frontColor]||FCOLORS.white).fill};
 const CAT_EDIT={hinges:['over','half','gap'],slides:['price'],handles:['cc','len','proj','price'],coupe:[]};
-const CAT_EDIT_CUSTOM={slides:['dW','dL'],coupe:['dh','ov']};
+const CAT_EDIT_CUSTOM={slides:['dW','dL'],coupe:['dh','ov','iwL','iwG','ihL','ihG','itL','itG','imL','imG','ibL','ibG','idv']};
 function catMerge(saved){const out={};
   for(const k of Object.keys(CATALOG)){const sv=(saved&&saved[k])||[];
     out[k]=CATALOG[k].map(d=>{const o={...d},x=sv.find(y=>y.id===d.id);if(x)[...CAT_EDIT[k],...(d.custom?CAT_EDIT_CUSTOM[k]||[]:[])].forEach(f=>{if(Number.isFinite(+x[f]))o[f]=+x[f]});return o})}
@@ -910,8 +914,12 @@ function calcWing(p,s,W,sections,blk,key,walls){
   }else{
     const ox0=bL||t,ox1=bR?W-bR:W-t,ow=ox1-ox0;
     const cn=+p.coupeN||(ow<=1600?2:ow<=2500?3:4);
-    const cs=HWp.coupe,dw=Math.floor((ow+cs.ov*(cn-1))/cn),dh=Math.floor(innerH-cs.dh);
-    coupeD={n:cn,w:dw,h:dh,ow,sys:cs,items:Array.from({length:cn},(_,i)=>({x:ox0+i*(dw-cs.ov),w:dw,h:dh}))};
+    // Сумма перехлёстов: у 4 дверей их два (передняя — задняя — задняя — передняя), как в инструкциях производителей;
+    // у ABSOLUT — своя таблица на 2–5 дверей (ручка Classic).
+    const cs=HWp.coupe,laps=cn===4?[1,0,1]:Array(cn-1).fill(1),add=cs.addN&&cs.addN[cn]!==undefined?cs.addN[cn]:cs.ov*laps.reduce((a,b)=>a+b,0);
+    const dw=Math.floor((ow+add)/cn),dh=Math.floor(innerH-cs.dh),per=add/laps.reduce((a,b)=>a+b,0);
+    const items=[];let xx=ox0;for(let i=0;i<cn;i++){items.push({x:xx,w:dw,h:dh,track:cn===4?[0,1,1,0][i]:i%2});xx+=dw-(i<cn-1?laps[i]*per:0)}
+    coupeD={n:cn,w:dw,h:dh,ow,sys:cs,add,laps,items};
     if(dw>1100)warn.push(ERR(`двери купе получаются ${dw} мм — шире 1100 мм профиль не выдержит. Увеличьте число дверей.`));
     if(dw<500)warn.push(`двери купе получаются ${dw} мм — уже 500 мм неудобно. Уменьшите число дверей.`);
     sections.forEach((c,i)=>{if((c.drawers||c.baskets)&&ws[i]>dw-60)warn.push(ERR(`секция ${i+1} (${Math.round(ws[i])} мм) шире, чем открывает дверь купе (${dw-60} мм): ящики и корзины упрутся в профиль двери. Поставьте их в более узкую секцию или добавьте секцию.`))});
@@ -940,6 +948,14 @@ function calcWing(p,s,W,sections,blk,key,walls){
     conf:4*per+2*(n-1)*per+(pl>0?8:0)+8*nd+4*seats+4*rails,supports:4*(shelves+mezzN+shoes),rods:rodSecs.length,rodM:rodSecs.reduce((a,b)=>a+b,0)/1000,nd,nb,slide,baskets};
 }
 
+// Вставки дверей купе: материалы и размеры. Высота части — до оси разделителя; вставка = часть − вычет системы профиля.
+const COUPE_MAT={mirror:{name:'зеркало серебро',p:'coupeMirror'},tint:{name:'зеркало бронза или графит',p:'coupeTint'},sand:{name:'зеркало с пескоструйным рисунком',p:'coupeSand'},photo:{name:'стекло с фотопечатью',p:'coupePhoto'}};
+function coupeSecs(d,n,M,sys){n=[1,2,3].includes(+n)?+n:1;M=COUPE_MAT[M]?M:'mirror';const hs=d.h/n,inf=sys&&sys.iwL!==undefined?sys:null;
+  const mats=n===1?[d.mirror?M:'ldsp']:n===2?(d.mirror?[M,'ldsp']:['ldsp','ldsp']):(d.mirror?['ldsp',M,'ldsp']:['ldsp','ldsp','ldsp']);
+  return mats.map((m,j)=>{const g=m!=='ldsp';let ih=null,iw=null;
+    if(inf){iw=Math.floor(d.w-(g?inf.iwG:inf.iwL));ih=Math.floor(n===1?d.h-(g?inf.ihG:inf.ihL):j===0?hs-(g?inf.itG:inf.itL):j===n-1?hs-(g?inf.ibG:inf.ibL):hs-(g?inf.imG:inf.imL))}
+    return{mat:m,h:hs,ih,iw}})}
+const coupeMatName=m=>m==='ldsp'?'ЛДСП 10 мм':COUPE_MAT[m].name;
 function calcWardrobe(p,s){
   const corner=p.shape==='corner',coupe=p.type==='coupe',A_L=p.cornerSide==='L';
   // Угол распашного шкафа: сторона Б отодвигается на толщину двери А плюс 4 мм, на обеих сторонах доборные планки.
@@ -985,11 +1001,14 @@ function calcWardrobe(p,s){
     const ma=mirrors.reduce((a,m)=>a+m.qty*m.L*m.Wd,0)/1e6;
     if(ma)hw.push(['Зеркало 4 мм на фасад, с обработкой',+ma.toFixed(2),'м²',pr.mirror]);
   }else{
-    const area=f=>doorsAll.filter(f).reduce((a,d)=>a+d.w*d.h,0)/1e6;
     hw.push(['Профиль купе (комплект на дверь)',doorsAll.length,'шт',pr.coupeProfile]);
-    const la=area(d=>!d.mirror),ma=area(d=>d.mirror);
-    if(la)hw.push(['Вставка ЛДСП в двери купе',+la.toFixed(2),'м²',pr.coupeFill]);
-    if(ma)hw.push(['Вставка зеркало в двери купе',+ma.toFixed(2),'м²',pr.coupeMirror]);
+    // площадь вставок: по точным размерам, если система профиля известна, иначе — по размеру двери
+    const sys=wings[0].coupeD.sys,ar={};let divM=0;
+    doorsAll.forEach(d=>{d.secs=coupeSecs(d,p.coupeSplit,p.coupeMat,sys);d.secs.forEach(sc=>ar[sc.mat]=(ar[sc.mat]||0)+(sc.ih!==null?sc.ih*sc.iw:d.w*sc.h)/1e6);divM+=(d.secs.length-1)*(d.w-(sys.idv||54))/1000});
+    if(ar.ldsp)hw.push(['Вставка ЛДСП в двери купе',+ar.ldsp.toFixed(2),'м²',pr.coupeFill]);
+    if(ar.mirror)hw.push(['Вставка зеркало в двери купе',+ar.mirror.toFixed(2),'м²',pr.coupeMirror]);
+    ['tint','sand','photo'].forEach(m=>{if(ar[m])hw.push([`Вставка: ${COUPE_MAT[m].name}`,+ar[m].toFixed(2),'м²',pr[COUPE_MAT[m].p]])});
+    if(divM)hw.push(['Профиль разделительный (горизонтальный)',+divM.toFixed(2),'м',pr.coupeDiv]);
     hw.push(['Рельсы верх + низ',+(2*sum(w=>w.coupeD.ow)/1000).toFixed(2),'м',pr.coupeRail]);
     handleRow(hw,HWp.handleIn,nd,'внутренние ящики');
   }
@@ -1046,9 +1065,9 @@ function drawFront(p,s,w){
         g+=`<path d="M${ox} ${y} L${hx} ${y+h/2} L${ox} ${y+h}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".6"/>`;
         g+=handleV(ox+(d.hinge==='L'?-50:50),y+h*.48-80,160,sw)});
     }else{
-      w.coupeD.items.forEach((d,i)=>{const y=t+20;
-        g+=`<rect x="${d.x}" y="${y}" width="${d.w}" height="${d.h}" fill="${d.mirror?MIRROR:fdec}" fill-opacity="${i%2?'.97':'.85'}" class="sv-ink" stroke-width="${sw}"/>`;
-        if(d.mirror)g+=mirrorRect(d.x+25,y+30,d.w-50,d.h-60);
+      w.coupeD.items.forEach((d,i)=>{const y=t+20,secs=d.secs||[{mat:d.mirror?'mirror':'ldsp',h:d.h}];let yy=y;
+        secs.forEach((sc,j)=>{const g2=sc.mat!=='ldsp';g+=`<rect x="${d.x}" y="${yy}" width="${d.w}" height="${sc.h}" fill="${g2?(sc.mat==='tint'?'#9C9188':MIRROR):fdec}" fill-opacity="${d.track?'.97':'.85'}" class="sv-ink" stroke-width="${sw}"/>`;
+          if(g2)g+=mirrorRect(d.x+25,yy+20,d.w-50,sc.h-40);if(j)g+=`<line x1="${d.x}" x2="${d.x+d.w}" y1="${yy}" y2="${yy}" class="sv-ink" stroke-width="${sw*3}"/>`;yy+=sc.h});
         g+=`<rect x="${d.x}" y="${y}" width="25" height="${d.h}" class="sv-mut" opacity=".55"/><rect x="${d.x+d.w-25}" y="${y}" width="25" height="${d.h}" class="sv-mut" opacity=".55"/>`});
     }
   }
@@ -1692,7 +1711,7 @@ function scene3dWardrobe(p,s,c){const t=s.t,H=p.H,D=p.D,pl=Math.max(0,p.plinth),
     if(!c.coupe){w.doors.forEach(d=>{const id=A.door(),door={id,hx:d.hinge==='L'?d.x:d.x+d.w,dir:d.hinge==='L'?-1:1,z:D+1};
         A(d.x,pl+2,D+1,d.w,d.h,fT,'front',{door});if(d.mirror)A(d.x+50,pl+52,D+1+fT,d.w-100,d.h-100,2,'mirror',{door})});
       if(w.blk.planka){const bx=w.blk.side==='L'?w.blk.w-FILLER:W-w.blk.w;A(bx,pl+2,D+1,FILLER,H-pl-4,fT,'front')}}
-    else w.coupeD.items.forEach((d,i)=>A(d.x,pl+t+20,D-24-(i%2?0:30),d.w,d.h,22,d.mirror?'mirror':'front',{coupe:1}));
+    else w.coupeD.items.forEach(d=>{const z=D-24-(d.track?0:30),secs=d.secs||[{mat:d.mirror?'mirror':'ldsp',h:d.h}];let top=pl+t+20+d.h;secs.forEach(sc=>{top-=sc.h;A(d.x,top,z,d.w,sc.h,22,sc.mat!=='ldsp'?'mirror':'front',{coupe:1})})});
     let rot=0,pos=[0,0,0];
     if(w.key==='B'){const off=c.coupe?0:fT+4;if(p.cornerSide==='L'){rot=Math.PI/2;pos=[0,0,p.W2]}else{rot=-Math.PI/2;pos=[p.W,0,p.D+off]}}
     groups.push({items:it,rot,pos})});
@@ -2022,7 +2041,7 @@ function renderWardrobeUI(c){
   $('#cornerBox').hidden=!corner;
   $('#lblW').textContent=corner?'Ширина А':'Ширина';
   $('#lblSecA').textContent=corner?'Секций на стороне А':'Секций';
-  $('#coupeNField').style.visibility=P.type==='coupe'?'visible':'hidden';
+  $('#coupeNField').style.visibility=P.type==='coupe'?'visible':'hidden';$('#coupeFillBox').hidden=P.type!=='coupe';$('#pCs2').value=String(P.coupeSplit||1);$('#pCm').value=P.coupeMat||'mirror';
   $('#secCount').textContent=P.sections.length;$('#secBCount').textContent=P.sectionsB.length;
   $('#mirCount').textContent=P.mirrors;$('#mirMax').textContent=`(из ${c.doorsAll.length})`;
   $('#showDoors').checked=showDoors;
@@ -2110,8 +2129,10 @@ function renderParts(){
   $('#partsHdf').innerHTML=partsTable(R.hdf,'ХДФ 3 мм',false);
   const el=$('#partsCoupe');el.hidden=!c.coupe;
   if(c.coupe){const cs=c.wings[0].coupeD.sys;el.innerHTML=`<h3>Двери купе — заказ в цех профиля</h3><div class="tbl-wrap"><table><thead><tr><th>Дверь</th><th class="r">Высота</th><th class="r">Ширина</th><th>Вставка</th></tr></thead><tbody>
-    ${c.wings.flatMap(w=>w.coupeD.items.map((d,i)=>`<tr><td>${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}</td><td class="r num">${d.h}</td><td class="r num">${d.w}</td><td>${d.mirror?'зеркало':'ЛДСП'}</td></tr>`)).join('')}</tbody></table></div>
-    <p class="hint">Профиль: ${esc(cs.name)}. ${c.wings.map(w=>`${c.corner?wingName(w.key)+': п':'П'}роём ${Math.round(w.coupeD.ow)} × ${Math.round(w.innerH)} мм`).join('. ')}. Высота двери = проём − ${cs.dh} мм, перехлёст ${cs.ov} мм. ${cs.check||cs.custom?'Сверьте с таблицей вашего профиля.':''}</p>`}
+    ${c.wings.flatMap(w=>w.coupeD.items.map((d,i)=>`<tr><td>${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}</td><td class="r num">${d.h}</td><td class="r num">${d.w}</td><td>${(d.secs||[]).map(sc=>coupeMatName(sc.mat)).join(' / ')||(d.mirror?'зеркало':'ЛДСП')}</td></tr>`)).join('')}</tbody></table></div>
+    ${cs.iwL!==undefined?`<h3 style="margin-top:12px">Вставки в двери — для цеха</h3><div class="tbl-wrap"><table><thead><tr><th>Дверь</th><th>Часть</th><th>Материал</th><th class="r">Высота</th><th class="r">Ширина</th></tr></thead><tbody>
+    ${c.wings.flatMap(w=>w.coupeD.items.flatMap((d,i)=>(d.secs||[]).map((sc,j)=>`<tr><td>${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}</td><td>${d.secs.length>1?['верх','середина','низ'][d.secs.length===2&&j===1?2:j]:'целая'}</td><td>${coupeMatName(sc.mat)}</td><td class="r num">${sc.ih}</td><td class="r num">${sc.iw}</td></tr>`))).join('')}</tbody></table></div>`:''}
+    <p class="hint">Профиль: ${esc(cs.name)}. ${c.wings.map(w=>`${c.corner?wingName(w.key)+': п':'П'}роём ${Math.round(w.coupeD.ow)} × ${Math.round(w.innerH)} мм`).join('. ')}. Высота двери = проём − ${cs.dh} мм, перехлёст ${cs.ov} мм. ${cs.iwL!==undefined?`Вставки посчитаны по вычетам системы: ЛДСП 10 мм — ширина двери − ${cs.iwL}, зеркало/стекло 4 мм — − ${cs.iwG}. Части делят дверь поровну по осям разделителей.`:'Размеры вставок для этой системы — по таблице поставщика профиля (в программе вычетов для неё нет).'} ${cs.check||cs.custom?'Сверьте с таблицей вашего профиля.':''}</p>`}
   const em=$('#partsMirror');em.hidden=!c.mirrors.length;
   if(c.mirrors.length)em.innerHTML=partsTable(c.mirrors,'Зеркала 4 мм — в стекольную мастерскую',false)+'<p class="hint">Зеркало меньше фасада на 50 мм с каждой стороны. Клеится на специальный клей для зеркал, кромка шлифованная.</p>';
   $('#orderText').value=orderText();$('#csvText').value=csvText();
@@ -2124,7 +2145,7 @@ function renderParts(){
   if(R.hdf.length){L.push('','ХДФ 3 мм:');R.hdf.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт`))}
   if(R.orders.length){L.push('',`Фасады на заказ (отдельно, в цех): ${fm.f.name} ${fm.t} мм${P.mat.frontNote?', цвет '+P.mat.frontNote:''}. Высота × ширина:`);R.orders.forEach((r,i)=>L.push(`${i+1}. ${r.name} — ${r.L} × ${r.Wd} — ${r.qty} шт`));L.push(`Площадь ~${fmt(R.cost.oArea,2)} м².`)}
   if(c.mirrors.length){L.push('','Зеркала 4 мм (отдельно, в стекольную мастерскую):');c.mirrors.forEach((r,i)=>L.push(`${i+1}. ${r.L} × ${r.Wd} — ${r.qty} шт, шлифованная кромка`))}
-  if(c.coupe){L.push('','Двери купе (высота × ширина):');c.wings.forEach(w=>w.coupeD.items.forEach((d,i)=>L.push(`${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}. ${d.h} × ${d.w} — вставка ${d.mirror?'зеркало':'ЛДСП'}`)))}
+  if(c.coupe){L.push('','Двери купе (высота × ширина):');c.wings.forEach(w=>w.coupeD.items.forEach((d,i)=>L.push(`${c.corner?(w.key==='A'?'А':'Б')+'-':''}${i+1}. ${d.h} × ${d.w} — ${(d.secs||[]).map(sc=>coupeMatName(sc.mat)+(sc.ih!==null?` ${sc.ih}×${sc.iw}`:'')).join(' / ')}`)))}
   L.push('',`Итого: ЛДСП корпуса ~${R.cl.sheets.length} л.${R.cf?`, ЛДСП фасадов ~${R.cf.sheets.length} л.`:''}, ХДФ ~${R.ch.sheets.length} л.${c.edges.length?`, кромка: ${edgeSum(c)}`:''}.`);
   return L.join('\n');
 }function csvText(){
@@ -2250,7 +2271,7 @@ function renderSettings(){
   $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>row(`${x.name} · ${x.seg}`,x.src||'',ci('hinges',x,'over','накладная, ₽')+ci('hinges',x,'half','полунакладная, ₽')+ci('hinges',x,'gap','зазор на перегородке, мм'))).join('')
    +`<h3 style="margin-top:14px">Направляющие</h3>`+C.slides.map(x=>row(`${x.name} · ${x.seg}`,x.src,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм',!x.custom)+ci('slides',x,'dL','короче направл., мм',!x.custom))).join('')
    +`<h3 style="margin-top:14px">Ручки</h3>`+C.handles.map(x=>row(x.name,'',ci('handles',x,'cc','межцентр, мм')+ci('handles',x,'len','длина, мм')+ci('handles',x,'proj','вынос, мм')+ci('handles',x,'price','₽ за шт'))).join('')
-   +`<h3 style="margin-top:14px">Профили купе</h3>`+C.coupe.map(x=>row(x.name,x.src,ci('coupe',x,'dh','проём − , мм',!x.custom)+ci('coupe',x,'ov','перехлёст, мм',!x.custom))).join('');
+   +`<h3 style="margin-top:14px">Профили купе</h3>`+C.coupe.map(x=>row(x.name,x.src,ci('coupe',x,'dh','проём − , мм',!x.custom)+ci('coupe',x,'ov','перехлёст, мм',!x.custom)+(x.custom?[['iwL','вставка ЛДСП: ширина −'],['iwG','зеркало: ширина −'],['ihL','ЛДСП цельная: высота −'],['ihG','зеркало цельное: высота −'],['itL','ЛДСП верх: −'],['itG','зеркало верх: −'],['imL','ЛДСП середина: −'],['imG','зеркало середина: −'],['ibL','ЛДСП низ: −'],['ibG','зеркало низ: −'],['idv','разделитель: дверь −']].map(([f,l])=>ci('coupe',x,f,l)).join(''):''))).join('');
   $$('[data-co]').forEach(el=>el.value=settings.company[el.dataset.co]||'');
   $('#installBtn').hidden=!installEvt;
   if(standalone)$('#installCard').hidden=true;
@@ -2362,7 +2383,7 @@ document.addEventListener('change',e=>{
   else if(d.sflag){const [w,i,f]=d.sflag.split(':'),sc=secsOf(w)[+i];sc[f]=el.checked;if(f==='seat'&&el.checked&&!sc.shoes)sc.shoes=1;activeSec=w+':'+i;change()}
   else if(d.mtype){const [z,i]=d.mtype.split(':'),m=P.k[z][+i];m.type=el.value;if(m.type==='tall'){m.shelves=Math.max(m.shelves,4)}if(m.type==='oven'||m.type==='tallOven'||m.type==='fridge')m.w=600;if(m.type==='tallOven'||m.type==='fridge')m.shelves=1;if(m.type==='dw'&&m.w!==450&&m.w!==600)m.w=600;if(m.type==='hood'&&m.w!==600&&m.w!==900)m.w=600;activeSec=d.mtype;change()}
   else if(d.ctype){const cl=P.c.cols[+d.ctype];cl.type=el.value;if(cl.type==='drawers'&&!cl.drawers)cl.drawers=3;if(cl.type!=='drawers'&&!cl.shelves)cl.shelves=1;activeSec='C:'+d.ctype;change()}
-  else if(d.k&&el.tagName==='SELECT'){const k=d.k;P[k]=k==='coupeN'?+el.value:el.value;change()}
+  else if(d.k&&el.tagName==='SELECT'){const k=d.k;P[k]=k==='coupeN'||k==='coupeSplit'?+el.value:el.value;change()}
 });
 function openTab(name){tab=name;
   $$('nav.tabs button').forEach(x=>{if(x.dataset.tab===name)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});

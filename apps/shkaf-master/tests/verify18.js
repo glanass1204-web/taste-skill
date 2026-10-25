@@ -1,7 +1,7 @@
 const {chromium}=require('playwright');const fs=require('fs');
 (async()=>{const b=await chromium.launch();const pg=await b.newPage();
 const errs=[];pg.on('pageerror',e=>errs.push(e.message));
-await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8').replace(/^[\s\S]*<body>/,'').replace(/<\/body>[\s\S]*$/,'')+'</body></html>');
+await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync('shkaf-master.html','utf8')+'</body></html>');
 await pg.waitForTimeout(500);
 const res=await pg.evaluate(()=>{
  const M=window.ShkafMaster,S=JSON.parse(JSON.stringify(M.settings()));S.t=18;S.sheetL=2750;S.sheetW=1830;const t=S.t,S_cat=(k,id)=>S.cat[k].find(x=>x.id===id),S_mat=(k,id)=>S.mat[k].find(x=>x.id===id),fails=[];let checks=0;

@@ -1,7 +1,7 @@
 // Независимая проверка: у каждой двери петли должны стоять на боковине или перегородке
 const {chromium}=require('playwright');const fs=require('fs');
 (async()=>{const b=await chromium.launch();const pg=await b.newPage();
-await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8').replace(/^[\s\S]*<body>/,'').replace(/<\/body>[\s\S]*$/,'')+'</body></html>');await pg.waitForTimeout(400);
+await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync('shkaf-master.html','utf8')+'</body></html>');await pg.waitForTimeout(400);
 const r=await pg.evaluate((HG)=>{const M=window.ShkafMaster,S=M.DEFAULT_SETTINGS,t=S.t,bad=[];let n=0;
  for(const side of ['L','R'])for(const W of [1200,1600,1800,2400,3000])for(const W2 of [1000,1400,2000])for(const nA of [1,2,3,4])for(const nB of [1,2,3])for(const co of [300,450,600]){
   const p=M.newProject();p.shape='corner';p.cornerSide=side;p.W=W;p.W2=W2;p.cornerOpen=co;p.mirrors=0;p.hw.hinge=HG;

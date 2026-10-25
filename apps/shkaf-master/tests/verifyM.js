@@ -1,6 +1,6 @@
 // Проверка: кухня без ручек (Gola), подъёмные фасады, антресоли, фартук/плинтус/подсветка, push-to-open, прихожая
 const {chromium}=require('playwright');const fs=require('fs');
-const FILE=process.argv[2]||require('path').join(__dirname,'..','index.html');
+const FILE=process.argv[2]||'shkaf-master.html';
 (async()=>{const b=await chromium.launch();const pg=await b.newPage();const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync(FILE,'utf8').replace(/^[\s\S]*<body>/,'').replace(/<\/body>[\s\S]*$/,'')+'</body></html>');
 await pg.waitForTimeout(500);

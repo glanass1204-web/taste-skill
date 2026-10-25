@@ -29,19 +29,19 @@
   --f-display:"Unbounded","Onest",system-ui,sans-serif;
   --f-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-  --r:12px;
+  --r:14px; --shadow:0 1px 2px rgb(29 34 39 / .05),0 2px 8px rgb(29 34 39 / .04);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#15181B; --surface:#1E2226; --ink:#E6E9EB; --muted:#98A1A8; --line:#30363B;
   --accent:#F2B705; --accent-ink:#15181B; --accent-soft:#3B3216;
   --cavity:#262B30; --warn:#FB8A4C; --warn-soft:#3A2418; --ok:#4ADE80; --ok-soft:#163A22; --err:#FF8A80; --err-soft:#401B18;
-  --g1:#27405E; --g2:#5A4618; --g3:#2C4A2C; --g4:#4D2F48; --g5:#373E44;
+  --g1:#27405E; --g2:#5A4618; --g3:#2C4A2C; --g4:#4D2F48; --g5:#373E44; --shadow:none;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#15181B; --surface:#1E2226; --ink:#E6E9EB; --muted:#98A1A8; --line:#30363B;
   --accent:#F2B705; --accent-ink:#15181B; --accent-soft:#3B3216;
   --cavity:#262B30; --warn:#FB8A4C; --warn-soft:#3A2418; --ok:#4ADE80; --ok-soft:#163A22; --err:#FF8A80; --err-soft:#401B18;
-  --g1:#27405E; --g2:#5A4618; --g3:#2C4A2C; --g4:#4D2F48; --g5:#373E44;
+  --g1:#27405E; --g2:#5A4618; --g3:#2C4A2C; --g4:#4D2F48; --g5:#373E44; --shadow:none;
   color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -65,7 +65,7 @@ main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 .view{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 h2{font-family:var(--f-display);font-weight:700;font-size:19px;margin:4px 0 0;text-wrap:balance;letter-spacing:-.01em}
 h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .hint{color:var(--muted);font-size:13px;margin:0}
 
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--cavity);border-radius:10px;padding:3px;gap:3px}
@@ -92,9 +92,6 @@ h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
 #v3canvas{height:min(62vh,520px);border-radius:8px;overflow:hidden;touch-action:none;background:var(--cavity)}
 #v3canvas canvas{display:block;width:100%;height:100%}
 .seg.mini{grid-auto-columns:auto}.seg.mini button{padding:6px 12px;font-size:13px}
-details.meas summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-details.meas summary::-webkit-details-marker{display:none}
-details.meas summary::before{content:'▸';color:var(--muted)}details.meas[open] summary::before{content:'▾'}
 .checks{display:flex;flex-wrap:wrap;gap:10px 18px}
 .photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .photos .ph{position:relative}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}
@@ -186,7 +183,37 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
 .sec-group{grid-column:1/-1;margin-top:4px}
 @media (max-width:420px){.grid3{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat b{font-size:17px}.total b{font-size:28px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-.kind-seg button{padding:10px 6px}
+.kind-seg{padding:4px;gap:4px;border-radius:14px}
+.kind-seg button{padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:11px;font-size:13px;line-height:1.2}
+.kind-seg svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}
+.kind-seg button[aria-pressed="true"] svg{color:var(--ink)}
+.kind-seg button[aria-pressed="true"]{box-shadow:inset 0 -3px 0 var(--accent),0 1px 2px rgb(0 0 0 / .15)}
+details.fold>summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:10px;row-gap:3px;margin:-14px;padding:14px;min-height:52px;border-radius:var(--r)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary>h3{grid-column:1}
+details.fold>summary>.hint{grid-column:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
+details.fold>summary::after{content:"";grid-column:2;grid-row:1/span 2;width:8px;height:8px;margin-right:4px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+details.fold[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+details.fold[open]>summary{margin-bottom:-2px}
+details.fold:not([open]){gap:0}
+details.fold[open]>summary>.hint{display:none}
+details.fold[open]>summary>.hint .st{display:none}
+details.mini-fold summary{cursor:pointer;font-size:14px;font-weight:500}
+details.mini-fold[open] summary{margin-bottom:8px}
+.st{display:inline-block;flex:none;font-size:11px;font-weight:600;letter-spacing:.02em;border-radius:999px;padding:1px 8px;background:var(--cavity);color:var(--ink);font-family:var(--f-body)}
+.proj .meta .st{margin-top:5px;display:table}
+.proj .meta .st{color:var(--ink)}.proj .meta .st-work{color:var(--accent-ink)}.proj .meta .st-done{color:var(--ok)}
+.st-meas{background:var(--g1)}.st-deal{background:var(--g2)}.st-work{background:var(--accent);color:var(--accent-ink)}.st-inst{background:var(--g3)}.st-done{background:var(--ok-soft);color:var(--ok)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sumstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px}
+.sumstrip>*{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:9px 10px;text-align:left;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sumstrip small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sumstrip b{font-size:17px;font-weight:600;white-space:nowrap}
+.sumstrip i{font-style:normal;font-size:12px;color:var(--muted);font-weight:500}
+.sumstrip button{cursor:pointer}
+.sumstrip button:active,.kind-seg button:active,nav.tabs button:active{transform:scale(.97)}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;flex:none}
+.mark svg{width:21px;height:21px;fill:none;stroke:var(--accent-ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .presets{display:flex;gap:8px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:500}
 .chip:hover{border-color:var(--accent)}
@@ -233,6 +260,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
 
 <header class="top">
   <div class="top-row">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M9.5 11v2M14.5 11v2"/></svg></div>
     <div class="brand"><small>Шкаф-Мастер</small><b id="hdrName">Шкаф</b></div>
     <button class="price-chip" id="hdrPrice" type="button" aria-label="Открыть смету">0 ₽</button>
     <button class="icon-btn" id="openProjects" type="button">Заказы</button>
@@ -242,17 +270,18 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
 <main>
   <!-- ИЗДЕЛИЕ -->
   <section class="view" id="view-build">
-    <div class="card">
+    <details class="card fold" id="orderBox"><summary><h3>Заказ и клиент</h3><span class="hint" id="orderSum"></span></summary>
       <div class="field text"><label for="pName">Название заказа</label><div class="inwrap"><input id="pName" data-k="name" type="text" autocomplete="off"></div></div>
       <div class="grid2">
         <div class="field text"><label for="pClient">Клиент</label><div class="inwrap"><input id="pClient" data-k="client" type="text" autocomplete="off" placeholder="Имя"></div></div>
         <div class="field text"><label for="pPhone">Телефон</label><div class="inwrap"><input id="pPhone" data-k="phone" type="tel" autocomplete="off" placeholder="+7"></div></div>
       </div>
+      <div class="field"><label for="pStatus">Этап заказа</label><div class="inwrap"><select id="pStatus" data-status="1"></select></div></div>
       <div class="field text"><label for="pAddr">Адрес</label><div class="inwrap"><input id="pAddr" data-k="address" type="text" autocomplete="off" placeholder="Город, улица, дом"></div></div>
-    </div>
+    </details>
 
-    <details class="card meas" id="measBox">
-      <summary><h3 style="display:inline">Замер помещения</h3> <span class="hint" id="msSumTop"></span></summary>
+    <details class="card meas fold" id="measBox">
+      <summary><h3>Замер помещения</h3><span class="hint" id="msSumTop"></span></summary>
       <div class="field"><label id="msLblW">Ширина места, мм: вверху · посередине · внизу</label>
         <div class="grid3"><div class="inwrap"><input id="ms_w0" data-meas="w:0" type="number" inputmode="numeric" placeholder="—" aria-label="Ширина вверху"></div><div class="inwrap"><input id="ms_w1" data-meas="w:1" type="number" inputmode="numeric" placeholder="—" aria-label="Ширина посередине"></div><div class="inwrap"><input id="ms_w2" data-meas="w:2" type="number" inputmode="numeric" placeholder="—" aria-label="Ширина внизу"></div></div></div>
       <div class="field" id="msWB"><label>Длина стены Б, мм: вверху · посередине · внизу</label>
@@ -280,43 +309,12 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
     </details>
 
     <div class="seg kind-seg" role="group" aria-label="Что делаем">
-      <button type="button" data-kind="wardrobe">Шкаф</button>
-      <button type="button" data-kind="kitchen">Кухня</button>
-      <button type="button" data-kind="chest">Комод, тумба</button>
+      <button type="button" data-kind="wardrobe"><svg viewBox="0 0 32 32"><rect x="5" y="3" width="22" height="26" rx="1.5"/><path d="M16 3v26M5 25h22M13.5 13v3M18.5 13v3"/></svg>Шкаф</button>
+      <button type="button" data-kind="kitchen"><svg viewBox="0 0 32 32"><rect x="3" y="4" width="26" height="8" rx="1"/><path d="M3 16h26M4 16v12h24V16M12 16v12M20 16v12M10 8h2M20 8h2M7 20h2M15 20h2M23 20h2"/></svg>Кухня</button>
+      <button type="button" data-kind="chest"><svg viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="20" rx="1.5"/><path d="M5 12.7h22M5 19.3h22M7 26v3M25 26v3M14 9.4h4M14 16h4M14 22.6h4"/></svg>Комод, тумба</button>
     </div>
 
     <div id="checkLine"></div>
-
-    <div class="card" id="matPanel">
-      <h3>Материалы</h3>
-      <div class="grid2">
-        <div class="field"><label for="mBody">Корпус</label><div class="inwrap"><select id="mBody" data-mat="body"></select></div></div>
-        <div class="field"><label for="mFront">Фасады</label><div class="inwrap"><select id="mFront" data-mat="front"></select></div></div>
-        <div class="field" id="mFDecorF"><label for="mFDecor">Декор фасадов</label><div class="inwrap"><select id="mFDecor" data-mat="frontDecor"></select></div></div>
-        <div class="field" id="mFColorF"><label for="mFColor">Цвет фасадов на чертеже</label><div class="inwrap"><select id="mFColor" data-mat="frontColor"></select></div></div>
-        <div class="field text" id="mFNoteF"><label for="mFNote">Цвет / плёнка по каталогу цеха</label><div class="inwrap"><input id="mFNote" data-matnote="1" type="text" autocomplete="off" placeholder="Например, RAL 9003 матовый"></div></div>
-        <div class="field" id="mEdgeFF"><label for="mEdgeF">Кромка фасадов</label><div class="inwrap"><select id="mEdgeF" data-mat="edgeF"></select></div></div>
-        <div class="field"><label for="mEdgeB">Кромка корпуса</label><div class="inwrap"><select id="mEdgeB" data-mat="edgeB"></select></div></div>
-        <div class="field" id="mTopF"><label for="mTop">Столешница</label><div class="inwrap"><select id="mTop" data-mat="top"></select></div></div>
-      </div>
-      <p class="hint" id="matInfo"></p>
-    </div>
-
-    <div class="card" id="hwPanel">
-      <h3>Фурнитура и стены</h3>
-      <div class="grid2">
-        <div class="field"><label for="hwHinge">Петли</label><div class="inwrap"><select id="hwHinge" data-hw="hinge"></select></div></div>
-        <div class="field"><label for="hwSlide">Направляющие ящиков</label><div class="inwrap"><select id="hwSlide" data-hw="slide"></select></div></div>
-        <div class="field"><label for="hwHandle" id="lblHandle">Ручки</label><div class="inwrap"><select id="hwHandle" data-hw="handle"></select></div></div>
-        <div class="field" id="hwInField"><label for="hwHandleIn">Ручки внутренних ящиков</label><div class="inwrap"><select id="hwHandleIn" data-hw="handleIn"></select></div></div>
-        <div class="field" id="hwCoupeField"><label for="hwCoupe">Профиль купе</label><div class="inwrap"><select id="hwCoupe" data-hw="coupe"></select></div></div>
-      </div>
-      <p class="hint" id="hwInfo"></p>
-      <div class="row" style="justify-content:flex-start;gap:16px">
-        <label class="switch"><input type="checkbox" id="wallL" data-wall="L"> <span id="lblWallL">Слева стена вплотную</span></label>
-        <label class="switch"><input type="checkbox" id="wallR" data-wall="R"> <span id="lblWallR">Справа стена вплотную</span></label>
-      </div>
-    </div>
 
     <!-- шкаф -->
     <div class="card" id="wPanel">
@@ -368,6 +366,22 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
         <button type="button" data-kshape="straight">Прямая</button>
         <button type="button" data-kshape="corner">Угловая</button>
       </div>
+      <details class="cornerbox" id="kAutoBox">
+        <summary><b>Собрать кухню под размер</b> <span class="hint">— длина, класс и техника, остальное программа разложит сама</span></summary>
+        <div class="grid3">
+          <div class="field"><label for="kaLA" id="kaLAl">Длина кухни</label><div class="inwrap"><input id="kaLA" type="number" inputmode="numeric"><span>мм</span></div></div>
+          <div class="field" id="kaLBF"><label for="kaLB">Сторона Б</label><div class="inwrap"><input id="kaLB" type="number" inputmode="numeric"><span>мм</span></div></div>
+          <div class="field"><label for="kaCls">Класс</label><div class="inwrap"><select id="kaCls"><option value="">Оставить фурнитуру и фасады</option><option value="econ">Эконом: ЛДСП, КДМ, шариковые</option><option value="mid">Средний: МДФ ПВХ, Boyard</option><option value="prem">Премиум: эмаль, Blum</option></select></div></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label for="kaDw">Посудомойка</label><div class="inwrap"><select id="kaDw"><option value="">Нет</option><option value="450">45 см</option><option value="600" selected>60 см</option></select></div></div>
+          <div class="field"><label for="kaOv">Духовка</label><div class="inwrap"><select id="kaOv"><option value="">Нет</option><option value="under" selected>Под варочной панелью</option><option value="tall">В пенале с СВЧ</option></select></div></div>
+        </div>
+        <label class="switch"><input type="checkbox" id="kaHob" checked> Варочная панель и вытяжка</label>
+        <label class="switch"><input type="checkbox" id="kaFr"> Холодильник в пенале</label>
+        <div class="btns"><button class="btn" type="button" id="kaGo">Собрать</button></div>
+        <p class="hint" id="kaMsg">Программа подберёт порядок модулей без ошибок: мойка, посудомойка рядом, панель с вытяжкой, остальное — модули до 600 мм ровно в размер. Текущие модули заменятся.</p>
+      </details>
       <div class="grid3">
         <div class="field"><label for="kBH">Нижние, корпус</label><div class="inwrap"><input id="kBH" data-kk="baseH" inputmode="numeric" type="number"><span>мм</span></div></div>
         <div class="field"><label for="kBD">Нижние, глубина</label><div class="inwrap"><input id="kBD" data-kk="baseD" inputmode="numeric" type="number"><span>мм</span></div></div>
@@ -398,22 +412,6 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
       <label class="switch"><input type="checkbox" data-kchk="topPlinth"> Плинтус для столешницы</label>
       <label class="switch"><input type="checkbox" data-kchk="led"> Подсветка под верхними шкафами</label>
       <p class="hint" id="kSummary"></p>
-      <details class="cornerbox" id="kAutoBox">
-        <summary><b>Собрать кухню под размер</b> <span class="hint">— длина, класс и техника, остальное программа разложит сама</span></summary>
-        <div class="grid3">
-          <div class="field"><label for="kaLA" id="kaLAl">Длина кухни</label><div class="inwrap"><input id="kaLA" type="number" inputmode="numeric"><span>мм</span></div></div>
-          <div class="field" id="kaLBF"><label for="kaLB">Сторона Б</label><div class="inwrap"><input id="kaLB" type="number" inputmode="numeric"><span>мм</span></div></div>
-          <div class="field"><label for="kaCls">Класс</label><div class="inwrap"><select id="kaCls"><option value="">Оставить фурнитуру и фасады</option><option value="econ">Эконом: ЛДСП, КДМ, шариковые</option><option value="mid">Средний: МДФ ПВХ, Boyard</option><option value="prem">Премиум: эмаль, Blum</option></select></div></div>
-        </div>
-        <div class="grid3">
-          <div class="field"><label for="kaDw">Посудомойка</label><div class="inwrap"><select id="kaDw"><option value="">Нет</option><option value="450">45 см</option><option value="600" selected>60 см</option></select></div></div>
-          <div class="field"><label for="kaOv">Духовка</label><div class="inwrap"><select id="kaOv"><option value="">Нет</option><option value="under" selected>Под варочной панелью</option><option value="tall">В пенале с СВЧ</option></select></div></div>
-        </div>
-        <label class="switch"><input type="checkbox" id="kaHob" checked> Варочная панель и вытяжка</label>
-        <label class="switch"><input type="checkbox" id="kaFr"> Холодильник в пенале</label>
-        <div class="btns"><button class="btn" type="button" id="kaGo">Собрать</button></div>
-        <p class="hint" id="kaMsg">Программа подберёт порядок модулей без ошибок: мойка, посудомойка рядом, панель с вытяжкой, остальное — модули до 600 мм ровно в размер. Текущие модули заменятся.</p>
-      </details>
     </div>
 
     <!-- комод / тумба -->
@@ -452,7 +450,37 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
         <p class="hint" id="v3msg"></p>
       </div>
     </div>
+    <div class="sumstrip" id="sumStrip"></div>
     <div id="buildAlerts"></div>
+
+    <details class="card fold" id="matPanel"><summary><h3>Материалы</h3><span class="hint" id="matSum"></span></summary>
+      <div class="grid2">
+        <div class="field"><label for="mBody">Корпус</label><div class="inwrap"><select id="mBody" data-mat="body"></select></div></div>
+        <div class="field"><label for="mFront">Фасады</label><div class="inwrap"><select id="mFront" data-mat="front"></select></div></div>
+        <div class="field" id="mFDecorF"><label for="mFDecor">Декор фасадов</label><div class="inwrap"><select id="mFDecor" data-mat="frontDecor"></select></div></div>
+        <div class="field" id="mFColorF"><label for="mFColor">Цвет фасадов на чертеже</label><div class="inwrap"><select id="mFColor" data-mat="frontColor"></select></div></div>
+        <div class="field text" id="mFNoteF"><label for="mFNote">Цвет / плёнка по каталогу цеха</label><div class="inwrap"><input id="mFNote" data-matnote="1" type="text" autocomplete="off" placeholder="Например, RAL 9003 матовый"></div></div>
+        <div class="field" id="mEdgeFF"><label for="mEdgeF">Кромка фасадов</label><div class="inwrap"><select id="mEdgeF" data-mat="edgeF"></select></div></div>
+        <div class="field"><label for="mEdgeB">Кромка корпуса</label><div class="inwrap"><select id="mEdgeB" data-mat="edgeB"></select></div></div>
+        <div class="field" id="mTopF"><label for="mTop">Столешница</label><div class="inwrap"><select id="mTop" data-mat="top"></select></div></div>
+      </div>
+      <p class="hint" id="matInfo"></p>
+    </details>
+
+    <details class="card fold" id="hwPanel"><summary><h3>Фурнитура и стены</h3><span class="hint" id="hwSum"></span></summary>
+      <div class="grid2">
+        <div class="field"><label for="hwHinge">Петли</label><div class="inwrap"><select id="hwHinge" data-hw="hinge"></select></div></div>
+        <div class="field"><label for="hwSlide">Направляющие ящиков</label><div class="inwrap"><select id="hwSlide" data-hw="slide"></select></div></div>
+        <div class="field"><label for="hwHandle" id="lblHandle">Ручки</label><div class="inwrap"><select id="hwHandle" data-hw="handle"></select></div></div>
+        <div class="field" id="hwInField"><label for="hwHandleIn">Ручки внутренних ящиков</label><div class="inwrap"><select id="hwHandleIn" data-hw="handleIn"></select></div></div>
+        <div class="field" id="hwCoupeField"><label for="hwCoupe">Профиль купе</label><div class="inwrap"><select id="hwCoupe" data-hw="coupe"></select></div></div>
+      </div>
+      <p class="hint" id="hwInfo"></p>
+      <div class="row" style="justify-content:flex-start;gap:16px">
+        <label class="switch"><input type="checkbox" id="wallL" data-wall="L"> <span id="lblWallL">Слева стена вплотную</span></label>
+        <label class="switch"><input type="checkbox" id="wallR" data-wall="R"> <span id="lblWallR">Справа стена вплотную</span></label>
+      </div>
+    </details>
 
     <div style="display:flex;flex-direction:column;gap:8px">
       <h3 id="contentTitle">Наполнение секций</h3>
@@ -540,13 +568,13 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
       <h3>Приложение на телефон</h3>
       <p class="hint">Версия программы: <b id="appVer"></b>. Адрес всегда один и тот же — обновления приходят сами. Если видите старую версию, закройте программу совсем и откройте снова.</p>
       <div class="btns"><button class="btn" type="button" id="installBtn" hidden>Установить приложение</button></div>
-      <ol class="steps" id="installSteps">
+      <details class="mini-fold"><summary>Как установить на телефон</summary><ol class="steps" id="installSteps">
         <li><b>Android:</b> откройте приложение в Chrome → меню ⋮ → «Установить приложение» или «Добавить на главный экран».</li>
         <li><b>iPhone:</b> откройте в Safari → кнопка «Поделиться» → «На экран Домой».</li>
         <li>После установки значок появится на главном экране, приложение работает без интернета.</li>
-      </ol>
+      </ol></details>
     </div>
-    <div class="card"><h3>Ваша мастерская</h3>
+    <details class="card fold"><summary><h3>Ваша мастерская</h3></summary>
       <p class="hint">Попадает в коммерческое предложение.</p>
       <div class="grid2">
         <div class="field text"><label for="coName">Название</label><div class="inwrap"><input id="coName" data-co="name" type="text" autocomplete="off" placeholder="Мебель на заказ"></div></div>
@@ -555,24 +583,24 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
         <div class="field text"><label for="coLead">Срок изготовления</label><div class="inwrap"><input id="coLead" data-co="lead" type="text" autocomplete="off"></div></div>
         <div class="field text"><label for="coWar">Гарантия</label><div class="inwrap"><input id="coWar" data-co="warranty" type="text" autocomplete="off" placeholder="Например, 2 года на корпус и фурнитуру"></div></div>
       </div>
-    </div>
-    <div class="card"><h3>Материал и раскрой</h3><div class="grid2" id="setMat"></div>
-      <label class="switch"><input type="checkbox" id="sGrain"> Учитывать текстуру (детали не поворачиваются)</label></div>
-    <div class="card"><h3>Материалы</h3>
+    </details>
+    <details class="card fold"><summary><h3>Материал и раскрой</h3></summary><div class="grid2" id="setMat"></div>
+      <label class="switch"><input type="checkbox" id="sGrain"> Учитывать текстуру (детали не поворачиваются)</label></details>
+    <details class="card fold"><summary><h3>Материалы</h3></summary>
       <p class="hint">Цены вашего поставщика. Толщина и формат листа влияют на раскрой и размеры деталей.</p>
-      <div id="setMat2"></div></div>
-    <div class="card"><h3>Каталог фурнитуры</h3>
+      <div id="setMat2"></div></details>
+    <details class="card fold"><summary><h3>Каталог фурнитуры</h3></summary>
       <p class="hint">Поставьте цены вашего поставщика. Размеры ручек и вычеты для направляющих влияют на расчёт и проверки — берите их из карточки товара или инструкции.</p>
-      <div id="setCat"></div></div>
-    <div class="card"><h3>Цены, ₽</h3><div class="grid2" id="setPrice"></div></div>
-    <div class="card"><h3>Работа и прибыль</h3><div class="grid2" id="setWork"></div></div>
-    <div class="card"><h3>Резервная копия</h3>
+      <div id="setCat"></div></details>
+    <details class="card fold"><summary><h3>Цены, ₽</h3></summary><div class="grid2" id="setPrice"></div></details>
+    <details class="card fold"><summary><h3>Работа и прибыль</h3></summary><div class="grid2" id="setWork"></div></details>
+    <details class="card fold"><summary><h3>Резервная копия</h3></summary>
       <p class="hint">Все заказы и цены в одном файле. Сохраните его, чтобы не потерять данные при смене телефона.</p>
       <div class="btns"><button class="btn" type="button" id="dlBackup">Сохранить копию</button><button class="btn ghost" type="button" id="copyBackup">Скопировать как текст</button></div>
       <div class="btns"><label class="btn ghost" for="restoreFile" style="cursor:pointer">Загрузить из файла</label><input id="restoreFile" type="file" accept=".json,application/json" hidden></div>
       <textarea class="copy" id="backupText" aria-label="Текст резервной копии" placeholder="Или вставьте сюда текст копии"></textarea>
       <div class="btns"><button class="btn ghost" type="button" id="restoreText">Восстановить из текста</button></div>
-    </div>
+    </details>
     <div class="btns"><button class="btn danger" type="button" id="resetSet">Вернуть цены по умолчанию</button></div>
   </section>
 </main>
@@ -589,12 +617,13 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--ink);background:var(--acce
   <div class="panel" role="dialog" aria-label="Заказы">
     <div class="row"><h2>Заказы</h2><button class="icon-btn" type="button" id="closeProjects">Закрыть</button></div>
     <div class="btns"><button class="btn" type="button" id="newProject">+ Новый заказ</button><button class="btn ghost" type="button" id="dupProject">Копия текущего</button></div>
-    <h3 style="margin-top:6px">Новый заказ из шаблона</h3>
-    <div id="tplList" style="display:flex;flex-direction:column;gap:6px"></div>
-    <div class="row" style="gap:8px"><div class="inwrap" style="flex:1"><input id="tplName" type="text" autocomplete="off" placeholder="Название шаблона" aria-label="Название шаблона"></div><button class="btn ghost" type="button" id="tplSave">Сохранить текущее как шаблон</button></div>
     <h3 style="margin-top:10px">Мои заказы</h3>
     <p class="hint" id="storageNote"></p>
+    <div class="presets" id="stFilter" role="group" aria-label="Этап заказа"></div>
     <div id="projList" style="display:flex;flex-direction:column;gap:8px"></div>
+    <h3 style="margin-top:10px">Новый заказ из шаблона</h3>
+    <div id="tplList" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div class="row" style="gap:8px"><div class="inwrap" style="flex:1"><input id="tplName" type="text" autocomplete="off" placeholder="Название шаблона" aria-label="Название шаблона"></div><button class="btn ghost" type="button" id="tplSave">Сохранить текущее как шаблон</button></div>
   </div>
 </div>
 
@@ -629,7 +658,9 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='19 от 25.10.2026';
+const APP_VER='20 от 25.10.2026';
+const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
+let stFilter='';
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
@@ -758,7 +789,7 @@ function newProject(){return norm({id:uid(),name:'Новый заказ',client:
   shape:'straight',type:'swing',W:1800,H:2400,D:560,W2:1400,cornerSide:'L',cornerOpen:450,plinth:80,mezz:true,mezzH:450,coupeN:0,decor:'sonoma',mirrors:1,
   sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],mat:{edgeF:'1',edgeB:'0.8'},updated:Date.now()})}
 function norm(p){
-  p.kind=p.kind||'wardrobe';p.address=p.address||'';
+  p.kind=p.kind||'wardrobe';p.address=p.address||'';if(!STATUS_NAME[p.status])p.status='calc';
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
   [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
@@ -2006,9 +2037,19 @@ function renderBuild(){
   const all=issues(),errs=all.filter(x=>x.lvl==='err'),wrn=all.filter(x=>x.lvl!=='err');
   $('#buildAlerts').innerHTML=(errs.length?`<div class="alert err"><b>Так делать нельзя — исправьте:</b>${errs.map(w=>`<span>• ${esc(w.t)}</span>`).join('')}</div>`:'')+(wrn.length?`<div class="alert" style="margin-top:8px"><b>Обратите внимание:</b>${wrn.map(w=>`<span>• ${esc(w.t)}</span>`).join('')}</div>`:'')+((c.notes||[]).length?`<p class="hint" style="margin-top:8px">${c.notes.map(esc).join('<br>')}</p>`:'');
   renderMeas();$('#msSumTop').textContent=(()=>{const ws=measNum(P.meas.w),hs=measNum(P.meas.h);return ws.length||hs.length?`${ws.length?Math.min(...ws):'—'} × ${hs.length?Math.min(...hs):'—'} мм`:'не заполнен'})();
-  renderMat();renderHw();
+  renderMat();renderHw();renderOrderSum();
+  {const sel=id=>{const o=$(id).selectedOptions[0];return o?o.textContent.replace(/\s*·.*$/,''):''},vis=id=>!$(id).closest('.field').hidden;
+   $('#matSum').textContent=[sel('#mBody'),'фасады: '+sel('#mFront'),vis('#mTop')?'столешница: '+sel('#mTop'):''].filter(Boolean).join(' · ');
+   $('#hwSum').textContent=[sel('#hwHinge'),sel('#hwSlide'),vis('#hwCoupe')?sel('#hwCoupe'):sel('#hwHandle')].filter(Boolean).join(' · ')}
+  {const n=c.parts.reduce((a,x)=>a+x.qty,0),sh=R.cl.sheets.length+(R.cf?R.cf.sheets.length:0);
+   $('#sumStrip').innerHTML=`<button type="button" data-go="parts"><small>Деталей</small><b class="num">${n}</b></button><button type="button" data-go="cut"><small>Листов</small><b class="num">${sh}</b></button><button type="button" data-go="parts"><small>Кромка</small><b class="num">${fmt(c.edges.reduce((a,e)=>a+e.m,0),0)}<i> м</i></b></button>`+
+     (c.weight?`<div><small>Вес</small><b class="num">~${fmt(Math.round(c.weight))}<i> кг</i></b></div>`:'')}
   if(kind==='wardrobe')renderWardrobeUI(c);else if(kind==='kitchen')renderKitchenUI(c);else renderChestUI(c);
 }
+function renderOrderSum(){
+  const sel=$('#pStatus');if(sel.options.length!==STATUS.length)sel.innerHTML=STATUS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
+  if(document.activeElement!==sel)sel.value=P.status;
+  $('#orderSum').innerHTML=`<span class="st st-${P.status}">${STATUS_NAME[P.status]}</span>`+esc([P.client,P.phone].filter(Boolean).join(' · ')||'клиент не указан')}
 function renderMat(){
   const m=P.mat,k=P.kind,f=matItem('fronts',m.front),b=matItem('bodies',m.body),top=matItem('tops',m.top);
   const fill=(id,list,val,lab)=>{$(id).innerHTML=list.map(x=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(lab?lab(x):x.name)}</option>`).join('')};
@@ -2300,13 +2341,15 @@ function builtinTemplates(){const t=[],mk=(name,f)=>{const p=newProject();f(p);t
   Object.entries(PRESETS).forEach(([k,v])=>mk(v.name,p=>{p.kind='chest';const c=clone(v);delete c.name;p.c=c}));
   return t}
 const allTemplates=()=>[...builtinTemplates(),...(settings.templates||[])];
-function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
+function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',status:'calc',updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
 function renderProjects(){
   $('#storageNote').textContent=storageOk?'Заказы сохраняются на этом телефоне. Делайте резервную копию в настройках.':'Сохранение недоступно в этом окне. Скопируйте заказ, чтобы не потерять расчёт.';
   const meta=p=>p.kind==='kitchen'?(p.k.shape==='corner'?`кухня угловая · А ${p.k.base.reduce((a,m)=>a+m.w,0)+p.k.cBaseW} · Б ${p.k.baseB.reduce((a,m)=>a+m.w,0)} мм`:`кухня · ${p.k.base.reduce((a,m)=>a+m.w,0)} мм`):p.kind==='chest'?`комод, тумба · ${p.c.W}×${p.c.H}×${p.c.D}`:`${p.shape==='corner'?`${p.W}×${p.W2}`:p.W}×${p.H}×${p.D} · ${p.shape==='corner'?'угловой, ':''}${p.type==='coupe'?'купе':'распашной'}`;
   $('#tplList').innerHTML=allTemplates().map(t=>`<div class="proj"><div class="meta"><b>${esc(t.name)}</b><span>${t.builtin?'встроенный':'мой шаблон'} · ${KIND_NAME[t.data.kind]}</span></div><button class="btn ghost" type="button" data-tpl="${t.id}">Создать</button>${t.builtin?'':`<button class="btn ghost" type="button" data-deltpl="${t.id}" aria-label="Удалить шаблон">✕</button>`}</div>`).join('');
-  $('#projList').innerHTML=[...projects].sort((a,b)=>b.updated-a.updated).map(p=>`<div class="proj${p.id===curId?' cur':''}">
-    <div class="meta"><b>${esc(p.name||'Без названия')}</b><span class="num">${meta(p)}${p.client?' · '+esc(p.client):''}</span></div>
+  const cnt=st=>projects.filter(p=>!st||p.status===st).length;if(stFilter&&!cnt(stFilter))stFilter='';
+  $('#stFilter').innerHTML=[['','Все'],...STATUS].filter(([k])=>!k||cnt(k)).map(([k,l])=>`<button class="chip" type="button" data-stf="${k}" aria-pressed="${stFilter===k}">${l} <span class="num">${cnt(k)}</span></button>`).join('');
+  $('#projList').innerHTML=[...projects].filter(p=>!stFilter||p.status===stFilter).sort((a,b)=>b.updated-a.updated).map(p=>`<div class="proj${p.id===curId?' cur':''}">
+    <div class="meta"><b>${esc(p.name||'Без названия')}</b><span class="num">${meta(p)}${p.client?' · '+esc(p.client):''}</span><span class="st st-${p.status}">${STATUS_NAME[p.status]}</span></div>
     ${p.id===curId?'<span class="hint">открыт</span>':`<button class="btn ghost" type="button" data-open="${p.id}">Открыть</button>`}
     <button class="btn ghost" type="button" data-del="${p.id}" aria-label="Удалить">✕</button></div>`).join('');
 }
@@ -2347,7 +2390,7 @@ document.addEventListener('input',e=>{
   const el=e.target,d=el.dataset,lim=limitsOf(el);
   if(lim){const box=el.closest('.inwrap');if(box)box.classList.toggle('bad',!inLim(num(el),lim))}
   if(d.k&&el.tagName!=='SELECT'){const k=d.k;
-    if(['name','client','phone','address'].includes(k)){P[k]=el.value;$('#hdrName').textContent=P.name||'Без названия';save();return}
+    if(['name','client','phone','address'].includes(k)){P[k]=el.value;$('#hdrName').textContent=P.name||'Без названия';renderOrderSum();save();return}
     const v=num(el);if(inLim(v,LIM[k])){P[k]=v;change()}return}
   if(d.kk){const v=num(el);if(inLim(v,KLIM[d.kk])){P.k[d.kk]=v;change()}return}
   if(d.ck){const v=num(el);if(inLim(v,CLIM[d.ck])){P.c[d.ck]=v;change()}return}
@@ -2386,6 +2429,7 @@ document.addEventListener('change',e=>{
   else if(d.sflag){const [w,i,f]=d.sflag.split(':'),sc=secsOf(w)[+i];sc[f]=el.checked;if(f==='seat'&&el.checked&&!sc.shoes)sc.shoes=1;activeSec=w+':'+i;change()}
   else if(d.mtype){const [z,i]=d.mtype.split(':'),m=P.k[z][+i];m.type=el.value;if(m.type==='tall'){m.shelves=Math.max(m.shelves,4)}if(m.type==='oven'||m.type==='tallOven'||m.type==='fridge')m.w=600;if(m.type==='tallOven'||m.type==='fridge')m.shelves=1;if(m.type==='dw'&&m.w!==450&&m.w!==600)m.w=600;if(m.type==='hood'&&m.w!==600&&m.w!==900)m.w=600;activeSec=d.mtype;change()}
   else if(d.ctype){const cl=P.c.cols[+d.ctype];cl.type=el.value;if(cl.type==='drawers'&&!cl.drawers)cl.drawers=3;if(cl.type!=='drawers'&&!cl.shelves)cl.shelves=1;activeSec='C:'+d.ctype;change()}
+  else if(d.status){P.status=el.value;save();renderOrderSum()}
   else if(d.k&&el.tagName==='SELECT'){const k=d.k;P[k]=k==='coupeN'||k==='coupeSplit'?+el.value:el.value;change()}
 });
 function openTab(name){tab=name;
@@ -2395,6 +2439,7 @@ function focusCard(id){const el=document.getElementById(id);el&&el.scrollIntoVie
 document.addEventListener('click',e=>{
   const b=e.target.closest('button,[data-sec],[data-mod],[data-col]');if(!b)return;const d=b.dataset;
   if(d.tab){openTab(d.tab);return}
+  if(d.go){openTab(d.go);return}
   if(b.id==='hdrPrice'){openTab('cost');return}
   if(d.view){show3D(d.view==='3d');return}
   if(b.id==='msFit'){fitToMeas();return}
@@ -2449,8 +2494,9 @@ document.addEventListener('click',e=>{
   if(b.id==='resetSet'){if(d.armed){const co=settings.company;const tpl=settings.templates;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.templates=tpl;settings.cat=catMerge(null);settings.mat=matMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
     else{d.armed=1;b.textContent='Нажмите ещё раз, чтобы сбросить'}return}
   if(b.id==='openProjects'){renderProjects();$('#projOverlay').hidden=false;return}
+  if(d.stf!==undefined){stFilter=d.stf;renderProjects();return}
   if(b.id==='closeProjects'){$('#projOverlay').hidden=true;return}
-  if(b.id==='newProject'||b.id==='dupProject'){const np=b.id==='newProject'?newProject():Object.assign(clone(P),{id:uid(),name:(P.name||'Заказ')+' (копия)'});
+  if(b.id==='newProject'||b.id==='dupProject'){const np=b.id==='newProject'?newProject():Object.assign(clone(P),{id:uid(),name:(P.name||'Заказ')+' (копия)',status:'calc'});
     if(b.id==='newProject')np.kind=P.kind;projects.push(np);P=np;curId=np.id;activeSec='';$('#projOverlay').hidden=true;change();openTab('build');toast('Заказ создан');return}
   if(d.tpl){const tp=allTemplates().find(x=>x.id===d.tpl);if(!tp)return;const np=fromTemplate(tp);projects.push(np);P=np;curId=np.id;activeSec='';$('#projOverlay').hidden=true;change();openTab('build');toast('Заказ создан из шаблона');return}
   if(b.id==='tplSave'){const nm=($('#tplName').value||'').trim()||P.name||'Мой шаблон',data=clone(P);data.meas=null;settings.templates=settings.templates||[];settings.templates.push({id:'u_'+uid(),name:nm,data});$('#tplName').value='';save();renderProjects();toast('Шаблон сохранён');return}

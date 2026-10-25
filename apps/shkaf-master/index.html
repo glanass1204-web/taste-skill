@@ -719,7 +719,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='30 от 26.10.2026';
+const APP_VER='31 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -1178,11 +1178,12 @@ function drawFront(p,s,w){
     const x0=w.xs[i],cw=w.ws[i],x1=x0+cw,zT=w.zTop,zB=w.zBot,sp=w.sp||0;
     if(p.mezz)g+=R(x0,p.mezzH,cw,t,dec);
     if(sp&&(sc.drawers||sc.baskets)){const hh=(sc.drawers+sc.baskets)*200;g+=R(x0,zB-hh,sp,hh,dec,'opacity=".8"')+R(x1-sp,zB-hh,sp,hh,dec,'opacity=".8"')}
-    for(let j=0;j<sc.drawers;j++){const y=zB-200*(j+1)+8;g+=R(x0+sp+2,y,cw-2*sp-4,184,dec)+handleH(x0+cw*.35,y+40,cw*.3,sw)}
+    for(let j=0;j<sc.drawers;j++){const y=zB-200*(j+1)+8;g+=R(x0+sp+2,y,cw-2*sp-4,184,dec)+handleH(x0+cw*.35,y+40,cw*.3,sw)+`<text x="${x0+cw/2}" y="${y+130}" font-size="${fs*.58}" text-anchor="middle" class="sv-txt">${Math.round(cw-2*sp-4)}×176</text>`}
     for(let j=0;j<sc.baskets;j++){const y=zB-200*(sc.drawers+j+1)+30;
       g+=`<rect x="${x0+12}" y="${y}" width="${cw-24}" height="160" fill="none" class="sv-ink" stroke-width="${sw*1.4}" rx="${sw*3}"/>`;
       for(let q=1;q<6;q++)g+=`<line x1="${x0+12+(cw-24)*q/6}" x2="${x0+12+(cw-24)*q/6}" y1="${y}" y2="${y+160}" class="sv-ink" stroke-width="${sw*.6}" opacity=".5"/>`;
-      g+=`<line x1="${x0+12}" x2="${x1-12}" y1="${y+80}" y2="${y+80}" class="sv-ink" stroke-width="${sw*.6}" opacity=".5"/>`}
+      g+=`<line x1="${x0+12}" x2="${x1-12}" y1="${y+80}" y2="${y+80}" class="sv-ink" stroke-width="${sw*.6}" opacity=".5"/>`;
+      g+=`<text x="${x0+cw/2}" y="${y+80+fs*.2}" font-size="${fs*.55}" text-anchor="middle" class="sv-txt" paint-order="stroke" stroke="var(--surface)" stroke-width="${fs*.18}">корзина ${Math.round(cw-2*sp)}</text>`}
     const dTop=zB-(sc.drawers+sc.baskets)*200;
     let shTop=zT;
     const pu=w.pull&&w.pull.find(x=>x.i===i);
@@ -1628,6 +1629,7 @@ function drawKitchenSide(p,s,r,sd){
       if(f.kind==='lift'){g+=`<path d="M${fx+f.w/2-40} ${fy+f.h*.55} l40 -40 l40 40" fill="none" class="sv-ink" stroke-width="${sw*1.2}" opacity=".45"/>`;if(!f.noHandle)g+=handleH(fx+f.w*.35,fy+f.h-Math.min(40,f.h*.2),f.w*.3,sw)}
       if(f.noHandle){}else if(f.kind==='door'){const hx=f.hinge==='L'?fx+f.w-40:fx+40;g+=isWall?handleV(hx,fy+f.h-200+2,140,sw):handleV(hx,fy-2+(f.h+4)*.08,Math.min(160,(f.h+4)*.25),sw)}
       if(f.kind==='drawer'&&!f.noHandle)g+=handleH(fx+f.w*.35,fy+Math.min(40,f.h*.25),f.w*.3,sw);
+      if(f.kind==='drawer'&&f.h>=fs*1.6)g+=`<text x="${fx+f.w/2}" y="${fy+f.h/2+fs*.45}" font-size="${fs*.6}" text-anchor="middle" class="sv-txt">${Math.round(f.w)}×${Math.round(f.h)}</text>`;
       if((f.kind==='dw'||f.kind==='fridge')&&!f.noHandle)g+=handleH(fx+f.w*.35,fy+Math.min(60,f.h*.08),f.w*.3,sw);
       if(f.kind==='dw')g+=`<text x="${fx+f.w/2}" y="${fy+f.h*.55}" font-size="${fs*.7}" text-anchor="middle" class="sv-mut">посудомойка</text>`;
       if(f.kind==='fridge'&&f.y<10)g+=`<text x="${fx+f.w/2}" y="${fy+f.h*.55}" font-size="${fs*.7}" text-anchor="middle" class="sv-mut">холодильник</text>`;
@@ -1729,7 +1731,7 @@ function drawChest(p,s,r){
   if(lg)g+=`<rect x="${t*2}" y="${H}" width="${t*2.5}" height="${lg}" class="sv-mut"/><rect x="${W-t*4.5}" y="${H}" width="${t*2.5}" height="${lg}" class="sv-mut"/>`;
   for(let i=1;i<n;i++)g+=R(r.xs[i]-t,t,t,H-pl-2*t,dec);
   c.cols.forEach((cl,i)=>{const fx=r.fr[i].x,fw=r.fr[i].w,fy=t+2,x0=r.xs[i],cw=r.colWs[i];
-    if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(r.fz-3*(m-1))/m;for(let j=0;j<m;j++){const y=fy+j*(fh+3);g+=R(fx,y,fw,fh,fdec)+handleH(fx+fw*.35,y+fh/2,fw*.3,sw)}}
+    if(cl.type==='drawers'){const m=Math.max(1,cl.drawers),fh=(r.fz-3*(m-1))/m;for(let j=0;j<m;j++){const y=fy+j*(fh+3);g+=R(fx,y,fw,fh,fdec)+handleH(fx+fw*.35,y+fh/2,fw*.3,sw)+(fh>=fs*1.8?`<text x="${fx+fw/2}" y="${y+fh/2+fs*.95}" font-size="${fs*.55}" text-anchor="middle" class="sv-txt">${Math.round(fw)}×${Math.round(fh)}</text>`:'')}}
     else if(cl.type==='door'){const nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;for(let j=0;j<nd;j++){const dx=fx+j*(dw+3),hingeL=(r.ch[i]||[])[j]?r.ch[i][j]==='L':(nd===2?j===0:i<n/2),ox=hingeL?dx+dw:dx,hx=hingeL?dx:dx+dw;
         g+=R(dx,fy,dw,r.fz,fdec)+`<path d="M${ox} ${fy} L${hx} ${fy+r.fz/2} L${ox} ${fy+r.fz}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".55"/>`+handleV(ox+(hingeL?-40:40),fy+r.fz*.15,Math.min(140,r.fz*.3),sw)}}
     else{for(let j=0;j<cl.shelves;j++)g+=R(x0,t+(H-pl-2*t)*(j+1)/(cl.shelves+1),cw,t,dec)}
@@ -1879,11 +1881,22 @@ function scene3dWardrobe(p,s,c){const HD=HW(p,s).handle,t=s.t,H=p.H,D=p.D,pl=Mat
     if(!c.coupe){w.doors.forEach(d=>{const id=A.door(),door={id,hx:d.hinge==='L'?d.x:d.x+d.w,dir:d.hinge==='L'?-1:1,z:D+1};
         A(d.x,pl+2,D+1,d.w,d.h,fT,'front',{door});handle3D(A,HD,d.hinge==='L'?d.x+d.w-50:d.x+50,pl+2+d.h*0.5,D+1+fT,true,{door});if(d.mirror)A(d.x+50,pl+52,D+1+fT,d.w-100,d.h-100,2,'mirror',{door})});
       if(w.blk.planka){const bx=w.blk.side==='L'?w.blk.w-FILLER:W-w.blk.w;A(bx,pl+2,D+1,FILLER,H-pl-4,fT,'front')}}
-    else w.coupeD.items.forEach(d=>{const z=D-24-(d.track?0:30),secs=d.secs||[{mat:d.mirror?'mirror':'ldsp',h:d.h}];let top=pl+t+20+d.h;secs.forEach(sc=>{top-=sc.h;A(d.x,top,z,d.w,sc.h,22,sc.mat!=='ldsp'?'mirror':'front',{coupe:1})})});
+    else{const its=w.coupeD.items,cd=w.coupeD,taken=new Set();
+      // «открыть»: передние двери уезжают на соседнюю заднюю (у каждой задней — не больше одной передней), задние при касании — за переднюю
+      its.forEach((d,j)=>{const nb=[j+1,j-1].filter(q=>q>=0&&q<its.length&&its[q].track!==d.track);let tgt=nb.find(q=>d.track===1&&!taken.has(q));if(tgt!==undefined)taken.add(tgt);
+        const any=nb[0],dx=tgt!==undefined?its[tgt].x-d.x:0,dxTap=any!==undefined?its[any].x-d.x:0,z=D-24-(d.track?0:30),secs=d.secs||[{mat:d.mirror?'mirror':'ldsp',h:d.h}],e={coupe:{id:j,dx,dxTap}};let top=pl+t+20+d.h;
+        secs.forEach(sc=>{top-=sc.h;A(d.x,top,z,d.w,sc.h,22,sc.mat!=='ldsp'?'mirror':'front',e)});
+        // вертикальные профили-ручки и горизонтальные профили между частями
+        A(d.x,pl+t+20,z+22,14,d.h,6,'metal',e);A(d.x+d.w-14,pl+t+20,z+22,14,d.h,6,'metal',e);
+        let yy=pl+t+20+d.h;secs.slice(0,-1).forEach(sc=>{yy-=sc.h;A(d.x+14,yy-5,z+22,d.w-28,10,4,'metal',e)})});
+      // рельсы: нижний на дне, верхний под крышей
+      A(cd.items[0].x,pl+t,D-60,cd.ow,8,58,'metal');A(cd.items[0].x,H-t-18,D-60,cd.ow,18,58,'metal')}
     let rot=0,pos=[0,0,0];
     if(w.key==='B'){const off=c.coupe?0:fT+4;if(p.cornerSide==='L'){rot=Math.PI/2;pos=[0,0,p.W2]}else{rot=-Math.PI/2;pos=[p.W,0,p.D+off]}}
     // размеры: ширина по полу спереди, ширины секций сверху (в свету — как на чертеже), высота и глубина справа
-    const fz=D+fT+2,dims=[{a:[0,0,fz],b:[W,0,fz],o:[0,0,260],t:W},...w.ws.map((sw,i)=>({a:[w.xs[i],H,fz],b:[w.xs[i]+sw,H,fz],o:[0,110,0],t:Math.round(sw),small:1}))];
+    const lbls=[];w.sections.forEach((sc,i)=>{const L=secLayout(p,s,w,i),x0=w.xs[i],cw=w.ws[i],sp=w.sp||0;
+      L.drawers.forEach(d=>lbls.push({lbl:[x0+cw/2,H-d.y-d.h/2,shD+t+4],t:`${Math.round(cw-2*sp-4)}×176`,small:1,inner:1}));L.baskets.forEach(bk=>lbls.push({lbl:[x0+cw/2,H-bk.y-bk.h/2,shD],t:`корзина ${Math.round(cw-2*sp)}`,small:1,inner:1}))});
+    const fz=D+fT+2,dims=[...lbls,{a:[0,0,fz],b:[W,0,fz],o:[0,0,260],t:W},...w.ws.map((sw,i)=>({a:[w.xs[i],H,fz],b:[w.xs[i]+sw,H,fz],o:[0,110,0],t:Math.round(sw),small:1}))];
     if(w.key==='A')dims.push({a:[W,0,fz],b:[W,H,fz],o:[220,0,0],t:H},{a:[W,0,0],b:[W,0,D],o:[220,0,0],t:D});
     groups.push({items:it,rot,pos,dims})});
   const walls=[{x:0,z:0,len:p.W,rot:0}];if(c.corner)walls.push(p.cornerSide==='L'?{x:0,z:0,len:p.W2,rot:-Math.PI/2}:{x:p.W,z:0,len:p.W2,rot:-Math.PI/2,right:true});
@@ -1929,7 +1942,7 @@ function scene3dKitchen(p,s,c){const HD=HW(p,s).handle,k=p.k,t=s.t,fT=frontMat(p
     let rot=0,pos=[0,0,0];
     if(sd.key==='B'){if(L.AL){rot=Math.PI/2;pos=[0,0,sd.cx]}else{rot=-Math.PI/2;pos=[L.sides[0].cx,0,0]}}
     // размеры: модули нижнего ряда и общая длина по полу, модули верхнего ряда сверху; справа — высота до столешницы, фартук, верхние шкафы
-    const ms=c.mods.filter(m=>m.side===sd.key),low=ms.filter(m=>!(m.zone.startsWith('wall')||m.zone==='cWall')).sort((a,b)=>a.x-b.x),up=ms.filter(m=>m.zone==='wall'||m.zone==='wallB'||m.zone==='cWall').sort((a,b)=>a.x-b.x),dims=[];
+    const ms=c.mods.filter(m=>m.side===sd.key),lbls=ms.flatMap(m=>m.fronts.filter(fr=>fr.kind==='drawer').map(fr=>({lbl:[m.x+fr.x+fr.w/2,m.y0+fr.y+fr.h/2,m.d+fT+4],t:`${Math.round(fr.w)}×${Math.round(fr.h)}`,small:1}))),low=ms.filter(m=>!(m.zone.startsWith('wall')||m.zone==='cWall')).sort((a,b)=>a.x-b.x),up=ms.filter(m=>m.zone==='wall'||m.zone==='wallB'||m.zone==='cWall').sort((a,b)=>a.x-b.x),dims=[...lbls];
     if(low.length){const zf=k.baseD+fT+2,x0=Math.min(...low.map(m=>m.x)),x1=Math.max(...low.map(m=>m.x+m.w));
       low.forEach(m=>dims.push({a:[m.x,0,zf],b:[m.x+m.w,0,zf],o:[0,0,200],t:Math.round(m.w),small:1}));if(low.length>1)dims.push({a:[x0,0,zf],b:[x1,0,zf],o:[0,0,650],t:Math.round(x1-x0)});
       const wt=k.legs+k.baseH+(k.worktop?tT:0);dims.push({a:[x1,0,zf],b:[x1,wt,zf],o:[220,0,0],t:wt});
@@ -1951,6 +1964,7 @@ function scene3dChest(p,s,c){const HD=HW(p,s).handle,cc=p.c,t=s.t,W=cc.W,Hb=c.Hb
     else{for(let j=0;j<cl.shelves;j++)A(x0,y0+t+(Hb-pl-2*t)*(j+1)/(cl.shelves+1),0,cw,t,D-20,'body');
       if(cl.type==='door'){const nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),id=A.door();const door={id,hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1};A(dx,y0,D+1,dw,fz,fT,'front',{door});handle3D(A,HD,hg==='L'?dx+dw-40:dx+40,y0+fz-fz*.15-Math.min(140,fz*.3)/2,D+1+fT,true,{door})}}}});
   const H=yb+Hb,fz=D+fT+2,dims=[{a:[0,0,fz],b:[W,0,fz],o:[0,0,220],t:W},{a:[W,0,fz],b:[W,H,fz],o:[200,0,0],t:Math.round(H)},{a:[W,0,0],b:[W,0,D],o:[200,0,0],t:D}];
+  cc.cols.forEach((cl,i)=>{if(cl.type!=='drawers')return;const fr=c.fr[i],m=Math.max(1,cl.drawers),fh=(c.fz-3*(m-1))/m;for(let j=0;j<m;j++){const yT=yb+pl+c.fz-j*(fh+3);dims.push({lbl:[fr.x+fr.w/2,yT-fh/2,D+fT+4],t:`${Math.round(fr.w)}×${Math.round(fh)}`,small:1})}});
   if(cc.cols.length>1)cc.cols.forEach((cl,i)=>dims.push({a:[c.xs[i],H,fz],b:[c.xs[i]+c.colWs[i],H,fz],o:[0,100,0],t:Math.round(c.colWs[i]),small:1}));
   return{groups:[{items:it,rot:0,pos:[0,0,0],dims}],walls:[{x:0,z:0,len:W,rot:0}]}}
 function scene3dData(){return P.kind==='kitchen'?scene3dKitchen(P,R.S,R.c):P.kind==='chest'?scene3dChest(P,R.S,R.c):scene3dWardrobe(P,R.S,R.c)}
@@ -1979,11 +1993,12 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
         o.position.x-=b.door.hx*M;o.position.z-=b.door.z*M;pv.add(o)}
       else if(b.lift){let pv=piv['L'+b.lift.id];if(!pv){pv=new THREE.Group();pv.position.set(0,b.lift.hy*M,b.lift.z*M);piv['L'+b.lift.id]=pv;G.add(pv);lifts.push(pv)}o.position.y-=b.lift.hy*M;o.position.z-=b.lift.z*M;pv.add(o)}
       else if(b.drawer){const dg=new THREE.Group();dg.add(o);G.add(dg);drawers.push(dg)}
-      else{if(b.coupe)coupe.push(o);G.add(o)}});
+      else if(b.coupe){let sl=piv['C'+b.coupe.id];if(!sl){sl=new THREE.Group();sl.userData.dx=b.coupe.dx*M;sl.userData.dxTap=b.coupe.dxTap*M;piv['C'+b.coupe.id]=sl;G.add(sl);coupe.push(sl)}sl.add(o)}
+      else G.add(o)});
     model.add(G)});
   scene.add(model);
   // размерные линии: в отдельной группе (не мешают сборке, касаниям и примерке), подписи всегда смотрят в камеру
-  const dimRoot=new THREE.Group();
+  const dimRoot=new THREE.Group(),dimIn=new THREE.Group();dimRoot.add(dimIn);
   if(opts.dims){const sz0=new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3()),lh=Math.min(.24,Math.max(.09,Math.max(sz0.x,sz0.y)*.065));
     const lm=new THREE.LineBasicMaterial({color:0x1D2227,transparent:true,opacity:.85,depthTest:false}),em=new THREE.LineBasicMaterial({color:0x1D2227,transparent:true,opacity:.35,depthTest:false});
     const label=(txt,small)=>{const cv=document.createElement('canvas'),g=cv.getContext('2d'),fs=64;g.font=`700 ${fs}px "JetBrains Mono",monospace`;const w=Math.ceil(g.measureText(txt).width)+40;cv.width=w;cv.height=96;
@@ -1993,18 +2008,24 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
       const tx=new THREE.CanvasTexture(cv);tx.minFilter=THREE.LinearFilter;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));
       const h=lh*(small?.85:1);sp.scale.set(h*w/96,h,1);sp.renderOrder=12;return sp};
     data.groups.forEach(gr=>{if(!gr.dims)return;const Gd=new THREE.Group();Gd.rotation.y=gr.rot;Gd.position.set(gr.pos[0]*M,gr.pos[1]*M,gr.pos[2]*M);
-      gr.dims.forEach(d=>{const V=a=>new THREE.Vector3(a[0]*M,a[1]*M,a[2]*M),a=V(d.a),b=V(d.b),o=V(d.o).multiplyScalar(1+lh*4),p1=a.clone().add(o),p2=b.clone().add(o),on=o.clone().normalize(),tk=on.clone().multiplyScalar(.03);
+      const GdIn=new THREE.Group();GdIn.rotation.y=gr.rot;GdIn.position.copy(Gd.position);dimIn.add(GdIn);
+      gr.dims.forEach(d=>{if(d.lbl){const sp=label(d.t,1);sp.position.set(d.lbl[0]*M,d.lbl[1]*M,d.lbl[2]*M);sp.scale.multiplyScalar(.8);(d.inner?GdIn:Gd).add(sp);return}
+        const V=a=>new THREE.Vector3(a[0]*M,a[1]*M,a[2]*M),a=V(d.a),b=V(d.b),o=V(d.o).multiplyScalar(1+lh*4),p1=a.clone().add(o),p2=b.clone().add(o),on=o.clone().normalize(),tk=on.clone().multiplyScalar(.03);
         const seg=(pts,mat)=>{const ls=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),mat);ls.renderOrder=11;Gd.add(ls)};
         seg([p1,p2,p1.clone().sub(tk),p1.clone().add(tk),p2.clone().sub(tk),p2.clone().add(tk)],lm);seg([a,p1.clone().add(tk),b,p2.clone().add(tk)],em);
         const sp=label(String(d.t),d.small);sp.position.copy(p1.clone().add(p2).multiplyScalar(.5).add(on.clone().multiplyScalar(lh*.75)));Gd.add(sp)});
       dimRoot.add(Gd)})}
   scene.add(dimRoot);
+  // мягкая тень под мебелью — чтобы изделие стояло на полу, а не висело
+  {const bb=new THREE.Box3().setFromObject(model),sx=bb.max.x-bb.min.x,sz=bb.max.z-bb.min.z,cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d'),gr=g.createRadialGradient(64,64,10,64,64,64);
+   gr.addColorStop(0,'rgba(0,0,0,.42)');gr.addColorStop(.6,'rgba(0,0,0,.2)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+   const sh=new THREE.Mesh(new THREE.PlaneGeometry(sx*1.25+.2,sz*1.6+.2),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.set(bb.min.x+sx/2,.002,bb.min.z+sz/2);sh.renderOrder=1;scene.add(sh)}
   // пол и стены для понимания масштаба
   const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(size.x+5,size.z+5),new THREE.MeshStandardMaterial({color:'#B9B2A7',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.set(box.min.x+size.x/2,-0.001,box.min.z+size.z/2);scene.add(floor);
   data.walls.forEach(w=>{const wall=new THREE.Mesh(new THREE.PlaneGeometry(w.len*M+(data.walls.length>1?1.5:4),size.y+1.2),new THREE.MeshStandardMaterial({color:'#D9D5CE',roughness:1}));
     wall.position.set(w.x*M+(w.rot?0:w.len*M/2),(size.y+1.2)/2,w.z*M-0.004+(w.rot?w.len*M/2:0));if(w.rot){wall.rotation.y=w.right?-Math.PI/2:Math.PI/2;wall.position.x+=w.right?0.004:-0.004}scene.add(wall)});
-  return{scene,model,doors,drawers,coupe,lifts,mats,dims:dimRoot}}
+  return{scene,model,doors,drawers,coupe,lifts,mats,dims:dimRoot,dimsIn:dimIn}}
 function fitCamera(cam,ctl,model,aspect,extra){const box=new THREE.Box3().setFromObject(model);if(extra&&extra.visible&&extra.children.length)box.expandByObject(extra);const c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
   // расстояние, при котором изделие целиком влезает и по высоте, и по ширине кадра
   const tn=Math.tan(cam.fov*Math.PI/360),dist=Math.max(s.y/2/tn,s.x/2/(tn*aspect))*1.18+s.z/2,r=Math.max(s.x,s.y);
@@ -2017,19 +2038,20 @@ function setOpen(S3,open,instant){
   const all=[...S3.doors,...S3.lifts].sort((a,b)=>a.getWorldPosition(new THREE.Vector3()).x-b.getWorldPosition(new THREE.Vector3()).x),drs=[...S3.drawers];
   all.forEach((o,i)=>openOne(o,open,instant?0:i*70));drs.forEach((o,i)=>openOne(o,open,instant?0:(open?all.length*70+i*40:i*25)));
   if(instant){S3.doors.forEach(pv=>pv.rotation.y=pv.userData.target);S3.lifts.forEach(pv=>pv.rotation.x=pv.userData.target);S3.drawers.forEach(dg=>dg.position.z=dg.userData.target)}
-  S3.coupe.forEach(o=>{o.userData.op=open?.18:1;if(instant)o.material.opacity=o.userData.op})}
+  if(S3.dimsIn)S3.dimsIn.visible=open;
+  S3.coupe.forEach((sl,i)=>{const u=sl.userData;u.kind='coupe';u.open=open&&!!u.dx;u.t0=performance.now()+(instant?0:i*120);u.target=u.open?u.dx:0;if(instant)sl.position.x=u.target})}
 // нажали на дверь или ящик — открываем только его (ящик вместе со своим коробом)
 function pick3D(ev){if(!T3||!T3.S3||T3.S3.asm)return;const S3=T3.S3,el=T3.r.domElement,rc=el.getBoundingClientRect();
   const v=new THREE.Vector2((ev.clientX-rc.left)/rc.width*2-1,-(ev.clientY-rc.top)/rc.height*2+1),ray=new THREE.Raycaster();ray.setFromCamera(v,T3.cam);
   const hit=ray.intersectObjects(S3.model.children,true).find(h=>h.object.isMesh);if(!hit)return;
-  if(S3.coupe.includes(hit.object)){const op=S3.coupe[0].userData.op===.18?1:.18;S3.coupe.forEach(o=>o.userData.op=op);return}
-  let o=hit.object;while(o&&!(S3.doors.includes(o)||S3.lifts.includes(o)||S3.drawers.includes(o)))o=o.parent;if(!o)return;
+  let o=hit.object;while(o&&!(S3.doors.includes(o)||S3.lifts.includes(o)||S3.drawers.includes(o)||S3.coupe.includes(o)))o=o.parent;if(!o)return;
+  if(S3.coupe.includes(o)){const u=o.userData,mv=u.dx||u.dxTap;u.open=!u.open&&!!mv;u.t0=0;u.target=u.open?mv:0;return}
   const open=!o.userData.open;
   if(S3.drawers.includes(o)){const bx=new THREE.Box3().setFromObject(o).expandByScalar(-0.005);
     S3.drawers.forEach(d=>{const b2=new THREE.Box3().setFromObject(d);if(b2.min.x<bx.max.x&&b2.max.x>bx.min.x&&b2.min.y<bx.max.y&&b2.max.y>bx.min.y)openOne(d,open,0)})}
   else openOne(o,open,0)}
 // сборка на глазах: корпус, задняя стенка, полки и ящики, потом фасады
-function playAssembly(S3){const items=[],rank=o=>{if(S3.doors.includes(o)||S3.lifts.includes(o))return 4;if(S3.drawers.includes(o))return 3;const m=o.material,c=m&&m.color&&'#'+m.color.getHexString();
+function playAssembly(S3){const items=[],rank=o=>{if(S3.doors.includes(o)||S3.lifts.includes(o)||S3.coupe.includes(o))return 4;if(S3.drawers.includes(o))return 3;const m=o.material,c=m&&m.color&&'#'+m.color.getHexString();
     return !o.isMesh?2:m===S3.mats.back?1:(m===S3.mats.metal||m===S3.mats.wire||m===S3.mats.box||m===S3.mats.appliance||m===S3.mats.top)?2:0};
   S3.model.children.forEach(G=>G.children.forEach(o=>{const b=new THREE.Box3().setFromObject(o);items.push({o,r:rank(o),y:b.min.y,x:b.min.x,home:o.position.clone()})}));
   items.sort((a,b)=>a.r-b.r||a.y-b.y+(Math.abs(a.y-b.y)<0.02?a.x-b.x:0));
@@ -2060,7 +2082,7 @@ function loop3D(){if(!view3d||!T3){if(T3)T3.raf=0;return}T3.raf=requestAnimation
   if(S3.asm)stepAssembly(S3,now);
   else{S3.doors.forEach(pv=>{if(go(pv))pv.rotation.y+=((pv.userData.target||0)-pv.rotation.y)*k});S3.lifts.forEach(pv=>{if(go(pv))pv.rotation.x+=((pv.userData.target||0)-pv.rotation.x)*k});
     S3.drawers.forEach(dg=>{if(go(dg))dg.position.z+=((dg.userData.target||0)-dg.position.z)*k})}
-  S3.coupe.forEach(o=>{const t=o.userData.op===undefined?1:o.userData.op;o.material.opacity+=(t-o.material.opacity)*k});
+  if(!S3.asm)S3.coupe.forEach(sl=>{if(go(sl))sl.position.x+=((sl.userData.target||0)-sl.position.x)*k});
   // обход вокруг изделия: полный круг за 7 секунд
   if(T3.spin){const da=Math.min(T3.spin.left,Math.PI*2*dt/7);T3.spin.left-=da;const off=T3.cam.position.clone().sub(T3.ctl.target).applyAxisAngle(new THREE.Vector3(0,1,0),da);T3.cam.position.copy(T3.ctl.target).add(off);if(T3.spin.left<=0)T3.spin=null}
   T3.ctl.update();T3.r.render(S3.scene,T3.cam)}

@@ -230,6 +230,8 @@ details.mini-fold[open] summary{margin-bottom:8px}
 details.acc{border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:8px}
 details.acc summary{cursor:pointer;font-weight:600;font-size:calc(14px * var(--fz))}
 .var-tbl td.cur{font-weight:700}.var-tbl td.num{white-space:nowrap}.var-tbl .bad{color:var(--warn);font-size:calc(12px * var(--fz))}
+.cat-row.mine{border-left:3px solid var(--accent);padding-left:10px}
+.cat-row.mine .nm .inwrap input{font-family:var(--f-body);font-size:calc(15px * var(--fz))}
 .mark{width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;flex:none}
 .mark svg{width:21px;height:21px;fill:none;stroke:var(--accent-ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .presets{display:flex;gap:8px;flex-wrap:wrap}
@@ -719,7 +721,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='31 от 26.10.2026';
+const APP_VER='32 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -824,9 +826,15 @@ function frontMat(p,s){const f=matItem('fronts',p.mat.front,s);return{f,mat:f.ki
 const frontFill=p=>{const f=matItem('fronts',p.mat.front);return f.kind==='body'?DECORS[p.decor].fill:f.kind==='sheet'?(DECORS[p.mat.frontDecor]||DECORS.white).fill:(FCOLORS[p.mat.frontColor]||FCOLORS.white).fill};
 const CAT_EDIT={hinges:['over','half','gap'],slides:['price'],handles:['cc','len','proj','price'],coupe:[]};
 const CAT_EDIT_CUSTOM={slides:['dW','dL'],coupe:['dh','ov','iwL','iwG','ihL','ihG','itL','itG','imL','imG','ibL','ibG','idv']};
+// своя фурнитура: мастер вписывает название, цену и размеры из карточки товара или инструкции
+const MY_CAT={hinges:()=>({name:'Мои петли',over:200,half:200,gap:3,tmin:14,tmax:24,src:'Свои петли: цена и зазор между фасадами — из карточки товара.'}),
+  slides:()=>({name:'Мои направляющие',kind:'side',dW:26,dL:0,price:700,src:'Свои направляющие: на сколько ящик уже проёма и короче направляющей — из инструкции.'}),
+  handles:()=>({name:'Моя ручка',cc:128,len:160,proj:30,price:250})};
+const MY_ADD={hinges:'+ Свои петли',slides:'+ Свои направляющие',handles:'+ Своя ручка'};
 function catMerge(saved){const out={};
   for(const k of Object.keys(CATALOG)){const sv=(saved&&saved[k])||[];
-    out[k]=CATALOG[k].map(d=>{const o={...d},x=sv.find(y=>y.id===d.id);if(x)[...CAT_EDIT[k],...(d.custom?CAT_EDIT_CUSTOM[k]||[]:[])].forEach(f=>{if(Number.isFinite(+x[f]))o[f]=+x[f]});return o})}
+    out[k]=CATALOG[k].map(d=>{const o={...d},x=sv.find(y=>y.id===d.id);if(x)[...CAT_EDIT[k],...(d.custom?CAT_EDIT_CUSTOM[k]||[]:[])].forEach(f=>{if(Number.isFinite(+x[f]))o[f]=+x[f]});return o});
+    sv.filter(y=>y&&typeof y.id==='string'&&y.id.startsWith('u_')).forEach(y=>out[k].push({...y,seg:'мои',mine:true}))}
   return out}
 
 /* ---------- модели ---------- */
@@ -2479,14 +2487,16 @@ function renderMat(){
 function renderHw(){
   const k=P.kind,corner=k==='wardrobe'&&P.shape==='corner',coupe=k==='wardrobe'&&P.type==='coupe';
   const opt=(x,val)=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(x.name)}${x.proj!==undefined?` · вынос ${x.proj} мм`:''}</option>`;
-  const fill=(id,list,val)=>{const el=$(id),segs=['эконом','средний','премиум','другое'];
+  const fill=(id,list,val)=>{const el=$(id),segs=['мои','эконом','средний','премиум','другое'];
     el.innerHTML=list.some(x=>x.seg)?segs.map(g=>{const xs=list.filter(x=>(x.seg||'другое')===g);return xs.length?`<optgroup label="${g[0].toUpperCase()+g.slice(1)}">${xs.map(x=>opt(x,val)).join('')}</optgroup>`:''}).join(''):list.map(x=>opt(x,val)).join('')};
   fill('#hwHinge',settings.cat.hinges,P.hw.hinge);fill('#hwSlide',settings.cat.slides,P.hw.slide);
   fill('#hwHandle',settings.cat.handles,P.hw.handle);fill('#hwHandleIn',settings.cat.handles,P.hw.handleIn);fill('#hwCoupe',settings.cat.coupe,P.hw.coupe);
   $('#hwInField').hidden=k!=='wardrobe';$('#hwCoupeField').hidden=!coupe;
-  $('#hwHinge').closest('.field').hidden=coupe&&k==='wardrobe';
+  const hasHinge=R.c&&R.c.hw.some(h=>/^Петл/.test(h[0])),hasSlide=R.c&&R.c.hw.some(h=>/^Направляющие \d/.test(h[0]));
+  $('#hwHinge').closest('.field').hidden=(coupe&&k==='wardrobe')||!hasHinge;$('#hwSlide').closest('.field').hidden=!hasSlide;
   $('#lblHandle').textContent=k==='wardrobe'?(coupe?'Ручки (не нужны для купе)':'Ручки дверей'):'Ручки фасадов';
-  const H_=HW(P),info=[`Направляющие: ${H_.slide.src}`];
+  const H_=HW(P),info=hasSlide?[`Направляющие: ${H_.slide.src}`]:[];
+  if(!hasHinge&&!(coupe&&k==='wardrobe'))info.push('Петли не нужны — в изделии нет дверей.');if(!hasSlide)info.push('Направляющие не нужны — в изделии нет ящиков.');
   if(coupe)info.push(`Профиль купе: ${H_.coupe.src}${H_.coupe.check||H_.coupe.custom?' Перед заказом дверей сверьте с таблицей поставщика.':''}`);
   $('#hwInfo').textContent=info.join(' ');
   const cw=corner||(k==='kitchen'&&P.k.shape==='corner'),wl=$('#wallL'),wr=$('#wallR');wl.dataset.wall=cw?'A':'L';wr.dataset.wall=cw?'B':'R';
@@ -2752,9 +2762,11 @@ function renderSettings(){
   $('#setMat2').innerHTML=`<h3 style="margin-top:6px">ЛДСП корпуса</h3>`+M_.bodies.map(x=>row(x.name,x.src,mi('bodies',x,'price','₽ за лист')+mi('bodies',x,'t','толщина, мм',!x.custom)+mi('bodies',x,'L','лист, длина',!x.custom)+mi('bodies',x,'W','лист, ширина',!x.custom))).join('')
    +`<h3 style="margin-top:14px">Фасады на заказ</h3>`+M_.fronts.filter(x=>x.kind==='order').map(x=>row(x.name,x.src,mi('fronts',x,'price','₽ за м²')+mi('fronts',x,'t','толщина, мм',!x.custom)+mi('fronts',x,'kg','вес, кг/м²'))).join('')
    +`<h3 style="margin-top:14px">Столешницы</h3>`+M_.tops.map(x=>row(x.name,x.src,mi('tops',x,'price','₽ за пог. м')+mi('tops',x,'t','толщина, мм',!x.custom)+mi('tops',x,'D','глубина, мм',!x.custom)+mi('tops',x,'maxL','длина листа, мм',!x.custom))).join('');
-  $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>row(`${x.name} · ${x.seg}`,x.src||'',ci('hinges',x,'over','накладная, ₽')+ci('hinges',x,'half','полунакладная, ₽')+ci('hinges',x,'gap','зазор на перегородке, мм'))).join('')
-   +`<h3 style="margin-top:14px">Направляющие</h3>`+C.slides.map(x=>row(`${x.name} · ${x.seg}`,x.src,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм',!x.custom)+ci('slides',x,'dL','короче направл., мм',!x.custom))).join('')
-   +`<h3 style="margin-top:14px">Ручки</h3>`+C.handles.map(x=>row(x.name,'',ci('handles',x,'cc','межцентр, мм')+ci('handles',x,'len','длина, мм')+ci('handles',x,'proj','вынос, мм')+ci('handles',x,'price','₽ за шт'))).join('')
+  const mine=(k,x,cells)=>`<div class="cat-row mine"><div class="nm"><div class="inwrap"><input type="text" data-catname="${k}:${x.id}" value="${esc(x.name)}" aria-label="Название" autocomplete="off"></div><small>своя позиция</small></div>${cells}<button class="chip" type="button" data-catdel="${k}:${x.id}" aria-label="Удалить">Удалить</button></div>`;
+  const addBtn=k=>`<div class="btns"><button class="chip" type="button" data-catadd="${k}">${MY_ADD[k]}</button></div>`;
+  $('#setCat').innerHTML=`<h3 style="margin-top:6px">Петли, ₽ за штуку</h3>`+C.hinges.map(x=>x.mine?mine('hinges',x,ci('hinges',x,'over','накладная, ₽')+ci('hinges',x,'half','полунакладная, ₽')+ci('hinges',x,'gap','зазор на перегородке, мм')+ci('hinges',x,'tmin','фасад от, мм')+ci('hinges',x,'tmax','фасад до, мм')):row(`${x.name} · ${x.seg}`,x.src||'',ci('hinges',x,'over','накладная, ₽')+ci('hinges',x,'half','полунакладная, ₽')+ci('hinges',x,'gap','зазор на перегородке, мм'))).join('')+addBtn('hinges')
+   +`<h3 style="margin-top:14px">Направляющие</h3>`+C.slides.map(x=>x.mine?mine('slides',x,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм')+ci('slides',x,'dL','короче направл., мм')+`<div class="field"><label>Монтаж</label><div class="inwrap"><select data-catkind="slides:${x.id}"><option value="side"${x.kind!=='hidden'?' selected':''}>Боковой (роликовые, шариковые)</option><option value="hidden"${x.kind==='hidden'?' selected':''}>Скрытый (под дном ящика)</option></select></div></div>`):row(`${x.name} · ${x.seg}`,x.src,ci('slides',x,'price','₽ за пару')+ci('slides',x,'dW','уже проёма, мм',!x.custom)+ci('slides',x,'dL','короче направл., мм',!x.custom))).join('')+addBtn('slides')
+   +`<h3 style="margin-top:14px">Ручки</h3>`+C.handles.map(x=>(x.mine?mine:(k,x,c)=>row(x.name,'',c))('handles',x,ci('handles',x,'cc','межцентр, мм')+ci('handles',x,'len','длина, мм')+ci('handles',x,'proj','вынос, мм')+ci('handles',x,'price','₽ за шт'))).join('')+addBtn('handles')
    +`<h3 style="margin-top:14px">Профили купе</h3>`+C.coupe.map(x=>row(x.name,x.src,ci('coupe',x,'dh','проём − , мм',!x.custom)+ci('coupe',x,'ov','перехлёст, мм',!x.custom)+(x.custom?[['iwL','вставка ЛДСП: ширина −'],['iwG','зеркало: ширина −'],['ihL','ЛДСП цельная: высота −'],['ihG','зеркало цельное: высота −'],['itL','ЛДСП верх: −'],['itG','зеркало верх: −'],['imL','ЛДСП середина: −'],['imG','зеркало середина: −'],['ibL','ЛДСП низ: −'],['ibG','зеркало низ: −'],['idv','разделитель: дверь −']].map(([f,l])=>ci('coupe',x,f,l)).join(''):''))).join('');
   $$('[data-co]').forEach(el=>el.value=settings.company[el.dataset.co]||'');
   $('#installBtn').hidden=!installEvt;
@@ -2856,6 +2868,7 @@ document.addEventListener('input',e=>{
   if(d.meas){const [k,i]=d.meas.split(':'),v=el.value.replace(/[^0-9]/g,'');if(i!==undefined)P.meas[k][+i]=v;else P.meas[k]=v;change();return}
   if(d.measnote){P.meas.notes=el.value;save();return}
   if(d.matedit){const [k,id,f]=d.matedit.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.mat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
+  if(d.catname){const [k,id]=d.catname.split(':'),it=settings.cat[k].find(x=>x.id===id);if(it){it.name=el.value.trim()||'Без названия';save();renderHw()}return}
   if(d.cat){const [k,id,f]=d.cat.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.cat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
   if(d.s){const [g,k]=d.s.split(':');const v=+el.value;if(el.value===''||isNaN(v)||v<0)return;
     if(g==='p')settings.p[k]=v;else settings[k]=v;change();}
@@ -2878,6 +2891,7 @@ document.addEventListener('change',e=>{
   else if(d.wall){P.walls[d.wall]=el.checked;change()}
   else if(d.mcheck){P.meas.checks[d.mcheck]=el.checked;save()}
   else if(el.id==='tryCam'||el.id==='tryFile'){const f=el.files&&el.files[0];if(f){const rd=new FileReader();rd.onload=()=>trySetPhoto(rd.result);rd.readAsDataURL(f)}el.value=''}
+  else if(d.catkind){const [k,id]=d.catkind.split(':'),it=settings.cat[k].find(x=>x.id===id);if(it){it.kind=el.value;if(el.value==='hidden'){it.dW=it.dW===26?42:it.dW;it.dL=it.dL||10}change();renderSettings()}}
   else if(el.id==='kpVar'){P.kpVar=el.checked;save()}
   else if(el.id==='sBig'){settings.bigText=el.checked;document.documentElement.classList.toggle('big',el.checked);save()}
   else if(el.id==='tryKp'){if(P.tryon){P.tryon.kp=el.checked;save()}}
@@ -2899,6 +2913,12 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('button,[data-sec],[data-mod],[data-col]');if(!b)return;const d=b.dataset;
   if(d.tab){openTab(d.tab);return}
   if(d.go){openTab(d.go);return}
+  if(d.catadd){const k=d.catadd,it=Object.assign({id:'u_'+uid(),seg:'мои',mine:true},MY_CAT[k]());settings.cat[k].push(it);save();renderSettings();toast('Добавлено. Впишите название и цену, потом выберите в блоке «Фурнитура»');
+    setTimeout(()=>{const el=document.querySelector(`[data-catname="${k}:${it.id}"]`);if(el){el.focus();el.select()}},50);return}
+  if(d.catdel){const [k,id]=d.catdel.split(':');if(!d.armed){d.armed=1;b.textContent='Точно удалить?';return}
+    const first=CATALOG[k][0].id,fld={hinges:['hinge'],slides:['slide'],handles:['handle','handleIn']}[k];let n=0;
+    projects.forEach(p=>fld.forEach(f=>{if(p.hw[f]===id){p.hw[f]=first;n++}}));settings.cat[k]=settings.cat[k].filter(x=>x.id!==id);change();renderSettings();
+    toast(n?`Удалено. В ${plural(n,'заказе','заказах','заказах')} поставлено «${CATALOG[k][0].name}»`:'Удалено');return}
   if(d.variant){const v=VARS&&VARS.find(x=>x.k===d.variant);if(v){P.mat=clone(v.q.mat);P.hw=clone(v.q.hw);change();toast('Взят вариант «'+v.name+'»')}return}
   if(b.id==='hdrPrice'){openTab('cost');return}
   if(d.view){show3D(d.view==='3d');return}
@@ -2966,7 +2986,7 @@ document.addEventListener('click',e=>{
   if(b.id==='copyBackup'){settings.lastBackup=Date.now();save();copy(backupJSON(),$('#backupText'),'Копия скопирована');return}
   if(b.id==='restoreText'){const v=$('#backupText').value.trim();if(v)restore(v);else toast('Вставьте текст копии в поле');return}
   if(b.id==='installBtn'&&installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;renderSettings()});return}
-  if(b.id==='resetSet'){if(d.armed){const co=settings.company;const tpl=settings.templates;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.templates=tpl;settings.cat=catMerge(null);settings.mat=matMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
+  if(b.id==='resetSet'){if(d.armed){const co=settings.company,co_cat=settings.cat;const tpl=settings.templates;settings=clone(DEFAULT_SETTINGS);settings.company=co;settings.templates=tpl;settings.cat=catMerge(Object.fromEntries(Object.entries(co_cat).map(([k,l])=>[k,l.filter(x=>x.mine)])));settings.mat=matMerge(null);delete d.armed;b.textContent='Вернуть цены по умолчанию';renderSettings();change();toast('Цены сброшены')}
     else{d.armed=1;b.textContent='Нажмите ещё раз, чтобы сбросить'}return}
   if(b.id==='openProjects'){renderProjects();$('#projOverlay').hidden=false;return}
   if(d.stf!==undefined){stFilter=d.stf;renderProjects();return}

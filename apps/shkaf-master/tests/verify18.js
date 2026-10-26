@@ -24,13 +24,14 @@ const res=await pg.evaluate(()=>{
    const p=base();p.W=W;p.plinth=pl;p.sections=Array.from({length:n},()=>({shelves:3,rod:false,drawers:1,baskets:1}));p.mirrors=0;
    const r=M.calc(p,S),w=r.wings[0],tag=`шкаф ${W} ${n}с цок${pl}`;
    if(w.ws.some(x=>x<150))continue;
-   eq(w.ws.reduce((a,b)=>a+b,0)+(n-1)*t+2*t,W,tag+' сумма секций');
+   const nJ=(w.J||[]).length;eq(w.ws.reduce((a,b)=>a+b,0)+(n-1)*t+nJ*t+2*t,W,tag+' сумма секций');
+   if(nJ)ok(r.parts.filter(x=>x.mat==='ldsp').every(x=>Math.max(x.L,x.Wd)<=S.sheetL-2*S.trim),tag+' корпуса: все детали помещаются на лист');
    const ds=[...w.doors].sort((a,b)=>a.x-b.x);
    eq(ds[0].x,2,tag+' зазор слева');eq(ds.at(-1).x+ds.at(-1).w,W-2,tag+' зазор справа');
    for(let i=1;i<ds.length;i++)eq(ds[i].x-(ds[i-1].x+ds[i-1].w),3,tag+' зазор между дверями');
-   for(let i=1;i<n;i++){const c=w.xs[i]-t/2,last=ds.filter(d=>d.sec===i-1).at(-1),first=ds.find(d=>d.sec===i);eq((last.x+last.w+first.x)/2,c,tag+` стык дверей на перегородке ${i}`)}
+   for(let i=1;i<n;i++){const c=(w.J||[]).includes(i)?w.xs[i]-t:w.xs[i]-t/2,last=ds.filter(d=>d.sec===i-1).at(-1),first=ds.find(d=>d.sec===i);eq((last.x+last.w+first.x)/2,c,tag+` стык дверей на перегородке ${i}`)}
    ds.forEach(d=>eq(d.h,p.H-pl-4,tag+' высота двери'));
-   const part=r.parts.find(x=>x.name==='Перегородка');if(n>1)eq(part.L+2*t+pl,p.H,tag+' высота перегородки');
+   const part=r.parts.find(x=>x.name==='Перегородка');if(part)eq(part.L+2*t+pl,p.H,tag+' высота перегородки');
    const fac=r.parts.filter(x=>x.name==='Ящик: фасад');fac.forEach(f=>ok(w.ws.some(sw=>Math.abs(f.L-(sw-2*t-4))<1),tag+' фасад ящика между проставками'));
    sanity(r,tag)}
  // ---- купе
@@ -39,7 +40,7 @@ const res=await pg.evaluate(()=>{
    const ADD=cd.sys.addN&&cd.sys.addN[cd.n]!==undefined?cd.sys.addN[cd.n]:cd.sys.ov*({2:1,3:2,4:2,5:4}[cd.n]);ok(cd.add===ADD,tag+' сумма перехлёстов '+cd.add+' ≠ '+ADD);const last=cd.items[cd.n-1];ok(last.x+last.w<=cd.ow+cd.items[0].x+0.01&&cd.ow+cd.items[0].x-(last.x+last.w)<cd.n,tag+' последняя дверь доходит до края проёма');
    ok(cd.n*cd.w-ADD<=cd.ow&&cd.ow-(cd.n*cd.w-ADD)<cd.n,tag+` двери закрывают проём: ${cd.n}×${cd.w}−перехлёст vs ${cd.ow}`);
    eq(cd.h,p.H-p.plinth-2*t-40,tag+' высота двери купе',0.5);
-   eq(w.ws.reduce((a,b)=>a+b,0)+t*(w.ws.length+1),W,tag+' сумма секций');sanity(r,tag)}
+   eq(w.ws.reduce((a,b)=>a+b,0)+t*(w.ws.length+1)+t*(w.J||[]).length,W,tag+' сумма секций');sanity(r,tag)}
  // ---- угловые распашные
  for(const side of ['L','R'])for(const [W,W2,nA,nB] of [[1800,1400,3,2],[2400,1600,3,2],[2000,1200,2,1],[1600,1600,2,2]]){
    const p=base();p.shape='corner';p.cornerSide=side;p.W=W;p.W2=W2;p.mirrors=0;
@@ -86,6 +87,7 @@ const res=await pg.evaluate(()=>{
      const backs=[];r.parts.filter(x=>x.name==='Задняя стенка').forEach(x=>{for(let i=0;i<x.qty;i++)backs.push(x.Wd)});
      const plank=r.parts.some(x=>x.name==='Планка под стык ХДФ');
      ok(backs.every(b=>b<=S.sheetL-2*S.trim),tag+' кусок влезает в лист');
+     if((w.J||[]).length){ok(backs.length>=w.corp.length,tag+' у каждого корпуса своя задняя стенка');continue}
      if(!plank&&backs.length>1){const raw=r.wings[0];let acc=0;const centers=raw.xs.slice(1).map(x=>x-t/2-2);
        // восстановим реальные (не округлённые) стыки по порядку
        ok(Math.abs(backs.reduce((a,b)=>a+b,0)+2*(backs.length-1)-(W-4))<=backs.length,tag+' стенка закрывает всю ширину');
@@ -116,12 +118,12 @@ const res=await pg.evaluate(()=>{
  // ---- у каждой двери петли на боковине или перегородке (шкафы прямые, угловые, комоды)
  {const sup=(list,x)=>list.some(s=>Math.abs(s-x)<=3.1);
   for(const W of [600,900,1200,1500,1800,2100,2400,3000])for(const n of [1,2,3,4,5,6]){const p=base();p.W=W;p.mirrors=0;p.sections=Array.from({length:n},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
-    const w=M.calc(p,S).wings[0];if(w.ws.some(x=>x<150))continue;const S0=[0,W,...w.xs.slice(1).map(x=>x-t/2)];
+    const w=M.calc(p,S).wings[0];if(w.ws.some(x=>x<150))continue;const S0=[0,W,...w.xs.slice(1).map(x=>x-t/2),...(w.jc||[])];
     w.doors.forEach(d=>ok(sup(S0,d.hinge==='L'?d.x:d.x+d.w),`шкаф ${W} ${n}с: петли двери без стенки`))}
   for(const side of ['L','R'])for(const W of [1200,1800,2400,3000])for(const W2 of [1000,1400,2000])for(const nA of [1,2,3,4])for(const nB of [1,2,3])for(const co of [300,450,600]){
     const p=base();p.shape='corner';p.cornerSide=side;p.W=W;p.W2=W2;p.cornerOpen=co;p.mirrors=0;
     p.sections=Array.from({length:nA},()=>({shelves:2,rod:false,drawers:0,baskets:0}));p.sectionsB=Array.from({length:nB},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
-    M.calc(p,S).wings.forEach(w=>{const S0=[0,w.W,...w.xs.slice(1).map(x=>x-t/2)];const ci=w.blk.w?(w.blk.side==='L'?0:w.sections.length-1):-1;
+    M.calc(p,S).wings.forEach(w=>{const S0=[0,w.W,...w.xs.slice(1).map(x=>x-t/2),...(w.jc||[])];const ci=w.blk.w?(w.blk.side==='L'?0:w.sections.length-1):-1;
       w.doors.forEach(d=>ok(sup(S0,d.hinge==='L'?d.x:d.x+d.w),`угол ${side} ${W}×${W2} А${nA}Б${nB}: петли без стенки`));
       if(ci>=0)ok(w.doors.filter(d=>d.sec===ci).length<=1,`угол ${side} ${W}×${W2}: у угловой секции одна дверь`)})}
   for(const W of [450,800,1200,1600,2000])for(const n of [1,2,3,4]){const p=base();p.kind='chest';p.c={W,H:850,D:450,plinth:60,legs:0,cols:Array.from({length:n},()=>({type:'door',drawers:0,shelves:2}))};

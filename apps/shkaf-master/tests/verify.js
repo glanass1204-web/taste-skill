@@ -96,7 +96,7 @@ const res=await pg.evaluate(()=>{
      if(backs.length===1)eq(backs[0],W-4,tag+' стенка целиком',0.5)}}
  // ---- петли: накладные на боковинах, полунакладные на перегородках
  for(const n of [1,2,3,4]){const p=base();p.W=600*n;p.mirrors=0;p.sections=Array.from({length:n},()=>({shelves:2,rod:false,drawers:0,baskets:0}));
-   const r=M.calc(p,S),ds=r.wings[0].doors,hc=h=>h<=1000?2:h<=1500?3:h<=2000?4:5;
+   const r=M.calc(p,S),ds=r.wings[0].doors,hc=h=>h<=900?2:h<=1600?3:h<=2000?4:5;
    const over=r.hw.find(h=>h[0].startsWith('Петля накладная'))?.[1]||0,half=r.hw.find(h=>h[0].startsWith('Петля полунакладная'))?.[1]||0;
    eq(over+half,ds.length*hc(ds[0].h),`петли ${n}с всего`,0);
    const expOuter=ds.filter(d=>{const bx=d.hinge==='L'?d.x:d.x+d.w;return bx<5||bx>p.W-5}).length*hc(ds[0].h);eq(over,expOuter,`петли ${n}с накладные`,0);

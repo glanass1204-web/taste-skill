@@ -804,7 +804,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='39 от 26.10.2026';
+const APP_VER='40 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -1025,7 +1025,9 @@ const ERR=t=>({t,lvl:'err'});
 function frontChecks(p,s,h,warn,maxH){const fm=frontMat(p,s),tmin=h.tmin||14,tmax=h.tmax||24;
   if(fm.t>tmax||fm.t<tmin)warn.push(ERR(`Фасады ${fm.t} мм, а петли «${h.name}» рассчитаны на фасады ${tmin}–${tmax} мм. Выберите другие петли или фасады.`));
   if((fm.f.kg||0)>=15&&maxH>1500)warn.push(`Тяжёлые фасады (${fm.f.kg} кг/м²) высотой ${Math.round(maxH)} мм — сверьте число петель по таблице производителя петель.`)}
-const hingeCount=(h,mirror)=>(h<=1000?2:h<=1500?3:h<=2000?4:h<=2400?5:6)+(mirror&&h>1000?1:0);
+// число петель по высоте двери — таблица производителей (Blum, Hettich): до 900 мм — 2, до 1600 — 3, до 2000 — 4, до 2400 — 5;
+// зеркало на высокой двери добавляет вес — ещё одна петля
+const hingeCount=(h,mirror)=>(h<=900?2:h<=1600?3:h<=2000?4:h<=2400?5:6)+(mirror&&h>900?1:0);
 const slideFor=d=>[550,500,450,400,350,300,250].find(v=>v<=d-10)||0;
 const boxHFor=fh=>Math.max(80,Math.min(200,Math.floor((fh-50)/10)*10));
 // фасады округляем вниз: иначе ряд дверей может выйти на миллиметр шире корпуса
@@ -1144,6 +1146,8 @@ function calcWing(p,s,W,sections,blk,key,walls){
       const lo=a===0?2:(bL&&a===bL)?3:hg/2,ro=Math.abs(b-W)<.01?2:(bR&&b===W-bR)?3:hg/2;
       // у планки нет стенки под петли, поэтому дверь угловой секции всегда одна и висит на дальней стороне
       const reg=b-a-lo-ro,d=isC(i)?1:reg>620?2:1,dw=(reg-3*(d-1))/d;
+      // проём не помещается (секций больше, чем позволяет ширина) — двери нет, ошибка уже показана
+      if(!(dw>0))return;
       if(isC(i)&&reg>620)warn.push(ERR(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`));
       // у угловой секции петли ставим с дальней от угла стороны: дверь открывается от угла, а не на соседнюю сторону
       let single=isC(i)?(i===0&&bL?'R':'L'):(i<n/2?'L':'R');
@@ -2371,6 +2375,8 @@ function calc(p,s){
   r.parts.forEach(x=>{x.eT=x.eL||x.eW||x.eX?edgeItem(fe&&isFrontPart(x)?p.mat.edgeF:p.mat.edgeB).id:''});
   r.edges=EDGES.map(e=>({...e,m:r.parts.filter(x=>x.eT===e.id).reduce((a,x)=>a+em(x),0)})).filter(e=>e.m>0);
   r.edgeM=r.edges.reduce((a,e)=>a+e.m,0);
+  // работа «кромкование» — по чистой длине кромок; запас нужен только на саму ленту
+  r.edgeWorkM=r.parts.filter(x=>x.eT).reduce((a,x)=>a+x.qty*(x.eL*x.L+x.eW*x.Wd+(x.eX||0))/1000,0);
   // вес изделия: ЛДСП ~0,7 кг/м² на 1 мм, ХДФ 3 мм ~2,6 кг/м², фасады на заказ — по весу из настроек, зеркало 4 мм ~10 кг/м²
   {const fm=frontMat(p,s),kgm=x=>x.mat==='hdf'?2.6:x.mat==='order'?(fm.f.kg||15):0.7*s.t;
     r.weight=r.parts.reduce((a,x)=>a+x.qty*x.L*x.Wd/1e6*kgm(x),0)+(r.mirrors||[]).reduce((a,m)=>a+m.qty*m.L*m.Wd/1e6*10,0);
@@ -2526,9 +2532,11 @@ function costs(p,s,c,cl,ch,cf){
     ...(orders.length?[[`Фасады на заказ: ${fm.f.name}${/мм/.test(fm.f.name)?'':' '+fm.t+' мм'}${p.mat.frontNote?' ('+p.mat.frontNote+')':''}`,+oArea.toFixed(2),'м²',fm.f.price]]:[]),
     ...c.edges.map(e=>[`Кромка ${e.name}`,+e.m.toFixed(1),'м',s.p[e.price]]),
     ['Распил (примерно)',+(cl.cutM+ch.cutM+(cf?cf.cutM:0)).toFixed(1),'м',s.p.cut],
-    ['Кромкование',+c.edgeM.toFixed(1),'м',s.p.edgeWork],
+    ['Кромкование',+c.edgeWorkM.toFixed(1),'м',s.p.edgeWork],
     ...c.hw,
     ...(p.extra||[]).filter(e=>+e.qty>0&&+e.price>0).map(e=>[(e.name||'Своя позиция').trim(),+e.qty,e.unit||'шт',+e.price])];
+  // при ошибке в изделии (секций больше, чем помещается) размеры могут уйти в минус — в смете количество не бывает меньше нуля
+  rows.forEach((r,i)=>{if(!(r[1]>0)){rows[i]=r.slice();rows[i][1]=0}});
   const mat=rows.reduce((a,r)=>a+r[1]*r[3],0);
   const work=mat*s.work/100,self=mat+work;
   const furnFull=Math.ceil(self*(1+s.markup/100)/100)*100,disc=Math.min(50,Math.max(0,+p.discount||0));
@@ -3388,7 +3396,9 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS};
+window.ShkafMaster={variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
+  // для проверок: текущий расчёт и тексты, которые видит клиент
+  __hooks:{R:()=>R,offerText,docText,supplierLists,rub,mountText}};
 // работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persisted().then(p=>{if(!p)navigator.storage.persist()}).catch(()=>{})}catch(e){}
 window.addEventListener('offline',()=>toast('Нет интернета — программа работает дальше, всё сохраняется на телефоне'));

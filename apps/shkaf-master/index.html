@@ -369,6 +369,14 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         <button type="button" data-type="swing">Распашные двери</button>
         <button type="button" data-type="coupe">Купе</button>
       </div>
+      <div id="mirBox">
+        <div class="seg" role="group" aria-label="Зеркала на дверях">
+          <button type="button" data-mir="0">Без зеркал</button>
+          <button type="button" data-mir="1">С зеркалами</button>
+        </div>
+        <div class="row" id="mirRow"><span class="hint">Дверей с зеркалом <span id="mirMax" class="num"></span></span>
+          <div class="stepper"><button type="button" id="mirMinus" aria-label="Меньше зеркал">−</button><output id="mirCount" class="num">0</output><button type="button" id="mirPlus" aria-label="Больше зеркал">+</button></div></div>
+      </div>
       <div class="grid3">
         <div class="field"><label for="pW" id="lblW">Ширина</label><div class="inwrap"><input id="pW" data-k="W" inputmode="numeric" type="number"><span>мм</span></div></div>
         <div class="field"><label for="pH">Высота</label><div class="inwrap"><input id="pH" data-k="H" inputmode="numeric" type="number"><span>мм</span></div></div>
@@ -394,14 +402,12 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         <div class="field" id="coupeNField"><label for="pCn">Дверей купе</label><div class="inwrap"><select id="pCn" data-k="coupeN"><option value="0">Авто</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div>
       </div>
       <div class="grid2" id="coupeFillBox">
-        <div class="field"><label for="pCs2">Двери купе: вставки</label><div class="inwrap"><select id="pCs2" data-k="coupeSplit"><option value="1">Цельные</option><option value="2">Из 2 частей</option><option value="3">Из 3 частей (зеркало в середине)</option></select></div></div>
-        <div class="field"><label for="pCm">Зеркальная вставка</label><div class="inwrap"><select id="pCm" data-k="coupeMat"><option value="mirror">Зеркало серебро</option><option value="tint">Зеркало бронза / графит</option><option value="sand">Зеркало с пескоструйным рисунком</option><option value="photo">Стекло с фотопечатью</option></select></div></div>
+        <div class="field"><label for="pCs2">Двери купе: вставки</label><div class="inwrap"><select id="pCs2" data-k="coupeSplit"><option value="1">Цельные</option><option value="2">Из 2 частей</option><option value="3" id="pCs2o3">Из 3 частей (зеркало в середине)</option></select></div></div>
+        <div class="field" id="pCmField"><label for="pCm">Зеркальная вставка</label><div class="inwrap"><select id="pCm" data-k="coupeMat"><option value="mirror">Зеркало серебро</option><option value="tint">Зеркало бронза / графит</option><option value="sand">Зеркало с пескоструйным рисунком</option><option value="photo">Стекло с фотопечатью</option></select></div></div>
       </div>
       <label class="switch"><input type="checkbox" id="pMezz"> Антресольная полка</label>
       <div class="row"><span class="hint" id="lblSecA">Секций</span>
         <div class="stepper"><button type="button" id="secMinus" aria-label="Меньше секций">−</button><output id="secCount" class="num">3</output><button type="button" id="secPlus" aria-label="Больше секций">+</button></div></div>
-      <div class="row"><span class="hint">Дверей с зеркалом <span id="mirMax" class="num"></span></span>
-        <div class="stepper"><button type="button" id="mirMinus" aria-label="Меньше зеркал">−</button><output id="mirCount" class="num">0</output><button type="button" id="mirPlus" aria-label="Больше зеркал">+</button></div></div>
       <p class="hint">Глубина — по корпусу, без фасадов. Цоколь 0 — шкаф без цоколя.</p>
     </div>
 
@@ -762,7 +768,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='35 от 26.10.2026';
+const APP_VER='36 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -2635,6 +2641,8 @@ function renderWardrobeUI(c){
   $('#coupeNField').style.visibility=P.type==='coupe'?'visible':'hidden';$('#coupeFillBox').hidden=P.type!=='coupe';$('#pCs2').value=String(P.coupeSplit||1);$('#pCm').value=P.coupeMat||'mirror';
   $('#secCount').textContent=P.sections.length;$('#secBCount').textContent=P.sectionsB.length;$('#secVCount').textContent=P.sectionsV.length;
   $('#mirCount').textContent=P.mirrors;$('#mirMax').textContent=`(из ${c.doorsAll.length})`;
+  {const nd=c.doorsAll.length,on=P.mirrors>0;$('#mirBox').hidden=!nd;$('#mirRow').hidden=!on;$$('[data-mir]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.mir===(on?1:0))));
+   $('#pCmField').hidden=!on;$('#pCs2o3').textContent=on?'Из 3 частей (зеркало в середине)':'Из 3 частей'}
   $('#showDoors').checked=showDoors;
   $('#contentTitle').textContent='Наполнение секций';$('#contentHint').textContent='Нажмите на секцию на чертеже, чтобы перейти к её настройке.';
   $('#sections').innerHTML=c.wings.map(w=>(corner?`<h3 class="sec-group">${wingName(w.key)}</h3>`:'')+w.sections.map((s,i)=>{const key=w.key+':'+i;
@@ -3167,6 +3175,7 @@ document.addEventListener('click',e=>{
   if(b.id==='secVMinus'&&P.sectionsV.length>1){P.sectionsV.pop();activeSec='';change();return}
   if(b.id==='mirPlus'){P.mirrors=Math.min(R.c.doorsAll.length,P.mirrors+1);showDoors=true;change();return}
   if(b.id==='mirMinus'){P.mirrors=Math.max(0,P.mirrors-1);change();return}
+  if(d.mir!==undefined){const n=R.c.doorsAll.length;P.mirrors=d.mir==='1'?Math.min(n,Math.max(1,P.mirrors)):0;if(d.mir==='1')showDoors=true;change();toast(P.mirrors?`Зеркало на ${P.mirrors} из ${n} дверей — число можно поменять`:'Шкаф без зеркал');return}
   if(d.supsend!==undefined||d.supcopy!==undefined){const x=SUPS[+(d.supsend??d.supcopy)];if(!x)return;
     if(d.supsend!==undefined&&navigator.share&&!inFrame)navigator.share({title:x.title,text:x.text}).catch(()=>{});else copy(x.text,$('#supText'),'Список скопирован — вставьте в сообщение поставщику');return}
   if(b.id==='mountShare'){const t=mountText();if(navigator.share&&!inFrame)navigator.share({title:'Монтаж: '+P.name,text:t}).catch(()=>{});else copy(t,$('#mountText'),'Текст для монтажника скопирован');return}

@@ -51,7 +51,7 @@ const res=await pg.evaluate(()=>{
    ok(M.drillMap(p,S,r).length>0,`${tag}: присадка`)};
 
  // ---------- 1. шаблон угловой кухни с техникой — без ошибок
- const tpl=M.builtinTemplates().find(t=>/угловая/.test(t.name));ok(!!tpl,'шаблон угловой кухни есть');
+ const tpl=M.builtinTemplates().find(t=>/Кухня угловая/.test(t.name));ok(!!tpl,'шаблон угловой кухни есть');
  if(tpl){const p=M.fromTemplate(tpl),S=M.effSettings(p),r=M.calc(p,S);ok(!errsOf(r).length,'шаблон угловой кухни без ошибок: '+errsOf(r).join(' | '));sanity(p,S,r,'шаблон');inModule(r,'шаблон');sideFronts(r,'шаблон');collide(p,S,r,'шаблон');
    ok(r.mods.some(m=>m.type==='dw')&&r.mods.some(m=>m.type==='fridge')&&r.mods.some(m=>m.type==='tallOven')&&r.mods.some(m=>m.type==='hood')&&r.mods.some(m=>m.hob),'шаблон: вся техника')}
 

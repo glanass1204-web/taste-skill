@@ -347,6 +347,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       <button type="button" data-kind="wardrobe"><svg viewBox="0 0 32 32"><rect x="5" y="3" width="22" height="26" rx="1.5"/><path d="M16 3v26M5 25h22M13.5 13v3M18.5 13v3"/></svg>Шкаф</button>
       <button type="button" data-kind="kitchen"><svg viewBox="0 0 32 32"><rect x="3" y="4" width="26" height="8" rx="1"/><path d="M3 16h26M4 16v12h24V16M12 16v12M20 16v12M10 8h2M20 8h2M7 20h2M15 20h2M23 20h2"/></svg>Кухня</button>
       <button type="button" data-kind="hall"><svg viewBox="0 0 32 32"><path d="M4 6h24M8 6v3M14 6v3M20 6v3M26 6v3M8 9q0 3 2 3M14 9q0 3 2 3M20 9q0 3 2 3"/><rect x="4" y="19" width="24" height="4" rx="1"/><path d="M6 23v6M26 23v6M6 27h20"/></svg>Прихожая</button>
+      <button type="button" data-kind="walk"><svg viewBox="0 0 32 32"><path d="M4 28V5h24v23"/><path d="M4 11h24M9 11v17M23 11v17M12 15h8M14 15q2 3 4 0"/></svg>Гардеробная</button>
       <button type="button" data-kind="chest"><svg viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="20" rx="1.5"/><path d="M5 12.7h22M5 19.3h22M7 26v3M25 26v3M14 9.4h4M14 16h4M14 22.6h4"/></svg>Комод, тумба</button>
     </div>
 
@@ -357,9 +358,12 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       <h3 id="wTitle">Шкаф: тип и габариты</h3>
       <div id="hallBox" hidden><p class="hint">Готовые прихожие — нажмите, потом поменяйте размеры под замер:</p>
         <div class="presets" style="margin-top:8px"><button class="chip" type="button" data-hallp="set">Шкаф + вешалка + банкетка</button><button class="chip" type="button" data-hallp="narrow">Узкая, глубина 350</button><button class="chip" type="button" data-hallp="coupe">Прихожая-купе</button><button class="chip" type="button" data-hallp="rack">Открытая вешалка</button><button class="chip" type="button" data-preset2="shoe">Обувница</button></div></div>
+      <div id="walkBox" hidden><p class="hint">Готовые гардеробные — нажмите, потом поменяйте размеры под замер. Секции открытые; дверь можно поставить в любую секцию.</p>
+        <div class="presets" style="margin-top:8px"><button class="chip" type="button" data-walkp="line">Линейная</button><button class="chip" type="button" data-walkp="corner">Угловая (Г)</button><button class="chip" type="button" data-walkp="u">П-образная</button></div></div>
       <div class="seg" role="group" aria-label="Форма шкафа">
         <button type="button" data-shape="straight">Прямой</button>
         <button type="button" data-shape="corner">Угловой</button>
+        <button type="button" data-shape="u">П-образный</button>
       </div>
       <div class="seg" role="group" aria-label="Тип дверей">
         <button type="button" data-type="swing">Распашные двери</button>
@@ -372,13 +376,17 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       </div>
       <div class="cornerbox" id="cornerBox">
         <div class="grid2">
-          <div class="field"><label for="pW2">Ширина стороны Б</label><div class="inwrap"><input id="pW2" data-k="W2" inputmode="numeric" type="number"><span>мм</span></div></div>
-          <div class="field"><label for="pCs">Где угол на стороне А</label><div class="inwrap"><select id="pCs" data-k="cornerSide"><option value="L">Слева</option><option value="R">Справа</option></select></div></div>
+          <div class="field"><label for="pW2" id="lblW2">Ширина стороны Б</label><div class="inwrap"><input id="pW2" data-k="W2" inputmode="numeric" type="number"><span>мм</span></div></div>
+          <div class="field" id="w3Field"><label for="pW3">Ширина стороны В (справа)</label><div class="inwrap"><input id="pW3" data-k="W3" inputmode="numeric" type="number"><span>мм</span></div></div>
+          <div class="field" id="csField"><label for="pCs">Где угол на стороне А</label><div class="inwrap"><select id="pCs" data-k="cornerSide"><option value="L">Слева</option><option value="R">Справа</option></select></div></div>
         </div>
         <div class="grid2"><div class="field"><label for="pCo">Проём угловой секции</label><div class="inwrap"><input id="pCo" data-k="cornerOpen" inputmode="numeric" type="number"><span>мм</span></div></div></div>
         <div class="row"><span class="hint">Секций на стороне Б</span>
           <div class="stepper"><button type="button" id="secBMinus" aria-label="Меньше секций на стороне Б">−</button><output id="secBCount" class="num">2</output><button type="button" id="secBPlus" aria-label="Больше секций на стороне Б">+</button></div></div>
-        <p class="hint">Сторона А — вдоль одной стены, сторона Б — вдоль другой. Ширина Б меряется от угла комнаты. У распашного углового шкафа в углу ставятся доборные планки по 60 мм, а корпус стороны Б короче на 20 мм: так двери и ручки двух сторон не бьются друг о друга.</p>
+        <div class="row" id="secVRow"><span class="hint">Секций на стороне В</span>
+          <div class="stepper"><button type="button" id="secVMinus" aria-label="Меньше секций на стороне В">−</button><output id="secVCount" class="num">2</output><button type="button" id="secVPlus" aria-label="Больше секций на стороне В">+</button></div></div>
+        <p class="hint" id="uHint" hidden>П-образная: сторона А — у дальней стены, Б — слева, В — справа. Ширины Б и В меряются от дальней стены. Если секции у стыка открытые, стороны встают вплотную; если в них есть двери — ставятся планки по 60 мм.</p>
+        <p class="hint" id="cHint">Сторона А — вдоль одной стены, сторона Б — вдоль другой. Ширина Б меряется от угла комнаты. У распашного углового шкафа в углу ставятся доборные планки по 60 мм, а корпус стороны Б короче на 20 мм: так двери и ручки двух сторон не бьются друг о друга.</p>
       </div>
       <div class="grid3">
         <div class="field"><label for="pPl">Цоколь</label><div class="inwrap"><input id="pPl" data-k="plinth" inputmode="numeric" type="number"><span>мм</span></div></div>
@@ -754,10 +762,10 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='34 от 26.10.2026';
+const APP_VER='35 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
-const kindName=p=>p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
+const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
@@ -908,6 +916,18 @@ const HALLS={
     secs:[{open:true,hooks:4,seat:true,shoes:1}]}};
 function applyHall(p,k){const h=HALLS[k];Object.assign(p,{kind:'wardrobe',hall:true,shape:'straight',W:h.W,H:h.H,D:h.D,type:h.type,plinth:h.plinth,mezz:h.mezz,mezzH:h.mezzH,mirrors:h.mirrors,coupeN:h.coupeN||0,
   sections:h.secs.map(x=>Object.assign(sec(x.shelves||0,!!x.rod,0,0),{open:!!x.open,hooks:x.hooks||0,seat:!!x.seat,shoes:x.shoes||0}))})}
+// гардеробные: открытые секции без дверей; глубина 560 — плечики висят поперёк, штанга обычная.
+// П-образная: сторона А у дальней стены, Б слева, В справа; Б и В встают к А вплотную, если угловые секции открытые.
+const WALKS={
+  line:{name:'Гардеробная линейная 2400',shape:'straight',W:2400,H:2500,
+    A:[{shelves:6},{shelves:1,rod:true},{shelves:1,rod:true,drawers:3},{shelves:1,rod:true}]},
+  corner:{name:'Гардеробная угловая 2400 × 1800',shape:'corner',W:2400,W2:1800,H:2500,
+    A:[{shelves:6},{shelves:1,rod:true},{shelves:1,rod:true},{shelves:1,rod:true,drawers:3}],B:[{shelves:1,rod:true,shoeOut:2},{shelves:6}]},
+  u:{name:'Гардеробная П-образная 2800 × 1800',shape:'u',W:2800,W2:1800,W3:1800,H:2500,
+    A:[{shelves:6},{shelves:1,rod:true,drawers:3},{shelves:6}],B:[{shelves:1,rod:true},{shelves:6}],V:[{shelves:6},{shelves:1,rod:true,trousers:true}]}};
+const walkSecs=xs=>(xs||[{shelves:5}]).map(x=>Object.assign(sec(x.shelves||0,!!x.rod,x.drawers||0,0),{open:true,trousers:!!x.trousers,shoeOut:x.shoeOut||0}));
+function applyWalk(p,k){const h=WALKS[k];Object.assign(p,{kind:'wardrobe',walk:true,hall:false,shape:h.shape,type:'swing',W:h.W,W2:h.W2||p.W2,W3:h.W3||p.W3,H:h.H,D:560,plinth:80,mezz:true,mezzH:400,mirrors:0,coupeN:0,cornerSide:'L',cornerOpen:450,
+  sections:walkSecs(h.A),sectionsB:walkSecs(h.B||[{shelves:1,rod:true},{shelves:6}]),sectionsV:walkSecs(h.V||[{shelves:6},{shelves:1,rod:true}])})}
 const hasHall=p=>[...p.sections,...p.sectionsB].some(x=>x.seat||x.hooks||x.open);
 const PRESETS={
   komod:{name:'Комод',W:800,H:850,D:450,plinth:60,legs:0,cols:[col('drawers',4,0)]},
@@ -923,18 +943,19 @@ function kDefaults(){return{baseH:720,baseD:560,legs:100,wallH:720,wallD:300,wal
 function cDefaults(){const p=clone(PRESETS.komod);delete p.name;return p}
 function newProject(){return norm({id:uid(),name:'Новый заказ',client:'',phone:'',address:'',kind:'wardrobe',
   shape:'straight',type:'swing',W:1800,H:2400,D:560,W2:1400,cornerSide:'L',cornerOpen:450,plinth:80,mezz:true,mezzH:450,coupeN:0,decor:'sonoma',mirrors:1,
-  sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],mat:{edgeF:'1',edgeB:'0.8'},updated:Date.now()})}
+  sections:[sec(4,false,0,0),sec(1,true,0,0),sec(1,false,2,1)],sectionsB:[sec(4,false,0,0),sec(1,true,0,0)],sectionsV:[sec(1,true,0,0),sec(4,false,0,0)],W3:1400,mat:{edgeF:'1',edgeB:'0.8'},updated:Date.now()})}
 function norm(p){
-  p.kind=p.kind||'wardrobe';p.address=p.address||'';p.hall=!!p.hall;if(!STATUS_NAME[p.status])p.status='calc';p.prepay=Math.max(0,+p.prepay||0);p.extra=Array.isArray(p.extra)?p.extra:[];p.mount=Object.assign({checks:{},photos:[]},p.mount||{});p.svc=Object.assign({floor:1,lift:'pass',km:0,dism:false,trash:false},p.svc||{});p.tryon=p.tryon&&p.tryon.photo?p.tryon:null;p.installDate=p.installDate||'';
+  p.kind=p.kind||'wardrobe';p.address=p.address||'';p.hall=!!p.hall;p.walk=!!p.walk&&!p.hall;if(!STATUS_NAME[p.status])p.status='calc';p.prepay=Math.max(0,+p.prepay||0);p.extra=Array.isArray(p.extra)?p.extra:[];p.mount=Object.assign({checks:{},photos:[]},p.mount||{});p.svc=Object.assign({floor:1,lift:'pass',km:0,dism:false,trash:false},p.svc||{});p.tryon=p.tryon&&p.tryon.photo?p.tryon:null;p.installDate=p.installDate||'';
   p.shape=p.shape||'straight';p.W2=p.W2||1400;p.cornerSide=p.cornerSide||'L';p.cornerOpen=Math.min(600,Math.max(300,p.cornerOpen||450));p.mirrors=p.mirrors||0;
-  p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];
-  [...p.sections,...p.sectionsB].forEach(s=>{s.baskets=s.baskets||0});
+  p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];p.sectionsV=p.sectionsV||[sec(1,true,0,0),sec(4,false,0,0)];p.W3=p.W3||1400;
+  if(p.shape==='u'&&p.type==='coupe')p.type='swing';
+  [...p.sections,...p.sectionsB,...p.sectionsV].forEach(s=>{s.baskets=s.baskets||0});
   p.meas=Object.assign({w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]},p.meas||{});
   p.mat=Object.assign({body:'krono16',front:'body',frontDecor:'white',frontColor:'white',frontNote:'',top:'pf38',edgeF:'2',edgeB:'2'},p.mat||{});
   // заказы прошлых версий были посчитаны с кромкой 2 мм (или 2 мм + 0,4 мм) — сохраняем как было; новый заказ: фасады 1 мм, корпус 0,8 мм
   if(p.mat.edge!==undefined){if(p.mat.edge==='mix'){p.mat.edgeF='2';p.mat.edgeB='0.4'}else{p.mat.edgeF='2';p.mat.edgeB='2'}delete p.mat.edge}
   p.mat.edgeF=edgeItem(p.mat.edgeF).id;p.mat.edgeB=edgeItem(p.mat.edgeB).id;
-  p.hw=Object.assign({hinge:'boyard',slide:'ball',handle:'r128',handleIn:'knob',coupe:'std'},p.hw||{});p.walls=Object.assign({L:false,R:false,A:false,B:false},p.walls||{});
+  p.hw=Object.assign({hinge:'boyard',slide:'ball',handle:'r128',handleIn:'knob',coupe:'std'},p.hw||{});p.walls=Object.assign({L:false,R:false,A:false,B:false,V:false},p.walls||{});
   p.k=Object.assign(kDefaults(),p.k||{});p.c=Object.assign(cDefaults(),p.c||{});if(p.c.legs===undefined)p.c.legs=0;
   return p}
 
@@ -951,7 +972,7 @@ let P=projects.find(p=>p.id===curId)||projects[0];curId=P.id;
 document.documentElement.classList.toggle('big',!!settings.bigText);
 let tab='build',activeSec='',showDoors=false;const accOpen=new Set();
 document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.acc){if(d.open)accOpen.add(d.dataset.acc);else accOpen.delete(d.dataset.acc)}},true);
-const secsOf=k=>k==='B'?P.sectionsB:P.sections;
+const secsOf=k=>k==='B'?P.sectionsB:k==='V'?P.sectionsV:P.sections;
 const catItem=(k,id,st)=>{const c=(st||settings).cat||settings.cat;return c[k].find(x=>x.id===id)||c[k][0]};
 const HW=(p,st)=>({hinge:catItem('hinges',p.hw.hinge,st),slide:catItem('slides',p.hw.slide,st),handle:catItem('handles',p.hw.handle,st),handleIn:catItem('handles',p.hw.handleIn,st),coupe:catItem('coupe',p.hw.coupe,st)});
 
@@ -1013,18 +1034,22 @@ function calcWing(p,s,W,sections,blk,key,walls){
   walls=walls||{};const HWp=HW(p,s),sys=HWp.slide;
   const t=s.t,H=p.H,D=p.D,n=sections.length,pl=Math.max(0,p.plinth),coupe=p.type==='coupe';
   const inW=W-2*t,partD=coupe?D-100:D,shelfD=partD-20,innerH=H-pl-2*t,net=inW-(n-1)*t;
-  const bL=blk.side==='L'?blk.w:0,bR=blk.side==='R'?blk.w:0,ci=blk.w?(bL?0:n-1):-1;
+  // угловые зоны: у прямой и угловой стороны — с одного края, у задней стороны П-образной — с обоих
+  const bs=blk.sides||(blk.w?{[blk.side]:{w:blk.w,planka:!!blk.planka}}:{});
+  const bL=bs.L?bs.L.w:0,bR=bs.R?bs.R.w:0,cis=[...(bL?[0]:[]),...(bR&&!(bL&&n===1)?[n-1]:[])],ci=cis.length?cis[0]:-1,isC=i=>cis.includes(i);
   // Распашные: стык дверей должен приходиться на центр перегородки, иначе петлю не к чему крепить.
   // Поэтому сначала делим фасад на пролёты, а ширины секций выводим из них.
   let spans=null,ws;
   if(!coupe){
     if(ci<0)spans=Array(n).fill(W/n);
     else if(n===1)spans=[W];
-    else{const open=blk.open||Math.min((W-blk.w)/n,600),cs=blk.w+open,o=(W-cs)/(n-1);spans=Array(n).fill(o);spans[ci]=cs}
+    else{const bw=i=>i===0&&bL?bL:i===n-1&&bR?bR:0,open=blk.open||Math.min((W-bL-bR)/n,600);
+      if(cis.length===n)spans=cis.map(i=>bw(i)+(W-bL-bR)/n);
+      else{const cs=cis.reduce((a,i)=>a+bw(i)+open,0),o=(W-cs)/(n-cis.length);spans=Array(n).fill(o);cis.forEach(i=>spans[i]=bw(i)+open)}}
     ws=spans.map((sp,i)=>sp-(i===0?t:t/2)-(i===n-1?t:t/2));
   }else{
     ws=Array(n).fill(net/n);
-    if(ci>=0&&n>1){const cw=Math.min(net-250*(n-1),Math.max(net/n,blk.w-t+(p.cornerOpen||450)));ws=ws.map((_,i)=>i===ci?cw:(net-cw)/(n-1))}
+    if(ci>=0&&n>1){const cw=Math.min(net-250*(n-1),Math.max(net/n,(bL||bR)-t+(p.cornerOpen||450)));ws=ws.map((_,i)=>i===ci?cw:(net-cw)/(n-1))}
   }
   const xs=[];ws.reduce((x,w,i)=>(xs[i]=x,x+w+t),t);
   const parts=[],warn=[],add=adder(parts,frontMat(p,s));
@@ -1062,7 +1087,7 @@ function calcWing(p,s,W,sections,blk,key,walls){
   const bk=backPanels(add,s,H-pl-4,W-4,xs.slice(1).map(x=>x-t/2-2));
   if(bk.noSupport)warn.push(`задняя стенка из ${bk.k} частей, стык не попадает на перегородку — за стыком добавлена планка 60 мм.`);
   if(bk.tall)warn.push(ERR('задняя стенка выше листа ХДФ — нужна стенка из двух частей по высоте с горизонтальной планкой.'));
-  if(blk.planka)add('Доборная планка','Фасады',H-pl-4,FILLER,1,'ldsp',2,2);
+  {const np=(bs.L&&bs.L.planka?1:0)+(bs.R&&bs.R.planka?1:0);if(np)add('Доборная планка','Фасады',H-pl-4,FILLER,np,'ldsp',2,2)}
   const doors=[];let coupeD=null,doorH=0;
   if(!coupe){
     doorH=H-pl-4;
@@ -1075,19 +1100,19 @@ function calcWing(p,s,W,sections,blk,key,walls){
       const a=Math.max(B[i],bL),b=Math.min(B[i+1],W-bR);if(b-a<=0)return;
       const lo=a===0?2:(bL&&a===bL)?3:hg/2,ro=Math.abs(b-W)<.01?2:(bR&&b===W-bR)?3:hg/2;
       // у планки нет стенки под петли, поэтому дверь угловой секции всегда одна и висит на дальней стороне
-      const reg=b-a-lo-ro,d=i===ci?1:reg>620?2:1,dw=(reg-3*(d-1))/d;
-      if(i===ci&&reg>620)warn.push(ERR(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`));
+      const reg=b-a-lo-ro,d=isC(i)?1:reg>620?2:1,dw=(reg-3*(d-1))/d;
+      if(isC(i)&&reg>620)warn.push(ERR(`дверь угловой секции получается ${Math.floor(reg)} мм — шире 600 мм она провиснет. Добавьте секцию на этой стороне.`));
       // у угловой секции петли ставим с дальней от угла стороны: дверь открывается от угла, а не на соседнюю сторону
-      let single=i===ci?(bL?'R':'L'):(i<n/2?'L':'R');
+      let single=isC(i)?(i===0&&bL?'R':'L'):(i<n/2?'L':'R');
       // одиночную дверь у стены вешаем на дальнюю от стены сторону, иначе она упрётся в стену
-      if(i!==ci){if(i===0&&walls.L&&single==='L'&&!(i===n-1&&walls.R))single='R';if(i===n-1&&walls.R&&single==='R'&&!(i===0&&walls.L))single='L'}
+      if(!isC(i)){if(i===0&&walls.L&&single==='L'&&!(i===n-1&&walls.R))single='R';if(i===n-1&&walls.R&&single==='R'&&!(i===0&&walls.L))single='L'}
       for(let j=0;j<d;j++)doors.push({sec:i,w:dw,h:doorH,x:a+lo+j*(dw+3),hinge:d===2?(j===0?'L':'R'):single});
       const atWall=doors.filter(x=>x.sec===i).filter(x=>(x.hinge==='L'&&walls.L&&x.x<5)||(x.hinge==='R'&&walls.R&&x.x+x.w>W-5));
       if(atWall.length){const inner=c.drawers||c.baskets;
         warn.push(inner?ERR(`секция ${i+1}: дверь на петлях у стены откроется только на 90°, ящики и корзины за ней не выдвинутся. Поставьте у стены доборную планку 50 мм (сделайте шкаф уже на 50 мм) или сделайте в секции одну дверь.`)
           :`секция ${i+1}: дверь на петлях у стены откроется только на 90° и может задевать стену. Лучше оставить у стены зазор или поставить доборную планку 50 мм.`)}
       add('Дверь','Фасады',doorH,dw,d,'ldsp',2,2);
-      if(i===ci&&reg<350)warn.push(ERR(`угловая секция открывается только на ${Math.max(0,Math.round(reg))} мм. Увеличьте проём угловой секции или ширину стороны.`));
+      if(isC(i)&&reg<350)warn.push(ERR(`угловая секция открывается только на ${Math.max(0,Math.round(reg))} мм. Увеличьте проём угловой секции или ширину стороны.`));
     });
   }else{
     const ox0=bL||t,ox1=bR?W-bR:W-t,ow=ox1-ox0;
@@ -1102,7 +1127,7 @@ function calcWing(p,s,W,sections,blk,key,walls){
     if(dw<500)warn.push(`двери купе получаются ${dw} мм — уже 500 мм неудобно. Уменьшите число дверей.`);
     sections.forEach((c,i)=>{if((c.drawers||c.baskets||c.trousers||c.shoeOut)&&ws[i]>dw-60)warn.push(ERR(`секция ${i+1} (${Math.round(ws[i])} мм) шире, чем открывает дверь купе (${dw-60} мм): ${c.drawers||c.baskets?'ящики и корзины':'выдвижные брючница и полки'} упрутся в профиль двери. Поставьте их в более узкую секцию или добавьте секцию.`))});
   }
-  if(ci>=0&&(sections[ci].drawers||sections[ci].baskets))warn.push(ERR('ящики и корзины в угловой секции упрутся в соседнюю сторону — перенесите их в другую секцию.'));
+  if(cis.some(i=>sections[i].drawers||sections[i].baskets))warn.push(ERR('ящики и корзины в угловой секции упрутся в соседнюю сторону — перенесите их в другую секцию.'));
   const per=D>450?4:3;
   const zTop=p.mezz?p.mezzH+t:t,zBot=H-pl-t,zoneH=zBot-zTop;
   if(p.mezz&&zoneH<600)warn.push(ERR(`под антресолью остаётся ${Math.max(0,Math.round(zoneH))} мм — антресоль опущена слишком низко. Уменьшите «Антресоль от верха».`));
@@ -1141,7 +1166,8 @@ function calcWing(p,s,W,sections,blk,key,walls){
     if(pull&&sp)add('Проставка под выдвижной аксессуар (у задней стенки)','Ящики',Math.min(innerH,pull*200),shelfD,2,'ldsp',1,0)});
   const baskets=sections.map((c,i)=>c.baskets?{n:c.baskets,w:Math.round(ws[i]-2*sp)}:null).filter(Boolean);
   const seats=sections.filter(c=>c.seat).length,rails=sections.filter(c=>c.hooks).length,shoes=sections.reduce((a,c)=>a+(c.seat?c.shoes||0:0),0);
-  return{key,W,sections,blk,ws,xs,spans,bk,shelfD,partD,innerH,inW,parts,warn,doors,doorH,coupeD,zTop,zBot,sp,hooks:sections.reduce((a,c)=>a+(c.hooks||0),0),
+  const bk1=bL?bs.L:bR?bs.R:null;blk=Object.assign({},blk,{side:bL?'L':bR?'R':blk.side||'L',w:bk1?bk1.w:0,planka:!!(bk1&&bk1.planka)});
+  return{key,W,sections,blk,bs,cis,ws,xs,spans,bk,shelfD,partD,innerH,inW,parts,warn,doors,doorH,coupeD,zTop,zBot,sp,hooks:sections.reduce((a,c)=>a+(c.hooks||0),0),
     conf:4*per+2*(n-1)*per+(pl>0?8:0)+8*nd+4*seats+4*rails,supports:4*(shelves+mezzN+shoes),rods:rodSecs.length,rodM:rodSecs.reduce((a,b)=>a+b,0)/1000,rodPull,pull,acc,nd,nb,slide,baskets};
 }
 
@@ -1154,26 +1180,41 @@ function coupeSecs(d,n,M,sys){n=[1,2,3].includes(+n)?+n:1;M=COUPE_MAT[M]?M:'mirr
     return{mat:m,h:hs,ih,iw}})}
 const coupeMatName=m=>m==='ldsp'?'ЛДСП 10 мм':COUPE_MAT[m].name;
 function calcWardrobe(p,s){
-  const corner=p.shape==='corner',coupe=p.type==='coupe',A_L=p.cornerSide==='L';
+  const u=p.shape==='u',corner=p.shape==='corner'||u,coupe=p.type==='coupe'&&!u,A_L=u||p.cornerSide==='L';
   // Угол распашного шкафа: сторона Б отодвигается на толщину двери А плюс 4 мм, на обеих сторонах доборные планки.
   // Угол купе: двери внутри корпуса, сторона Б примыкает к стороне А вплотную.
-  const blkA=!corner?{side:'L',w:0}:coupe?{side:p.cornerSide,w:p.D}:{side:p.cornerSide,w:p.D+FILLER,open:p.cornerOpen||450,planka:true};
-  // стены у краёв: у прямого шкафа — слева и справа, у углового — у свободных концов сторон А и Б
-  const wA=!corner?{L:p.walls.L,R:p.walls.R}:{[A_L?'R':'L']:p.walls.A},wB=corner?{[A_L?'L':'R']:p.walls.B}:{};
+  // Гардеробная: если обе секции у стыка открытые (без дверей), стороны стыкуются вплотную, без планок и отступа.
+  const fT=frontMat(p,s).t;
+  const join=(secA,secB)=>coupe?'coupe':p.walk&&secA&&secA.open&&secB&&secB.open?'open':'doors';
+  const sideA=A_L?'L':'R',jB=corner?join(A_L?p.sections[0]:p.sections[p.sections.length-1],A_L?p.sectionsB[p.sectionsB.length-1]:p.sectionsB[0]):null,
+    jV=u?join(p.sections[p.sections.length-1],p.sectionsV[0]):null;
+  const zone=j=>j==='doors'?{w:p.D+FILLER,planka:true}:{w:p.D,planka:false};
+  const sidesA={};if(corner)sidesA[sideA]=zone(jB);if(u)sidesA.R=zone(jV);
+  const blkA={sides:sidesA,open:coupe?0:p.cornerOpen||450};
+  // стены у краёв: у прямого шкафа — слева и справа, у углового — у свободных концов сторон А и Б, у П-образной — у концов Б и В
+  const wA=!corner?{L:p.walls.L,R:p.walls.R}:u?{}:{[A_L?'R':'L']:p.walls.A},wB=corner?{[A_L?'L':'R']:p.walls.B}:{},wV=u?{R:p.walls.V}:{};
   const HWp=HW(p,s);
   const wings=[calcWing(p,s,p.W,p.sections,blkA,'A',wA)];
-  const fT=frontMat(p,s).t,lenB=corner?(coupe?p.W2-p.D:p.W2-p.D-(fT+4)):0;
-  if(corner)wings.push(calcWing(p,s,lenB,p.sectionsB,coupe?{side:'L',w:0}:{side:A_L?'R':'L',w:FILLER,planka:true},'B',wB));
+  const offOf=j=>j==='doors'?fT+4:0,lenOf=(L,j)=>L-p.D-offOf(j),bWing=(j,side)=>j==='doors'?{sides:{[side]:{w:FILLER,planka:true}}}:{sides:{}};
+  const lenB=corner?lenOf(p.W2,jB):0,lenV=u?lenOf(p.W3,jV):0;
+  if(corner){const w=calcWing(p,s,lenB,p.sectionsB,bWing(jB,A_L?'R':'L'),'B',wB);w.off=offOf(jB);w.join=jB;wings.push(w)}
+  if(u){const w=calcWing(p,s,lenV,p.sectionsV,bWing(jV,'L'),'V',wV);w.off=offOf(jV);w.join=jV;wings.push(w)}
   const parts=mergeParts(wings.flatMap(w=>w.parts));
   const warn=[];
   const W_=x=>typeof x==='string'?{t:x,lvl:'warn'}:x;
-  wings.forEach(w=>w.warn.forEach(x=>{const o=W_(x);warn.push({...o,t:corner?`Сторона ${w.key==='A'?'А':'Б'}: ${o.t}`:o.t[0].toUpperCase()+o.t.slice(1)})}));
+  wings.forEach(w=>w.warn.forEach(x=>{const o=W_(x);warn.push({...o,t:corner?`Сторона ${w.key==='A'?'А':w.key==='B'?'Б':'В'}: ${o.t}`:o.t[0].toUpperCase()+o.t.slice(1)})}));
   if(p.H>s.sheetL-2*s.trim)warn.push(ERR(`Высота ${p.H} мм больше длины листа — боковины не выкроить из одного листа.`));
   if(coupe&&p.D<450)warn.push('Для купе глубина корпуса обычно от 450 мм: 100 мм уходит под двери.');
   // корпус собирают лёжа и поднимают: потолок должен быть выше диагонали боковины
   const notes=[`Шкаф собирают лёжа и поднимают. Потолок в месте установки должен быть не ниже ${Math.ceil(Math.hypot(p.H,p.D))+10} мм — замерьте до заказа.`,'Шкаф обязательно крепится к стене двумя уголками — от опрокидывания (в смете есть).'];
   if(corner&&!coupe&&HWp.handle.proj>FILLER-15)warn.push(ERR(`Ручки выступают на ${HWp.handle.proj} мм — в углу двери сторон А и Б заденут ручки друг друга (планка ${FILLER} мм рассчитана на вынос до ${FILLER-15} мм). Выберите ручку с меньшим выносом.`));
   if(corner&&lenB<500)warn.push(ERR(`Сторона Б слишком короткая: корпус выходит ${Math.round(lenB)} мм. Увеличьте ширину стороны Б.`));
+  if(u&&lenV<500)warn.push(ERR(`Сторона В слишком короткая: корпус выходит ${Math.round(lenV)} мм. Увеличьте ширину стороны В.`));
+  // проход между сторонами Б и В: от 700 мм удобно, уже 500 — не пройти
+  const pass=u?Math.round(p.W-2*p.D-offOf(jB)-offOf(jV)-(jB==='doors'||jV==='doors'?fT:0)):0;
+  if(u&&pass<500)warn.push(ERR(`Между сторонами Б и В остаётся ${Math.max(0,pass)} мм — не пройти. Нужно от 700 мм: увеличьте ширину А или уменьшите глубину.`));
+  else if(u&&pass<700)warn.push(`Между сторонами Б и В остаётся ${pass} мм — тесно, удобно от 700 мм.`);
+  if(p.walk&&!coupe&&wings.some(w=>w.doors.length))notes.push('В гардеробной двери обычно не ставят. Секции с дверями отмечены на чертеже; у стыка сторон с дверями ставятся планки 60 мм.');
   const doorsAll=coupe?wings.flatMap(w=>w.coupeD.items):wings.flatMap(w=>w.doors);
   if(!coupe&&doorsAll.length)frontChecks(p,s,HWp.hinge,warn,Math.max(...doorsAll.map(d=>d.h)));
   const nm=Math.min(p.mirrors||0,doorsAll.length);
@@ -1182,8 +1223,9 @@ function calcWardrobe(p,s){
   const sum=f=>wings.reduce((a,w)=>a+f(w),0),pr=s.p,hw=[];
   const nd=sum(w=>w.nd),nb=sum(w=>w.nb);
   hw.push(['Конфирмат 7×50',sum(w=>w.conf),'шт',pr.confirmat]);
-  if(corner)hw.push(['Стяжка межсекционная (соединить стороны)',6,'шт',pr.tie]);
-  if(corner&&!coupe)hw.push(['Уголок для доборной планки',8,'шт',pr.bracket]);
+  const joins=wings.slice(1).map(w=>w.join);
+  if(corner)hw.push(['Стяжка межсекционная (соединить стороны)',6*joins.length,'шт',pr.tie]);
+  {const pj=joins.filter(j=>j==='doors').length;if(pj)hw.push(['Уголок для доборной планки',8*pj,'шт',pr.bracket])}
   hw.push(['Полкодержатель',sum(w=>w.supports),'шт',pr.support]);
   // высокий шкаф крепят к стене — от опрокидывания
   hw.push(['Крепление к стене от опрокидывания (уголок с дюбелем)',2*wings.length,'шт',pr.wallFix]);
@@ -1223,7 +1265,7 @@ function calcWardrobe(p,s){
   if(slide)slideRow(hw,HWp.slide,slide,nd);
   const bm=new Map();wings.forEach(w=>w.baskets.forEach(b=>bm.set(b.w,(bm.get(b.w)||0)+b.n)));
   bm.forEach((q,w)=>hw.push([`Корзина выдвижная с направляющими, под проём ${w} мм`,q,'шт',pr.basket]));
-  return{wings,parts,hw,warn,notes,mirrors,doorsAll,corner,coupe,lenB};
+  return{wings,parts,hw,warn,notes,mirrors,doorsAll,corner,coupe,lenB,u,lenV,pass};
 }
 
 function drawFront(p,s,w){
@@ -1285,22 +1327,37 @@ function drawFront(p,s,w){
         g+=`<rect x="${d.x}" y="${y}" width="25" height="${d.h}" class="sv-mut" opacity=".55"/><rect x="${d.x+d.w-25}" y="${y}" width="25" height="${d.h}" class="sv-mut" opacity=".55"/>`});
     }
   }
-  if(w.blk.w){const L=w.blk.side==='L',plk=w.blk.planka?FILLER:0,hw=w.blk.w-plk;
-    if(hw>0){const bx=L?0:W-hw;
+  Object.entries(w.bs||{}).forEach(([sd,b])=>{if(!b.w)return;const L=sd==='L',plk=b.planka?FILLER:0,hw=b.w-plk;
+    if(hw>0){const bx=L?0:W-hw,mate=w.key!=='A'?'А':p.shape==='u'?(L?'Б':'В'):'Б';
       g+=`<rect x="${bx}" y="0" width="${hw}" height="${H}" fill="url(#${id})" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*5} ${sw*3}"/>`;
-      g+=`<text x="${bx+hw/2}" y="${H*.42}" font-size="${fs*.9}" text-anchor="middle" class="sv-txt" font-weight="600" transform="rotate(-90 ${bx+hw/2} ${H*.42})">стык со стороной ${w.key==='A'?'Б':'А'}</text>`}
-    if(plk){const px=L?hw:W-w.blk.w;g+=R(px,2,plk,H-pl-4,fdec)+`<text x="${px+plk/2}" y="${H*.75}" font-size="${fs*.6}" text-anchor="middle" class="sv-mut" transform="rotate(-90 ${px+plk/2} ${H*.75})">планка ${plk}</text>`}}
+      g+=`<text x="${bx+hw/2}" y="${H*.42}" font-size="${fs*.9}" text-anchor="middle" class="sv-txt" font-weight="600" transform="rotate(-90 ${bx+hw/2} ${H*.42})">стык со стороной ${mate}</text>`}
+    if(plk){const px=L?hw:W-b.w;g+=R(px,2,plk,H-pl-4,fdec)+`<text x="${px+plk/2}" y="${H*.75}" font-size="${fs*.6}" text-anchor="middle" class="sv-mut" transform="rotate(-90 ${px+plk/2} ${H*.75})">планка ${plk}</text>`}});
   g+=dimLines(W,H,M,sw,fs,padR,padB);
   return `<svg viewBox="${-padL} ${-padT} ${W+padL+padR} ${H+padT+padB}" role="img" aria-label="Чертёж фасада ${W} на ${H} мм">${g}</svg>`;
 }
 
-function drawPlan(p){
+function drawPlanU(p,c){
+  const W=p.W,W2=p.W2,W3=p.W3,D=p.D,M=Math.max(W,W2,W3),fs=M*0.05,sw=M/200,pad=M*0.12,dec=DECORS[p.decor].fill,Hh=Math.max(W2,W3);
+  const wB=c.wings.find(w=>w.key==='B'),wV=c.wings.find(w=>w.key==='V'),oB=wB?wB.off:0,oV=wV?wV.off:0;
+  let g=`<line x1="${-pad*.4}" x2="${W+pad*.4}" y1="${-sw*2}" y2="${-sw*2}" class="sv-ink" stroke-width="${sw*4}"/>`;
+  g+=`<line x1="${-sw*2}" x2="${-sw*2}" y1="${-pad*.4}" y2="${W2+pad*.3}" class="sv-ink" stroke-width="${sw*4}"/><line x1="${W+sw*2}" x2="${W+sw*2}" y1="${-pad*.4}" y2="${W3+pad*.3}" class="sv-ink" stroke-width="${sw*4}"/>`;
+  g+=`<rect x="0" y="0" width="${W}" height="${D}" fill="${dec}" class="sv-ink" stroke-width="${sw}"/>`;
+  g+=`<rect x="0" y="${D+oB}" width="${D}" height="${W2-D-oB}" fill="${dec}" class="sv-ink" stroke-width="${sw}"/><rect x="${W-D}" y="${D+oV}" width="${D}" height="${W3-D-oV}" fill="${dec}" class="sv-ink" stroke-width="${sw}"/>`;
+  const T=(x,y,t)=>`<text x="${x}" y="${y}" font-size="${fs*1.2}" text-anchor="middle" dominant-baseline="middle" class="sv-txt" font-weight="700">${t}</text>`;
+  g+=T(W/2,D/2,'А')+T(D/2,D+(W2-D)/2,'Б')+T(W-D/2,D+(W3-D)/2,'В');
+  g+=`<text x="${W/2}" y="${-pad*.45}" font-size="${fs}" text-anchor="middle" class="sv-txt">${W}</text>`;
+  g+=`<text x="${-pad*.45}" y="${W2/2}" font-size="${fs}" text-anchor="middle" class="sv-txt" transform="rotate(-90 ${-pad*.45} ${W2/2})">${W2}</text><text x="${W+pad*.45}" y="${W3/2}" font-size="${fs}" text-anchor="middle" class="sv-txt" transform="rotate(90 ${W+pad*.45} ${W3/2})">${W3}</text>`;
+  if(c.pass>0){const y=Math.min(W2,W3)-fs;g+=`<line x1="${D}" x2="${W-D}" y1="${y}" y2="${y}" class="sv-mut" stroke="currentColor" stroke-width="${sw}" stroke-dasharray="${sw*3} ${sw*2}"/><text x="${W/2}" y="${y-fs*.4}" font-size="${fs*.8}" text-anchor="middle" class="sv-mut">проход ${c.pass}</text>`}
+  return `<svg viewBox="${-pad} ${-pad} ${W+2*pad} ${Hh+pad*1.4}" role="img" aria-label="Вид сверху П-образной гардеробной" style="max-height:34vh">${g}</svg>`;
+}
+function drawPlan(p,c){
+  if(p.shape==='u')return drawPlanU(p,c);
   const W=p.W,W2=p.W2,D=p.D,L=p.cornerSide==='L',M=Math.max(W,W2),fs=M*0.05,sw=M/200,pad=M*0.1,dec=DECORS[p.decor].fill;
   const bx=L?0:W-D,wx=L?0:W;
   let g=`<line x1="${-pad*.4}" x2="${W+pad*.4}" y1="${-sw*2}" y2="${-sw*2}" class="sv-ink" stroke-width="${sw*4}"/>`;
   g+=`<line x1="${wx+(L?-sw*2:sw*2)}" x2="${wx+(L?-sw*2:sw*2)}" y1="${-pad*.4}" y2="${W2+pad*.3}" class="sv-ink" stroke-width="${sw*4}"/>`;
   g+=`<rect x="0" y="0" width="${W}" height="${D}" fill="${dec}" class="sv-ink" stroke-width="${sw}"/>`;
-  const off=p.type==='coupe'?0:20;
+  const wb=c&&c.wings.find(w=>w.key==='B'),off=wb?wb.off:p.type==='coupe'?0:20;
   if(off)g+=`<rect x="${bx}" y="${D}" width="${D}" height="${off}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*3} ${sw*2}"/>`;
   g+=`<rect x="${bx}" y="${D+off}" width="${D}" height="${W2-D-off}" fill="${dec}" class="sv-ink" stroke-width="${sw}"/>`;
   g+=`<text x="${(L?D:0)+(W-D)/2}" y="${D/2}" font-size="${fs*1.2}" text-anchor="middle" dominant-baseline="middle" class="sv-txt" font-weight="700">А</text>`;
@@ -1941,7 +1998,7 @@ function scene3dWardrobe(p,s,c){const HD=HW(p,s).handle,t=s.t,H=p.H,D=p.D,pl=Mat
       if(L.rodY!==null){const pu=w.pull.find(x=>x.i===i);if(!w.rodPull)A(x0+10,H-L.rodY-8,shD/2-8,cw-20,16,16,'metal',{cyl:1});else if(pu)for(let q=0;q<pu.q;q++)A(x0+cw*(q+.5)/pu.q-8,H-L.rodY-8,Math.max(0,shD-10-pu.L),16,16,pu.L,'metal')}});
     if(!c.coupe){w.doors.forEach(d=>{const id=A.door(),door={id,hx:d.hinge==='L'?d.x:d.x+d.w,dir:d.hinge==='L'?-1:1,z:D+1};
         A(d.x,pl+2,D+1,d.w,d.h,fT,'front',{door});handle3D(A,HD,d.hinge==='L'?d.x+d.w-50:d.x+50,pl+2+d.h*0.5,D+1+fT,true,{door});if(d.mirror)A(d.x+50,pl+52,D+1+fT,d.w-100,d.h-100,2,'mirror',{door})});
-      if(w.blk.planka){const bx=w.blk.side==='L'?w.blk.w-FILLER:W-w.blk.w;A(bx,pl+2,D+1,FILLER,H-pl-4,fT,'front')}}
+      Object.entries(w.bs||{}).forEach(([sd,b])=>{if(b.planka)A(sd==='L'?b.w-FILLER:W-b.w,pl+2,D+1,FILLER,H-pl-4,fT,'front')})}
     else{const its=w.coupeD.items,cd=w.coupeD,taken=new Set();
       // «открыть»: передние двери уезжают на соседнюю заднюю (у каждой задней — не больше одной передней), задние при касании — за переднюю
       its.forEach((d,j)=>{const nb=[j+1,j-1].filter(q=>q>=0&&q<its.length&&its[q].track!==d.track);let tgt=nb.find(q=>d.track===1&&!taken.has(q));if(tgt!==undefined)taken.add(tgt);
@@ -1953,14 +2010,15 @@ function scene3dWardrobe(p,s,c){const HD=HW(p,s).handle,t=s.t,H=p.H,D=p.D,pl=Mat
       // рельсы: нижний на дне, верхний под крышей
       A(cd.items[0].x,pl+t,D-60,cd.ow,8,58,'metal');A(cd.items[0].x,H-t-18,D-60,cd.ow,18,58,'metal')}
     let rot=0,pos=[0,0,0];
-    if(w.key==='B'){const off=c.coupe?0:fT+4;if(p.cornerSide==='L'){rot=Math.PI/2;pos=[0,0,p.W2]}else{rot=-Math.PI/2;pos=[p.W,0,p.D+off]}}
+    if(w.key==='B'){const off=w.off;if(c.u||p.cornerSide==='L'){rot=Math.PI/2;pos=[0,0,p.W2]}else{rot=-Math.PI/2;pos=[p.W,0,p.D+off]}}
+    if(w.key==='V'){rot=-Math.PI/2;pos=[p.W,0,p.D+w.off]}
     // размеры: ширина по полу спереди, ширины секций сверху (в свету — как на чертеже), высота и глубина справа
     const lbls=[];w.sections.forEach((sc,i)=>{const L=secLayout(p,s,w,i),x0=w.xs[i],cw=w.ws[i],sp=w.sp||0;
       L.drawers.forEach(d=>lbls.push({lbl:[x0+cw/2,H-d.y-d.h/2,shD+t+4],t:`${Math.round(cw-2*sp-4)}×176`,small:1,inner:1}));L.baskets.forEach(bk=>lbls.push({lbl:[x0+cw/2,H-bk.y-bk.h/2,shD],t:`корзина ${Math.round(cw-2*sp)}`,small:1,inner:1}))});
     const fz=D+fT+2,dims=[...lbls,{a:[0,0,fz],b:[W,0,fz],o:[0,0,260],t:W},...w.ws.map((sw,i)=>({a:[w.xs[i],H,fz],b:[w.xs[i]+sw,H,fz],o:[0,110,0],t:Math.round(sw),small:1}))];
     if(w.key==='A')dims.push({a:[W,0,fz],b:[W,H,fz],o:[220,0,0],t:H},{a:[W,0,0],b:[W,0,D],o:[220,0,0],t:D});
     groups.push({items:it,rot,pos,dims})});
-  const walls=[{x:0,z:0,len:p.W,rot:0}];if(c.corner)walls.push(p.cornerSide==='L'?{x:0,z:0,len:p.W2,rot:-Math.PI/2}:{x:p.W,z:0,len:p.W2,rot:-Math.PI/2,right:true});
+  const walls=[{x:0,z:0,len:p.W,rot:0}];if(c.u)walls.push({x:0,z:0,len:p.W2,rot:-Math.PI/2},{x:p.W,z:0,len:p.W3,rot:-Math.PI/2,right:true});else if(c.corner)walls.push(p.cornerSide==='L'?{x:0,z:0,len:p.W2,rot:-Math.PI/2}:{x:p.W,z:0,len:p.W2,rot:-Math.PI/2,right:true});
   return{groups,walls}}
 function scene3dKitchen(p,s,c){const HD=HW(p,s).handle,k=p.k,t=s.t,fT=frontMat(p,s).t,tT=c.tT||0,top=c.top,L=c.L,groups=[];
   L.sides.forEach(sd=>{const it=[],A=itemAdder(it);
@@ -2449,7 +2507,7 @@ function drawingHTML(forKp){
   if(P.kind==='kitchen')return drawKitchen(P,R.S,R.c);
   if(P.kind==='chest')return drawChest(P,R.S,R.c);
   const c=R.c;
-  if(c.corner)return `<div class="wing-title">Вид сверху</div>${drawPlan(P)}`+c.wings.map(w=>`<div class="wing-title">${wingName(w.key)}</div>${drawFront(P,R.S,w)}`).join('');
+  if(c.corner)return `<div class="wing-title">Вид сверху</div>${drawPlan(P,c)}`+c.wings.map(w=>`<div class="wing-title">${wingName(w.key)}</div>${drawFront(P,R.S,w)}`).join('');
   return drawFront(P,R.S,c.wings[0]);
 }
 
@@ -2464,7 +2522,7 @@ function compute(){
   R={S,c,ldsp,ldspF,hdf,orders,cl,cf,ch,cost:costs(P,S,c,cl,ch,cf)};
 }const edgeTxt=r=>(r.eL||r.eW||r.eX)?[r.eL?r.eL+'Д':'',r.eW?r.eW+'Ш':'',r.eX?`по вырезу ${r.eX}`:''].filter(Boolean).join(' ')+(r.eT?` · ${r.eT.replace('.',',')} мм`:''):'—';
 const edgeSum=c=>c.edges.map(e=>`${e.name} — ${fmt(e.m,1)} м`).join(', ');
-const wingName=k=>k==='B'?'Сторона Б':'Сторона А';
+const wingName=k=>k==='B'?'Сторона Б':k==='V'?'Сторона В':'Сторона А';
 
 // все замечания по заказу: ошибки (так делать нельзя) и предупреждения
 function issues(){const N=x=>typeof x==='string'?{t:x,lvl:'warn'}:x,list=(R.c.warn||[]).map(N);
@@ -2474,7 +2532,7 @@ function issues(){const N=x=>typeof x==='string'?{t:x,lvl:'warn'}:x,list=(R.c.wa
   return list}
 // куда вести по нажатию на ошибку: карточка секции, модуля, колонки или нужный блок
 function issueTarget(t){
-  if(P.kind==='wardrobe'){const m=/^(?:Сторона ([АБ]): )?[Сс]екция (\d+)/.exec(t);if(m)return (m[1]==='Б'?'B':'A')+':'+(m[2]-1)}
+  if(P.kind==='wardrobe'){const m=/^(?:Сторона ([АБВ]): )?[Сс]екция (\d+)/.exec(t);if(m)return (m[1]==='Б'?'B':m[1]==='В'?'V':'A')+':'+(m[2]-1)}
   if(P.kind==='chest'){const m=/^Колонка (\d+)/.exec(t);if(m)return 'C:'+(m[1]-1)}
   if(P.kind==='kitchen'){const m=/^(Б-)?([НВП])(\d+)\b|^(УН|УВ)\b/.exec(t);if(m){if(m[4])return m[4]==='УН'?'cBase':'cWall';
     const k=P.k,zones=m[1]?['baseB','wallB']:['base','wall'];for(const z of zones){const i=k[z].findIndex((md,j)=>modLabel(z,j,md)===(m[1]||'')+m[2]+m[3]);if(i>=0)return z+':'+i}}}
@@ -2484,7 +2542,7 @@ function issueTarget(t){
   return 'box:'+(P.kind==='kitchen'?'kPanel':P.kind==='chest'?'cPanel':'wPanel')}
 function goIssue(g){
   if(g.startsWith('box:')){const el=document.getElementById(g.slice(4));if(!el)return;if(el.tagName==='DETAILS')el.open=true;el.scrollIntoView({behavior:'smooth',block:'start'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1500);return}
-  activeSec=g;renderBuild();const id=/^[AB]:/.test(g)?'sec-'+g.replace(':','-'):g.startsWith('C:')?'col-'+g.slice(2):'mod-'+g.replace(':','-');
+  activeSec=g;renderBuild();const id=/^[ABV]:/.test(g)?'sec-'+g.replace(':','-'):g.startsWith('C:')?'col-'+g.slice(2):'mod-'+g.replace(':','-');
   focusCard(id);const el=document.getElementById(id);if(el){el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1500)}}
 function renderChecks(){const all=issues(),e=all.filter(x=>x.lvl==='err').length,w=all.length-e;
   const line=e?`<button type="button" class="check bad" id="goAlerts">${plural(e,'ошибка','ошибки','ошибок')}${w?` и ${plural(w,'предупреждение','предупреждения','предупреждений')}`:''} — посмотреть</button>`
@@ -2505,8 +2563,8 @@ const opts=(list,v)=>list.map(([k,l])=>`<option value="${k}"${k===v?' selected':
 
 function renderBuild(){
   const c=R.c,kind=P.kind;
-  $$('[data-kind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.kind===(kind==='wardrobe'&&P.hall?'hall':kind)));
-  $('#hallBox').hidden=!(kind==='wardrobe'&&P.hall);$('#wTitle').textContent=P.hall?'Прихожая: тип и габариты':'Шкаф: тип и габариты';
+  $$('[data-kind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.kind===(kind==='wardrobe'&&P.hall?'hall':kind==='wardrobe'&&P.walk?'walk':kind)));
+  $('#hallBox').hidden=!(kind==='wardrobe'&&P.hall);$('#walkBox').hidden=!(kind==='wardrobe'&&P.walk);$('#wTitle').textContent=P.walk?'Гардеробная: форма и габариты':P.hall?'Прихожая: тип и габариты':'Шкаф: тип и габариты';
   $('#wPanel').hidden=kind!=='wardrobe';$('#kPanel').hidden=kind!=='kitchen';$('#cPanel').hidden=kind!=='chest';
   $('#doorsToggle').hidden=kind!=='wardrobe'||view3d;$('#kAdd').hidden=kind!=='kitchen';
   $$('#view-build [data-k]').forEach(el=>{if(document.activeElement!==el)el.value=P[el.dataset.k]??''});
@@ -2545,7 +2603,7 @@ function renderMat(){
   {const box=$('#matMine');if(!box.contains(document.activeElement)){const ed=[['body',b],['front',f],['top',top]].filter(([fl,x])=>x.mine&&(fl!=='top'||k==='kitchen'));box.innerHTML=ed.map(([fl,x])=>mineEditor('mat',MATK[fl],x)).join('')}}
   $('#matInfo').textContent=[`Корпус: ${b.src}`,`Фасады: ${f.src}`,k==='kitchen'?`Столешница: ${top.src}`:''].filter(Boolean).join(' ')}
 function renderHw(){
-  const k=P.kind,corner=k==='wardrobe'&&P.shape==='corner',coupe=k==='wardrobe'&&P.type==='coupe';
+  const k=P.kind,corner=k==='wardrobe'&&P.shape==='corner',uu=k==='wardrobe'&&P.shape==='u',coupe=k==='wardrobe'&&P.type==='coupe';
   const opt=(x,val)=>`<option value="${x.id}"${x.id===val?' selected':''}>${esc(x.name)}${x.proj!==undefined?` · вынос ${x.proj} мм`:''}</option>`;
   const fill=(id,list,val)=>{const el=$(id),segs=['мои','эконом','средний','премиум','другое'];
     el.innerHTML=(list.some(x=>x.seg)?segs.map(g=>{const xs=list.filter(x=>(x.seg||'другое')===g);return xs.length?`<optgroup label="${g[0].toUpperCase()+g.slice(1)}">${xs.map(x=>opt(x,val)).join('')}</optgroup>`:''}).join(''):list.map(x=>opt(x,val)).join(''))+'<option value="__new">＋ Своя — вписать название и цену</option>'};
@@ -2560,25 +2618,27 @@ function renderHw(){
   if(coupe)info.push(`Профиль купе: ${H_.coupe.src}${H_.coupe.check||H_.coupe.custom?' Перед заказом дверей сверьте с таблицей поставщика.':''}`);
   $('#hwInfo').textContent=info.join(' ');
   {const box=$('#hwMine');if(!box.contains(document.activeElement)){const seen=new Set(),ed=[];[['hinge','#hwHinge'],['slide','#hwSlide'],['handle','#hwHandle'],['handleIn','#hwHandleIn'],['coupe','#hwCoupe']].forEach(([fl,sel])=>{const x=catItem(HWK[fl],P.hw[fl]);if(x.mine&&!$(sel).closest('.field').hidden&&!seen.has(x.id)){seen.add(x.id);ed.push(mineEditor('cat',HWK[fl],x))}});box.innerHTML=ed.join('')}}
-  const cw=corner||(k==='kitchen'&&P.k.shape==='corner'),wl=$('#wallL'),wr=$('#wallR');wl.dataset.wall=cw?'A':'L';wr.dataset.wall=cw?'B':'R';
+  const cw=corner||(k==='kitchen'&&P.k.shape==='corner'),wl=$('#wallL'),wr=$('#wallR');wl.dataset.wall=uu?'B':cw?'A':'L';wr.dataset.wall=uu?'V':cw?'B':'R';
   wl.checked=!!P.walls[wl.dataset.wall];wr.checked=!!P.walls[wr.dataset.wall];
-  $('#lblWallL').textContent=cw?'Стена у свободного края стороны А':'Слева стена вплотную';
-  $('#lblWallR').textContent=cw?'Стена у свободного края стороны Б':'Справа стена вплотную'}
+  $('#lblWallL').textContent=uu?'Стена у свободного края стороны Б':cw?'Стена у свободного края стороны А':'Слева стена вплотную';
+  $('#lblWallR').textContent=uu?'Стена у свободного края стороны В':cw?'Стена у свободного края стороны Б':'Справа стена вплотную'}
 function renderWardrobeUI(c){
   const corner=c.corner;
   $$('[data-type]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.type===P.type));
   $$('[data-shape]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.shape===P.shape));
   $('#pMezz').checked=!!P.mezz;$('#pMz').disabled=!P.mezz;
-  $('#cornerBox').hidden=!corner;
-  $('#lblW').textContent=corner?'Ширина А':'Ширина';
+  $('#cornerBox').hidden=!corner;const uu=!!c.u;
+  $('#w3Field').hidden=!uu;$('#csField').hidden=uu;$('#secVRow').hidden=!uu;$('#uHint').hidden=!uu;$('#cHint').hidden=uu;$('#lblW2').textContent=uu?'Ширина стороны Б (слева)':'Ширина стороны Б';
+  $$('[data-type="coupe"]').forEach(b=>b.disabled=uu);
+  $('#lblW').textContent=uu?'Ширина А (дальняя стена)':corner?'Ширина А':'Ширина';
   $('#lblSecA').textContent=corner?'Секций на стороне А':'Секций';
   $('#coupeNField').style.visibility=P.type==='coupe'?'visible':'hidden';$('#coupeFillBox').hidden=P.type!=='coupe';$('#pCs2').value=String(P.coupeSplit||1);$('#pCm').value=P.coupeMat||'mirror';
-  $('#secCount').textContent=P.sections.length;$('#secBCount').textContent=P.sectionsB.length;
+  $('#secCount').textContent=P.sections.length;$('#secBCount').textContent=P.sectionsB.length;$('#secVCount').textContent=P.sectionsV.length;
   $('#mirCount').textContent=P.mirrors;$('#mirMax').textContent=`(из ${c.doorsAll.length})`;
   $('#showDoors').checked=showDoors;
   $('#contentTitle').textContent='Наполнение секций';$('#contentHint').textContent='Нажмите на секцию на чертеже, чтобы перейти к её настройке.';
   $('#sections').innerHTML=c.wings.map(w=>(corner?`<h3 class="sec-group">${wingName(w.key)}</h3>`:'')+w.sections.map((s,i)=>{const key=w.key+':'+i;
-    const isC=w.blk.w&&i===(w.blk.side==='L'?0:w.sections.length-1);
+    const isC=(w.cis||[]).includes(i);
     return `<div class="sec${key===activeSec?' on':''}" id="sec-${w.key}-${i}">
     <header><b>Секция ${i+1}</b><span class="num hint">${Math.round(w.ws[i])} мм${isC?' · угловая':''}</span></header>
     ${stepRow('Полки',`data-step="${key}:shelves`,s.shelves)}${stepRow('Ящики',`data-step="${key}:drawers`,s.drawers)}${stepRow('Корзины',`data-step="${key}:baskets`,s.baskets)}
@@ -2718,7 +2778,7 @@ function mountSteps(){const c=R.c,k=P.kind,st=[],ceil=(c.notes||[]).find(n=>/П�
   if(k==='wardrobe'){st.push(['ceil',`Замерить потолок в месте установки: нужно не меньше ${fits} мм (шкаф собирают лёжа)`],['body','Собрать корпус лёжа: боковины, дно, крыша, цоколь — на конфирматы'],['parts',P.sections.length>1?'Поставить перегородки':'Проверить углы корпуса'],
       ['back','Проверить диагонали (разница не больше 2 мм) и прибить заднюю стенку ХДФ'],['up','Поднять шкаф, выставить по уровню'],['wall','Закрепить к стене уголками от опрокидывания'],
       ['fill','Полки, штанги, ящики, корзины и аксессуары'],[P.type==='coupe'?'coupe':'doors',P.type==='coupe'?'Рельсы, двери купе, стопоры; двери ходят без перекоса':'Двери на петли, выставить зазоры 2–3 мм ровно по всей высоте'],['hdl','Ручки, заглушки на конфирматы']);
-    if(c.corner)st.splice(6,0,['join','Стянуть стороны А и Б межсекционными стяжками'])}
+    if(c.corner)st.splice(6,0,['join',c.u?'Стянуть стороны А, Б и В межсекционными стяжками':'Стянуть стороны А и Б межсекционными стяжками'])}
   else if(k==='kitchen'){const kk=P.k;st.push(['level','Проверить пол и стены уровнем, отметить высоту столешницы и линию низа верхних шкафов — '+kk.wallY+' мм от пола'],['base','Собрать нижние модули, ножки, выставить по уровню (верх корпусов на одной линии)'],
       ['join','Стянуть модули между собой'],['tall','Пеналы закрепить к стене уголками'],['top','Столешница: стыки, вырезы мойки и варочной по шаблонам, торцы — на герметик'],['wall','Навесить верхние шкафы на высоту '+kk.wallY+' мм, проверить уровень'],
       ['tech','Техника по инструкциям: фасад посудомойки по шаблону, вытяжка — воздуховод'],['fronts','Фасады, зазоры, ручки'],['plinth','Цоколь, плинтус, герметик у стены']);if(kk.wall2H)st.splice(7,0,['wall2','Антресоли над верхними шкафами — стяжками к шкафам'])}
@@ -2819,9 +2879,9 @@ function describe(){
       `Наполнение: ${cc.cols.map((cl,i)=>`колонка ${i+1} — ${cl.type==='drawers'?plural(cl.drawers,'ящик','ящика','ящиков'):cl.type==='door'?'дверца, '+plural(cl.shelves,'полка','полки','полок'):'открытая, '+plural(cl.shelves,'полка','полки','полок')}`).join('; ')}.`,
       cc.plinth?'На цоколе.':'На ножках.']}}
   const fill=c.wings.map(w=>(c.corner?wingName(w.key)+': ':'')+w.sections.map((s,i)=>`секция ${i+1}: `+([s.shelves?plural(s.shelves,'полка','полки','полок'):'',s.panto?'пантограф':s.rod?(w.rodPull?'выдвижная штанга':'штанга'):'',s.trousers?'брючница':'',s.shoeOut?'выдвижные полки для обуви':'',s.mirrorOut?'выдвижное зеркало':'',s.led?'подсветка':'',s.drawers?plural(s.drawers,'ящик','ящика','ящиков'):'',s.baskets?plural(s.baskets,'корзина','корзины','корзин'):''].filter(Boolean).join(', ')||'пустая')).join('; '));
-  const size=c.corner?`${p.W}×${p.W2} мм по стенам, высота ${p.H}, глубина ${p.D}`:`${p.W}×${p.H}×${p.D} мм (Ш×В×Г)`;
+  const size=c.u?`${p.W2}×${p.W}×${p.W3} мм по стенам, высота ${p.H}, глубина ${p.D}`:c.corner?`${p.W}×${p.W2} мм по стенам, высота ${p.H}, глубина ${p.D}`:`${p.W}×${p.H}×${p.D} мм (Ш×В×Г)`;
   const nDoors=c.doorsAll.length;
-  return{title:p.hall?(nDoors?`Прихожая${c.corner?' угловая':''} ${c.coupe?'с дверями купе':'с распашными дверями'}`:'Прихожая: открытая вешалка'):`Шкаф ${c.corner?'угловой ':''}${c.coupe?'купе':'с распашными дверями'}`,lines:[`Размер ${size}${c.coupe?'':`; глубина вместе с дверями ${p.D+18} мм, без ручек`}.`,`${mat}.`,
+  return{title:p.walk?`Гардеробная ${c.u?'П-образная':c.corner?'угловая':'линейная'}${nDoors?' с распашными дверями':', открытая'}`:p.hall?(nDoors?`Прихожая${c.corner?' угловая':''} ${c.coupe?'с дверями купе':'с распашными дверями'}`:'Прихожая: открытая вешалка'):`Шкаф ${c.corner?'угловой ':''}${c.coupe?'купе':'с распашными дверями'}`,lines:[`Размер ${size}${c.coupe?'':`; глубина вместе с дверями ${p.D+18} мм, без ручек`}.`,`${mat}.`,
     c.coupe?`Двери купе: ${nDoors} шт${p.mirrors?`, из них с зеркалом: ${p.mirrors}`:''}.`:nDoors?`Дверей: ${nDoors}, петли с доводчиком${p.mirrors?`, зеркало на ${p.mirrors}`:''}.`:'Без дверей.',
     p.mezz?'Антресоль.':'',`Наполнение — ${fill.join('. ')}.`].filter(Boolean)}
 }
@@ -2830,7 +2890,7 @@ function hwLine(){const H_=HW(P),k=P.kind,coupe=k==='wardrobe'&&P.type==='coupe'
   if(R.c.hw.some(h=>h[0].startsWith('Направляющие')))r.push(`направляющие: ${H_.slide.name.toLowerCase()}`);if(!coupe)r.push(`ручки: ${H_.handle.name.toLowerCase()}`);return `Фурнитура: ${r.join(', ')}.`}
 // характеристики изделия для клиента — как в карточке товара
 function specRows(){const p=P,c=R.c,S=R.S,b=matItem('bodies',p.mat.body,S),fm=frontMat(p,S),H_=HW(p,S),rows=[];
-  if(p.kind==='wardrobe')rows.push(['Размеры (Ш × В × Г)',p.shape==='corner'?`${p.W} и ${p.W2} × ${p.H} × ${p.D} мм`:`${p.W} × ${p.H} × ${p.D} мм`]);
+  if(p.kind==='wardrobe')rows.push(['Размеры (Ш × В × Г)',p.shape==='u'?`${p.W2}, ${p.W} и ${p.W3} × ${p.H} × ${p.D} мм`:p.shape==='corner'?`${p.W} и ${p.W2} × ${p.H} × ${p.D} мм`:`${p.W} × ${p.H} × ${p.D} мм`]);
   else if(p.kind==='chest')rows.push(['Размеры (Ш × В × Г)',`${p.c.W} × ${p.c.H} × ${p.c.D} мм`]);
   else rows.push(['Размеры',c.corner?`сторона А ${Math.round(c.lenA)} мм, сторона Б ${Math.round(c.lenB)} мм`:`длина ${c.allBase} мм`],['Высота столешницы',`${p.k.legs+p.k.baseH+(c.tT||0)} мм от пола`]);
   rows.push(['Корпус',`${b.name}, «${DECORS[p.decor].name}»`],['Фасады',fm.f.kind==='body'?`ЛДСП ${S.t} мм, как корпус`:fm.f.kind==='sheet'?`ЛДСП ${S.t} мм, «${(DECORS[p.mat.frontDecor]||DECORS.white).name}»`:`${fm.f.name}${/мм/.test(fm.f.name)?'':', '+fm.t+' мм'}`],['Задняя стенка','ХДФ 3 мм'],
@@ -2907,6 +2967,7 @@ function builtinTemplates(){const t=[],mk=(name,f)=>{const p=newProject();f(p);t
   mk('Угловой шкаф 1800×1400',p=>{p.shape='corner';p.mirrors=0});
   mk('Шкаф до потолка 2700, без ручек',p=>{p.W=2400;p.H=2700;p.D=600;p.mezz=true;p.mezzH=500;p.mirrors=0;p.hw.handle='push';p.sections=[sec(5,false,0,0),sec(1,true,0,0),sec(1,true,0,0),sec(3,false,3,0)]});
   mk('Прихожая с открытой вешалкой 2000',p=>{p.hall=true;p.W=2000;p.H=2400;p.D=450;p.mezz=true;p.mezzH=450;p.mirrors=1;p.sections=[sec(4,false,0,0),Object.assign(sec(0,false,0,0),{open:true,hooks:5,seat:true,shoes:1}),sec(4,false,0,0)]});
+  Object.keys(WALKS).forEach(k=>mk(WALKS[k].name,p=>applyWalk(p,k)));
   Object.entries(HALLS).forEach(([k,h])=>mk('Прихожая: '+h.name.toLowerCase().replace('прихожая-','').replace(/^./,ch=>ch),p=>applyHall(p,k)));
   mk('Кухня прямая 2400 мм',p=>{p.kind='kitchen'});
   mk('Кухня с пеналом 3000 мм',p=>{p.kind='kitchen';p.k.base=[km('tall',600,4),km('doors',600,1),km('drawers',400,0,3),km('sink',800,0),km('doors',600,1)];p.k.wall=[km('doors',600,2),km('doors',400,2),km('drying',800,0),km('doors',600,2)]});
@@ -2923,7 +2984,7 @@ const allTemplates=()=>[...builtinTemplates(),...(settings.templates||[])];
 function fromTemplate(tp){const np=norm(clone(tp.data));Object.assign(np,{id:uid(),name:tp.name,client:'',phone:'',address:'',status:'calc',prepay:0,installDate:'',tryon:null,mount:{checks:{},photos:[]},updated:Date.now()});np.meas={w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]};norm(np);return np}
 function renderProjects(){
   $('#storageNote').textContent=storageOk?'Заказы сохраняются на этом телефоне. Делайте резервную копию в настройках.':'Сохранение недоступно в этом окне. Скопируйте заказ, чтобы не потерять расчёт.';
-  const meta=p=>p.kind==='kitchen'?(p.k.shape==='corner'?`кухня угловая · А ${p.k.base.reduce((a,m)=>a+m.w,0)+p.k.cBaseW} · Б ${p.k.baseB.reduce((a,m)=>a+m.w,0)} мм`:`кухня · ${p.k.base.reduce((a,m)=>a+m.w,0)} мм`):p.kind==='chest'?`комод, тумба · ${p.c.W}×${p.c.H}×${p.c.D}`:`${p.shape==='corner'?`${p.W}×${p.W2}`:p.W}×${p.H}×${p.D} · ${p.shape==='corner'?'угловой, ':''}${p.type==='coupe'?'купе':'распашной'}`;
+  const meta=p=>p.kind==='kitchen'?(p.k.shape==='corner'?`кухня угловая · А ${p.k.base.reduce((a,m)=>a+m.w,0)+p.k.cBaseW} · Б ${p.k.baseB.reduce((a,m)=>a+m.w,0)} мм`:`кухня · ${p.k.base.reduce((a,m)=>a+m.w,0)} мм`):p.kind==='chest'?`комод, тумба · ${p.c.W}×${p.c.H}×${p.c.D}`:`${p.shape==='u'?`${p.W2}×${p.W}×${p.W3}`:p.shape==='corner'?`${p.W}×${p.W2}`:p.W}×${p.H}×${p.D} · ${p.walk?'гардеробная'+(p.shape==='u'?' П-образная':p.shape==='corner'?' угловая':''):`${p.shape==='corner'?'угловой, ':''}${p.type==='coupe'?'купе':'распашной'}`}`;
   $('#tplList').innerHTML=allTemplates().map(t=>`<div class="proj"><div class="meta"><b>${esc(t.name)}</b><span>${t.builtin?'встроенный':'мой шаблон'} · ${kindName(t.data)}</span></div><button class="btn ghost" type="button" data-tpl="${t.id}">Создать</button>${t.builtin?'':`<button class="btn ghost" type="button" data-deltpl="${t.id}" aria-label="Удалить шаблон">✕</button>`}</div>`).join('');
   const cnt=st=>projects.filter(p=>!st||p.status===st).length;if(stFilter&&!cnt(stFilter))stFilter='';
   {const lb=settings.lastBackup||0,days=Math.floor((Date.now()-lb)/864e5);
@@ -3069,13 +3130,16 @@ document.addEventListener('click',e=>{
   if(b.id==='v3spin'){if(T3)T3.spin=T3.spin?null:{left:Math.PI*2};return}
   if(d.goto){goIssue(d.goto);return}
   if(b.id==='goAlerts'){const el=$('#buildAlerts');el&&el.scrollIntoView({behavior:'smooth',block:'center'});return}
-  if(d.kind){const toHall=d.kind==='hall';P.kind=toHall?'wardrobe':d.kind;activeSec='';
-    if(toHall&&!P.hall){P.hall=true;if(!hasHall(P)){applyHall(P,'set');if(/^Новый|^Пример/.test(P.name)||!P.name)P.name='Прихожая';toast('Поставлена типовая прихожая — поменяйте размеры под замер')}}else if(!toHall)P.hall=false;
+  if(d.kind){const toHall=d.kind==='hall',toWalk=d.kind==='walk';P.kind=toHall||toWalk?'wardrobe':d.kind;activeSec='';
+    if(toHall&&!P.hall){P.hall=true;P.walk=false;if(!hasHall(P)){applyHall(P,'set');if(/^Новый|^Пример/.test(P.name)||!P.name)P.name='Прихожая';toast('Поставлена типовая прихожая — поменяйте размеры под замер')}}else if(!toHall)P.hall=false;
+    if(toWalk&&!P.walk){applyWalk(P,'corner');if(/^Новый|^Пример|^Шкаф/.test(P.name)||!P.name)P.name='Гардеробная';toast('Поставлена угловая гардеробная — поменяйте размеры под замер')}else if(!toWalk)P.walk=false;
+    if(!toWalk&&P.shape==='u')P.shape='corner';
     change();return}
+  if(d.walkp){applyWalk(P,d.walkp);if(/^Новый|^Пример|^Гардеробная|^Шкаф/.test(P.name)||!P.name)P.name=WALKS[d.walkp].name;activeSec='';change();toast('Готово: '+WALKS[d.walkp].name);return}
   if(d.hallp){applyHall(P,d.hallp);if(/^Новый|^Пример|^Прихожая|^Узкая|^Открытая|^Шкаф \+/.test(P.name)||!P.name)P.name=HALLS[d.hallp].name;activeSec='';change();toast('Готово: '+HALLS[d.hallp].name);return}
   if(d.preset2){const pr=clone(PRESETS[d.preset2]);P.kind='chest';P.hall=false;if(/^Новый|^Пример|^Прихожая|^Узкая|^Открытая|^Шкаф \+/.test(P.name)||!P.name)P.name=pr.name;delete pr.name;P.c=pr;activeSec='';change();return}
-  if(d.type){P.type=d.type;change();return}
-  if(d.shape){P.shape=d.shape;activeSec='';change();return}
+  if(d.type){if(d.type==='coupe'&&P.shape==='u'){toast('П-образный бывает только с распашными дверями или открытый');return}P.type=d.type;change();return}
+  if(d.shape){if(d.shape==='u'&&P.type==='coupe'){P.type='swing';toast('П-образный — с распашными дверями или открытый')}P.shape=d.shape;activeSec='';change();return}
   if(d.decor){P.decor=d.decor;change();return}
   if(d.sec!==undefined){activeSec=d.sec;renderBuild();focusCard('sec-'+activeSec.replace(':','-'));return}
   if(d.mod!==undefined){activeSec=d.mod;renderBuild();focusCard('mod-'+activeSec.replace(':','-'));return}
@@ -3099,6 +3163,8 @@ document.addEventListener('click',e=>{
   if(b.id==='secMinus'&&P.sections.length>1){P.sections.pop();activeSec='';change();return}
   if(b.id==='secBPlus'&&P.sectionsB.length<6){P.sectionsB.push(sec(3,false,0,0));change();return}
   if(b.id==='secBMinus'&&P.sectionsB.length>1){P.sectionsB.pop();activeSec='';change();return}
+  if(b.id==='secVPlus'&&P.sectionsV.length<6){P.sectionsV.unshift(Object.assign(sec(3,false,0,0),{open:!!P.walk}));change();return}
+  if(b.id==='secVMinus'&&P.sectionsV.length>1){P.sectionsV.pop();activeSec='';change();return}
   if(b.id==='mirPlus'){P.mirrors=Math.min(R.c.doorsAll.length,P.mirrors+1);showDoors=true;change();return}
   if(b.id==='mirMinus'){P.mirrors=Math.max(0,P.mirrors-1);change();return}
   if(d.supsend!==undefined||d.supcopy!==undefined){const x=SUPS[+(d.supsend??d.supcopy)];if(!x)return;

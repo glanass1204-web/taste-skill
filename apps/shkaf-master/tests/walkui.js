@@ -11,7 +11,7 @@ const groups=await pg.evaluate(()=>window.ShkafMaster.scene3dData().groups.lengt
 log((await pg.$$('#sections .sec-group')).length===3,'наполнение по трём сторонам');
 const fr=await pg.$('#front');await fr.screenshot({path:'look/walk_plan.png'});
 await pg.fill('#pW','1600');await pg.press('#pW','Tab');await pg.waitForTimeout(400);log((await pg.textContent('#buildAlerts')).includes('не пройти'),'ошибка прохода при 1600');
-await pg.fill('#pW','2800');await pg.press('#pW','Tab');await pg.waitForTimeout(400);
+await pg.fill('#pW','2700');await pg.press('#pW','Tab');await pg.waitForTimeout(400);
 await pg.click('[data-view="3d"]');await pg.waitForTimeout(5000);const c=await pg.$('#v3canvas');await c.scrollIntoViewIfNeeded();await c.screenshot({path:'look/walk_3d.png'});
 await pg.click('[data-view="3d"]').catch(()=>{});
 await pg.click('[data-walkp="corner"]').catch(()=>{});await pg.waitForTimeout(800);

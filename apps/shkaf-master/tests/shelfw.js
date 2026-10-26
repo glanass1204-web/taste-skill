@@ -1,0 +1,7 @@
+const {chromium}=require('playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch();const L=async f=>{const pg=await b.newPage();await pg.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body>'+fs.readFileSync(f,'utf8')+'</body></html>');await pg.waitForTimeout(400);return pg};
+const N=await L('shkaf-master.html'),O=await L('v38-backup.html');
+const tw=pg=>pg.evaluate(()=>{const M=window.ShkafMaster;return M.builtinTemplates().map(t=>{const p=M.fromTemplate(t);return [t.name,M.calc(p,M.effSettings(p)).warn.map(w=>w.t||w).filter(x=>/полк/.test(x))]})});
+const a=await tw(O),c=await tw(N);c.forEach((x,i)=>{if(JSON.stringify(x)!==JSON.stringify(a[i]))console.log('ИЗМ',x[0],'\n  было',a[i][1],'\n  стало',x[1])});
+const r=await N.evaluate(()=>{const M=window.ShkafMaster,S=M.settings(),out=[];for(const [W,n,sh,mz] of [[1000,1,3,false],[1100,1,3,false],[1100,1,0,false],[1100,1,0,true],[1900,2,3,false],[1880,2,3,false]]){const p=M.newProject();p.W=W;p.mezz=mz;p.mirrors=0;p.sections=Array.from({length:n},()=>({shelves:sh,rod:false,drawers:0,baskets:0}));const c=M.calc(p,S);out.push([W,n,sh,mz,Math.round(c.wings[0].ws[0]-2),c.warn.map(w=>w.t||w).filter(x=>/прогн/.test(x))])}return out});
+r.forEach(x=>console.log(x.slice(0,5).join(' '),'→',JSON.stringify(x[5])));await b.close()})();

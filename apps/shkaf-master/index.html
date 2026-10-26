@@ -804,7 +804,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='38 от 26.10.2026';
+const APP_VER='39 от 26.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -954,21 +954,22 @@ const HALLS={
     secs:[{shelves:1,rod:true},{open:true,hooks:4,seat:true,shoes:2}]},
   coupe:{name:'Прихожая-купе',W:1800,H:2400,D:450,type:'coupe',coupeN:2,plinth:80,mezz:true,mezzH:450,mirrors:1,
     secs:[{shelves:1,rod:true},{shelves:5}]},
-  rack:{name:'Открытая вешалка с банкеткой',W:1000,H:2000,D:350,type:'swing',plinth:60,mezz:false,mezzH:450,mirrors:0,
+  rack:{name:'Открытая вешалка с банкеткой',W:900,H:2000,D:350,type:'swing',plinth:60,mezz:false,mezzH:450,mirrors:0,
     secs:[{open:true,hooks:4,seat:true,shoes:1}]}};
 function applyHall(p,k){const h=HALLS[k];Object.assign(p,{kind:'wardrobe',hall:true,shape:'straight',W:h.W,H:h.H,D:h.D,type:h.type,plinth:h.plinth,mezz:h.mezz,mezzH:h.mezzH,mirrors:h.mirrors,coupeN:h.coupeN||0,
   sections:h.secs.map(x=>Object.assign(sec(x.shelves||0,!!x.rod,0,0),{open:!!x.open,hooks:x.hooks||0,seat:!!x.seat,shoes:x.shoes||0}))})}
 // гардеробные: открытые секции без дверей; глубина 560 — плечики висят поперёк, штанга обычная.
+// Проём угла 350 мм: угловая секция выходит 886 мм — полка не длиннее 900, не прогнётся.
 // П-образная: сторона А у дальней стены, Б слева, В справа; Б и В встают к А вплотную, если угловые секции открытые.
 const WALKS={
   line:{name:'Гардеробная линейная 2400',shape:'straight',W:2400,H:2500,
     A:[{shelves:6},{shelves:1,rod:true},{shelves:1,rod:true,drawers:3},{shelves:1,rod:true}]},
   corner:{name:'Гардеробная угловая 2400 × 1800',shape:'corner',W:2400,W2:1800,H:2500,
     A:[{shelves:6},{shelves:1,rod:true},{shelves:1,rod:true},{shelves:1,rod:true,drawers:3}],B:[{shelves:1,rod:true,shoeOut:2},{shelves:6}]},
-  u:{name:'Гардеробная П-образная 2800 × 1800',shape:'u',W:2800,W2:1800,W3:1800,H:2500,
+  u:{name:'Гардеробная П-образная 2700 × 1800',shape:'u',W:2700,W2:1800,W3:1800,H:2500,
     A:[{shelves:6},{shelves:1,rod:true,drawers:3},{shelves:6}],B:[{shelves:1,rod:true},{shelves:6}],V:[{shelves:6},{shelves:1,rod:true,trousers:true}]}};
 const walkSecs=xs=>(xs||[{shelves:5}]).map(x=>Object.assign(sec(x.shelves||0,!!x.rod,x.drawers||0,0),{open:true,trousers:!!x.trousers,shoeOut:x.shoeOut||0}));
-function applyWalk(p,k){const h=WALKS[k];Object.assign(p,{kind:'wardrobe',walk:true,hall:false,shape:h.shape,type:'swing',W:h.W,W2:h.W2||p.W2,W3:h.W3||p.W3,H:h.H,D:560,plinth:80,mezz:true,mezzH:400,mirrors:0,coupeN:0,cornerSide:'L',cornerOpen:450,
+function applyWalk(p,k){const h=WALKS[k];Object.assign(p,{kind:'wardrobe',walk:true,hall:false,shape:h.shape,type:'swing',W:h.W,W2:h.W2||p.W2,W3:h.W3||p.W3,H:h.H,D:560,plinth:80,mezz:true,mezzH:400,mirrors:0,coupeN:0,cornerSide:'L',cornerOpen:350,
   sections:walkSecs(h.A),sectionsB:walkSecs(h.B||[{shelves:1,rod:true},{shelves:6}]),sectionsV:walkSecs(h.V||[{shelves:6},{shelves:1,rod:true}])})}
 const hasHall=p=>[...p.sections,...p.sectionsB].some(x=>x.seat||x.hooks||x.open);
 const PRESETS={
@@ -1188,7 +1189,8 @@ function calcWing(p,s,W,sections,blk,key,walls){
   sections.forEach((c,i)=>{if(!c.rod||c.panto)return;const rodH=Math.round(H-zTop-70);if(rodH>1950)warn.push(`секция ${i+1}: штанга на высоте ${rodH} мм от пола — без пантографа (лифта для одежды) её не достать. Опустите антресоль или включите её.`)});
   sections.forEach((c,i)=>{if((c.drawers||c.baskets)&&ws[i]-2*sp>900)warn.push(`секция ${i+1}: ящик шире 900 мм будет перекашиваться. Добавьте секцию.`)});
   if(Math.min(...ws)<250)warn.push(ERR('секции слишком узкие — уменьшите число секций.'));
-  const wide=ws.findIndex(w=>w>1000);if(wide>=0)warn.push(`секция ${wide+1} шириной ${Math.round(ws[wide])} мм — полки длиннее 900 мм прогибаются. Добавьте секцию.`);
+  // полка из ЛДСП 16 мм длиннее 900 мм со временем прогибается — как у кухни и комода
+  sections.forEach((c,i)=>{const L=Math.round(ws[i]-2);if(L>900&&(c.shelves||p.mezz||(c.seat&&c.shoes)))warn.push(`секция ${i+1}: полка ${L} мм — длиннее 900 мм прогнётся. Добавьте секцию.`)});
   const rodSecs=rodPull?[]:sections.map((c,i)=>c.rod&&!c.panto?ws[i]:0).filter(Boolean);
   // аксессуары: пантограф вместо штанги, брючница и полки для обуви на направляющих (за распашной дверью — на проставках, как ящики),
   // выдвижное зеркало под полкой, подсветка во всю ширину секции

@@ -11,6 +11,7 @@ const r=await pg.evaluate(()=>{const M=window.ShkafMaster;let n=0;const bad=[];c
  ok(c.hw.some(h=>/мои шариковые/.test(h[0])&&h[3]===777),'в смете свои направляющие по 777 ₽');
  c=run('u_t2');const fh=c.parts.find(x=>x.name==='Ящик: перед и зад'),dn=c.parts.find(x=>/дно \(ЛДСП/.test(x.name));ok(fh&&(fh.L===open-42||fh.Wd===open-42),`свои скрытые (−42): перед ящика = ${open} − 42 = ${open-42}`);ok(!!dn,'скрытые: дно ящика из ЛДСП между боковинами');
  const q=M.newProject();q.hw.hinge='u_h';const ch=M.calc(q,M.effSettings(q));ok(ch.hw.some(h=>/Мои петли/.test(h[0])&&h[3]===333),'свои петли: накладная 333 ₽');
+ S0.mat.bodies.push({id:'u_b18',mine:true,name:'Своя ЛДСП 18',t:18,L:2800,W:2070,price:3000});{const a=M.newProject(),b2=M.newProject();a.mat.body='krono18';b2.mat.body='u_b18';const pa=JSON.stringify(M.calc(a,M.effSettings(a)).parts),pb=JSON.stringify(M.calc(b2,M.effSettings(b2)).parts);ok(pa===pb,'своя ЛДСП 18 мм 2800×2070 — детали те же, что у Kronospan 18');S0.mat.bodies=S0.mat.bodies.filter(x=>x.id!=='u_b18')}
  S0.cat.slides=S0.cat.slides.filter(x=>!x.id.startsWith('u_'));S0.cat.hinges=S0.cat.hinges.filter(x=>!x.id.startsWith('u_'));
  return{n,bad}});
 console.log('Проверок:',r.n,'Ошибок:',r.bad.length);r.bad.forEach(x=>console.log(' -',x));console.log('js errors',errs);await b.close()})();

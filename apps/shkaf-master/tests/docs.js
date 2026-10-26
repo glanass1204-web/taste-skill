@@ -20,11 +20,11 @@ await pg.click('#agreeCopy');await pg.waitForTimeout(200);const c1=await clip();
 await pg.click('#agreeBtn');await pg.waitForTimeout(200);log((await pg.textContent('#agreeBox')).includes('ничего не менялось'),'согласовано заново');
 // договор
 await pg.click('[data-docopen="contract"]');await pg.waitForTimeout(400);const ct=await pg.textContent('#docSheet');
-for(const [re,m] of [[/Договор № 2610-1 /,'номер договора'],[/ИП Петров П\. П\./,'исполнитель'],[/Иванова Мария/,'заказчик'],[/ул\. Ленина, 1, кв\. 5/,'адрес'],[/Предоплата при подписании договора: 20\s000 ₽/,'предоплата'],[/21 рабочий день|21 рабочих дней|21 рабочего/,'срок из настроек'],[/24 месяца/,'гарантия 24 месяца'],[/Приложение 1/,'приложение'],[/ИНН 540100000000/,'ИНН']])log(re.test(ct.replace(/ | /g,' ')),'договор: '+m);
+for(const [re,m] of [[/Договор бытового подряда № 2610-1 /,'номер договора'],[/ИП Петров П\. П\./,'исполнитель'],[/Иванова Мария/,'заказчик'],[/ул\. Ленина, 1, кв\. 5/,'адрес'],[/Предоплата при подписании договора: 20\s000 ₽/,'предоплата'],[/21 рабочий день|21 рабочих дней|21 рабочего/,'срок из настроек'],[/24 месяца/,'гарантия 24 месяца'],[/Приложение 1/,'приложение'],[/ИНН 540100000000/,'ИНН']])log(re.test(ct.replace(/ | /g,' ')),'договор: '+m);
 log(await pg.$$eval('#docSheet .doc-draw svg',x=>x.length>0),'договор: эскиз в приложении');
 const price=await pg.evaluate(()=>document.querySelector('#costTotal b').textContent);log(ct.includes(price.trim()),'договор: цена как в смете '+price);
 await pg.screenshot({path:'look/doc1.png',fullPage:false});
-await pg.click('#docCopy');await pg.waitForTimeout(200);const t1=await clip();log(t1.startsWith('ДОГОВОР №')&&t1.includes('Исполнитель'),'текст договора копируется');
+await pg.click('#docCopy');await pg.waitForTimeout(200);const t1=await clip();log(t1.startsWith('ДОГОВОР БЫТОВОГО ПОДРЯДА №')&&/ст. 32/.test(t1)&&!/Паспорт/.test(t1)&&t1.includes('Исполнитель'),'текст договора копируется');
 // срок своим числом
 await pg.fill('#ctDays','30');await pg.press('#ctDays','Tab');await pg.click('[data-docopen="contract"]');await pg.waitForTimeout(300);log((await pg.textContent('#docSheet')).includes('30 рабочих дней'),'срок 30 рабочих дней');await pg.click('#closeDoc');
 // акт и памятка

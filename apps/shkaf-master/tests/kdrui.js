@@ -1,0 +1,16 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:1.5});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://localhost:8765/');await pg.evaluate(()=>localStorage.clear());await pg.reload();await pg.waitForTimeout(800);
+const log=(c,m)=>console.log(c?'✓':'✗',m);
+await pg.click('[data-kind="kitchen"]');await pg.waitForTimeout(400);
+const sel=await pg.$('select[data-mopt="base:1:dlay"]');log(!!sel,'у модуля с ящиками есть выбор «Ящики по высоте»');
+await sel.selectOption('top');await pg.waitForTimeout(400);
+const hint=await pg.textContent('#mod-base-1');const m=hint.match(/сверху вниз: ([\d ·]+) мм/);log(m&&/^1\d\d · 2\d\d · 2\d\d/.test(m[1].trim()),'показаны размеры фасадов: '+(m&&m[1]));
+await (await pg.$('#mod-base-1')).screenshot({path:'look/kdr1.png'});
+await pg.selectOption('select[data-mopt="base:1:dlay"]','cust');await pg.waitForTimeout(300);await pg.fill('input[data-mopt="base:1:dh"]','140 283 287');await pg.press('input[data-mopt="base:1:dh"]','Tab');await pg.waitForTimeout(400);
+log((await pg.textContent('#mod-base-1')).includes('140 · 283 · 287'),'свои высоты 140 · 283 · 287');
+const nd=await pg.$('select[data-mopt="wall:0:nd"]');log(!!nd,'у верхнего модуля есть выбор «Дверей»');await nd.selectOption('2');await pg.waitForTimeout(400);
+const n=await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.mods.find(m=>m.key==='wall:0').fronts.filter(f=>f.kind==='door').length);log(n===2,'верхний модуль: 2 двери');
+await (await pg.$('#mod-wall-0')).screenshot({path:'look/kdr2.png'});
+await pg.reload();await pg.waitForTimeout(800);const keep=await pg.evaluate(()=>{const P=JSON.parse(localStorage.getItem('shkaf.projects'))[0];return [P.k.base[1].dlay,P.k.base[1].dh,P.k.wall[0].nd]});log(keep.join('|')==='cust|140 283 287|2','после перезапуска сохранилось');
+console.log('errs',errs);await b.close()})();

@@ -1,0 +1,16 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:1.5});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://localhost:8765/');await pg.evaluate(()=>localStorage.clear());await pg.reload();await pg.waitForTimeout(800);
+const log=(c,m)=>console.log(c?'✓':'✗',m);const C=()=>pg.evaluate(()=>window.ShkafMaster.__hooks.R().c);
+await pg.click('[data-kind="kitchen"]');await pg.waitForTimeout(400);
+const opts=await pg.$$eval('#kWallF option',o=>o.map(x=>x.value));log(opts.length>5&&opts[0]==='','выбор верхних фасадов: '+opts.length+' вариантов');
+await pg.selectOption('#kWallF','anthr');await pg.waitForTimeout(400);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.parts.some(x=>x.mat==='ldspF'&&/\(верх\)/.test(x.name))),'верх — антрацит на отдельных листах');
+await (await pg.$('#front')).screenshot({path:'look/two47.png'});
+await pg.click('[data-view="3d"]');await pg.waitForTimeout(1500);await (await pg.$('.drawing')).screenshot({path:'look/two47-3d.png'});await pg.click('[data-view="2d"]');
+await pg.click('[data-kind="chest"]');await pg.waitForTimeout(400);
+await pg.click('[data-preset="tvhang"]');await pg.waitForTimeout(400);log(await pg.isChecked('#cHang'),'ТВ-тумба подвесная: галочка');log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.hw.some(h=>/Навес/.test(h[0]))),'навесы в смете');
+await pg.click('[data-preset="flip"]');await pg.waitForTimeout(400);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.hw.some(h=>/откидной обувницы/.test(h[0]))),'обувница откидная');await (await pg.$('#front')).screenshot({path:'look/flip47.png'});
+await pg.click('[data-preset="washer"]');await pg.waitForTimeout(400);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.parts.some(x=>/стиральной/.test(x.name))),'шкаф над стиралкой');
+await pg.fill('#cnh-0','950');await pg.press('#cnh-0','Tab');await pg.waitForTimeout(400);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.parts.some(x=>x.name==='Дверца'&&x.L===2000-950-32-4)),'ниша 950 → дверца 1014');
+await (await pg.$('#front')).screenshot({path:'look/washer47.png'});
+console.log('errs',errs);await b.close()})();

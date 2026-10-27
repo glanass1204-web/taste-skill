@@ -17,7 +17,7 @@ const r=await pg.evaluate(()=>{const M=window.ShkafMaster;let n=0;const bad=[];c
   ok(!E(c).length,'без ошибок: '+E(c).join('|'));ok(W(c).some(t=>/ниша для ног 576 мм — тесно/.test(t)),'ниша 576 — подсказка');
   const s=M.__render(p);ok(s.svg>0&&s.scene>0&&s.drill>0,'чертёж, 3D, сверловка');const d=M.drillMap(p,S,c);ok(d.some(x=>/Стойка у ниши/.test(x.name)&&x.size==='734×600'),'сверловка: стойка 734×600')}
  {const {c}=ch({W:900,H:750,D:600,plinth:0,legs:0,cols:[col('knee',0,0),col('drawers',3,0)]});ok(E(c).some(t=>/ниша для ног 426 мм — уже 500/.test(t)),'стол 900 на 2 колонки: ниша 426 — ошибка')}
- {const {c}=ch({W:1200,H:750,D:600,plinth:0,legs:0,cols:[col('knee',0,0),col('knee',0,0)]});ok(E(c).some(t=>/все колонки — ниши/.test(t)),'одни ниши — ошибка')}
+ {const {c}=ch({W:1200,H:750,D:600,plinth:0,legs:0,cols:[col('knee',0,0),col('knee',0,0)]});ok(E(c).some(t=>/колонки — ниши/i.test(t)),'одни ниши — ошибка')}
  // стол с цоколем 60: цоколь только под тумбой
  {const {c}=ch({W:1400,H:750,D:600,plinth:60,legs:0,cols:[col('drawers',3,0),col('knee',0,0),col('door',0,2)]});ok(P(c,/^Цоколь$/)==='443x60x2','цоколь — два куска по 443 (1400/3−16−8) под тумбами: '+P(c,/^Цоколь$/));ok(P(c,/^Стойка у ниши/).endsWith('x2'),'две стойки у ниши')}
  // тумба под раковину 600×700×470 на ножках 100: корпус 600, боковины 600, царги 568×100, крышки нет

@@ -118,8 +118,8 @@ details.drill{border-bottom:1px solid var(--line);padding-block:8px}details.dril
 .drawing{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;position:relative}
 .drawing svg{display:block;width:100%;height:auto;max-height:62vh}
 .drawing .tools{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:2px 2px 8px}
-.decors{display:flex;gap:6px}
-.decors button{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);padding:0}
+.decors{display:flex;gap:6px;overflow-x:auto;min-width:0;flex:1 1 150px;padding:3px;scrollbar-width:none}.decors::-webkit-scrollbar{display:none}
+.decors button{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);padding:0}
 .decors button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--accent)}
 svg text{font-family:var(--f-mono)}
 .sv-ink{stroke:var(--ink)} .sv-txt{fill:var(--ink)} .sv-mut{fill:var(--muted)} .sv-cav{fill:var(--cavity)}
@@ -528,6 +528,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         <div class="decors" id="decors" role="group" aria-label="Декор ЛДСП"></div>
         <div class="seg mini" role="group" aria-label="Вид"><button type="button" data-view="2d" aria-pressed="true">Чертёж</button><button type="button" data-view="3d">3D</button></div>
         <label class="switch" id="doorsToggle"><input type="checkbox" id="showDoors"> Двери</label>
+        <span class="hint" id="decorName" style="flex-basis:100%"></span>
       </div>
       <div id="front"></div>
       <div id="view3d" hidden>
@@ -826,10 +827,15 @@ const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})(
 const clone=o=>JSON.parse(JSON.stringify(o));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
-const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
+// декоры ЛДСП: первые четыре — прежние, дальше — самые ходовые по каталогам (код — для заказа у поставщика; аналоги есть у Lamarty, Kronospan, Увадрев)
+const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'},
+  kashmir:{name:'Кашемир серый (Egger U702)',fill:'#C9C1B4'},lgrey:{name:'Светло-серый (Egger U708)',fill:'#C7CACB'},sand:{name:'Бежевый песок (Egger U156)',fill:'#D8C8AE'},
+  anthr:{name:'Антрацит (Egger U963)',fill:'#4B4F53'},black:{name:'Чёрный (Egger U999)',fill:'#2A2B2D'},sage:{name:'Зелёный шалфей (Egger U638)',fill:'#A7B09A'},
+  casella:{name:'Дуб каселла натуральный (Egger H1385)',fill:'#C9A374'},casellaD:{name:'Дуб каселла коричневый (Egger H1386)',fill:'#8A6545'},
+  halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='44 от 27.10.2026';
+const APP_VER='45 от 27.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -894,6 +900,8 @@ const MATERIALS={
     {id:'egger18',name:'ЛДСП Egger 18 мм',t:18,L:2800,W:2070,price:7200,src:'Формат Egger 2800×2070 мм. Цена примерная.'},
     {id:'lamarty16',name:'ЛДСП Lamarty 16 мм',t:16,L:2750,W:1830,price:3500,src:'Формат Lamarty 2750×1830 мм; около 3 500 ₽ за лист 16 мм (Москва, 2026).'},
     {id:'lamarty18',name:'ЛДСП Lamarty 18 мм',t:18,L:2750,W:1830,price:3900,src:'Формат Lamarty 2750×1830 мм. Цена примерная.'},
+    {id:'uvadrev16',name:'ЛДСП Увадрев 16 мм',t:16,L:2750,W:1830,price:2700,src:'Формат Увадрев 2750×1830 мм; 2 660–2 780 ₽ за лист 16 мм (stroyprovider.ru, eraplit.com, 2026). Самая недорогая из ходовых.'},
+    {id:'uvadrevW16',name:'ЛДСП Увадрев влагостойкая 16 мм',t:16,L:2750,W:1830,price:3550,src:'Формат 2750×1830 мм; около 3 540 ₽ за лист (stroyprovider.ru, 2026). Для мойки, ванной, прихожей у входа.'},
     {id:'custom',name:'Свой лист',t:16,L:2800,W:2070,price:4800,custom:true,src:'Впишите толщину, формат и цену вашего листа.'}],
   fronts:[
     {id:'body',kind:'body',name:'ЛДСП, как корпус',src:'Фасады выкраиваются из тех же листов, кромка — как выбрано для фасадов.'},
@@ -913,6 +921,7 @@ const MATERIALS={
     {id:'pf38',name:'Постформинг 38 мм, длина 3050',t:38,D:600,maxL:3050,price:3500,planks:true,src:'Стандарт: глубина 600 мм, длина 3050 или 4200 мм, толщина 38 мм. Цена примерная.'},
     {id:'pf38l',name:'Постформинг 38 мм, длина 4200',t:38,D:600,maxL:4200,price:3700,planks:true,src:'Длина 4200 мм — меньше стыков. Цена примерная.'},
     {id:'egger38',name:'Egger 38 мм, длина 4100',t:38,D:600,maxL:4100,price:5500,planks:true,src:'Стандарт Egger: 4100×600×38 мм. Цена примерная.'},
+    {id:'hpl12',name:'Компакт-плита HPL 12 мм, длина 3050',t:12,D:600,maxL:3050,price:9000,src:'Тонкая столешница, не боится воды и царапин. 20 000–30 000 ₽ за плиту (Лемана ПРО, stroyprovider.ru, 2026) — около 9 000 ₽ за погонный метр. Торцы не кромят; мойку и варочную — только под накладной или врезной монтаж по схеме для компакт-плиты.'},
     {id:'stone',name:'Искусственный камень (акрил), край 38 мм',t:38,D:600,maxL:0,price:25000,src:'Изготавливается по замеру, швы склеиваются незаметно. Цена примерная за погонный метр.'},
     {id:'quartz',name:'Кварцевый агломерат 20 мм',t:20,D:600,maxL:0,price:35000,src:'Изготавливается по замеру. Цена примерная за погонный метр.'},
     {id:'custom',name:'Своя столешница',t:38,D:600,maxL:3050,price:3500,planks:true,custom:true,src:'Впишите толщину, глубину, длину листа и цену за погонный метр.'}],
@@ -2774,7 +2783,7 @@ function renderBuild(){
   $('#wPanel').hidden=kind!=='wardrobe';$('#kPanel').hidden=kind!=='kitchen';$('#cPanel').hidden=kind!=='chest';
   $('#doorsToggle').hidden=kind!=='wardrobe'||view3d;$('#kAdd').hidden=kind!=='kitchen';
   $$('#view-build [data-k]').forEach(el=>{if(document.activeElement!==el)el.value=P[el.dataset.k]??''});
-  $('#decors').innerHTML=Object.entries(DECORS).map(([k,d])=>`<button type="button" data-decor="${k}" aria-pressed="${P.decor===k}" title="${d.name}" aria-label="${d.name}" style="background:${d.fill}"></button>`).join('');
+  $('#decors').innerHTML=Object.entries(DECORS).map(([k,d])=>`<button type="button" data-decor="${k}" aria-pressed="${P.decor===k}" title="${d.name}" aria-label="${d.name}" style="background:${d.fill}"></button>`).join('');{const bx=$('#decors'),on=bx.querySelector('[aria-pressed="true"]');if(on)bx.scrollLeft=Math.max(0,on.offsetLeft-bx.offsetLeft-bx.clientWidth/2+14)}$('#decorName').textContent='Декор корпуса: '+DECORS[P.decor].name+' — листайте кружки вбок, там ещё декоры';
   $('#front').innerHTML=drawingHTML();if(view3d)build3D();
   const over=[...new Set([...R.cl.over,...R.ch.over].map(o=>`${o.name} ${o.L}×${o.Wd}`))];
   const all=issues(),errs=all.filter(x=>x.lvl==='err'),wrn=all.filter(x=>x.lvl!=='err');

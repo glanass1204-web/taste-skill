@@ -844,7 +844,7 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='47 от 27.10.2026';
+const APP_VER='48 от 27.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -2376,14 +2376,14 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
   scene.add(model);
   // размерные линии: в отдельной группе (не мешают сборке, касаниям и примерке), подписи всегда смотрят в камеру
   const dimRoot=new THREE.Group(),dimIn=new THREE.Group();dimRoot.add(dimIn);
-  if(opts.dims){const sz0=new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3()),lh=Math.min(.24,Math.max(.09,Math.max(sz0.x,sz0.y)*.065));
+  const labels=[];if(opts.dims){const sz0=new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3()),lh=Math.min(.24,Math.max(.09,Math.max(sz0.x,sz0.y)*.065));
     const lm=new THREE.LineBasicMaterial({color:0x1D2227,transparent:true,opacity:.85,depthTest:false}),em=new THREE.LineBasicMaterial({color:0x1D2227,transparent:true,opacity:.35,depthTest:false});
     const label=(txt,small)=>{const cv=document.createElement('canvas'),g=cv.getContext('2d'),fs=64;g.font=`700 ${fs}px "JetBrains Mono",monospace`;const w=Math.ceil(g.measureText(txt).width)+40;cv.width=w;cv.height=96;
       g.font=`700 ${fs}px "JetBrains Mono",monospace`;g.fillStyle='rgba(255,255,255,.93)';g.strokeStyle=small?'#9AA3A8':'#F2B705';g.lineWidth=6;
       const r=22;g.beginPath();g.moveTo(r,3);g.arcTo(w-3,3,w-3,93,r);g.arcTo(w-3,93,3,93,r);g.arcTo(3,93,3,3,r);g.arcTo(3,3,w-3,3,r);g.closePath();g.fill();g.stroke();
       g.fillStyle='#1D2227';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,w/2,50);
       const tx=new THREE.CanvasTexture(cv);tx.minFilter=THREE.LinearFilter;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));
-      const h=lh*(small?.85:1);sp.scale.set(h*w/96,h,1);sp.renderOrder=12;return sp};
+      const h=lh*(small?.85:1);sp.scale.set(h*w/96,h,1);sp.renderOrder=12;sp.userData.small=!!small;labels.push(sp);return sp};
     data.groups.forEach(gr=>{if(!gr.dims)return;const Gd=new THREE.Group();Gd.rotation.y=gr.rot;Gd.position.set(gr.pos[0]*M,gr.pos[1]*M,gr.pos[2]*M);
       const GdIn=new THREE.Group();GdIn.rotation.y=gr.rot;GdIn.position.copy(Gd.position);dimIn.add(GdIn);
       gr.dims.forEach(d=>{if(d.lbl){const sp=label(d.t,1);sp.position.set(d.lbl[0]*M,d.lbl[1]*M,d.lbl[2]*M);sp.scale.multiplyScalar(.8);(d.inner?GdIn:Gd).add(sp);return}
@@ -2402,7 +2402,7 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(size.x+5,size.z+5),new THREE.MeshStandardMaterial({color:'#B9B2A7',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.set(box.min.x+size.x/2,-0.001,box.min.z+size.z/2);scene.add(floor);
   data.walls.forEach(w=>{const wall=new THREE.Mesh(new THREE.PlaneGeometry(w.len*M+(data.walls.length>1?1.5:4),size.y+1.2),new THREE.MeshStandardMaterial({color:'#D9D5CE',roughness:1}));
     wall.position.set(w.x*M+(w.rot?0:w.len*M/2),(size.y+1.2)/2,w.z*M-0.004+(w.rot?w.len*M/2:0));if(w.rot){wall.rotation.y=w.right?-Math.PI/2:Math.PI/2;wall.position.x+=w.right?0.004:-0.004}scene.add(wall)});
-  return{scene,model,doors,drawers,coupe,lifts,mats,dims:dimRoot,dimsIn:dimIn}}
+  return{scene,model,doors,drawers,coupe,lifts,mats,dims:dimRoot,dimsIn:dimIn,labels}}
 function fitCamera(cam,ctl,model,aspect,extra){const box=new THREE.Box3().setFromObject(model);if(extra&&extra.visible&&extra.children.length)box.expandByObject(extra);const c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
   // расстояние, при котором изделие целиком влезает и по высоте, и по ширине кадра
   const tn=Math.tan(cam.fov*Math.PI/360),dist=Math.max(s.y/2/tn,s.x/2/(tn*aspect))*1.18+s.z/2,r=Math.max(s.x,s.y);
@@ -2462,7 +2462,17 @@ function loop3D(){if(!view3d||!T3){if(T3)T3.raf=0;return}T3.raf=requestAnimation
   if(!S3.asm)S3.coupe.forEach(sl=>{if(go(sl))sl.position.x+=((sl.userData.target||0)-sl.position.x)*k});
   // обход вокруг изделия: полный круг за 7 секунд
   if(T3.spin){const da=Math.min(T3.spin.left,Math.PI*2*dt/7);T3.spin.left-=da;const off=T3.cam.position.clone().sub(T3.ctl.target).applyAxisAngle(new THREE.Vector3(0,1,0),da);T3.cam.position.copy(T3.ctl.target).add(off);if(T3.spin.left<=0)T3.spin=null}
-  T3.ctl.update();T3.r.render(S3.scene,T3.cam)}
+  T3.ctl.update();if(S3.dims.visible)declutter(S3,T3.cam,T3.r);T3.r.render(S3.scene,T3.cam)}
+// подписи размеров не должны закрывать друг друга: крупные — первыми, мешающую подпись поднимаем, мелкую без места прячем
+function declutter(S3,cam,r){const W=r.domElement.clientWidth||1,H=r.domElement.clientHeight||1,v=new THREE.Vector3(),up=new THREE.Vector3(),placed=[];
+  cam.updateMatrixWorld();up.set(0,1,0).applyQuaternion(cam.quaternion);
+  const ls=(S3.labels||[]).filter(sp=>{let o=sp;while(o){if(!o.visible&&o!==sp)return false;o=o.parent}return true}).sort((a,b)=>a.userData.small-b.userData.small);
+  ls.forEach(sp=>{sp.center.set(.5,.5);sp.visible=true;sp.getWorldPosition(v);const p=v.clone().project(cam);if(p.z>1)return;
+    const q=v.clone().add(up.clone().multiplyScalar(sp.scale.y)).project(cam),h=Math.abs(q.y-p.y)*H/2,w=h*sp.scale.x/sp.scale.y,x=(p.x+1)*W/2,y=(1-p.y)*H/2;
+    let rc={x0:x-w/2,x1:x+w/2,y0:y-h/2,y1:y+h/2},k=0;const hit=a=>placed.some(b=>a.x0<b.x1&&a.x1>b.x0&&a.y0<b.y1&&a.y1>b.y0);
+    while(hit(rc)&&k<4){k++;rc={...rc,y0:rc.y0-h*1.1,y1:rc.y1-h*1.1}}
+    if(hit(rc)){if(sp.userData.small){sp.visible=false;return}}else if(k)sp.center.set(.5,.5-1.1*k);
+    placed.push(rc)})}
 function show3D(on){view3d=on;$$('[data-view]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.view==='3d')===on));
   $('#front').hidden=on;$('#view3d').hidden=!on;$('#doorsToggle').hidden=on||P.kind!=='wardrobe';
   if(!on)return;$('#v3msg').textContent='Загружаю 3D…';

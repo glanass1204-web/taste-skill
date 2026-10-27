@@ -81,7 +81,7 @@ h3{font-size:calc(12px * var(--fz));font-weight:600;text-transform:uppercase;let
 .inwrap select{font-family:var(--f-body);font-size:calc(15px * var(--fz))}
 .inwrap span{color:var(--muted);font-size:calc(12px * var(--fz));padding-left:4px}
 .inwrap:focus-within{border-color:var(--accent)}
-.alert.err{background:var(--err-soft);color:var(--err)}
+.alert.err{background:var(--err-soft);color:var(--err)}.alert.ok{background:var(--ok-soft);color:var(--ok)}
 .alert b{font-weight:600}
 .check{display:block;width:100%;text-align:left;border:0;border-radius:10px;padding:10px 12px;font-weight:600;font-size:calc(14px * var(--fz))}
 .check.ok{background:var(--ok-soft);color:var(--ok)}
@@ -234,6 +234,7 @@ details.acc summary{cursor:pointer;font-weight:600;font-size:calc(14px * var(--f
 .var-tbl td.cur{font-weight:700}.var-tbl td.num{white-space:nowrap}.var-tbl .bad{color:var(--warn);font-size:calc(12px * var(--fz))}
 .cat-row.mine{border-left:3px solid var(--accent);padding-left:10px}
 .cat-row.mine .nm .inwrap input{font-family:var(--f-body);font-size:calc(15px * var(--fz))}
+.wishes{display:grid;gap:8px;margin:6px 0}.wish{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}.wish-ok{display:flex;align-items:center;justify-content:center;width:40px;height:40px}.wish input[type=text]{font-family:var(--f-body)}.wish-ok input{width:22px;height:22px;accent-color:var(--accent,#2a7)}
 .ex-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;grid-template-areas:'n n n' 'q p x';gap:6px;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--line)}.ex-row .inwrap input{min-width:0}.ex-n{grid-area:n}.ex-q{grid-area:q}.ex-p{grid-area:p}.ex-row>button{grid-area:x}
 .mine-ed .grid2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 .sup-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px dashed var(--line)}.sup-row>div:first-child{min-width:0;flex:1}
@@ -347,10 +348,19 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         <label class="switch"><input type="checkbox" data-mcheck="floor"> Неровный пол</label>
         <label class="switch"><input type="checkbox" data-mcheck="door"> Дверь или окно рядом</label>
       </div>
-      <div class="field text"><label for="ms_notes">Заметки замерщика</label><textarea id="ms_notes" data-measnote="1" class="copy" style="min-height:70px;font-family:var(--f-body);font-size:14px" placeholder="Где розетки, что мешает, пожелания клиента"></textarea></div>
+      <div class="grid3">
+        <div class="field"><label for="ms_wall">Стена для крепления</label><div class="inwrap"><select id="ms_wall" data-measwall="1"><option value="">Не указана</option><option value="concrete">Бетон, кирпич</option><option value="gas">Газобетон, пеноблок</option><option value="hollow">Пустотелый кирпич</option><option value="gkl">Гипсокартон</option><option value="wood">Дерево, брус</option></select></div></div>
+        <div class="field"><label for="ms_robot">Робот-пылесос, высота</label><div class="inwrap"><input id="ms_robot" data-meas="robot" type="number" inputmode="numeric" placeholder="нет"><span>мм</span></div></div>
+      </div>
+      <label class="switch" id="msEmbedRow"><input type="checkbox" data-mcheck="embed"> В гипсокартоне есть закладная (брус, фанера) под навесные шкафы</label>
+      <div class="field"><label>Пожелания клиента</label><p class="hint">Записывайте всё, что клиент просит на словах. Когда учли в проекте — ставьте галочку. Список попадёт в договор.</p>
+        <div id="wishList" class="wishes"></div>
+        <div class="btns"><button class="btn ghost" type="button" id="wishAdd">+ Пожелание</button></div></div>
+      <div class="field text"><label for="ms_notes">Заметки замерщика</label><textarea id="ms_notes" data-measnote="1" class="copy" style="min-height:70px;font-family:var(--f-body);font-size:14px" placeholder="Где розетки, что мешает"></textarea></div>
       <div class="field"><label>Фото помещения (до 6)</label><div class="photos" id="msPhotos"></div>
         <div class="btns"><label class="btn ghost" for="msFile" style="cursor:pointer">+ Добавить фото</label><input id="msFile" type="file" accept="image/*" multiple hidden></div></div>
-      <div class="btns"><button class="btn" type="button" id="msFit">Подогнать размеры под замер</button><button class="btn ghost" type="button" id="msCopy">Скопировать замер</button></div>
+      <div class="btns"><button class="btn" type="button" id="msFit">Подогнать размеры под замер</button><button class="btn ghost" type="button" id="msRange">Вилка цены для клиента</button><button class="btn ghost" type="button" id="msCopy">Скопировать замер</button></div>
+      <div id="msRangeBox" hidden></div>
       <textarea class="copy" id="msText" readonly hidden aria-label="Текст замера"></textarea>
     </details>
 
@@ -819,7 +829,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Сонома',fill:'#D9BF92'},grey:{name:'Серый графит',fill:'#8C9296'},wenge:{name:'Венге',fill:'#5B4436'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='43 от 27.10.2026';
+const APP_VER='44 от 27.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -828,13 +838,13 @@ const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, т�
 const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день',warranty:'',person:'',inn:'',ogrn:'',addr:'',warrantyM:'24'},
   p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,rodPull:650,liftFloor:250,deliveryKm:40,dismantle:1500,trash:1000,panto:4500,trousers:3200,shoeOut:1800,mirrorOut:3500,ledSensor:900,basket:1900,mirror:3200,tie:30,
-     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeTint:4500,coupeSand:5500,coupePhoto:6500,coupeDiv:300,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
+     coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeTint:4500,coupeSand:5500,coupePhoto:6500,coupeDiv:300,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,anchor:35,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300}};
 const SET_MAT=[['kerf','Пропил','мм'],['trim','Обпил края','мм'],['edgeReserve','Запас кромки','%'],['fMinArea','Мин. площадь заказного фасада','м²']];
 const SET_PRICE=[['hdf','Лист ХДФ','₽/лист'],['edge04','Кромка ПВХ 0,4 мм','₽/м'],['edge08','Кромка ПВХ 0,8 мм','₽/м'],['edge1','Кромка ПВХ 1 мм','₽/м'],['edge','Кромка ПВХ 2 мм','₽/м'],['edgeWork','Кромкование','₽/м'],['cut','Распил','₽/м'],
   ['confirmat','Конфирмат','₽/шт'],['tie','Стяжка межсекционная','₽/шт'],['support','Полкодержатель','₽/шт'],
   ['basket','Корзина выдвижная','₽/шт'],['rod','Штанга','₽/м'],['flange','Флянец штанги','₽/шт'],['rodPull','Штанга выдвижная (торцевая)','₽/шт'],['panto','Пантограф (лифт для одежды)','₽/шт'],['trousers','Брючница выдвижная','₽/шт'],['shoeOut','Полка для обуви выдвижная','₽/шт'],['mirrorOut','Зеркало выдвижное','₽/шт'],['ledSensor','Датчик включения подсветки','₽/шт'],['liftFloor','Подъём по лестнице: за этаж на каждые 100 кг','₽'],['deliveryKm','Доставка за город','₽/км'],['dismantle','Демонтаж старой мебели','₽'],['trash','Вывоз упаковки и мусора','₽'],['mirror','Зеркало на фасад','₽/м²'],
   ['coupeProfile','Профиль купе','₽/дверь'],['coupeFill','Купе: вставка ЛДСП','₽/м²'],['coupeMirror','Купе: вставка зеркало','₽/м²'],['coupeTint','Купе: зеркало бронза/графит','₽/м²'],['coupeSand','Купе: зеркало с пескоструйным рисунком','₽/м²'],['coupePhoto','Купе: стекло с фотопечатью','₽/м²'],['coupeDiv','Купе: профиль разделительный','₽/м'],['coupeRail','Рельсы купе','₽/м'],
-  ['topEnd','Планка торцевая столешницы','₽/шт'],['topJoint','Планка соединительная столешницы','₽/шт'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['hobCut','Вырез под варочную панель','₽/шт'],['grille','Решётка вентиляционная','₽/шт'],['hinge170','Петля 165–170° для угловых створок','₽/шт'],['hingeFold','Петля для складного фасада','₽/шт'],['plinthCorner','Угловой элемент цоколя','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт'],['hook','Крючок мебельный','₽/шт'],['wallFix','Крепление к стене (уголок с дюбелем)','₽/шт'],['gaslift','Газлифт','₽/шт'],['golaL','Профиль Gola L','₽/м'],['golaC','Профиль Gola C','₽/м'],['apron','Стеновая панель (фартук)','₽/м²'],['topPlinth','Плинтус для столешницы','₽/м'],['led','Подсветка (лента с профилем)','₽/м'],['ledPsu','Блок питания подсветки','₽/шт']];
+  ['topEnd','Планка торцевая столешницы','₽/шт'],['topJoint','Планка соединительная столешницы','₽/шт'],['kplinth','Цоколь кухонный','₽/м'],['leg','Ножка','₽/шт'],['hanger','Навес для шкафа','₽/шт'],['sinkCut','Врезка мойки','₽/шт'],['hobCut','Вырез под варочную панель','₽/шт'],['grille','Решётка вентиляционная','₽/шт'],['hinge170','Петля 165–170° для угловых створок','₽/шт'],['hingeFold','Петля для складного фасада','₽/шт'],['plinthCorner','Угловой элемент цоколя','₽/шт'],['drying','Сушка для посуды','₽/шт'],['bracket','Уголок мебельный','₽/шт'],['nail','Гвоздь/саморез для ХДФ','₽/шт'],['cap','Заглушка конфирмата','₽/шт'],['minifix','Эксцентриковая стяжка','₽/шт'],['glide','Подпятник','₽/шт'],['hook','Крючок мебельный','₽/шт'],['wallFix','Крепление к стене (уголок с дюбелем)','₽/шт'],['anchor','Дюбель для газобетона и пустотелых стен','₽/шт'],['gaslift','Газлифт','₽/шт'],['golaL','Профиль Gola L','₽/м'],['golaC','Профиль Gola C','₽/м'],['apron','Стеновая панель (фартук)','₽/м²'],['topPlinth','Плинтус для столешницы','₽/м'],['led','Подсветка (лента с профилем)','₽/м'],['ledPsu','Блок питания подсветки','₽/шт']];
 const SET_WORK=[['work','Изготовление, сборка, доставка по городу','% от материалов'],['markup','Наценка','%']];
 
 /* ---------- каталог фурнитуры ----------
@@ -1008,7 +1018,7 @@ function norm(p){
   p.sectionsB=p.sectionsB||[sec(4,false,0,0),sec(1,true,0,0)];p.sectionsV=p.sectionsV||[sec(1,true,0,0),sec(4,false,0,0)];p.W3=p.W3||1400;
   if(p.shape==='u'&&p.type==='coupe')p.type='swing';
   [...p.sections,...p.sectionsB,...p.sectionsV].forEach(s=>{s.baskets=s.baskets||0});
-  p.meas=Object.assign({w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',notes:'',checks:{},photos:[]},p.meas||{});
+  p.meas=Object.assign({w:['','',''],wB:['','',''],h:['','',''],depth:'',bbH:'',bbT:'',robot:'',wall:'',notes:'',checks:{},photos:[]},p.meas||{});p.wishes=Array.isArray(p.wishes)?p.wishes.filter(x=>x&&typeof x.t==='string'):[];
   p.mat=Object.assign({body:'krono16',front:'body',frontDecor:'white',frontColor:'white',frontNote:'',top:'pf38',edgeF:'2',edgeB:'2'},p.mat||{});
   // заказы прошлых версий были посчитаны с кромкой 2 мм (или 2 мм + 0,4 мм) — сохраняем как было; новый заказ: фасады 1 мм, корпус 0,8 мм
   if(p.mat.edge!==undefined){if(p.mat.edge==='mix'){p.mat.edgeF='2';p.mat.edgeB='0.4'}else{p.mat.edgeF='2';p.mat.edgeB='2'}delete p.mat.edge}
@@ -1293,6 +1303,9 @@ function calcWardrobe(p,s){
   const lenB=corner?lenOf(p.W2,jB):0,lenV=u?lenOf(p.W3,jV):0;
   if(corner){const w=calcWing(p,s,lenB,p.sectionsB,bWing(jB,A_L?'R':'L'),'B',wB);w.off=offOf(jB);w.join=jB;wings.push(w)}
   if(u){const w=calcWing(p,s,lenV,p.sectionsV,bWing(jV,'L'),'V',wV);w.off=offOf(jV);w.join=jV;wings.push(w)}
+  // удобство: между полками больше 550 мм — стопки падают (высоту штанги проверяет calcWing)
+  wings.forEach(w=>w.sections.forEach((sc,i)=>{const L=secLayout(p,s,w,i);
+    const ys=L.shelves.slice().sort((a,b)=>a-b);for(let j=1;j<ys.length;j++){const g=Math.round(ys[j]-ys[j-1]-s.t);if(g>550){w.warn.push(`секция ${i+1}: между полками ${g} мм — стопки вещей будут падать, удобно 300–400 мм. Добавьте полку.`);break}}}));
   // до потолка: корпус ниже потолка на высоту планки, планка — спереди на крыше, по месту подрезается по потолку
   const C=ceilOf(p),extra=[],fillH=p.ceil==='filler'&&C?C-p.H:0,fillN=[];
   if(fillH>0){const Lm=s.sheetL-2*s.trim,ad=adder(extra,null);wings.forEach(w=>{const k=Math.ceil(w.W/Lm);w.fillH=fillH;fillN.push(k);ad('Планка до потолка','Корпус',w.W/k,fillH,k,'ldsp',1,0)})}
@@ -2486,6 +2499,16 @@ function measChecks(p,s,r){const m=p.meas;if(!m)return;const ws=measNum(m.w),hs=
   if(ws.length>1&&Math.max(...ws)-mW>10)warn.push(`Замер: ширина гуляет на ${Math.max(...ws)-mW} мм (стены завалены). Изделие делайте по меньшему размеру, щель закройте планкой.`);
   if(hs.length>1&&Math.max(...hs)-mH>10)warn.push(`Замер: высота гуляет на ${Math.max(...hs)-mH} мм (пол или потолок неровные). Выставляйте по уровню на регулируемых опорах или подкладках.`);
   const ch=m.checks||{};
+  // пожелания клиента: всё, что сказано на словах, должно быть учтено в проекте
+  (p.wishes||[]).filter(x=>x.t.trim()&&!x.done).forEach(x=>warn.push(`Пожелание клиента не отмечено как учтённое: «${x.t.trim()}». Проверьте проект и поставьте галочку в замере.`));
+  // робот-пылесос: под изделием на ножках нужен просвет выше робота хотя бы на 10 мм
+  {const rb=+m.robot||0;if(rb>0&&p.kind==='chest'&&p.c.legs>0&&p.c.legs<rb+10)warn.push(`Робот-пылесос ${rb} мм не проедет под ножками ${p.c.legs} мм — нужны ножки от ${rb+10} мм (или цоколь, чтобы пыль не копилась).`)}
+  // стена: навесные шкафы и крепление от опрокидывания
+  {const wl=m.wall,hang=r.hw.filter(h=>/^Навес/.test(h[0])).reduce((a,h)=>a+h[1],0),fix=r.hw.filter(h=>/^Крепление .*к стене/.test(h[0])).reduce((a,h)=>a+h[1],0);
+   if(wl==='gkl'&&hang&&!ch.embed)warn.push('Стена из гипсокартона: навесные шкафы на него вешать нельзя — нужна закладная (брус или фанера) в стене или шина на несущую стену. Если закладная есть, отметьте это в замере.');
+   if(wl==='gkl'&&fix&&!hang)warn.push('Стена из гипсокартона: крепление от опрокидывания ставьте в профиль или закладную, бабочки в один лист не держат.');
+   if((wl==='gas'||wl==='hollow')&&(hang||fix)){const n=hang+2*fix;r.hw.push([`Дюбель для ${wl==='gas'?'газобетона':'пустотелого кирпича'} (вместо обычного)`,n,'шт',s.p.anchor||35]);
+     if(hang)warn.push(`Стена из ${wl==='gas'?'газобетона':'пустотелого кирпича'}: навесы и шину крепите специальными дюбелями (в смете ${n} шт), не обычными.`)}}
   if(ch.radiator)warn.push('Замер: рядом батарея — оставьте от неё 50–70 мм, чтобы тёплый воздух уходил вверх, а ЛДСП не пересыхала.');
   if(ch.door)warn.push('Замер: рядом дверь или окно — от проёма нужно около 100 мм, проверьте, что двери изделия и комнаты не бьются друг о друга.');
   if(ch.sockets)warn.push('Замер: в зоне изделия розетки или выключатели — отметьте их на задней стенке и заложите вырез или перенос розетки.');
@@ -2518,14 +2541,19 @@ function addPhotos(files){const left=6-P.meas.photos.length;[...files].slice(0,M
   P.meas.photos.push(cv.toDataURL('image/jpeg',0.6));renderMeas();save();setTimeout(()=>{if(!LS.set('shkaf.projects',projects))toast('Память телефона заполнена — фото может не сохраниться. Удалите старые фото или заказы.')},400)};im.src=rd.result};rd.readAsDataURL(f)});
   if(files.length>left)toast('Не больше 6 фото на заказ')}
 function renderMeas(){const m=P.meas;$('#msWB').hidden=!(P.kind==='kitchen'&&P.k.shape==='corner');['w','h','wB'].forEach(k=>m[k].forEach((v,i)=>{const el=$(`#ms_${k}${i}`);if(el&&document.activeElement!==el)el.value=v}));
-  ['depth','bbH','bbT'].forEach(k=>{const el=$('#ms_'+k);if(el&&document.activeElement!==el)el.value=m[k]});if(document.activeElement!==$('#ms_notes'))$('#ms_notes').value=m.notes||'';
+  $('#ms_wall').value=m.wall||'';$('#msEmbedRow').hidden=m.wall!=='gkl';renderWishes();
+  ['depth','bbH','bbT','robot'].forEach(k=>{const el=$('#ms_'+k);if(el&&document.activeElement!==el)el.value=m[k]});if(document.activeElement!==$('#ms_notes'))$('#ms_notes').value=m.notes||'';
   $$('[data-mcheck]').forEach(el=>el.checked=!!m.checks[el.dataset.mcheck]);
   const lw=P.kind==='kitchen'?(P.k.shape==='corner'?'Длина стены А':'Длина стены'):'Ширина места';$('#msLblW').textContent=`${lw}, мм: вверху · посередине · внизу`;
   $('#msPhotos').innerHTML=m.photos.map((u,i)=>`<div class="ph"><img src="${u}" alt="Фото замера ${i+1}"><button type="button" class="icon-btn" data-delphoto="${i}" aria-label="Удалить фото">✕</button></div>`).join('');
   const ws=measNum(m.w),hs=measNum(m.h);$('#msSum').textContent=ws.length||hs.length?`Берём меньшее: ${ws.length?'ширина '+Math.min(...ws)+' мм':''}${ws.length&&hs.length?', ':''}${hs.length?'высота '+Math.min(...hs)+' мм':''}.`:'Меряйте в трёх местах: стены и пол почти никогда не ровные.'}
 function measText(){const m=P.meas,ws=measNum(m.w),hs=measNum(m.h),CH={sockets:'розетки/выключатели в зоне изделия',pipes:'трубы, стояки, счётчики',radiator:'батарея рядом',baseboard:'плинтус',floor:'неровный пол',door:'дверь или окно рядом'};
   return [`Замер: ${P.name}${P.address?' — '+P.address:''}`,ws.length?`${P.kind==='kitchen'?(P.k.shape==='corner'?'Длина стены А':'Длина стены'):'Ширина'}: ${m.w.filter(Boolean).join(' / ')} мм (берём ${Math.min(...ws)})`:'',P.kind==='kitchen'&&P.k.shape==='corner'&&measNum(m.wB).length?`Длина стены Б: ${m.wB.filter(Boolean).join(' / ')} мм (берём ${Math.min(...measNum(m.wB))})`:'',hs.length?`Высота до потолка: ${m.h.filter(Boolean).join(' / ')} мм (берём ${Math.min(...hs)})`:'',
-    +m.depth?`Глубина ниши: ${m.depth} мм`:'',+m.bbT||+m.bbH?`Плинтус:${+m.bbH?' высота '+m.bbH+' мм':''}${+m.bbH&&+m.bbT?',':''}${+m.bbT?' толщина '+m.bbT+' мм':''}`:'',Object.keys(CH).filter(k=>m.checks[k]).map(k=>'• '+CH[k]).join('\n'),m.notes?'Заметки: '+m.notes:''].filter(Boolean).join('\n')}
+    +m.depth?`Глубина ниши: ${m.depth} мм`:'',+m.bbT||+m.bbH?`Плинтус:${+m.bbH?' высота '+m.bbH+' мм':''}${+m.bbH&&+m.bbT?',':''}${+m.bbT?' толщина '+m.bbT+' мм':''}`:'',Object.keys(CH).filter(k=>m.checks[k]).map(k=>'• '+CH[k]).join('\n'),m.wall?'Стена: '+WALL_NAME[m.wall]+(m.wall==='gkl'?(m.checks.embed?', закладная есть':', закладной нет'):''):'',+m.robot?`Робот-пылесос: ${m.robot} мм`:'',
+    P.wishes.some(x=>x.t.trim())?'Пожелания клиента:\n'+P.wishes.filter(x=>x.t.trim()).map(x=>(x.done?'✓ ':'☐ ')+x.t.trim()).join('\n'):'',m.notes?'Заметки: '+m.notes:''].filter(Boolean).join('\n')}
+const WALL_NAME={concrete:'бетон, кирпич',gas:'газобетон, пеноблок',hollow:'пустотелый кирпич',gkl:'гипсокартон',wood:'дерево, брус'};
+function renderWishes(force){const box=$('#wishList');if(!box||(!force&&box.contains(document.activeElement)))return;
+  box.innerHTML=P.wishes.map((x,i)=>`<div class="wish"><label class="wish-ok" title="Учтено в проекте"><input type="checkbox" data-wishdone="${i}"${x.done?' checked':''} aria-label="Учтено в проекте"></label><div class="inwrap"><input type="text" data-wish="${i}" value="${esc(x.t)}" placeholder="Например: верх до потолка" aria-label="Пожелание"></div><button class="chip" type="button" data-wishdel="${i}" aria-label="Удалить пожелание">✕</button></div>`).join('')||'<p class="hint">Пока пусто.</p>'}
 
 function packRows(rects,s,allowRot){
   const Ls=s.sheetL-2*s.trim,Ws=s.sheetW-2*s.trim,k=s.kerf;
@@ -3170,6 +3198,7 @@ function docBlocks(kind){const co=settings.company,c=R.c,d=describe(),k=R.cost,p
       `${g+2}.2. Договор составлен в двух экземплярах, по одному для каждой стороны.`);
     B.push({sign:[[`Исполнитель`,isp,co.inn?`ИНН ${co.inn}`:'',co.ogrn?`ОГРНИП ${co.ogrn}`:'',co.addr||'',co.phone?`Тел. ${co.phone}`:''],['Заказчик',zak,P.address?`Адрес: ${P.address}`:'',P.phone?`Тел. ${P.phone}`:'']]});
     B.push({h:'Приложение 1. Спецификация и эскиз',spec:agreedSnap().filter(([k])=>!/^Особенность/.test(k)),draw:true});
+    {const ws=P.wishes.filter(x=>x.t.trim()&&x.done);if(ws.length)list('Пожелания Заказчика, учтённые в проекте',ws.map(x=>x.t.trim()))}
     B.push({sign:[['Исполнитель',isp],['Заказчик',zak]]});
   }else if(kind==='act'){
     B.push({title:'Акт приёма-передачи мебели',meta:[`к договору № ${no}`,today]});
@@ -3364,6 +3393,7 @@ document.addEventListener('input',e=>{
   if(d.matnote){P.mat.frontNote=el.value;change();return}
   if(d.meas){const [k,i]=d.meas.split(':'),v=el.value.replace(/[^0-9]/g,'');if(i!==undefined)P.meas[k][+i]=v;else P.meas[k]=v;change();return}
   if(d.measnote){P.meas.notes=el.value;save();return}
+  if(d.wish){const x=P.wishes[+d.wish];if(x){x.t=el.value;change()}return}
   if(d.matedit){const [k,id,f]=d.matedit.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.mat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
   if(d.mname){const [st,k,id]=d.mname.split(':'),it=mineList(st,k).find(x=>x.id===id);if(it){it.name=el.value.trim()||'Без названия';save();renderHw();renderMat()}return}
   if(d.catname){const [k,id]=d.catname.split(':'),it=settings.cat[k].find(x=>x.id===id);if(it){it.name=el.value.trim()||'Без названия';save();renderHw()}return}
@@ -3388,7 +3418,9 @@ document.addEventListener('change',e=>{
   else if(d.hw){if(el.value==='__new'){const it=newMine('cat',HWK[d.hw],d.hw);change();toast('Впишите название и цену своей позиции');setTimeout(()=>{const x=document.querySelector(`[data-mname="cat:${HWK[d.hw]}:${it.id}"]`);if(x){x.focus();x.select()}},60);return}P.hw[d.hw]=el.value;change()}
   else if(d.mat){if(el.value==='__new'&&MATK[d.mat]){const it=newMine('mat',MATK[d.mat],d.mat);change();toast('Впишите название и цену своей позиции');setTimeout(()=>{const x=document.querySelector(`[data-mname="mat:${MATK[d.mat]}:${it.id}"]`);if(x){x.focus();x.select()}},60);return}P.mat[d.mat]=el.value;change()}
   else if(d.wall){P.walls[d.wall]=el.checked;change()}
-  else if(d.mcheck){P.meas.checks[d.mcheck]=el.checked;save()}
+  else if(d.mcheck){P.meas.checks[d.mcheck]=el.checked;if(d.mcheck==='embed')change();else save()}
+  else if(d.measwall){P.meas.wall=el.value;change();renderMeas()}
+  else if(d.wishdone!==undefined){const x=P.wishes[+d.wishdone];if(x){x.done=el.checked;change()}}
   else if(el.id==='tryCam'||el.id==='tryFile'){const f=el.files&&el.files[0];if(f){const rd=new FileReader();rd.onload=()=>trySetPhoto(rd.result);rd.readAsDataURL(f)}el.value=''}
   else if(d.catkind){const [k,id]=d.catkind.split(':'),it=settings.cat[k].find(x=>x.id===id);if(it){it.kind=el.value;if(el.value==='hidden'){it.dW=it.dW===26?42:it.dW;it.dL=it.dL||10}change();renderSettings()}}
   else if(el.id==='kpVar'){P.kpVar=el.checked;save()}
@@ -3437,6 +3469,13 @@ document.addEventListener('click',e=>{
     else{const v=Math.min(2700,C-20,Math.floor(k.legs+Math.sqrt(Math.max(0,(C-10-k.legs)**2-k.baseD**2))));if(v<1500){toast('Потолок слишком низкий для пенала');return}
       k.tallH=v;change();toast(`Пеналы ${k.tallH} мм (поднимаются после сборки), до потолка ${C-k.tallH} мм`)}return}
   if(b.id==='copyDrill'){copy(drillText(),$('#drillText'),'Присадка скопирована');return}
+  if(b.id==='wishAdd'){P.wishes.push({t:'',done:false});renderWishes(true);save();const els=$$('[data-wish]');if(els.length)els[els.length-1].focus();return}
+  if(b.dataset.wishdel!==undefined){P.wishes.splice(+b.dataset.wishdel,1);renderWishes(true);change();return}
+  if(b.id==='msRange'){const v=variantsOf(P).filter(x=>!x.err).sort((a,c)=>a.price-c.price),box=$('#msRangeBox');
+    if(!v.length){box.hidden=false;box.innerHTML='<p class="hint">Сначала исправьте ошибки в изделии — тогда посчитаю.</p>';return}
+    const lo=v[0].price,hi=v[v.length-1].price,txt=`Ориентировочная цена: от ${rub(lo)} до ${rub(hi)} — зависит от материалов и фурнитуры.\n${v.map(x=>`${x.name}: ${rub(x.price)} (${x.desc.join(', ')})`).join('\n')}\nТочная цена — после проекта по замеру.`;
+    box.hidden=false;box.innerHTML=`<div class="alert ok"><b>От ${rub(lo)} до ${rub(hi)}</b>${v.map(x=>`<span>${x.name}: <b class="num">${rub(x.price)}</b> — ${esc(x.desc.join(', '))}</span>`).join('')}<div class="btns"><button class="btn ghost" type="button" id="msRangeCopy">Скопировать для клиента</button></div></div><textarea class="copy" id="msRangeText" readonly hidden>${esc(txt)}</textarea>`;return}
+  if(b.id==='msRangeCopy'){copy($('#msRangeText').value,$('#msRangeText'),'Вилка цены скопирована');return}
   if(b.id==='msCopy'){copy(measText(),$('#msText'),'Замер скопирован');return}
   if(d.delphoto!==undefined){P.meas.photos.splice(+d.delphoto,1);renderMeas();save();return}
   if(b.id==='v3open'){if(T3&&T3.S3&&T3.S3.asm)return;open3d=!open3d;b.textContent=open3d?'Закрыть двери и ящики':'Открыть двери и ящики';if(T3&&T3.S3)setOpen(T3.S3,open3d,false);return}

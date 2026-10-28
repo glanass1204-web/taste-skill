@@ -100,6 +100,8 @@ details.drill{border-bottom:1px solid var(--line);padding-block:8px}
 .dpic{margin:8px 0 4px;overflow-x:auto}.dpic svg{display:block;width:100%;height:auto;max-height:70vh;background:#FFFFFF;border-radius:8px}
 .dleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:calc(12px * var(--fz));color:var(--muted);margin:4px 0}.dleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 .dskip{font-size:calc(12px * var(--fz));color:var(--muted);margin:4px 0}
+.tool-g{margin:10px 0 2px;font-weight:600}.tool{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}.tool input{margin-top:3px;width:18px;height:18px;flex:0 0 auto}
+.tool .tw{flex:1;min-width:0}.tool .tw small{display:block;color:var(--muted);font-size:calc(12px * var(--fz))}.tool .tp{white-space:nowrap;font-variant-numeric:tabular-nums}.tool.have{opacity:.55}.tool-sum{margin-top:10px;display:flex;flex-direction:column;gap:2px}
 .tpl-page{break-after:page;page-break-after:always;margin:0 auto 14px;max-width:180mm}.tpl-page svg{display:block;width:100%;height:auto;background:#FFFFFF;border:1px solid #C9CED2}
 .tpl-head{font-size:10pt;margin:0 0 4px}details.drill summary{cursor:pointer}details.drill ul{margin:6px 0 0;padding-left:18px;font-size:calc(13px * var(--fz));display:flex;flex-direction:column;gap:4px}
 .cat-row{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,1fr));gap:8px;align-items:end;padding-block:8px;border-bottom:1px solid var(--line)}
@@ -683,6 +685,12 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       <div class="btns"><button class="btn" type="button" id="copyDrill">Скопировать присадку</button></div>
       <textarea class="copy" id="drillText" readonly hidden aria-label="Текст присадки"></textarea>
     </div>
+    <div class="card" id="toolsCard">
+      <h3>Инструмент и оснастка на этот заказ</h3>
+      <p class="hint">Собрано по деталям и фурнитуре заказа. Отметьте, что у вас уже есть, — внизу будет, сколько примерно стоит докупить. Отметки запоминаются для всех заказов.</p>
+      <div class="field"><label for="sJig">Кондуктор для присадки</label><div class="inwrap"><select id="sJig"><option value="none">Нет — размечаю по шаблону 1:1</option><option value="32">Кондуктор-линейка с шагом 32 мм</option><option value="univ">Универсальный, с упорами</option></select></div></div>
+      <div id="toolList"></div>
+    </div>
     <div class="card">
       <h3>Файл для распила</h3>
       <p class="hint">Таблица CSV: открывается в Excel, загружается в Cutlist Optimizer, Раскрой Мастер и программы поставщиков.</p>
@@ -890,13 +898,13 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='54 от 28.10.2026';
+const APP_VER='55 от 28.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
-const DEFAULT_SETTINGS={t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
+const DEFAULT_SETTINGS={jig:'none',tools:{},t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день',warranty:'',person:'',inn:'',ogrn:'',addr:'',warrantyM:'24'},
   p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,rodPull:650,liftFloor:250,deliveryKm:40,dismantle:1500,trash:1000,panto:4500,trousers:3200,shoeOut:1800,mirrorOut:3500,iron:7000,ledSensor:900,basket:1900,mirror:3200,tie:30,
      coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeTint:4500,coupeSand:5500,coupePhoto:6500,coupeDiv:300,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,anchor:35,radiusCut:250,hangRail:450,flip:900,cargo:6500,magic:17000,carousel:8000,bin:3000,glassFront:9000,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300,bedBase:2500,bedMech:2600,bedGas:750,bedBar:90}};
@@ -2362,7 +2370,8 @@ const R0=v=>Math.round(v*2)/2,LIST=a=>a.map(v=>R0(v)).join(', ');
 // петли: 100 мм от краёв, остальные равномерно; shift — сдвиг на 32 мм, если с другой стороны стенки уже есть планки
 function cupYs(h,n,shift){const e=h>=260?100:Math.max(38,Math.round(h*.27)),a=[];for(let i=0;i<n;i++)a.push(e+(h-2*e)*(n===1?0:i/(n-1)));return shift?a.map(y=>y+32):a}
 const along=(len,n)=>{const a=[];for(let i=0;i<n;i++)a.push(50+(len-100)*(n===1?0:i/(n-1)));return a};
-function drillMap(p,s,c){const t=s.t,out=[],add=(name,size,qty,lines)=>{if(lines.length)out.push({name,size,qty,lines})},H_=HW(p,s);
+function drillMap(p,s,c){return jig32Lines(drillMap0(p,s,c),s)}
+function drillMap0(p,s,c){const t=s.t,out=[],add=(name,size,qty,lines)=>{if(lines.length)out.push({name,size,qty,lines})},H_=HW(p,s);
   const cupLine=(edge,ys)=>`Чашки петель Ø35, глубина 12–13 мм: центр в 22 мм от ${edge} края; Y от низа: ${LIST(ys)}`;
   const handleLines=(h,cx,cy,vertical)=>{const hd=H_.handle;if(!hd.proj&&!hd.cc)return[];if(!hd.cc)return[`Ручка: отверстие Ø5 сквозное — X ${R0(cx)}, Y ${R0(cy)}`];
     return vertical?[`Ручка ${hd.cc} мм: отверстия Ø5 сквозные — X ${R0(cx)}; Y ${R0(cy-hd.cc/2)} и ${R0(cy+hd.cc/2)}`]:[`Ручка ${hd.cc} мм: отверстия Ø5 сквозные — Y ${R0(cy)}; X ${R0(cx-hd.cc/2)} и ${R0(cx+hd.cc/2)}`]};
@@ -2524,7 +2533,7 @@ function drillParse(g){const m=/^(\d+(?:\.\d+)?)×(\d+(?:\.\d+)?)/.exec(g.size);
     else if((r=new RegExp('^Оба торца: Ø(\\d+) глубиной \\d+ — X '+DRL+'$').exec(c)))drNums(r[2]).forEach(x=>edges.push({e:'T',p:x,d:+r[1]},{e:'B',p:x,d:+r[1]}));
     else if((r=new RegExp('^Верхний торец: эксцентриковые стяжки крышки — X '+DRL+', по схеме стяжки$').exec(c)))drNums(r[1]).forEach(x=>edges.push({e:'T',p:x,d:0,k:'minifix'}));
     else if((r=new RegExp('^Вырез под плинтус: снизу у заднего края ('+DRN+') мм по высоте × ('+DRN+') мм по глубине$').exec(c)))cuts.push({x:W-r[2],y:0,w:+r[2],h:+r[1]});
-    else if(/^Без ручки|^Навес|^Задняя стенка ЛДСП|^Газлифты|^Крепится|^Навешивается|^Вытяжка|^Конфирматы в боковины|^Пантограф|^Полки с двух сторон|^Верх|^Низ —|^Стоит на полу|^Проставка/.test(c))notes.push(raw);
+    else if(/^Кондуктор 32|^Без ручки|^Навес|^Задняя стенка ЛДСП|^Газлифты|^Крепится|^Навешивается|^Вытяжка|^Конфирматы в боковины|^Пантограф|^Полки с двух сторон|^Верх|^Низ —|^Стоит на полу|^Проставка/.test(c))notes.push(raw);
     else if((dm||/^Снизу: эксцентриковые стяжки/.test(c))&&!/Только на|от торца у изножья|глубиной|Торец|торец|по высоте,|шт\. по высоте/.test(c)&&!/X от/.test(c)){
       // общий случай: «Y …; X …» или «X …, Y …» с одним диаметром; пары X/Y ищем внутри частей через «;»
       const minifix=/эксцентриков/.test(c),k=minifix?'minifix':'hole';let px=null,py=null,okAll=true;const add=(xs,ys)=>xs.forEach(x=>ys.forEach(y=>holes.push({x,y,d:minifix?0:d,face,k})));
@@ -2591,6 +2600,51 @@ function drillTemplate(g){const P_=drillParse(g);if(!P_||P_.bad)return '';const 
 let TPL_TXT='';
 function openTpl(name){const g=drillMap(P,R.S,R.c).find(x=>x.name===name);if(!g)return;const h=drillTemplate(g);if(!h)return;DOC='tpl';TPL_TXT=`${g.name} ${g.size}\n`+g.lines.join('\n');
   $('#docSheet').innerHTML=h;$('#docWrap').hidden=false;document.body.style.overflow='hidden';$('#docPrint').hidden=inFrame;$('#docShare').hidden=true;$('#docWrap').scrollTop=0}
+/* ---------- инструмент и оснастка на заказ ----------
+   Список собирается из фурнитуры и присадки заказа. Цены — примерные (2026), только для оценки «сколько докупить». */
+function toolsFor(p,s,c,dm){const H=c.hw.map(r=>r[0]).join('\n'),DL=dm.map(g=>g.lines.join('\n')).join('\n'),hd=HW(p,s).handle,jig=s.jig||'none',o=[];
+  const T=(id,grp,name,why,price,need)=>o.push({id,grp,name,why,price,need:need!==false});
+  const hinge=/Петля/.test(H),conf=/Конфирмат/.test(H),minifix=/Эксцентриков/.test(H),sup=/Полкодержатель/.test(H),hcc=(hd.cc||0)>0&&/^Ручка/m.test(H),slides=/^Направляющие/m.test(H),d8=/Ø8/.test(DL),
+    wall=/Крепление к стене|Навес|Шина монтажная|Дюбель/.test(H)||p.kind==='kitchen',worktop=p.kind==='kitchen'&&p.k.worktop,cut=/Врезка мойки|Вырез под варочную/.test(H),joint=/соединительная столешницы/i.test(H),
+    coupe=p.kind==='wardrobe'&&p.type==='coupe',thin=[p.mat.edgeF,p.mat.edgeB].some(e=>String(e)==='0.4'),radius=/Радиусный рез/.test(H),edgeOrder=!thin;
+  T('screw','Основное','Шуруповёрт с регулировкой усилия','сборка на конфирматы, ящики, фурнитура',6000);
+  T('tape','Основное','Рулетка 5 м и строительный угольник','замер, разметка, проверка прямых углов',900);
+  T('clamp','Основное','Струбцины угловые, 2 шт.','держать стенки под 90° при сверлении и сборке',900);
+  T('level','Основное','Уровень 60 см','выставить корпус и фасады',600);
+  T('awl','Основное','Шило и карандаш','наколоть центр отверстия — сверло не уйдёт',150);
+  if(hinge){T('f35','Сверлить','Сверло Форстнера Ø35','чашки петель',600);T('stop35','Сверлить','Упор глубины для Ø35 (стопорное кольцо)','глубина 12–13 мм — глубже насквозь продырявит фасад',200)}
+  if(conf){T('confd','Сверлить','Сверло конфирматное ступенчатое 5/7','отверстия под конфирматы одним проходом',350);T('hex','Сверлить','Бита-шестигранник 4 мм под конфирмат','закручивать конфирматы',150)}
+  if(sup||hcc)T('d5','Сверлить','Сверло Ø5 с упором глубины',(sup?'полкодержатели (глубина 10 мм)':'')+(sup&&hcc?', ':'')+(hcc?'ручки насквозь':''),250);
+  if(d8)T('d8','Сверлить','Сверло Ø8 по дереву','сквозные отверстия в кровати',150);
+  if(minifix)T('f15','Сверлить','Сверло Форстнера Ø15','эксцентриковые стяжки крышки',400);
+  if(hcc)T('board','Сверлить','Подкладная доска (обрезок ЛДСП)','сверлить фасад под ручку насквозь без сколов',0,false);
+  if(wall){T('perf','Установка','Перфоратор','крепление к стене'+(p.kind==='kitchen'?', навесные шкафы':''),6000);T('dconc','Установка','Свёрла по бетону Ø6 и Ø8','дюбели',300)}
+  if(worktop&&(cut||joint))T('jigsaw','Установка','Электролобзик и пилки чистого реза','вырез под мойку и варочную панель'+(joint?', подрезка столешницы':''),5000);
+  if(joint)T('router','Установка','Фрезер и шаблон для стыка столешниц','стык столешниц под планку — или закажите стык в цехе',8000,false);
+  if(coupe)T('miter','Установка','Торцовочная пила с диском по алюминию','резка профиля купе — или попросите поставщика нарезать в размер',9000,false);
+  if(thin)T('iron','Кромка','Утюг и кромочный нож (торцовка)','кромка 0,4 мм клеится утюгом',900);
+  // оснастка: кондуктор выбирается в списке выше
+  if(jig==='32'){if(conf||sup||slides)T('jig32','Оснастка','Кондуктор-линейка с шагом 32 мм','конфирматы, полкодержатели рядом, направляющие — без разметки',2500,false)}
+  else if(jig==='univ'){if(conf||sup||hinge)T('jigU','Оснастка','Универсальный кондуктор с упорами','конфирматы, полкодержатели, петли — отверстия совпадают на парных деталях',4500,false)}
+  else{if(sup)T('tplS','Оснастка','Шаблон для полкодержателей (полоса с отверстиями)','одинаковые отверстия на обеих стенках — полка не качается',700,false);
+    if(conf)T('jigC','Оснастка','Кондуктор для конфирматов','отверстие точно по центру торца',1500,false)}
+  if(hinge&&jig!=='univ')T('jigH','Оснастка','Кондуктор для петель Ø35','центр чашки ровно 22 мм от края',1200,false);
+  if(hcc)T('jigR','Оснастка','Шаблон для ручек','одинаковое место ручки на всех фасадах',800,false);
+  if(slides&&jig!=='32')T('jigS','Оснастка','Шаблон для направляющих','направляющие на одной высоте с двух сторон',900,false);
+  const notes=[];if(edgeOrder)notes.push('Кромку ПВХ 0,8–2 мм дешевле заказать в цехе вместе с распилом — станок не нужен.');if(radius)notes.push('Радиусные полки — радиусный рез в цехе (есть в смете).');
+  if(jig==='none')notes.push('Без кондуктора: в разделе «Присадка» у каждой детали есть шаблон 1:1 — распечатайте, приложите и наколите центры шилом.');
+  if(jig==='32')notes.push('Кондуктор 32: в присадке у полкодержателей указан ряд через 32 мм и ближайшие к полкам отверстия ряда.');
+  return{list:o,notes}}
+const TOOL_GRP=['Основное','Сверлить','Установка','Кромка','Оснастка'];
+function renderTools(dm){const box=$('#toolList');if(!box)return;const {list,notes}=toolsFor(P,R.S,R.c,dm),own=settings.tools||{};$('#sJig').value=settings.jig||'none';
+  const row=t=>`<label class="tool${own[t.id]?' have':''}"><input type="checkbox" data-tool="${t.id}"${own[t.id]?' checked':''}><span class="tw">${esc(t.name)}${t.need?'':' <span class="hint">— желательно</span>'}<small>${esc(t.why)}</small></span><span class="tp">${t.price?'≈ '+rub(t.price):''}</span></label>`;
+  const need=list.filter(t=>t.need&&!own[t.id]).reduce((a,t)=>a+t.price,0),want=list.filter(t=>!t.need&&!own[t.id]).reduce((a,t)=>a+t.price,0);
+  box.innerHTML=TOOL_GRP.map(g=>{const l=list.filter(t=>t.grp===g);return l.length?`<div class="tool-g">${g}</div>`+l.map(row).join(''):''}).join('')+
+    `<div class="tool-sum"><b>${need?`Не хватает нужного: ≈ ${rub(need)}`:'Всё нужное есть'}</b>${want?`<span class="hint">Оснастка и удобства (желательно): ≈ ${rub(want)}</span>`:''}</div>`+(notes.length?`<ul class="hint">${notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'')}
+// кондуктор 32: к строкам полкодержателей добавляем ряд через 32 мм и ближайшие отверстия ряда для каждой полки
+function jig32Lines(dm,s){if((s.jig||'none')!=='32')return dm;const re=/^((?:Левая|Правая) сторона\. )?(Полки для обуви: полкодержатели|Полкодержатели)[^:]*:? .*Y \(низ полки\) (.+)$/;
+  dm.forEach(g=>{const add=[];g.lines.forEach(l=>{const m=re.exec(l);if(!m)return;const ys=drNums(m[3]);if(!ys.length)return;const y0=Math.min(...ys),y1=Math.max(...ys),k=Math.round((y1-y0)/32),snap=ys.map(y=>R0(y0+32*Math.round((y-y0)/32)));
+    add.push(`${m[1]||''}Кондуктор 32: ряд через 32 мм от Y ${R0(y0)} до Y ${R0(y0+32*k)} (${k+1} отв. в ряду, те же X) — полки ставьте на Y ${LIST(snap)}`)});g.lines.push(...add)});return dm}
 function drillText(){const L=[`Присадка: ${P.name}`,'Y — от нижнего края детали, X — от переднего края (у стенок) или от края фасада. Размеры в мм.',''];
   drillMap(P,R.S,R.c).forEach(g=>{L.push(`${g.name} — ${g.size} — ${g.qty} шт`);g.lines.forEach(l=>L.push('  • '+l));L.push('')});return L.join('\n')}
 
@@ -2792,19 +2846,35 @@ function loadThree(){if(window.THREE&&THREE.OrbitControls)return Promise.resolve
     .then(()=>loadScript(v?v+'OrbitControls.js':'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js')).catch(e=>{threeP=null;throw e})}
   return threeP}
 function topColor(){const id=P.mat.top;return id==='stone'?'#ECEAE6':id==='quartz'?'#D8D7D3':'#B8B0A6'}
+/* ---------- 3D: текстура дерева и мягкая тень ----------
+   У древесных декоров — волокна (рисуются на холсте, без картинок из сети, работает без интернета).
+   Волокна идут вдоль длинной стороны каждой детали: у боковины и двери — по высоте, у полки — по ширине. */
+const WOOD=new Set(['sonoma','wenge','casella','casellaD','halifax','walnut']),WOOD_FILL=new Set([...WOOD].map(k=>DECORS[k].fill.toLowerCase()));
+const isWoodFill=hex=>WOOD_FILL.has(String(hex).toLowerCase());
+const WOOD_TEX={};
+function woodTex(hex){if(WOOD_TEX[hex])return WOOD_TEX[hex];const W=256,H=512,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');g.fillStyle=hex;g.fillRect(0,0,W,H);
+  let sd=1234567;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+  for(let i=0;i<90;i++){const x=rnd()*W,lw=.6+rnd()*2.4,dark=rnd()<.62,a=dark?.05+rnd()*.12:.04+rnd()*.09,amp=1.5+rnd()*6,ph=rnd()*6.283,f=1+Math.floor(rnd()*3);
+    g.strokeStyle=dark?`rgba(55,32,14,${a})`:`rgba(255,246,228,${a})`;g.lineWidth=lw;
+    for(const dx of [-W,0,W]){g.beginPath();for(let y=0;y<=H;y+=8){const xx=x+dx+amp*Math.sin(ph+y/H*6.2832*f);y?g.lineTo(xx,y):g.moveTo(xx,y)}g.stroke()}}
+  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return WOOD_TEX[hex]=t}
+// развёртка коробки в метрах: волокна (V) — вдоль самой длинной стороны детали, если она лежит в плоскости грани
+function woodUV(g,b){const pos=g.attributes.position,nr=g.attributes.normal,uv=g.attributes.uv,dims=[b.w,b.h,b.d],L=dims.indexOf(Math.max(...dims)),SU=.25,SV=.5,off=((b.x||0)*.37+(b.y||0)*.11+(b.z||0)*.23)/1000;
+  for(let i=0;i<pos.count;i++){const n=[Math.abs(nr.getX(i)),Math.abs(nr.getY(i)),Math.abs(nr.getZ(i))],a=n.indexOf(Math.max(...n)),pl=[0,1,2].filter(k=>k!==a),gv=pl.includes(L)?L:(dims[pl[0]]>=dims[pl[1]]?pl[0]:pl[1]),gu=pl.find(k=>k!==gv),c=[pos.getX(i),pos.getY(i),pos.getZ(i)];
+    uv.setXY(i,c[gu]/SU+off,c[gv]/SV+off*.5)}uv.needsUpdate=true}
 function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(),dec=DECORS[P.decor].fill,fdec=frontFill(P),gloss=P.mat.front==='mdfgloss';
   scene.add(new THREE.HemisphereLight(0xffffff,0xbfb6a8,0.55));const sun=new THREE.DirectionalLight(0xffffff,0.5);sun.position.set(-1.5,3,4);scene.add(sun);const fill=new THREE.DirectionalLight(0xffffff,0.18);fill.position.set(2,1,-1);scene.add(fill);
-  const fdec2=(wallTone(P)||{}).fill||fdec,mats={},mat=m=>mats[m]||(mats[m]=m==='front'||m==='front2'?new THREE.MeshStandardMaterial({color:m==='front2'?fdec2:fdec,roughness:gloss?.25:.75,transparent:true}):m==='mirror'?new THREE.MeshStandardMaterial({color:'#EAF3F6',roughness:.12,metalness:.1,transparent:true})
+  const fdec2=(wallTone(P)||{}).fill||fdec,mats={},woodM=hex=>isWoodFill(hex),mat=m=>mats[m]||(mats[m]=m==='front'||m==='front2'?new THREE.MeshStandardMaterial(Object.assign({roughness:gloss?.25:.75,transparent:true},woodM(m==='front2'?fdec2:fdec)?{color:'#FFFFFF',map:woodTex(m==='front2'?fdec2:fdec)}:{color:m==='front2'?fdec2:fdec})):m==='mirror'?new THREE.MeshStandardMaterial({color:'#EAF3F6',roughness:.12,metalness:.1,transparent:true})
     :m==='back'?new THREE.MeshStandardMaterial({color:'#E7E3DC',roughness:.9}):m==='metal'?new THREE.MeshStandardMaterial({color:'#A7ADB3',roughness:.35,metalness:.7}):m==='wire'?new THREE.MeshStandardMaterial({color:'#A7ADB3',roughness:.4,metalness:.6,wireframe:true})
     :m==='top'?new THREE.MeshStandardMaterial({color:topColor(),roughness:.5}):m==='appliance'?new THREE.MeshStandardMaterial({color:'#2B2E33',roughness:.4,metalness:.3}):m==='plinth'?new THREE.MeshStandardMaterial({color:'#8E9194',roughness:.6})
-    :m==='box'?new THREE.MeshStandardMaterial({color:'#EDE9E2',roughness:.85}):m==='mattress'?new THREE.MeshStandardMaterial({color:'#E6E9EF',roughness:.95}):new THREE.MeshStandardMaterial({color:dec,roughness:.8}));
+    :m==='box'?new THREE.MeshStandardMaterial({color:'#EDE9E2',roughness:.85}):m==='mattress'?new THREE.MeshStandardMaterial({color:'#E6E9EF',roughness:.95}):new THREE.MeshStandardMaterial(woodM(dec)?{color:'#FFFFFF',map:woodTex(dec),roughness:.8}:{color:dec,roughness:.8}));
   const line=new THREE.LineBasicMaterial({color:0x2a2f35,transparent:true,opacity:opts.edge||.35});
   const mesh=b=>{let g;if(b.poly){const sh=new THREE.Shape();b.poly.forEach(([z,y],k)=>k?sh.lineTo(-z*M,y*M):sh.moveTo(-z*M,y*M));sh.closePath();
       g=new THREE.ExtrudeGeometry(sh,{depth:b.w*M,bevelEnabled:false});const o=new THREE.Mesh(g,mat(b.m));o.rotation.y=Math.PI/2;o.position.set(b.x*M,0,0);o.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,30),line));return o}
     if(b.qr){const sh=new THREE.Shape(),sx=b.qr==='L'?-1:1;sh.moveTo(0,0);for(let k=0;k<=16;k++){const a=Math.PI/2*k/16;sh.lineTo(sx*b.w*Math.cos(a)*M,b.d*Math.sin(a)*M)}sh.lineTo(0,0);
       g=new THREE.ExtrudeGeometry(sh,{depth:b.h*M,bevelEnabled:false});const o=new THREE.Mesh(g,mat(b.m));o.rotation.x=Math.PI/2;o.position.set((b.qr==='L'?b.x+b.w:b.x)*M,(b.y+b.h)*M,b.z*M);o.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,30),line));return o}
     if(b.cyl){g=new THREE.CylinderGeometry(b.h/2*M,b.h/2*M,b.w*M,12);const o=new THREE.Mesh(g,mat(b.m));o.rotation.z=Math.PI/2;o.position.set((b.x+b.w/2)*M,(b.y+b.h/2)*M,(b.z+b.d/2)*M);return o}
-    g=new THREE.BoxGeometry(b.w*M,b.h*M,b.d*M);const o=new THREE.Mesh(g,mat(b.m));o.position.set((b.x+b.w/2)*M,(b.y+b.h/2)*M,(b.z+b.d/2)*M);
+    g=new THREE.BoxGeometry(b.w*M,b.h*M,b.d*M);const o=new THREE.Mesh(g,mat(b.m));if(mat(b.m).map&&mat(b.m).map!==undefined)woodUV(g,b);o.position.set((b.x+b.w/2)*M,(b.y+b.h/2)*M,(b.z+b.d/2)*M);
     if(b.m!=='wire'&&b.m!=='mirror')o.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),line));return o};
   const doors=[],drawers=[],coupe=[],lifts=[],model=new THREE.Group();
   data.groups.forEach(gr=>{const G=new THREE.Group(),piv={};G.rotation.y=gr.rot;G.position.set(gr.pos[0]*M,gr.pos[1]*M,gr.pos[2]*M);
@@ -2817,6 +2887,10 @@ function makeScene(data,opts){opts=opts||{};const M=0.001,scene=new THREE.Scene(
       else G.add(o)});
     model.add(G)});
   scene.add(model);
+  if(!opts.edge){const bb=new THREE.Box3().setFromObject(model),sz=bb.getSize(new THREE.Vector3()),cv=document.createElement('canvas');cv.width=cv.height=256;const g=cv.getContext('2d');
+    try{g.filter='blur(16px)'}catch(e){}g.fillStyle='rgba(20,22,24,.6)';g.fillRect(48,48,160,160);
+    const tx=new THREE.CanvasTexture(cv),sh=new THREE.Mesh(new THREE.PlaneGeometry((sz.x+.3)*1.45,(sz.z+.3)*1.45),new THREE.MeshBasicMaterial({map:tx,transparent:true,depthWrite:false}));
+    sh.rotation.x=-Math.PI/2;sh.position.set((bb.min.x+bb.max.x)/2,.002,(bb.min.z+bb.max.z)/2);sh.renderOrder=-1;sh.userData.shadow=true;scene.add(sh)}
   // размерные линии: в отдельной группе (не мешают сборке, касаниям и примерке), подписи всегда смотрят в камеру
   const dimRoot=new THREE.Group(),dimIn=new THREE.Group();dimRoot.add(dimIn);
   const labels=[];if(opts.dims){const sz0=new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3()),lh=Math.min(.24,Math.max(.09,Math.max(sz0.x,sz0.y)*.065));
@@ -3535,7 +3609,7 @@ function renderParts(){
   const em=$('#partsMirror');em.hidden=!c.mirrors.length;
   if(c.mirrors.length)em.innerHTML=partsTable(c.mirrors,'Зеркала 4 мм — в стекольную мастерскую',false)+'<p class="hint">Зеркало меньше фасада на 50 мм с каждой стороны. Клеится на специальный клей для зеркал, кромка шлифованная.</p>';
   $('#orderText').value=orderText();$('#csvText').value=csvText();renderSup();renderMount();
-  const dm=drillMap(P,R.S,R.c);$('#drillList').innerHTML=dm.map((g,i)=>`<details class="drill" data-dpi="${i}"><summary><b>${esc(g.name)}</b> <span class="num hint">${g.size} · ${g.qty} шт</span></summary><div class="dpic-box"></div><ul>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`).join('');
+  const dm=drillMap(P,R.S,R.c);renderTools(dm);$('#drillList').innerHTML=dm.map((g,i)=>`<details class="drill" data-dpi="${i}"><summary><b>${esc(g.name)}</b> <span class="num hint">${g.size} · ${g.qty} шт</span></summary><div class="dpic-box"></div><ul>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`).join('');
 }
 /* ---------- закупка по поставщикам ---------- */
 // куда что покупать: столешницы — в цех столешниц, купе — в цех дверей купе, зеркала — в стекольную, остальное — в магазин фурнитуры
@@ -3998,6 +4072,8 @@ document.addEventListener('change',e=>{
   if(el.id==='pMezz'){P.mezz=el.checked;change()}
   else if(el.id==='showDoors'){showDoors=el.checked;renderBuild()}
   else if(el.id==='sGrain'){settings.grain=el.checked;change()}
+  else if(el.id==='sJig'){settings.jig=el.value;change()}
+  else if(el.dataset&&el.dataset.tool){settings.tools=Object.assign({},settings.tools,{[el.dataset.tool]:el.checked});change()}
   else if(el.id==='kTop'){P.k.worktop=el.checked;change()}
   else if(el.id==='kaLA'||el.id==='kaLB'){el.dataset.touched=1}
   else if(d.kchk){P.k[d.kchk]=el.checked;if(d.kchk==='islandOn'&&el.checked&&!(P.k.island||[]).length)P.k.island=[km('drawers',600,0,3),km('doors',600,1)];change()}
@@ -4181,7 +4257,7 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
+window.ShkafMaster={toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
   // для проверок: текущий расчёт и тексты, которые видит клиент
   __hooks:{R:()=>R,offerText,docText,supplierLists,rub,mountText,T3:()=>T3}};
 // работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала

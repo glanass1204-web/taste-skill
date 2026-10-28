@@ -500,6 +500,12 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       <div class="field" id="kWallFF"><label for="kWallF">Верхние фасады (двухцветная кухня)</label><div class="inwrap"><select id="kWallF" data-ksel="wallF"></select></div></div>
       <div class="row"><div class="field"><label for="kCeil">Потолок</label><div class="inwrap"><input id="kCeil" data-k="ceilH" inputmode="numeric" type="number" placeholder="из замера"><span>мм</span></div></div>
         <div class="btns"><button class="chip" type="button" id="kCeilWall">Антресоли до потолка</button><button class="chip" type="button" id="kCeilTall">Пеналы до потолка</button></div></div>
+      <label class="switch"><input type="checkbox" data-kchk="islandOn"> Остров или барная стойка</label>
+      <div class="grid3" id="kIslandBox">
+        <div class="field"><label for="kIG">Проход до острова</label><div class="inwrap"><input id="kIG" data-kk="islandGap" inputmode="numeric" type="number"><span>мм</span></div></div>
+        <div class="field"><label for="kIO">Столешница острова</label><div class="inwrap"><select id="kIO" data-ksel="islandOv"><option value="0">Обычная</option><option value="300">Барная: свес 300 мм</option><option value="400">Барная: свес 400 мм</option></select></div></div>
+        <div class="field"><label>&nbsp;</label><button class="btn ghost" type="button" data-kadd="island">+ Модуль острова</button></div>
+      </div>
       <label class="switch"><input type="checkbox" data-kchk="apron"> Фартук: стеновая панель</label>
       <label class="switch"><input type="checkbox" data-kchk="topPlinth"> Плинтус для столешницы</label>
       <label class="switch"><input type="checkbox" data-kchk="led"> Подсветка под верхними шкафами</label>
@@ -854,7 +860,7 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='50 от 28.10.2026';
+const APP_VER='51 от 28.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -1047,7 +1053,7 @@ const PRESETS={
   overdoor:{name:'Антресоль над дверью',W:1000,H:450,D:350,plinth:0,legs:0,hang:true,cols:[col('door',0,1),col('door',0,1)]},
   arounddoor:{name:'Шкаф вокруг двери',W:2700,H:2600,D:400,plinth:60,legs:0,cols:[col('door',0,5),col('pass',0,1,{nicheH:2100}),col('door',0,5)]},
   desk:{name:'Письменный стол',W:1200,H:750,D:600,plinth:0,legs:0,cols:[col('knee',0,0),col('drawers',3,0)]}};
-function kDefaults(){return{baseH:720,baseD:560,legs:100,wallH:720,wallD:300,wallY:1450,tallH:2100,worktop:true,fridgeH:1775,
+function kDefaults(){return{island:[],islandOn:false,islandGap:1200,islandOv:'0',baseH:720,baseD:560,legs:100,wallH:720,wallD:300,wallY:1450,tallH:2100,worktop:true,fridgeH:1775,
   gola:false,golaL:36,golaC:30,golaW:20,wall2H:0,wall2Open:'lift',apron:false,topPlinth:false,led:false,
   shape:'straight',cornerSide:'L',cBase:'blind',cBaseW:1100,cBaseW2:900,cWall:'blind',cWallW:800,cWallW2:600,
   baseB:[km('doors',600,1),km('drawers',600,0,3),km('doors',600,1)],wallB:[km('doors',600,2),km('doors',600,2)],
@@ -1587,7 +1593,7 @@ function drawerHs(m,H,n,gap){const lay=m&&m.dlay||'';let r;
   const avail=H-gap*(r.length-1),sum=r.reduce((a,b)=>a+b,0);return r.map(x=>avail*x/sum)}
 // число дверей модуля: «авто» — по ширине, или 1 / 2 по выбору
 const ndOf=(m,auto)=>{const v=+(m&&m.nd);return v===1||v===2?v:auto};
-const modLabel=(zone,i,m)=>(zone.endsWith('B')?'Б-':'')+(isTall(m)?'П':zone.startsWith('wall')?'В':'Н')+(i+1);
+const modLabel=(zone,i,m)=>zone==='island'?'О'+(i+1):(zone.endsWith('B')?'Б-':'')+(isTall(m)?'П':zone.startsWith('wall')?'В':'Н')+(i+1);
 // Ниши техники — по каталогу встраиваемой техники Bosch: духовой шкаф 575–597 (серии 6 и 8: 585–595) × 560–568 × 550 мм,
 // компактный духовой шкаф 450–455, микроволновка 362–382, посудомойка 815–875 × 450/600 × 550, холодильник 1775 × 560 × 550.
 // Вырезы под варочные панели: 60 см — 560 × 490–500 (газ 560 × 480–490), 30 см — 270 × 490–500, 80 см — 750–780 × 490–500, 45 см — 420 × 490.
@@ -1605,8 +1611,8 @@ const HOB_ON=['doors','drawers','oven'],DW_H=[815,875];
 function kLayout(p,s){const k=p.k,fT=frontMat(p,s).t,corner=k.shape==='corner',AL=k.cornerSide!=='R';
   const cb=k.cBase==='L'?'L':'blind',cw=k.cWall==='L'||k.cWall==='none'?k.cWall:'blind';
   // у глухого угла сторона Б стоит перед корпусом и фасадом углового модуля стороны А (плюс 1 мм)
-  const blk={A:{base:corner?k.cBaseW:0,wall:corner&&cw!=='none'?k.cWallW:0},B:{base:cb==='L'?k.cBaseW2:k.baseD+2+fT,wall:cw==='L'?k.cWallW2:k.wallD+2+fT}};
-  const side=(key,end)=>{const zb=key==='A'?'base':'baseB',zw=key==='A'?'wall':'wallB',base=k[zb],wall=k[zw],b=blk[key],dir=end==='L'?1:-1;
+  const blk={I:{base:0,wall:0},A:{base:corner?k.cBaseW:0,wall:corner&&cw!=='none'?k.cWallW:0},B:{base:cb==='L'?k.cBaseW2:k.baseD+2+fT,wall:cw==='L'?k.cWallW2:k.wallD+2+fT}};
+  const side=(key,end)=>{const zb=key==='A'?'base':key==='B'?'baseB':'island',zw=key==='A'?'wall':key==='B'?'wallB':'wallI',base=k[zb]||[],wall=k[zw]||[],b=blk[key],dir=end==='L'?1:-1;
     const ord=a=>{const ix=a.map((_,i)=>i);return dir>0?ix:ix.reverse()};
     const bs=[];let x=dir*b.base;
     ord(base).forEach(i=>{const w=base[i].w;if(dir<0)x-=w;bs[i]={m:base[i],i,zone:zb,x,w};if(dir>0)x+=w});
@@ -1625,20 +1631,22 @@ function kLayout(p,s){const k=p.k,fT=frontMat(p,s).t,corner=k.shape==='corner',A
     const adjB=corner&&base.length?(dir>0?0:base.length-1):-1,adjW=corner&&wall.length?(dir>0?0:wall.length-1):-1;
     const wAdj=adjW>=0&&Math.abs((dir>0?ws[adjW].x:ws[adjW].x+ws[adjW].w)-(dir>0?cz.wall[1]:cz.wall[0]))<1?adjW:-1;
     return{key,end,dir,cx:sh,base:bs,wall:ws,len:mx-mn,cz,blk:b,zb,zw,tall,adjB,adjW:wAdj,span:b.base+bSum,
-      free:corner?(end==='L'?'R':'L'):'LR'}};
+      free:corner&&key!=='I'?(end==='L'?'R':'L'):'LR'}};
   const sides=[side('A',corner?(AL?'L':'R'):'L')];
   if(corner)sides.push(side('B',AL?'R':'L'));
+  // остров (барная стойка) — отдельный ряд нижних модулей напротив стороны А
+  if(k.islandOn&&(k.island||[]).length)sides.push(side('I','L'));
   return{corner,AL,cb,cw,blk,sides,fT}}
 
 function calcKitchen(p,s){
   const k=p.k,t=s.t,parts=[],warn=[],notes=[],fm=frontMat(p,s),fT=fm.t,add=adder(parts,fm),pr=s.p,L=kLayout(p,s),corner=L.corner,AL=L.AL;
   const TT=wallTone(p,s),addW0=TT?adder(parts,{...fm,mat:TT.mat}):null,addW=TT?(n,...a)=>addW0(n+' (верх)',...a):add;let fadd=add;
-  const top=matItem('tops',p.mat.top,s),tT=k.worktop?top.t:0,slide=slideFor(k.baseD-20),HWp=HW(p,s),sys=HWp.slide,kh={base:[],wall:[],baseB:[],wallB:[]},mods=[];
+  const top=matItem('tops',p.mat.top,s),tT=k.worktop?top.t:0,slide=slideFor(k.baseD-20),HWp=HW(p,s),sys=HWp.slide,kh={base:[],wall:[],baseB:[],wallB:[],island:[]},mods=[];
   const G=!!k.gola,gL=G?k.golaL:0,gC=G?k.golaC:3,gW=G?k.golaW:0;
   const D=k.baseD,Dw=k.wallD,F=FILLER,C={lifts:{},ties:0,legs:0,hinges:0,handles:0,slides:0,supports:0,conf:0,hangers:0,dry:0,sink:0,cargo:{},glass:0,bins:0,magic:0,carousel:0,hobs:0,grilles:0,brackets:0,h170:0,hFold:0,dwPanels:0};
   const noteOnce=x=>{if(!notes.includes(x))notes.push(x)};
   const shelfYs=(a,b,n)=>Array.from({length:n},(_,j)=>a+(b-a)*(j+1)/(n+1));
-  const wallsOf=sd=>({L:corner?sd.free==='L'&&p.walls[sd.key]:p.walls.L,R:corner?sd.free==='R'&&p.walls[sd.key]:p.walls.R});
+  const wallsOf=sd=>sd.key==='I'?{L:false,R:false}:({L:corner?sd.free==='L'&&p.walls[sd.key]:p.walls.L,R:corner?sd.free==='R'&&p.walls[sd.key]:p.walls.R});
   // одиночную дверь у стены (или у пенала) вешаем на дальнюю сторону
   const pick=(n,first,bl,br,forced)=>{if(n===2)return['L','R'];if(forced)return[forced];let h=first?'L':'R';if(bl&&h==='L'&&!br)h='R';if(br&&h==='R'&&!bl)h='L';return[h]};
   const doorRow=(mod,x0,x1,y,h,hs,label,noH)=>{const n=hs.length,dw=(x1-x0-3*(n-1))/n;
@@ -1876,6 +1884,16 @@ function calcKitchen(p,s){
     if(topB>0)noteOnce(`Столешница угловая: сторона А ${Math.round(topA)} мм во всю длину до стены Б, сторона Б ${Math.round(topB)} мм — примыкает к стороне А, в углу стык.`)}
   // фасад стоит на 2 мм перед корпусом; столешница должна перекрыть его хотя бы на 5 мм
   if(k.worktop&&k.baseD+2+fm.t>top.D-5)warn.push(ERR(`Столешница глубиной ${top.D} мм не закроет фасады: корпус ${k.baseD} + фасад ${fm.t} мм. Уменьшите глубину нижних модулей до ${top.D-7-fm.t} мм или возьмите столешницу глубже.`));
+  const IS=L.sides.find(sd=>sd.key==='I');
+  if(IS){const len=IS.base.reduce((a,o)=>a+o.w,0),gap=+k.islandGap||0,ov=+k.islandOv||0;
+    if(gap<900)warn.push(ERR(`Остров: проход между кухней и островом ${gap} мм — нужно от 1000 мм, удобно 1200 мм.`));else if(gap<1000)warn.push(`Остров: проход ${gap} мм — тесно, удобно 1000–1200 мм.`);
+    IS.base.forEach(o=>{if(isTall(o.m))warn.push(ERR(`${modLabel('island',o.i,o.m)}: пенал в острове не ставят — уберите его или перенесите к стене.`))});
+    add('Задняя панель острова (декор)','Корпус',len,k.legs+k.baseH,1,'ldsp',2,2);
+    if(IS.base.some(o=>o.m.type==='sink'))noteOnce('Остров с мойкой: воду и слив подводят через пол — заложите это до чистового ремонта.');
+    if(IS.base.some(o=>o.m.hob))noteOnce('Остров с варочной панелью: нужна островная вытяжка (считается отдельно) и розетка через пол.');
+    if(ov)noteOnce(`Барная стойка: столешница острова глубиной ${top.D+ov} мм — свес ${ov} мм для ног со стороны стульев. Стандартная столешница ${top.D} мм — закажите шире или из двух частей с планкой.`);
+    if(k.worktop&&top.maxL&&len>top.maxL)warn.push(`Остров: столешница ${len} мм длиннее листа ${top.maxL} мм — нужен стык.`);
+    C.island={len,ov,gap}}
   const anyTall=L.sides.some(sd=>sd.base.some(o=>isTall(o.m)));
   if(C.hinges||C.h170)frontChecks(p,s,HWp.hinge,warn,Math.max(k.wallH,anyTall?k.tallH-k.legs-k.baseH:0));
   if(!slide&&L.sides.some(sd=>sd.base.some(o=>o.m.type==='drawers'||o.m.type==='oven'||(o.m.type==='tallOven'&&o.m.low==='drawers'))))warn.push(ERR('Ящики не помещаются по глубине — увеличьте глубину нижних модулей.'));
@@ -1883,11 +1901,12 @@ function calcKitchen(p,s){
   hw.push(['Конфирмат 7×50',C.conf,'шт',pr.confirmat]);
   if(C.legs)hw.push(['Ножка кухонная регулируемая',C.legs,'шт',pr.leg]);
   // цоколь стоит в 60 мм от передней кромки корпуса; в угловой кухне — по линии фасада обеих сторон
-  const plinthM=corner?L.sides.reduce((a,sd)=>a+sd.span-(D-60),0):allBase;
-  if(plinthM>0)hw.push(['Цоколь кухонный ПВХ',+(plinthM/1000).toFixed(2),'м',pr.kplinth]);
+  const plinthM=corner?L.sides.filter(sd=>sd.key!=='I').reduce((a,sd)=>a+sd.span-(D-60),0):allBase;
+  if(plinthM>0||C.island)hw.push(['Цоколь кухонный ПВХ',+((plinthM+(C.island?2*C.island.len+2*(D-60):0))/1000).toFixed(2),'м',pr.kplinth]);
   if(corner&&plinthM>0)hw.push(['Угловой элемент цоколя',1,'шт',pr.plinthCorner]);
   if(k.worktop&&baseLen){hw.push([`Столешница: ${top.name.toLowerCase()}`,+(baseLen/1000).toFixed(2),'м',top.price]);
     if(top.planks){hw.push(['Планка торцевая для столешницы',2,'шт',pr.topEnd]);if(joints)hw.push([corner?'Планка соединительная для столешницы (в т. ч. угловая)':'Планка соединительная для столешницы',joints,'шт',pr.topJoint])}}
+  if(C.island&&k.worktop)hw.push([`Столешница острова: ${top.name.toLowerCase()}${C.island.ov?`, глубина ${top.D+C.island.ov} мм`:''}`,+(C.island.len/1000).toFixed(2),'м',Math.round(top.price*(top.D+C.island.ov)/top.D)]);
   if(C.sink)hw.push(['Врезка мойки в столешницу',C.sink,'шт',pr.sinkCut]);
   if(C.hobs)hw.push(['Вырез под варочную панель',C.hobs,'шт',pr.hobCut]);
   hingeRows(hw,HWp.hinge,C.hinges,0);
@@ -1906,7 +1925,7 @@ function calcKitchen(p,s){
   if(C.brackets)hw.push(['Уголок для доборной планки',C.brackets,'шт',pr.bracket]);
   Object.keys(C.lifts).sort((a,b)=>a-b).forEach(N=>hw.push([`Газлифт ${N}N`,C.lifts[N],'шт',pr.gaslift]));
   if(C.ties)hw.push(['Стяжка межсекционная (антресоль к шкафу)',C.ties,'шт',pr.tie]);
-  if(G){const gl=mods.filter(x=>(x.zone==='base'||x.zone==='baseB')&&!isTall(x.m)).reduce((a,x)=>a+x.w,0)+(corner?Math.max(0,k.cBaseW-D):0),
+  if(G){const gl=mods.filter(x=>(x.zone==='base'||x.zone==='baseB'||x.zone==='island')&&!isTall(x.m)).reduce((a,x)=>a+x.w,0)+(corner?Math.max(0,k.cBaseW-D):0),
       gc=mods.filter(x=>x.zone.startsWith('base')&&x.type==='drawers').reduce((a,x)=>a+x.w*Math.max(0,x.fronts.filter(f=>f.kind==='drawer').length-1),0);
     hw.push(['Профиль Gola L-образный (под столешницей)',+(gl/1000).toFixed(2),'м',pr.golaL]);if(gc)hw.push(['Профиль Gola C-образный (между ящиками)',+(gc/1000).toFixed(2),'м',pr.golaC]);
     noteOnce(`Без ручек, профиль Gola: фасады нижних модулей ниже корпуса на ${gL} мм (под L-профиль), между ящиками — ${gC} мм (C-профиль); фасады верхних — ниже дна на ${gW} мм, открываются за край. Эти размеры зависят от системы профиля — сверьте с поставщиком. Пеналы — с ручкой или push-to-open.`)}
@@ -2035,9 +2054,9 @@ function drawKPlan(p,s,r){const k=p.k,L=r.L,A=L.sides[0],B=L.sides[1],AL=L.AL,D=
   const tx=AL?-pad*.5:Wx+pad*.5;
   g+=`<text x="${tx}" y="${Hy/2}" font-size="${fs}" text-anchor="middle" class="sv-txt" transform="rotate(${AL?-90:90} ${tx} ${Hy/2})">Б ${Math.round(r.lenB)}</text>`;
   return `<svg viewBox="${-pad} ${-pad} ${Wx+2*pad} ${Hy+pad*1.4}" role="img" aria-label="Вид сверху угловой кухни" style="max-height:34vh">${g}</svg>`}
-function drawKitchen(p,s,r){
-  if(!r.corner)return drawKitchenSide(p,s,r,r.L.sides[0]);
-  return `<div class="wing-title">Вид сверху</div>${drawKPlan(p,s,r)}`+r.L.sides.map(sd=>`<div class="wing-title">Сторона ${sd.key==='A'?'А':'Б'}</div>${drawKitchenSide(p,s,r,sd)}`).join('')}
+function drawKitchen(p,s,r){const IS=r.L.sides.find(sd=>sd.key==='I'),isl=IS?`<div class="wing-title">Остров${+p.k.islandOv?' (барная стойка)':''} — вид со стороны кухни</div>${drawKitchenSide(p,s,r,IS)}`:'';
+  if(!r.corner)return (isl?'<div class="wing-title">Кухня</div>':'')+drawKitchenSide(p,s,r,r.L.sides[0])+isl;
+  return `<div class="wing-title">Вид сверху</div>${drawKPlan(p,s,r)}`+r.L.sides.filter(sd=>sd.key!=='I').map(sd=>`<div class="wing-title">Сторона ${sd.key==='A'?'А':'Б'}</div>${drawKitchenSide(p,s,r,sd)}`).join('')+isl}
 
 
 /* ================= КОМОД, ТУМБА ================= */
@@ -2376,12 +2395,14 @@ function scene3dKitchen(p,s,c){const HD=HW(p,s).handle,k=p.k,t=s.t,fT=frontMat(p
         else if(a.kind==='fridge')A(x+t+2,y0+a.y,15,iw-4,a.h,d-25,'appliance');
         else if(a.kind==='hood')A(x+t+2,y0-4,20,iw-4,a.h,d-40,'metal');
         else A(x+t+2,y0+a.y+(a.kind==='oven'&&!tall?0:2),10,iw-4,a.kind==='oven'&&!tall?a.h:a.h-4,d-10,'appliance')});
-      if(!isWall&&!tall&&k.worktop){let ta=x,tb=x+w;if(sd.key==='B'){if(L.AL)tb=Math.min(tb,sd.cx-top.D);else ta=Math.max(ta,top.D)}if(tb>ta)A(ta,y0+h,0,tb-ta,tT,top.D,'top');
+      if(!isWall&&!tall&&k.worktop){let ta=x,tb=x+w;if(sd.key==='B'){if(L.AL)tb=Math.min(tb,sd.cx-top.D);else ta=Math.max(ta,top.D)}const ov=sd.key==='I'?(+k.islandOv||0)+t:0;if(tb>ta)A(ta,y0+h,-ov,tb-ta,tT,top.D+ov,'top');
         if(mod.type==='sink')A(x+w/2-220,y0+h+tT-1,top.D/2-200,440,2,380,'metal');
         if(mod.hob)A(x+mod.hob.cx-mod.hob.w/2-20,y0+h+tT,(top.D-mod.hob.d)/2-20,mod.hob.w+40,5,mod.hob.d+40,'appliance')}
     });
     let rot=0,pos=[0,0,0];
     if(sd.key==='B'){if(L.AL){rot=Math.PI/2;pos=[0,0,sd.cx]}else{rot=-Math.PI/2;pos=[L.sides[0].cx,0,0]}}
+    if(sd.key==='I'){const A0=L.sides[0],x0=Math.max(0,(A0.len-sd.len)/2);rot=Math.PI;pos=[x0+sd.len,0,k.baseD+(+k.islandGap||1200)+k.baseD];
+      A(0,0,-t,sd.len,k.legs+k.baseH,t,'body')}
     // размеры: модули нижнего ряда и общая длина по полу, модули верхнего ряда сверху; справа — высота до столешницы, фартук, верхние шкафы
     const ms=c.mods.filter(m=>m.side===sd.key),lbls=ms.flatMap(m=>m.fronts.filter(fr=>fr.kind==='drawer').map(fr=>({lbl:[m.x+fr.x+fr.w/2,m.y0+fr.y+fr.h/2,m.d+fT+4],t:`${Math.round(fr.w)}×${Math.round(fr.h)}`,small:1}))),low=ms.filter(m=>!(m.zone.startsWith('wall')||m.zone==='cWall')).sort((a,b)=>a.x-b.x),up=ms.filter(m=>m.zone==='wall'||m.zone==='wallB'||m.zone==='cWall').sort((a,b)=>a.x-b.x),dims=[...lbls];
     if(low.length){const zf=k.baseD+fT+2,x0=Math.min(...low.map(m=>m.x)),x1=Math.max(...low.map(m=>m.x+m.w));
@@ -3124,6 +3145,8 @@ function renderKitchenUI(c){
   const ae=document.activeElement;if(ae&&ae.tagName==='INPUT'&&$('#sections').contains(ae))return;
   $('#sections').innerHTML=corner?`<h3 class="sec-group">Угол</h3>${cornerCard('base')}${cornerCard('wall')}`+grp('Сторона А — нижний ряд','base')+grp('Сторона А — верхний ряд','wall')+grp('Сторона Б — нижний ряд','baseB')+grp('Сторона Б — верхний ряд','wallB')
     :grp('Нижний ряд','base')+grp('Верхний ряд','wall');
+  if(k.islandOn)$('#sections').innerHTML+=grp('Остров'+(+k.islandOv?' (барная стойка)':''),'island');
+  $('#kIslandBox').hidden=!k.islandOn;$('#kIO').value=String(k.islandOv||'0');
 }
 function renderChestUI(c){
   const cc=P.c;
@@ -3615,7 +3638,7 @@ document.addEventListener('change',e=>{
   else if(el.id==='sGrain'){settings.grain=el.checked;change()}
   else if(el.id==='kTop'){P.k.worktop=el.checked;change()}
   else if(el.id==='kaLA'||el.id==='kaLB'){el.dataset.touched=1}
-  else if(d.kchk){P.k[d.kchk]=el.checked;change()}
+  else if(d.kchk){P.k[d.kchk]=el.checked;if(d.kchk==='islandOn'&&el.checked&&!(P.k.island||[]).length)P.k.island=[km('drawers',600,0,3),km('doors',600,1)];change()}
   else if(d.ksel){P.k[d.ksel]=el.value;if(d.ksel==='cBase')P.k.cMech='';activeSec='';change()}
   else if(d.copt){const [i,f]=d.copt.split(':');P.c.cols[+i][f]=el.value;activeSec='C:'+i;change()}
   else if(d.mopt){const [z,i,f]=d.mopt.split(':');P.k[z][+i][f]=el.value;activeSec=z+':'+i;change()}
@@ -3717,7 +3740,7 @@ document.addEventListener('click',e=>{
     const res=kAuto(o);if(res.err){$('#kaMsg').textContent=res.err;toast('Не помещается');return}
     P.k=res.p.k;P.hw=res.p.hw;P.mat=res.p.mat;activeSec='';change();$('#kaMsg').textContent=res.sc>=100?'Собрано, но есть ошибки — посмотрите список ниже и поправьте.':'Собрано без ошибок. Модули можно править ниже.';toast('Кухня собрана');return}
   if(d.kshape){P.k.shape=d.kshape;activeSec='';change();return}
-  if(d.kadd){const a=d.kadd,z=a==='wall'||a==='wallB'?a:a.endsWith('B')?'baseB':'base',m=a.startsWith('tall')?km('tall',600,4):z.startsWith('wall')?km('doors',600,2):km('doors',600,1);P.k[z].push(m);activeSec=z+':'+(P.k[z].length-1);change();focusCard('mod-'+activeSec.replace(':','-'));return}
+  if(d.kadd){const a=d.kadd,z=a==='island'?'island':a==='wall'||a==='wallB'?a:a.endsWith('B')?'baseB':'base';if(z==='island'){P.k.island=P.k.island||[];P.k.islandOn=true}const zz=z,m=a.startsWith('tall')?km('tall',600,4):z.startsWith('wall')?km('doors',600,2):km('doors',600,1);P.k[z].push(m);activeSec=z+':'+(P.k[z].length-1);change();focusCard('mod-'+activeSec.replace(':','-'));return}
   if(d.preset){const pr=clone(PRESETS[d.preset]);if(/^Новый|^Пример/.test(P.name)||!P.name)P.name=pr.name;delete pr.name;P.c=pr;activeSec='';change();return}
   if(b.id==='colPlus'&&P.c.cols.length<4){P.c.cols.push(col('drawers',3,0));change();return}
   if(b.id==='colMinus'&&P.c.cols.length>1){P.c.cols.pop();activeSec='';change();return}

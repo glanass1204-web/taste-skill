@@ -1,0 +1,13 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});const pg=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:1.5});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://localhost:8765/');await pg.evaluate(()=>localStorage.clear());await pg.reload();await pg.waitForTimeout(800);
+const log=(c,m)=>console.log(c?'✓':'✗',m);
+await pg.click('[data-kind="kitchen"]');await pg.waitForTimeout(400);await pg.check('[data-kchk="islandOn"]');await pg.waitForTimeout(400);
+log(await pg.isVisible('#kIslandBox'),'настройки острова видны');log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.mods.filter(m=>m.zone==='island').length===2),'остров: сразу 2 модуля');
+await pg.click('[data-kadd="island"]');await pg.waitForTimeout(400);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.mods.filter(m=>m.zone==='island').length===3),'+ модуль острова');
+await pg.selectOption('#kIO','300');await pg.waitForTimeout(300);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.hw.some(h=>/глубина 900/.test(h[0]))),'барная стойка 900');
+log(await pg.$('select[data-mtype="island:0"]')!==null,'карточка модуля острова');
+await (await pg.$('#front')).screenshot({path:'look/isl51.png'});
+await pg.click('[data-view="3d"]');await pg.waitForTimeout(4500);await pg.evaluate(()=>{const T=window.ShkafMaster.__hooks.T3();const o=T.cam.position.clone().sub(T.ctl.target);o.applyAxisAngle(new T.cam.up.constructor(0,1,0),0.7);o.y+=1.2;T.cam.position.copy(T.ctl.target).add(o);T.ctl.update()});await pg.waitForTimeout(800);
+await (await pg.$('#v3canvas')).screenshot({path:'look/isl51-3d.png'});
+console.log('errs',errs);await b.close()})();

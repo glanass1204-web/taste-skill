@@ -76,7 +76,7 @@ const res=await pg.evaluate(([N,SEED])=>{const M=window.ShkafMaster,fails=[],cnt
   // какие стороны обязаны быть с кромкой — по смыслу детали, а не по флагам программы
   const fe=R.c&&p.kind?true:true,frontEdge=c.parts.some(x=>x.group==='Фасады'&&x.mat!=='order');
   c.parts.filter(x=>x.mat==='ldsp'||x.mat==='ldspF').forEach(x=>{
-    if(/^(Боковина|Крыша|Дно|Перегородка|Полка|Сиденье|Царга|Цоколь$|Планка для крючков|Стойка проёма)/.test(x.name))ok(x.eL>=1||x.eX>0,tag+`: у «${x.name}» нет кромки по видимому краю`,'кромка');
+    if(/^(Боковина|Крыша|Дно|Перегородка|Полка|Сиденье|Царга|Цоколь$|Планка для крючков|Стойка проёма)/.test(x.name)&&!/^Дно ниши для хранения/.test(x.name))ok(x.eL>=1||x.eX>0,tag+`: у «${x.name}» нет кромки по видимому краю`,'кромка');
     if(/(фасад|^Дверь|^Дверца|^Доборная планка)/i.test(x.name)&&!/Фальш/.test(x.name))ok(x.eL===2&&x.eW===2,tag+`: у «${x.name}» кромка не по кругу (${x.eL}/${x.eW})`,'кромка')});
   // ---- 4. петли по таблице производителей (шкафы)
   if(p.kind==='wardrobe'&&!c.coupe){const want2=c.doorsAll.reduce((a,dd)=>a+HT(dd.h,dd.mirror),0),got2=c.hw.filter(h=>/^Петля/.test(h[0])).reduce((a,h)=>a+h[1],0);ok(got2===want2,tag+`: петель ${got2}, по таблице ${want2}`,'петли')}

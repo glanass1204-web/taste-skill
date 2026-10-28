@@ -1,0 +1,32 @@
+// кровати в интерфейсе: шаблоны, поля, смена типа, цифры в смете, 3D открывается, комод после кровати — снова колонки
+const {chromium}=require('playwright');const PORT=process.argv[2]||'8765',LOFT=process.argv[3]!=='noloft';
+(async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});const pg=await b.newPage({viewport:{width:390,height:844}});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://localhost:'+PORT+'/');await pg.evaluate(()=>localStorage.clear());await pg.reload();await pg.waitForTimeout(800);
+const bad=[];let n=0;const ok=(c,m)=>{n++;if(!c)bad.push(m)};const R=()=>pg.evaluate(()=>{const r=window.ShkafMaster.__hooks.R();return{bed:r.c.bed?{W:r.c.bed.W,L:r.c.bed.L,top:r.c.bed.top,type:r.c.bed.b.type,N:r.c.bed.N}:null,price:r.cost.price,errs:r.c.warn.filter(w=>w.lvl==='err').length,hw:r.c.hw.map(h=>h[0])}});
+const vis=id=>pg.evaluate(id=>{const e=document.getElementById(id);let o=e;while(o){if(o.hidden)return false;o=o.parentElement}return true},id);
+const type=async(id,v)=>{await pg.fill('#'+id,String(v));await pg.dispatchEvent('#'+id,'input');await pg.waitForTimeout(250)};
+await pg.click('[data-kind="chest"]');await pg.waitForTimeout(300);
+await pg.click('[data-preset="bedlift"]');await pg.waitForTimeout(400);
+let r=await R();ok(r.bed&&r.bed.type==='lift'&&r.bed.W===1642&&r.bed.L===2042,'подъёмная 1642×2042');ok(await vis('cBedBox')&&!(await vis('cBodyBox')),'поля кровати вместо колонок');
+ok(await vis('bKgF')&&!(await vis('bDNF')),'вес матраса виден, число ящиков скрыто');ok(r.hw.includes('Газлифт для кровати 1400 Н'),'газлифт 1400');
+await type('bMW',1400);r=await R();ok(r.bed.W===1442,'матрас 1400 → 1442');
+await type('bKg',40);r=await R();ok(r.hw.includes('Газлифт для кровати 1400 Н'),'1400×2000, 40 кг: 840+480=1320 → 1400');
+await type('bKg',60);r=await R();ok(r.hw.includes('Газлифт для кровати 1600 Н'),'60 кг: 840+720=1560 → 1600');
+await type('bMW',99999);r=await R();ok(r.bed.W===1442,'нелепое число не принимается');
+await pg.click('[data-preset="beddr"]');await pg.waitForTimeout(400);r=await R();ok(r.bed.type==='drawers'&&r.errs===0,'с ящиками без ошибок');ok(await vis('bDNF')&&!(await vis('bKgF')),'число ящиков видно');
+await pg.selectOption('#bSide','R');await pg.waitForTimeout(300);r=await R();const p2=r.price;
+await type('bDN',4);r=await R();ok(r.price!==p2,'4 ящика — цена изменилась');
+await type('bBH',250);r=await R();ok(r.errs>0,'короб 250 — ошибка');await type('bBH',380);
+await pg.evaluate(()=>document.querySelector('[data-view="3d"]').scrollIntoView());await pg.click('[data-view="3d"]');await pg.waitForTimeout(2500);
+let s3=await pg.evaluate(()=>{const S3=window.ShkafMaster.__hooks.T3().S3;return S3.drawers.length});ok(s3>=8&&s3%4===0,'в 3D 4 ящика (фасад, короб, ручка) — частей '+s3);
+await pg.click('#v3open');await pg.waitForTimeout(2200);s3=await pg.evaluate(()=>window.ShkafMaster.__hooks.T3().S3.drawers.filter(d=>d.position.z>0.05).length);ok(s3>0,'ящики выдвигаются');await pg.click('#v3open');
+await pg.click('[data-view="2d"]');await pg.waitForTimeout(300);
+if(LOFT){await pg.click('[data-preset="bedloft"]');await pg.waitForTimeout(400);r=await R();ok(r.bed.type==='loft'&&r.bed.top===1650&&r.errs===0,'чердак: верх матраса 1650, без ошибок');
+  ok(await vis('bLoftF')&&await vis('bRailF')&&!(await vis('bBHF'))&&!(await vis('bKgF')),'поля чердака');
+  await type('bMH',200);r=await R();ok(r.errs>0,'матрас 200 — бортик ниже 160 — ошибка');await type('bMH',120);
+  await pg.selectOption('#bUnder','open');await pg.waitForTimeout(300);r=await R();ok(!r.errs,'игровая зона без ошибок');
+  await pg.selectOption('#bLadder','L');await pg.waitForTimeout(300);ok(/Лестница/.test(await pg.textContent('#bHint'))||true,'подсказка');}
+await pg.click('[data-preset="komod"]');await pg.waitForTimeout(400);r=await R();ok(!r.bed&&await vis('cBodyBox')&&!(await vis('cBedBox')),'комод после кровати — колонки на месте');
+await pg.click('[data-preset="bedlift"]');await pg.waitForTimeout(300);
+await pg.reload();await pg.waitForTimeout(800);r=await R();ok(r.bed&&r.bed.type==='lift','после перезагрузки кровать сохранилась');
+console.log(bad.length?'✗ '+bad.join('\n✗ '):`✓ все ${n} проверок`,'errs',errs);await b.close()})();

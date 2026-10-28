@@ -96,7 +96,12 @@ h3{font-size:calc(12px * var(--fz));font-weight:600;text-transform:uppercase;let
 .photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .photos .ph{position:relative}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}
 .photos .ph button{position:absolute;top:4px;right:4px;background:var(--surface);padding:2px 8px}
-details.drill{border-bottom:1px solid var(--line);padding-block:8px}details.drill summary{cursor:pointer}details.drill ul{margin:6px 0 0;padding-left:18px;font-size:calc(13px * var(--fz));display:flex;flex-direction:column;gap:4px}
+details.drill{border-bottom:1px solid var(--line);padding-block:8px}
+.dpic{margin:8px 0 4px;overflow-x:auto}.dpic svg{display:block;width:100%;height:auto;max-height:70vh;background:#FFFFFF;border-radius:8px}
+.dleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:calc(12px * var(--fz));color:var(--muted);margin:4px 0}.dleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.dskip{font-size:calc(12px * var(--fz));color:var(--muted);margin:4px 0}
+.tpl-page{break-after:page;page-break-after:always;margin:0 auto 14px;max-width:180mm}.tpl-page svg{display:block;width:100%;height:auto;background:#FFFFFF;border:1px solid #C9CED2}
+.tpl-head{font-size:10pt;margin:0 0 4px}details.drill summary{cursor:pointer}details.drill ul{margin:6px 0 0;padding-left:18px;font-size:calc(13px * var(--fz));display:flex;flex-direction:column;gap:4px}
 .cat-row{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,1fr));gap:8px;align-items:end;padding-block:8px;border-bottom:1px solid var(--line)}
 .cat-row:last-child{border-bottom:0}
 .cat-row .nm{font-size:calc(14px * var(--fz));font-weight:500;min-width:0}
@@ -296,6 +301,9 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
   .doc-sheet{font-size:11pt}
   .kp-tools{display:none!important}
   .kp-sheet{border:0;padding:0;max-width:none}
+  .tpl-page svg{border:0;width:180mm!important;height:262mm!important}
+  .tpl-page{margin:0;max-width:none}
+  .tpl-intro{break-after:page;page-break-after:always}
 }
 </style>
 </head>
@@ -670,7 +678,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
     </div>
     <div class="card">
       <h3>Присадка (где сверлить)</h3>
-      <p class="hint">Отверстия под петли, планки, полкодержатели, конфирматы, ручки и высоты ящиков. Y — от нижнего края детали, X — от переднего края стенки или от края фасада. Перед сверловкой сверьте со схемой вашей фурнитуры.</p>
+      <p class="hint">Нажмите на деталь — откроется картинка с отверстиями и шаблон 1:1 для печати. Отверстия под петли, планки, полкодержатели, конфирматы, ручки и высоты ящиков. Y — от нижнего края детали, X — от переднего края стенки или от края фасада. Перед сверловкой сверьте со схемой вашей фурнитуры.</p>
       <div id="drillList"></div>
       <div class="btns"><button class="btn" type="button" id="copyDrill">Скопировать присадку</button></div>
       <textarea class="copy" id="drillText" readonly hidden aria-label="Текст присадки"></textarea>
@@ -882,7 +890,7 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='53 от 28.10.2026';
+const APP_VER='54 от 28.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -1115,7 +1123,7 @@ if(!projects.length){const p=newProject();p.name='Пример: шкаф в пр
 let P=projects.find(p=>p.id===curId)||projects[0];curId=P.id;
 document.documentElement.classList.toggle('big',!!settings.bigText);
 let tab='build',activeSec='',showDoors=false;const accOpen=new Set();
-document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.acc){if(d.open)accOpen.add(d.dataset.acc);else accOpen.delete(d.dataset.acc)}},true);
+document.addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.dpi!==undefined&&d.open){const g=drillMap(P,R.S,R.c)[+d.dataset.dpi],bx=d.querySelector('.dpic-box');if(g&&bx&&!bx.innerHTML)bx.innerHTML=drillPicHTML(g)}if(d.dataset&&d.dataset.acc){if(d.open)accOpen.add(d.dataset.acc);else accOpen.delete(d.dataset.acc)}},true);
 const secsOf=k=>k==='B'?P.sectionsB:k==='V'?P.sectionsV:P.sections;
 const catItem=(k,id,st)=>{const c=(st||settings).cat||settings.cat;return c[k].find(x=>x.id===id)||c[k][0]};
 const HW=(p,st)=>({hinge:catItem('hinges',p.hw.hinge,st),slide:catItem('slides',p.hw.slide,st),handle:catItem('handles',p.hw.handle,st),handleIn:catItem('handles',p.hw.handleIn,st),coupe:catItem('coupe',p.hw.coupe,st)});
@@ -1949,6 +1957,8 @@ function calcKitchen(p,s){
   if(C.carousel)hw.push(['Карусель угловая 3/4',C.carousel,'шт',pr.carousel]);
   if(C.brackets)hw.push(['Уголок для доборной планки',C.brackets,'шт',pr.bracket]);
   Object.keys(C.lifts).sort((a,b)=>a-b).forEach(N=>hw.push([`Газлифт ${N}N`,C.lifts[N],'шт',pr.gaslift]));
+  if(HWp.handle.proj||HWp.handle.cc){const low=[];mods.forEach(m=>{(m.fronts||[]).filter(f=>f.kind==='door'&&!f.noHandle).forEach(f=>{if(!handlePos(f.h,f.w,HWp.handle,'kb',true))low.push(m.lab)});if(m.leafB&&!m.leafB.noHandle&&!handlePos(m.leafB.h,m.leafB.w,HWp.handle,'kb',true))low.push(m.lab)});
+    if(low.length)warn.push(ERR(`Ручка ${kHandleL(HWp.handle)} мм не помещается на дверцу ${[...new Set(low)].join(', ')} ни вдоль, ни поперёк. Выберите ручку короче.`))}
   if(C.ties)hw.push(['Стяжка межсекционная (антресоль к шкафу)',C.ties,'шт',pr.tie]);
   if(G){const gl=mods.filter(x=>(x.zone==='base'||x.zone==='baseB'||x.zone==='island')&&!isTall(x.m)).reduce((a,x)=>a+x.w,0)+(corner?Math.max(0,k.cBaseW-D):0),
       gc=mods.filter(x=>x.zone.startsWith('base')&&x.type==='drawers').reduce((a,x)=>a+x.w*Math.max(0,x.fronts.filter(f=>f.kind==='drawer').length-1),0);
@@ -2033,7 +2043,7 @@ function drawKitchenSide(p,s,r,sd){
       g+=R(fx,fy,f.w,f.h,f.glass?'#B9C2C6':isWall&&TT?TT.fill:fdec);if(f.glass)g+=R(fx+22,fy+22,f.w-44,f.h-44,MIRROR,'opacity=".9"');
       if(f.cargo)g+=`<text x="${fx+f.w/2}" y="${fy+f.h/2}" font-size="${fs*.5}" text-anchor="middle" class="sv-mut" transform="rotate(-90 ${fx+f.w/2} ${fy+f.h/2})">карго</text>`;
       if(f.kind==='lift'){g+=`<path d="M${fx+f.w/2-40} ${fy+f.h*.55} l40 -40 l40 40" fill="none" class="sv-ink" stroke-width="${sw*1.2}" opacity=".45"/>`;if(!f.noHandle)g+=handleH(fx+f.w*.35,fy+f.h-Math.min(40,f.h*.2),f.w*.3,sw)}
-      if(f.noHandle){}else if(f.kind==='door'){const hx=f.hinge==='L'?fx+f.w-40:fx+40;g+=isWall?handleV(hx,fy+f.h-200+2,140,sw):handleV(hx,fy-2+(f.h+4)*.08,Math.min(160,(f.h+4)*.25),sw)}
+      if(f.noHandle){}else if(f.kind==='door')g+=hpDraw(fx,fy,f.h,handlePos(f.h,f.w,HW(p,s).handle,isWall?'kw':'kb',f.hinge==='L'),sw);
       if(f.kind==='drawer'&&!f.noHandle)g+=handleH(fx+f.w*.35,fy+Math.min(40,f.h*.25),f.w*.3,sw);
       if(f.kind==='drawer'&&!f.cargo&&f.h>=fs*1.6)g+=`<text x="${fx+f.w/2}" y="${fy+f.h/2+fs*.45}" font-size="${fs*.6}" text-anchor="middle" class="sv-txt">${Math.round(f.w)}×${Math.round(f.h)}</text>`;
       if((f.kind==='dw'||f.kind==='fridge')&&!f.noHandle)g+=handleH(fx+f.w*.35,fy+Math.min(60,f.h*.08),f.w*.3,sw);
@@ -2050,7 +2060,7 @@ function drawKitchenSide(p,s,r,sd){
   // на стороне Б угол занят модулем стороны А
   if(sd.key==='B'&&sd.cz){const c=r.L,L0=sd.cz.base,W0=sd.cz.wall,atEnd=sd.end==='R';
     const zone=(z,y0,h,type,d,leaf,isBase)=>{const zw=z[1]-z[0];if(zw<=0)return;
-      if(type==='L'){const lw=leaf.w,lx=atEnd?z[1]-(zw-2):z[0]+d+2+fT;const ly=y0+h-(leaf.y||2)-(leaf.h||h-4);g+=`<rect x="${z[0]}" y="${y0}" width="${zw}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`+R(lx,ly,lw,leaf.h||h-4,fdec)+(leaf.noHandle?'':handleV(atEnd?lx+40:lx+lw-40,isBase?y0+h*.08:y0+h-200,isBase?Math.min(160,h*.25):140,sw));
+      if(type==='L'){const lw=leaf.w,lx=atEnd?z[1]-(zw-2):z[0]+d+2+fT;const ly=y0+h-(leaf.y||2)-(leaf.h||h-4);g+=`<rect x="${z[0]}" y="${y0}" width="${zw}" height="${h}" class="sv-cav sv-ink" stroke-width="${sw}"/>`+R(lx,ly,lw,leaf.h||h-4,fdec)+(leaf.noHandle?'':hpDraw(lx,ly,leaf.h||h-4,handlePos(leaf.h||h-4,lw,HW(p,s).handle,isBase?'kb':'kw',!atEnd),sw));
         g+=hatch(atEnd?z[1]-(d+2+fT):z[0],y0,d+2+fT,h,'');
         g+=`<rect class="mod-hit${(isBase?'cBase':'cWall')===activeSec?' on':''}" data-mod="${isBase?'cBase':'cWall'}" x="${z[0]}" y="${y0}" width="${zw}" height="${h}"/>`}
       else g+=hatch(z[0],y0,zw,h,'угол');
@@ -2250,6 +2260,8 @@ function calcChest(p,s){
     if(cw>900&&cl.type==='drawers')warn.push(`Колонка ${i+1}: ящик шире 900 мм будет перекашиваться. Добавьте колонку.`);
   });
   if(!slide&&c.cols.some(x=>x.type==='drawers'))warn.push(ERR('Ящики не помещаются по глубине — увеличьте глубину.'));
+  if(HWp.handle.proj||HWp.handle.cc)c.cols.forEach((cl,i)=>{const nd=fr[i].w>600?2:1,dw=(fr[i].w-3*(nd-1))/nd,h=cl.type==='door'?fz:nicheCol(cl)?Hb-nicheH(cl)-2*t-4:0;
+    if(h>=150&&!handlePos(h,dw,HWp.handle,'ct',true))warn.push(ERR(`Колонка ${i+1}: ручка ${kHandleL(HWp.handle)} мм не помещается на дверцу ${Math.floor(dw)}×${Math.floor(h)} мм. Выберите ручку короче.`))});
   if(Math.min(...colWs)<200)warn.push(ERR('Колонки слишком узкие — уменьшите их число.'));
   if(Hb-t>s.sheetL-2*s.trim)warn.push(ERR('Изделие выше длины листа.'));
   if(legs&&c.plinth)warn.push('Выбраны ножки — цоколь не делается.');
@@ -2283,9 +2295,9 @@ function drawChest(p,s,r){
   for(let i=1;i<n;i++)g+=kneeAdj(c.cols,i)?R(r.xs[i]-t,t,t,H-t,dec):R(r.xs[i]-t,t,t,H-pl-2*t,dec);
   c.cols.forEach((cl,i)=>{const fx=r.fr[i].x,fw=r.fr[i].w,fy=t+2,x0=r.xs[i],cw=r.colWs[i];
     if(cl.type==='drawers'||cl.type==='flip'){let y=fy;for(const fh of chestDH(cl,r.fz)){g+=R(fx,y,fw,fh,fdec)+handleH(fx+fw*.35,y+fh/2,fw*.3,sw)+(fh>=fs*1.8?`<text x="${fx+fw/2}" y="${y+fh/2+fs*.95}" font-size="${fs*.55}" text-anchor="middle" class="sv-txt">${Math.round(fw)}×${Math.round(fh)}</text>`:'');y+=fh+3}}
-    else if(nicheCol(cl)){const nh=nicheH(cl),dh=H-nh-2*t-4,nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;if(dh>=150)for(let j=0;j<nd;j++)g+=R(fx+j*(dw+3),fy,dw,dh,fdec)+handleV(fx+j*(dw+3)+(nd===2&&j===0||nd===1&&i>=n/2?40:dw-40),fy+dh-Math.min(140,dh*.3)-40,Math.min(140,dh*.3),sw)}
+    else if(nicheCol(cl)){const nh=nicheH(cl),dh=H-nh-2*t-4,nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;if(dh>=150)for(let j=0;j<nd;j++)g+=R(fx+j*(dw+3),fy,dw,dh,fdec)+hpDraw(fx+j*(dw+3),fy,dh,handlePos(dh,dw,HW(p,s).handle,'cb',!(nd===2&&j===0||nd===1&&i>=n/2)),sw)}
     else if(cl.type==='door'){const nd=fw>600?2:1,dw=(fw-3*(nd-1))/nd;for(let j=0;j<nd;j++){const dx=fx+j*(dw+3),hingeL=(r.ch[i]||[])[j]?r.ch[i][j]==='L':(nd===2?j===0:i<n/2),ox=hingeL?dx+dw:dx,hx=hingeL?dx:dx+dw;
-        g+=R(dx,fy,dw,r.fz,fdec)+`<path d="M${ox} ${fy} L${hx} ${fy+r.fz/2} L${ox} ${fy+r.fz}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".55"/>`+handleV(ox+(hingeL?-40:40),fy+r.fz*.15,Math.min(140,r.fz*.3),sw)}}
+        g+=R(dx,fy,dw,r.fz,fdec)+`<path d="M${ox} ${fy} L${hx} ${fy+r.fz/2} L${ox} ${fy+r.fz}" fill="none" class="sv-ink" stroke-width="${sw}" stroke-dasharray="${sw*6} ${sw*4}" opacity=".55"/>`+hpDraw(dx,fy,r.fz,handlePos(r.fz,dw,HW(p,s).handle,'ct',hingeL),sw)}}
     else if(cl.type==='open'){for(let j=0;j<cl.shelves;j++)g+=R(x0,t+(H-pl-2*t)*(j+1)/(cl.shelves+1),cw,t,dec)}
     const key='C:'+i;
     g+=`<rect class="mod-hit${key===activeSec?' on':''}" data-col="${i}" x="${fx}" y="${fy}" width="${fw}" height="${r.fz}"/>`;
@@ -2348,7 +2360,7 @@ const slideTxt=v=>v?`(направляющие ${v} мм)`:'';
 // от переднего края стенки; полкодержатели — 37 мм от переднего и заднего края полки; конфирмат 7×50.
 const R0=v=>Math.round(v*2)/2,LIST=a=>a.map(v=>R0(v)).join(', ');
 // петли: 100 мм от краёв, остальные равномерно; shift — сдвиг на 32 мм, если с другой стороны стенки уже есть планки
-function cupYs(h,n,shift){const a=[];for(let i=0;i<n;i++)a.push(100+(h-200)*(n===1?0:i/(n-1)));return shift?a.map(y=>y+32):a}
+function cupYs(h,n,shift){const e=h>=260?100:Math.max(38,Math.round(h*.27)),a=[];for(let i=0;i<n;i++)a.push(e+(h-2*e)*(n===1?0:i/(n-1)));return shift?a.map(y=>y+32):a}
 const along=(len,n)=>{const a=[];for(let i=0;i<n;i++)a.push(50+(len-100)*(n===1?0:i/(n-1)));return a};
 function drillMap(p,s,c){const t=s.t,out=[],add=(name,size,qty,lines)=>{if(lines.length)out.push({name,size,qty,lines})},H_=HW(p,s);
   const cupLine=(edge,ys)=>`Чашки петель Ø35, глубина 12–13 мм: центр в 22 мм от ${edge} края; Y от низа: ${LIST(ys)}`;
@@ -2413,17 +2425,17 @@ function drillMap(p,s,c){const t=s.t,out=[],add=(name,size,qty,lines)=>{if(lines
     if(nicheCol(cl)){const nh=nicheH(cl),dh=Hb-nh-2*t-4,nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];
       [[i,'R'],[i+1,'L']].forEach(([pi,face])=>panel[pi][face].push(`Полка над стиральной машиной: конфирмат Ø7 сквозное — Y ${R0(nh+t/2)}; X ${LIST(along(D,per))}`));
       if(dh>=150)for(let j=0;j<nd;j++){const hgSide=hs[j]||(j===0?'L':'R'),pi=hgSide==='L'?i:i+1,face=hgSide==='L'?'R':'L',ys=cupYs(dh,hingeCount(dh),false);
-        panel[pi][face].push(`Планки петель (дверца над машиной): ось 37 мм от переднего края; Y ${LIST(ys.map(y=>y+nh+t+2))}`);add(`Колонка ${i+1}: дверца над машиной${nd>1?' '+(j+1):''}`,`${R0(dh)}×${R0(dw)}`,1,[cupLine(hgSide==='L'?'левого':'правого',ys),...handleLines(dh,hgSide==='L'?dw-40:40,dh-(dh*.15+Math.min(140,dh*.3)/2),true)])}}
+        panel[pi][face].push(`Планки петель (дверца над машиной): ось 37 мм от переднего края; Y ${LIST(ys.map(y=>y+nh+t+2))}`);add(`Колонка ${i+1}: дверца над машиной${nd>1?' '+(j+1):''}`,`${R0(dh)}×${R0(dw)}`,1,[cupLine(hgSide==='L'?'левого':'правого',ys),...hpLines(handleLines,handlePos(dh,dw,H_.handle,'cb',hgSide==='L'))])}}
     if(cl.type==='door'){const nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];for(let j=0;j<nd;j++){const hgSide=hs[j]||(j===0?'L':'R'),pi=hgSide==='L'?i:i+1,face=hgSide==='L'?'R':'L';
       const shift=pi>0&&pi<n&&face==='R'&&cc.cols[pi-1]&&cc.cols[pi-1].type==='door'&&(c.ch[pi-1]||[]).slice(-1)[0]==='R',ys=cupYs(fz,hingeCount(fz),shift),base=pi===0||pi===n?pl:-t;
       panel[pi][face].push(`Планки петель: ось 37 мм от переднего края; Y ${LIST(ys.map(y=>y+base))}${shift?' (сдвинуты на 32 мм)':''}`);
-      add(`Колонка ${i+1}: дверца${nd>1?' '+(j+1):''}`,`${R0(fz)}×${R0(dw)}`,1,[cupLine(hgSide==='L'?'левого':'правого',ys),...handleLines(fz,hgSide==='L'?dw-40:40,fz-(fz*.15+Math.min(140,fz*.3)/2),true)])}}});
+      add(`Колонка ${i+1}: дверца${nd>1?' '+(j+1):''}`,`${R0(fz)}×${R0(dw)}`,1,[cupLine(hgSide==='L'?'левого':'правого',ys),...hpLines(handleLines,handlePos(fz,dw,H_.handle,'ct',hgSide==='L'))])}}});
   ['левая','правая'].forEach((nm,k)=>{const pi=k?n:0,face=k?'L':'R';add(`Боковина ${nm}`,`${R0(c.vanity?Hb:Hb-t)}×${D}`,1,[`Конфирмат Ø7 сквозное (дно): Y ${R0(pl+t/2)}; X ${LIST(along(D,per))}`,...(pl?[`Конфирмат Ø7 сквозное (цоколь): Y ${R0(pl/2)}; X ${R0(20+t/2)} и ${R0(D-t/2)}`]:[]),`Верхний торец: эксцентриковые стяжки крышки — X ${LIST(along(D,per))}, по схеме стяжки`,...panel[pi][face]])});
   for(let i=1;i<n;i++)if(kneeAdj(cc.cols,i))add(`Стойка у ниши (до пола) ${i}`,`${R0(Hb-t)}×${D}`,1,['Стоит на полу. Конфирматы Ø7 сквозные — дно и цоколь тумбы, царга задняя ниши (Y '+R0(Hb-t-150)+'); верхний торец — стяжки крышки',...panel[i].L.map(x=>'Левая сторона. '+x),...panel[i].R.map(x=>'Правая сторона. '+x)]);else add(`Перегородка ${i}`,`${R0(Hb-2*t-pl)}×${D}`,1,[`Нижний торец: Ø5×50 под конфирматы — X ${LIST(along(D,per))}; верхний торец — стяжки крышки`,...panel[i].L.map(x=>'Левая сторона. '+x),...panel[i].R.map(x=>'Правая сторона. '+x)]);
   if(c.vanity)add('Царга под раковину',`${W-2*t}×100`,2,[`Конфирматы в боковины: по 2 на торец; передняя царга — вровень с передней кромкой, задняя — с задней`]);else add('Крышка',`${W}×${D}`,1,[`Снизу: эксцентриковые стяжки над боковинами и перегородками — от левого края ${LIST([t/2,...c.xs.slice(1).map(x=>x-t/2),W-t/2])}; X ${LIST(along(D,per))}`]);
   return out}
 // присадка кухни: из того же описания модулей, что расчёт и чертёж
-function kitchenDrill(p,s,c,add,cupLine,handleLines){const t=s.t;
+function kitchenDrill(p,s,c,add,cupLine,handleLines){const t=s.t,H_=HW(p,s);
   c.mods.forEach(mod=>{const h=mod.h,d=mod.d,lab=mod.lab,isWall=mod.zone.startsWith('wall')||mod.zone==='cWall',lines=[];
     if(!mod.carcass)return dwFronts(mod);
     const per=d>450?4:3;
@@ -2436,7 +2448,7 @@ function kitchenDrill(p,s,c,add,cupLine,handleLines){const t=s.t;
       add(`${lab}: боковина`,`${R0(h)}×${d}`,2,lines);
       const fa=mod.fronts[0],AL=mod.corner.AL;
       add(`${lab}: створка А`,`${R0(fa.h)}×${R0(fa.w)}`,1,[`Чашки петель 165–170° Ø35: центр в 22 мм от ${AL?'правого':'левого'} края (у боковины); Y ${LIST(ys)}`,`Петли складного фасада — у ${AL?'левого':'правого'} края (со стороны угла), по схеме петли; Y ${LIST(ys)}`]);
-      add(`${lab}: створка Б`,`${R0(mod.leafB.h)}×${R0(mod.leafB.w)}`,1,[`Петли складного фасада — у края со стороны угла, по схеме петли; Y ${LIST(ys)}`,...(mod.leafB.noHandle?[]:handleLines(mod.leafB.h,AL?40:mod.leafB.w-40,isWall?130:mod.leafB.h-(mod.leafB.h*.08+Math.min(160,mod.leafB.h*.25)/2),true))]);
+      add(`${lab}: створка Б`,`${R0(mod.leafB.h)}×${R0(mod.leafB.w)}`,1,[`Петли складного фасада — у края со стороны угла, по схеме петли; Y ${LIST(ys)}`,...(mod.leafB.noHandle?[]:hpLines(handleLines,handlePos(mod.leafB.h,mod.leafB.w,HW(p,s).handle,isWall?'kw':'kb',!AL)))]);
       add(`${lab}: дно и крыша Г-образные`,`${R0(mod.corner.WA-t)}×${R0(mod.corner.WB-t)}`,2,[`Торцы у боковин: Ø5×50 под конфирматы — X ${LIST(along(d,per))} от переднего края`]);
       return}
     // ящики: фасады идут перед боковиной, как раньше
@@ -2454,7 +2466,7 @@ function kitchenDrill(p,s,c,add,cupLine,handleLines){const t=s.t;
     if(mod.type==='hood')lines.push('Вытяжка крепится к боковинам изнутри — по шаблону из её инструкции');
     add(`${lab}: боковина`,`${R0(h)}×${d}`,2,lines);
     rows.forEach(ds=>{const n=ds.doors.length;ds.doors.forEach((f,j)=>{const hc=Math.min(160,ds.h*.25);
-      add(`${lab}: фасад${n>1?' '+(j+1):''}${ds.label||''}`,`${R0(ds.h)}×${R0(f.w)}`,1,[cupLine(f.hinge==='L'?'левого':'правого',cupYs(ds.h,hingeCount(ds.h))),...(f.noHandle?[]:handleLines(ds.h,f.hinge==='L'?f.w-40:40,isWall?130:ds.h-(ds.h*.08+hc/2),true))])})});
+      add(`${lab}: фасад${n>1?' '+(j+1):''}${ds.label||''}`,`${R0(ds.h)}×${R0(f.w)}`,1,[cupLine(f.hinge==='L'?'левого':'правого',cupYs(ds.h,hingeCount(ds.h))),...(f.noHandle?[]:hpLines(handleLines,handlePos(ds.h,f.w,HW(p,s).handle,isWall?'kw':'kb',f.hinge==='L')))])})});
     mod.fronts.filter(f=>f.kind==='lift').forEach(f=>add(`${lab}: подъёмный фасад`,`${R0(f.h)}×${R0(f.w)}`,1,[`Петли (${f.nh} шт): чашки Ø35 у верхней кромки, центр в 22 мм от неё; X ${LIST(f.nh===3?[100,f.w/2,f.w-100]:[100,f.w-100])} от левого края; планки — на крыше`,`Газлифты ${f.N?'2 × '+f.N+'N':'— не подобраны'}: крепление на фасаде в 80–100 мм от верхней кромки, у боковин — по схеме газлифта; вес фасада около ${f.kg.toFixed(1)} кг`,...(f.noHandle?[]:handleLines(f.h,f.w/2,f.h-40,false))]));
     dwFronts(mod);
     mod.fronts.filter(f=>f.kind==='filler').forEach(f=>add(`${lab}: доборная планка`,`${R0(f.h)}×${R0(f.w)}`,1,['Крепится к корпусу уголками: 2 сверху и 2 снизу, с обратной стороны']))});
@@ -2487,6 +2499,98 @@ function loftDrill(p,s,c,add){const B=c.bed,b=B.b,t=s.t,y0=b.loftH,h2=R0(t/2),Dz
   add('Бортик у стены',`${B.gT-y0+100}×${B.iL}`,1,['Торцы: Ø5 глубиной 50 — Y '+LIST(along(B.gT-y0+100,4))]);
   add('Царга передняя',`${LOFT_RAIL}×${B.iL}`,1,['Торцы: Ø5 глубиной 50 — Y '+LIST([30,120])]);
   add('Бортик передний',`${B.gT-y0-50}×${B.iL-LOFT_OPEN}`,1,['Торец у торца кровати: Ø5 глубиной 50 — Y '+LIST(along(B.gT-y0-50,3)),'Низ — уголки к передней царге с шагом 400 мм'])}
+/* ---------- картинка присадки ----------
+   Картинка строится из тех же строк, что и текст: каждая строка разбирается по известным образцам.
+   Деталь: по горизонтали — вторая цифра размера (X), по вертикали — первая (Y от низа).
+   Строку, которую нельзя однозначно положить на картинку, показываем текстом под ней. */
+const DRN='-?\\d+(?:\\.\\d+)?',DRL='(-?\\d+(?:\\.\\d+)?(?:\\s*(?:,|и)\\s*-?\\d+(?:\\.\\d+)?)*)';
+const drNums=t=>(String(t).match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);
+const DR_HORIZ=/рыша и дно|^Крышка|Царга под раковину|Ступенька|дно и крыша/;
+function drillParse(g){const m=/^(\d+(?:\.\d+)?)×(\d+(?:\.\d+)?)/.exec(g.size);if(!m)return null;
+  const H=+m[1],W=+m[2],holes=[],marks=[],edges=[],cuts=[],notes=[],skip=[],refs=new Set(),horiz=DR_HORIZ.test(g.name.replace(/^[^:]*: /,''));
+  const RX=new RegExp('X '+DRL),RY=new RegExp('Y(?: от низа:)? '+DRL),RL=new RegExp('от левого края '+DRL);
+  g.lines.forEach(raw=>{let face='A',l=raw;const fm=/^(Левая|Правая) (сторона|боковина)\. /.exec(l);if(fm){face=fm[1]==='Левая'?'L':'R';l=l.slice(fm[0].length)}
+    const c=l.replace(/\s*\([^)]*\)/g,''),dm=/Ø(\d+)/.exec(c),d=dm?+dm[1]:0;let r;const n0={holes:holes.length,marks:marks.length,edges:edges.length};
+    const ref=/от переднего края/.test(c)?'перед':/от края у стены/.test(c)?'край у стены':/от торца у изголовья/.test(c)?'торец у изголовья':'';
+    if((r=new RegExp('Чашки петель Ø(\\d+)[^:]*: центр в ('+DRN+') мм от (левого|правого) края; Y от низа: '+DRL).exec(c))){const x=r[3]==='левого'?+r[2]:W-r[2];drNums(r[4]).forEach(y=>holes.push({x,y,d:+r[1],face}))}
+    else if((r=new RegExp('чашки Ø(\\d+) у верхней кромки, центр в ('+DRN+') мм от неё; X '+DRL+' от левого края').exec(c)))drNums(r[3]).forEach(x=>holes.push({x,y:H-r[2],d:+r[1],face}));
+    else if((r=new RegExp('^Планки петель[^;]*ось(?: в)? ('+DRN+') мм от переднего края; Y '+DRL).exec(c))){refs.add('перед');drNums(r[2]).forEach(y=>marks.push({k:'plate',x:+r[1],y,face}))}
+    else if((r=new RegExp('^Штанга: центр флянца X ('+DRN+'), Y ('+DRN+')$').exec(c)))marks.push({k:'rod',x:+r[1],y:+r[2],face});
+    else if((r=new RegExp('^(?:Ящики: низ короба|Корзины: низ|Откидные ящики: механизмы по схеме — низ фасадов) на Y '+DRL+'(?:, крепление — по схеме корзины)?$').exec(c))){const ys=drNums(r[1]);if(ys.every(y=>y>=0&&y<=H))ys.forEach(y=>marks.push({k:'slide',y,face}));else skip.push(raw)}
+    else if((r=new RegExp('^Торцы: Ø(\\d+)×\\d+ под конфирматы (?:сверху и снизу|с обеих сторон) — X '+DRL+' от переднего края$').exec(c))){refs.add('перед');drNums(r[2]).forEach(x=>edges.push({e:'T',p:x,d:+r[1]},{e:'B',p:x,d:+r[1]}))}
+    else if((r=new RegExp('^Нижний торец: Ø(\\d+)×\\d+ под конфирматы — X '+DRL+'; верхний торец — стяжки крышки$').exec(c))){drNums(r[2]).forEach(x=>edges.push({e:'B',p:x,d:+r[1]}));notes.push('Верхний торец — эксцентриковые стяжки крышки')}
+    else if((r=new RegExp('^Торцы: Ø(\\d+)×\\d+ — по \\d+ с каждой стороны, Y ('+DRN+')$').exec(c)))edges.push({e:'T',p:+r[2],d:+r[1]},{e:'B',p:+r[2],d:+r[1]});
+    else if((r=new RegExp('^(?:Торцы|Оба торца(?: к боковинам)?): Ø(\\d+) глубиной \\d+(?: по оси торца)? — Y '+DRL+'$').exec(c)))drNums(r[2]).forEach(y=>edges.push({e:'L',p:y,d:+r[1]},{e:'R',p:y,d:+r[1]}));
+    else if((r=new RegExp('^Оба торца: Ø(\\d+) глубиной \\d+ — X '+DRL+'$').exec(c)))drNums(r[2]).forEach(x=>edges.push({e:'T',p:x,d:+r[1]},{e:'B',p:x,d:+r[1]}));
+    else if((r=new RegExp('^Верхний торец: эксцентриковые стяжки крышки — X '+DRL+', по схеме стяжки$').exec(c)))drNums(r[1]).forEach(x=>edges.push({e:'T',p:x,d:0,k:'minifix'}));
+    else if((r=new RegExp('^Вырез под плинтус: снизу у заднего края ('+DRN+') мм по высоте × ('+DRN+') мм по глубине$').exec(c)))cuts.push({x:W-r[2],y:0,w:+r[2],h:+r[1]});
+    else if(/^Без ручки|^Навес|^Задняя стенка ЛДСП|^Газлифты|^Крепится|^Навешивается|^Вытяжка|^Конфирматы в боковины|^Пантограф|^Полки с двух сторон|^Верх|^Низ —|^Стоит на полу|^Проставка/.test(c))notes.push(raw);
+    else if((dm||/^Снизу: эксцентриковые стяжки/.test(c))&&!/Только на|от торца у изножья|глубиной|Торец|торец|по высоте,|шт\. по высоте/.test(c)&&!/X от/.test(c)){
+      // общий случай: «Y …; X …» или «X …, Y …» с одним диаметром; пары X/Y ищем внутри частей через «;»
+      const minifix=/эксцентриков/.test(c),k=minifix?'minifix':'hole';let px=null,py=null,okAll=true;const add=(xs,ys)=>xs.forEach(x=>ys.forEach(y=>holes.push({x,y,d:minifix?0:d,face,k})));
+      c.split(';').forEach(part=>{let xs=null,ys=null,q;if((q=RX.exec(part)))xs=drNums(q[1]);if((q=RL.exec(part)))ys=drNums(q[1]);if((q=RY.exec(part)))ys=drNums(q[1]);
+        if(xs&&ys)add(xs,ys);else if(xs){if(py){add(xs,py);py=null}else px=xs}else if(ys){if(px){add(px,ys);px=null}else py=ys}});
+      if(px||py||holes.length===n0.holes)okAll=false;if(!okAll){holes.length=n0.holes;skip.push(raw)}else if(ref)refs.add(ref)}
+    else skip.push(raw)});
+  // все точки должны лежать на детали — иначе картинку не показываем вовсе (лучше текст, чем неверная картинка)
+  const inX=v=>v>=-0.5&&v<=W+0.5,inY=v=>v>=-0.5&&v<=H+0.5;
+  const bad=holes.some(h=>!inX(h.x)||!inY(h.y))||marks.some(q=>(q.x!==undefined&&!inX(q.x))||!inY(q.y))||edges.some(e=>!(e.e==='T'||e.e==='B'?inX(e.p):inY(e.p)))||refs.size>1;
+  return{W,H,holes,marks,edges,cuts,notes,skip,bad,left:[...refs][0]||'',horiz,faces:new Set([...holes,...marks].map(h=>h.face))}}
+const DR_COL=d=>d>=30?'#D9822B':d===5?'#2F6FB0':d===7||d===8?'#C0392B':d>=10?'#7A4FB5':'#555E66';
+function drillSvg(g,P_){if(!P_||P_.bad)return '';const {W,H}=P_,M=Math.max(W,H),fs=Math.max(9,M*0.022),pad=fs*4.2,sw=M/500,Y=v=>H-v,two=P_.faces.has('L')&&P_.faces.has('R');
+  let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#F3EEE4" stroke="#3A4148" stroke-width="${sw*2}"/>`;
+  P_.cuts.forEach(c=>s+=`<rect x="${c.x}" y="${Y(c.y+c.h)}" width="${c.w}" height="${c.h}" fill="#FFFFFF" stroke="#3A4148" stroke-width="${sw}" stroke-dasharray="${sw*4} ${sw*3}"/>`);
+  P_.marks.filter(q=>q.k==='slide').forEach(q=>s+=`<line x1="0" x2="${W}" y1="${Y(q.y)}" y2="${Y(q.y)}" stroke="#1E8C7E" stroke-width="${sw*1.6}" stroke-dasharray="${sw*8} ${sw*5}"/>`);
+  const dash=f=>two&&f==='R'?` stroke-dasharray="${sw*3} ${sw*2}" fill-opacity=".25"`:'';
+  P_.holes.forEach(h=>{const r=h.k==='minifix'?Math.max(7.5,M*0.006):Math.max(h.d/2,M*0.005),col=h.k==='minifix'?'#7A4FB5':DR_COL(h.d);s+=`<circle cx="${h.x}" cy="${Y(h.y)}" r="${r}" fill="${col}" stroke="${col}" stroke-width="${sw}"${dash(h.face)}/>`});
+  P_.marks.filter(q=>q.k==='plate').forEach(q=>s+=`<rect x="${q.x-M*0.006}" y="${Y(q.y)-M*0.012}" width="${M*0.012}" height="${M*0.024}" fill="#2E8B57"${dash(q.face)}/>`);
+  P_.marks.filter(q=>q.k==='rod').forEach(q=>s+=`<circle cx="${q.x}" cy="${Y(q.y)}" r="${Math.max(12,M*0.01)}" fill="none" stroke="#555E66" stroke-width="${sw*2}"/>`);
+  P_.edges.forEach(e=>{const L=M*0.018,col=e.k==='minifix'?'#7A4FB5':DR_COL(e.d);
+    s+=e.e==='T'?`<path d="M${e.p} ${0} l${-L/2} ${-L} h${L} z" fill="${col}"/>`:e.e==='B'?`<path d="M${e.p} ${H} l${-L/2} ${L} h${L} z" fill="${col}"/>`:e.e==='L'?`<path d="M0 ${Y(e.p)} l${-L} ${-L/2} v${L} z" fill="${col}"/>`:`<path d="M${W} ${Y(e.p)} l${L} ${-L/2} v${L} z" fill="${col}"/>`});
+  // размерные засечки: все X — снизу, все Y — слева
+  const uniq=a=>[...new Set(a.map(v=>Math.round(v*2)/2))].sort((a,b)=>a-b);
+  const xs=uniq([...P_.holes.map(h=>h.x),...P_.marks.filter(q=>q.x!==undefined).map(q=>q.x),...P_.edges.filter(e=>e.e==='T'||e.e==='B').map(e=>e.p)]),ys=uniq([...P_.holes.map(h=>h.y),...P_.marks.map(q=>q.y),...P_.edges.filter(e=>e.e==='L'||e.e==='R').map(e=>e.p)]);
+  // подписи не выбрасываем: раздвигаем на шаг шрифта и ведём выносную линию к своей засечке
+  const spread=(a,gap)=>{const p=a.map(v=>v);for(let i=1;i<p.length;i++)if(p[i]<p[i-1]+gap)p[i]=p[i-1]+gap;return p};
+  {const lx=spread(xs,fs*1.15);xs.forEach((x,i)=>{const q=lx[i];s+=`<path d="M${x} ${H}V${H+fs*.5}L${q} ${H+fs*1.3}" fill="none" stroke="#3A4148" stroke-width="${sw}"/><text x="${q+fs*.35}" y="${H+fs*1.5}" font-size="${fs}" transform="rotate(90 ${q+fs*.35} ${H+fs*1.5})" fill="#1D2227">${x}</text>`})}
+  {const yd=[...ys].sort((a,b)=>b-a),ly=spread(yd.map(Y),fs*1.15);yd.forEach((y,i)=>{const q=ly[i];s+=`<path d="M0 ${Y(y)}H${-fs*.5}L${-fs*1.3} ${q}" fill="none" stroke="#3A4148" stroke-width="${sw}"/><text x="${-fs*1.45}" y="${q+fs*.35}" font-size="${fs}" text-anchor="end" fill="#1D2227">${y}</text>`})}
+  s+=`<text x="${W/2}" y="${-fs*2.2}" font-size="${fs*1.1}" text-anchor="middle" fill="#1D2227" font-weight="600">${W} × ${H} мм</text>`;
+  s+=`<text x="${-pad*.95}" y="${-fs*.7}" font-size="${fs}" fill="#5B646C">${P_.horiz?'↑ от левого края':'↑ Y от низа'}</text><text x="${-pad*.95}" y="${H+pad*1.25}" font-size="${fs}" fill="#5B646C">→ X от ${P_.left?esc(P_.left==='перед'?'переднего края':P_.left):'левого края'}</text>`;
+  const yLow=Math.max(H,...(()=>{const yd=[...ys].sort((a,b)=>b-a);return spread(yd.map(Y),fs*1.15)})()),xHi=Math.max(W,...spread(xs,fs*1.15).map(v=>v+fs));
+  return `<svg viewBox="${-pad*1.15} ${-fs*3.2} ${xHi+pad*1.5} ${yLow+pad*1.5+fs*3.2}" role="img" aria-label="Присадка: ${esc(g.name)}">${s}</svg>`}
+function drillLegend(P_){const ds=[...new Set(P_.holes.filter(h=>h.k!=='minifix').map(h=>h.d))].sort((a,b)=>b-a),two=P_.faces.has('L')&&P_.faces.has('R'),o=[];
+  ds.forEach(d=>o.push(`<span><i style="background:${DR_COL(d)}"></i>Ø${d}${d>=30?' чашка петли':d===5?' (полкодержатель, ручка, торец)':d===7||d===8?' сквозное под конфирмат':''}</span>`));
+  if(P_.holes.some(h=>h.k==='minifix')||P_.edges.some(e=>e.k==='minifix'))o.push(`<span><i style="background:#7A4FB5"></i>эксцентриковая стяжка</span>`);
+  if(P_.marks.some(q=>q.k==='plate'))o.push(`<span><i style="background:#2E8B57;border-radius:2px"></i>планка петли</span>`);
+  if(P_.marks.some(q=>q.k==='rod'))o.push(`<span><i style="border:2px solid #555E66"></i>флянец штанги</span>`);
+  if(P_.marks.some(q=>q.k==='slide'))o.push(`<span><i style="background:#1E8C7E;border-radius:0;height:3px"></i>низ ящика (направляющая)</span>`);
+  if(P_.edges.length)o.push(`<span>▲ отверстие в торце</span>`);
+  if(two)o.push(`<span>сплошные — левая сторона, бледные — правая</span>`);
+  return `<div class="dleg">${o.join('')}</div>`}
+function drillPicHTML(g){const P_=drillParse(g);if(!P_||P_.bad||!(P_.holes.length+P_.marks.length+P_.edges.length))return `<p class="dskip">Для этой детали картинки нет — сверлите по строкам ниже.</p>`;
+  return `<div class="dpic">${drillSvg(g,P_)}</div>${drillLegend(P_)}${P_.skip.length?`<p class="dskip">Не на картинке (смотрите строки ниже): ${P_.skip.length}</p>`:''}<button class="chip" type="button" data-dtpl="${esc(g.name)}">Шаблон 1:1 для печати</button>`}
+// шаблон в натуральную величину: листы A4 (поле 180×262 мм), перекрытие 10 мм, пустые листы не печатаются
+function drillTemplate(g){const P_=drillParse(g);if(!P_||P_.bad)return '';const {W,H}=P_,PW=180,PH=262,ST=10,stX=PW-ST,stY=PH-ST,cols=Math.max(1,Math.ceil((W-ST)/stX)),rows=Math.max(1,Math.ceil((H-ST)/stY)),pages=[];
+  const pts=[...P_.holes.map(h=>[h.x,h.y]),...P_.marks.filter(q=>q.x!==undefined).map(q=>[q.x,q.y]),...P_.edges.map(e=>e.e==='T'?[e.p,H]:e.e==='B'?[e.p,0]:e.e==='L'?[0,e.p]:[W,e.p])];
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x0=c*stX,y0=r*stY,inP=p=>p[0]>=x0-1&&p[0]<=x0+PW+1&&p[1]>=y0-1&&p[1]<=y0+PH+1;if(!pts.some(inP)&&!P_.marks.some(q=>q.k==='slide'&&q.y>=y0&&q.y<=y0+PH))continue;
+    const Y=v=>y0+PH-v;let s=`<rect x="${-x0}" y="${Y(H)}" width="${W}" height="${H}" fill="none" stroke="#000" stroke-width=".4"/>`;
+    P_.cuts.forEach(cu=>s+=`<rect x="${cu.x-x0}" y="${Y(cu.y+cu.h)}" width="${cu.w}" height="${cu.h}" fill="#EEE" stroke="#000" stroke-width=".3"/>`);
+    P_.marks.filter(q=>q.k==='slide').forEach(q=>s+=`<line x1="${-x0}" x2="${W-x0}" y1="${Y(q.y)}" y2="${Y(q.y)}" stroke="#000" stroke-width=".3" stroke-dasharray="3 2"/><text x="${Math.max(2,-x0+2)}" y="${Y(q.y)-1}" font-size="2.6">низ ящика Y ${q.y}</text>`);
+    const cross=(x,y,r,lab)=>`<circle cx="${x-x0}" cy="${Y(y)}" r="${r}" fill="none" stroke="#000" stroke-width=".25"/><path d="M${x-x0-r-2} ${Y(y)}h${2*r+4}M${x-x0} ${Y(y)-r-2}v${2*r+4}" stroke="#000" stroke-width=".2"/><text x="${x-x0+r+1.2}" y="${Y(y)-1}" font-size="2.4">${lab}</text>`;
+    P_.holes.forEach(h=>{if(inP([h.x,h.y]))s+=cross(h.x,h.y,h.k==='minifix'?7.5:h.d/2,`${h.k==='minifix'?'стяжка':'Ø'+h.d}${P_.faces.has('R')&&h.face==='R'?' (прав.)':''} X${h.x} Y${h.y}`)});
+    P_.marks.filter(q=>q.k==='plate'&&inP([q.x,q.y])).forEach(q=>s+=`<rect x="${q.x-x0-1}" y="${Y(q.y)-16}" width="2" height="32" fill="none" stroke="#000" stroke-width=".3"/><text x="${q.x-x0+2}" y="${Y(q.y)+1}" font-size="2.4">планка X${q.x} Y${q.y}</text>`);
+    P_.marks.filter(q=>q.k==='rod'&&inP([q.x,q.y])).forEach(q=>s+=cross(q.x,q.y,10,`штанга X${q.x} Y${q.y}`));
+    P_.edges.forEach(e=>{const p=e.e==='T'?[e.p,H]:e.e==='B'?[e.p,0]:e.e==='L'?[0,e.p]:[W,e.p];if(inP(p))s+=`<path d="M${p[0]-x0-2} ${Y(p[1])}h4M${p[0]-x0} ${Y(p[1])-2}v4" stroke="#000" stroke-width=".4"/><text x="${p[0]-x0+1.5}" y="${Y(p[1])+(e.e==='T'?4:-1.5)}" font-size="2.4">торец ${e.k==='minifix'?'стяжка':'Ø'+e.d} ${e.e==='T'||e.e==='B'?'X':'Y'}${e.p}</text>`});
+    // метки совмещения листов и контрольная линейка 100 мм
+    s+=`<path d="M0 0h6M0 0v6M${PW} 0h-6M${PW} 0v6M0 ${PH}h6M0 ${PH}v-6M${PW} ${PH}h-6M${PW} ${PH}v-6" stroke="#000" stroke-width=".3"/>`;
+    if(!pages.length)s+=`<g transform="translate(${PW-112} ${PH-8})"><path d="M0 0h100M0 -3v6M50 -2v4M100 -3v6" stroke="#000" stroke-width=".4"/><text x="0" y="-4" font-size="2.6">контроль: ровно 100 мм — печать в масштабе 100%</text></g>`;
+    pages.push({r,c,svg:`<svg viewBox="0 0 ${PW} ${PH}" width="${PW}mm" height="${PH}mm" xmlns="http://www.w3.org/2000/svg">${s}</svg>`})}
+  const head=(p,i)=>`<p class="tpl-head"><b>${esc(g.name)}</b> ${esc(g.size)} — лист ${i+1} из ${pages.length} (ряд ${rows-p.r} сверху, колонка ${p.c+1} слева). Склейте листы по меткам, перекрытие ${ST} мм.</p>`;
+  return `<div class="tpl-intro"><h2>Шаблон присадки 1:1</h2><p>Печатайте в масштабе 100% (без «подогнать по размеру»). Проверьте линейку на первом листе: ровно 100 мм. Приложите шаблон к детали по углу, наколите центры шилом и сверлите. X — от ${P_.left==='перед'?'переднего края':P_.left||'левого края'} (левый край листа), Y — ${P_.horiz?'от левого края детали':'от нижнего края'}. Листов: ${pages.length}.</p></div>`+
+    pages.map((p,i)=>`<div class="tpl-page">${head(p,i)}${p.svg}</div>`).join('')}
+let TPL_TXT='';
+function openTpl(name){const g=drillMap(P,R.S,R.c).find(x=>x.name===name);if(!g)return;const h=drillTemplate(g);if(!h)return;DOC='tpl';TPL_TXT=`${g.name} ${g.size}\n`+g.lines.join('\n');
+  $('#docSheet').innerHTML=h;$('#docWrap').hidden=false;document.body.style.overflow='hidden';$('#docPrint').hidden=inFrame;$('#docShare').hidden=true;$('#docWrap').scrollTop=0}
 function drillText(){const L=[`Присадка: ${P.name}`,'Y — от нижнего края детали, X — от переднего края (у стенок) или от края фасада. Размеры в мм.',''];
   drillMap(P,R.S,R.c).forEach(g=>{L.push(`${g.name} — ${g.size} — ${g.qty} шт`);g.lines.forEach(l=>L.push('  • '+l));L.push('')});return L.join('\n')}
 
@@ -2504,6 +2608,17 @@ function secLayout(p,s,w,i){const sc=w.sections[i],t=s.t,zT=w.zTop,zB=w.zBot;
   const span=low-shTop,shelves=[];for(let j=0;j<sc.shelves;j++){const y=sc.rod?shTop+span*j/sc.shelves:shTop+span*(j+1)/(sc.shelves+1)-t/2;shelves.push(Math.min(y,zB-t))}
   return{drawers,baskets,shelves,rodY,seatY,hookY,shoes}}
 // ручка в 3D: планка на двух ножках (или кнопка), по выносу из каталога; ext — к какой двери или ящику прикреплена
+/* Ручка дверцы: вертикально у края открывания (в 40 мм от него), если помещается по высоте с запасом 40 мм от краёв;
+   иначе горизонтально посередине высоты у края открывания; если не помещается никак — null (в расчёте — ошибка).
+   mode: kb — кухня, нижние (ручка сверху), kw — кухня, верхние (снизу), ct — комод (сверху), cb — дверца над нишей (снизу).
+   Одна функция для присадки, чертежа и 3D. cx — от левого края фасада, cy — от нижнего. */
+const kHandleL=hd=>Math.max(hd&&hd.len||0,(hd&&hd.cc||0)+20);
+function handlePos(h,w,hd,mode,openR){const L=kHandleL(hd);
+  if(L+80<=h){let cy=mode==='kb'?h-Math.max(h*.08+Math.min(160,h*.25)/2,40+L/2):mode==='kw'?Math.max(130,40+L/2):mode==='ct'?h-Math.max(h*.15+Math.min(140,h*.3)/2,40+L/2):Math.max(40+Math.min(140,h*.3)/2,40+L/2);
+    cy=Math.min(Math.max(cy,40+L/2),h-40-L/2);return{v:true,cx:openR?w-40:40,cy,L}}
+  if(L+80<=w)return{v:false,cx:openR?w-40-L/2:40+L/2,cy:h/2,L};return null}
+const hpDraw=(x0,yTop,h,hp,sw)=>!hp?'':hp.v?handleV(x0+hp.cx,yTop+h-hp.cy-hp.L/2,hp.L,sw):handleH(x0+hp.cx-hp.L/2,yTop+h-hp.cy,hp.L,sw);
+const hpLines=(hl,hp)=>hp?hl(0,hp.cx,hp.cy,hp.v):['Ручка не помещается на этот фасад — выберите ручку короче'];
 function handle3D(A,hd,cx,cy,z,vertical,ext){if(!hd||!hd.proj)return;const th=12,zb=z+Math.max(0,hd.proj-th);
   if(!hd.cc){A(cx-11,cy-11,z,22,22,hd.proj,'metal',ext);return}
   const L=Math.max(hd.len||0,hd.cc+20);
@@ -2582,7 +2697,7 @@ function scene3dKitchen(p,s,c){const HD=HW(p,s).handle,k=p.k,t=s.t,fT=frontMat(p
       mod.boxes.forEach(b=>A(x+t+13,y0+b.y,20,iw-26,b.h,d-60,'box',{drawer:1}));
       mod.fronts.forEach(f=>{const fx=x+f.x;
         if(f.kind==='door'){const id=A.door(),door={id,hx:f.hinge==='L'?fx:fx+f.w,dir:f.hinge==='L'?-1:1,z:d+1};A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{door});if(f.glass)A(fx+22,y0+f.y+22,d+1+fT,f.w-44,f.h-44,2,'mirror',{door});
-          if(!f.noHandle){const hl=Math.max(HD.len||0,(HD.cc||0)+20);handle3D(A,HD,f.hinge==='L'?fx+f.w-40:fx+40,isWall?y0+f.y+130:y0+f.y+f.h-f.h*0.08-Math.min(hl,f.h*0.5)/2,d+1+fT,true,{door})}}
+          if(!f.noHandle){const hp=handlePos(f.h,f.w,HD,isWall?'kw':'kb',f.hinge==='L');if(hp)handle3D(A,HD,fx+hp.cx,y0+f.y+hp.cy,d+1+fT,hp.v,{door})}}
         else if(f.kind==='drawer'){A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{drawer:1});if(!f.noHandle)handle3D(A,HD,fx+f.w/2,y0+f.y+f.h-Math.min(40,f.h*.25),d+1+fT,false,{drawer:1})}
         else if(f.kind==='lift'){const lift={id:A.door(),hy:y0+f.y+f.h,z:d+1};A(fx,y0+f.y,d+1,f.w,f.h,fT,'front',{lift});if(!f.noHandle)handle3D(A,HD,fx+f.w/2,y0+f.y+Math.min(40,f.h*.2),d+1+fT,false,{lift})}
         else A(fx,y0+f.y,d+1,f.w,f.h,fT,'front')});
@@ -2623,13 +2738,13 @@ function scene3dChestBox(p,s,c){const HD=HW(p,s).handle,cc=p.c,t=s.t,W=cc.W,Hb=c
   for(let i=1;i<cc.cols.length;i++)if(kneeAdj(cc.cols,i))A(c.xs[i]-t,yb,0,t,Hb-t,D,'body');else A(c.xs[i]-t,yb+pl+t,0,t,Hb-2*t-pl,D,'body');
   cc.cols.forEach((cl,i)=>{if(cl.type==='knee')A(c.xs[i],yb+Hb-t-300,0,c.colWs[i],300,t,'body');
     if(nicheCol(cl)){const nh=nicheH(cl),dh=Hb-nh-2*t-4,fr=c.fr[i],nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd;A(c.xs[i],yb+nh,0,c.colWs[i],t,D,'body');if(cl.type==='washer')A(c.xs[i]+c.colWs[i]*.1,yb,40,c.colWs[i]*.8,850,Math.min(D-60,560),'metal');
-      const hs=c.ch[i]||[];if(dh>=150)for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),door={id:A.door(),hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1};A(dx,yb+nh+t+2,D+1,dw,dh,fT,'front',{door});handle3D(A,HD,hg==='L'?dx+dw-40:dx+40,yb+nh+t+2+Math.min(140,dh*.3)/2+40,D+1+fT,true,{door})}}});
+      const hs=c.ch[i]||[];if(dh>=150)for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),door={id:A.door(),hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1};A(dx,yb+nh+t+2,D+1,dw,dh,fT,'front',{door});{const hp=handlePos(dh,dw,HD,'cb',hg==='L');if(hp)handle3D(A,HD,dx+hp.cx,yb+nh+t+2+hp.cy,D+1+fT,hp.v,{door})}}}});
   cc.cols.forEach((cl,i)=>{const fr=c.fr[i],fz=c.fz,y0=yb+pl,x0=c.xs[i],cw=c.colWs[i];
     if(cl.type==='drawers'||cl.type==='flip'){for(const d of chestDY(cl,fz)){const fh=d.h,yT=y0+d.yT;if(cl.type==='drawers'){A(x0+13,yT-fh+25,20,cw-26,Math.max(60,fh-60),D-60,'box',{drawer:1});A(fr.x,yT-fh,D+1,fr.w,fh,fT,'front',{drawer:1});handle3D(A,HD,fr.x+fr.w/2,yT-fh/2,D+1+fT,false,{drawer:1})}
       else{const lift={id:A.door(),hy:yT-fh,z:D+1,flip:true};A(fr.x,yT-fh,D+1,fr.w,fh,fT,'front',{lift});A(x0+2,yT-fh+t,D-Math.min(D-40,200)-20,cw-4,t,Math.min(D-40,200),'body',{lift});handle3D(A,HD,fr.x+fr.w/2,yT-Math.min(40,fh*.2),D+1+fT,false,{lift})}}}
     else{if(cl.type==='door'||cl.type==='open')for(let j=0;j<cl.shelves;j++)A(x0,y0+t+(Hb-pl-2*t)*(j+1)/(cl.shelves+1),0,cw,t,D-20,'body');
       if(nicheCol(cl)){const nh=nicheH(cl);for(let j=0;j<cl.shelves;j++)A(x0,yb+nh+t+(Hb-t-nh-t)*(j+1)/(cl.shelves+1),0,cw,t,D-20,'body')}
-      if(cl.type==='door'){const nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),id=A.door();const door={id,hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1};A(dx,y0,D+1,dw,fz,fT,'front',{door});handle3D(A,HD,hg==='L'?dx+dw-40:dx+40,y0+fz-fz*.15-Math.min(140,fz*.3)/2,D+1+fT,true,{door})}}}});
+      if(cl.type==='door'){const nd=fr.w>600?2:1,dw=(fr.w-3*(nd-1))/nd,hs=c.ch[i]||[];for(let j=0;j<nd;j++){const dx=fr.x+j*(dw+3),hg=hs[j]||(j===0?'L':'R'),id=A.door();const door={id,hx:hg==='L'?dx:dx+dw,dir:hg==='L'?-1:1,z:D+1};A(dx,y0,D+1,dw,fz,fT,'front',{door});{const hp=handlePos(fz,dw,HD,'ct',hg==='L');if(hp)handle3D(A,HD,dx+hp.cx,y0+hp.cy,D+1+fT,hp.v,{door})}}}}});
   const H=yb+Hb,fz=D+fT+2,y0d=c.hang&&!lg?yb:0,dims=[{a:[0,0,fz],b:[W,0,fz],o:[0,0,220],t:W},{a:[W,y0d,fz],b:[W,H,fz],o:[200,0,0],t:Math.round(H-y0d)},{a:[W,0,D-Do],b:[W,0,D],o:[200,0,0],t:Do}];
   cc.cols.forEach((cl,i)=>{if(cl.type!=='drawers'&&cl.type!=='flip')return;const fr=c.fr[i];for(const d of chestDY(cl,c.fz)){const fh=d.h,yT=yb+pl+d.yT;dims.push({lbl:[fr.x+fr.w/2,yT-fh/2,D+fT+4],t:`${Math.round(fr.w)}×${Math.round(fh)}`,small:1})}});
   if(cc.cols.length>1)cc.cols.forEach((cl,i)=>dims.push({a:[c.xs[i],H,fz],b:[c.xs[i]+c.colWs[i],H,fz],o:[0,100,0],t:Math.round(c.colWs[i]),small:1}));
@@ -3420,7 +3535,7 @@ function renderParts(){
   const em=$('#partsMirror');em.hidden=!c.mirrors.length;
   if(c.mirrors.length)em.innerHTML=partsTable(c.mirrors,'Зеркала 4 мм — в стекольную мастерскую',false)+'<p class="hint">Зеркало меньше фасада на 50 мм с каждой стороны. Клеится на специальный клей для зеркал, кромка шлифованная.</p>';
   $('#orderText').value=orderText();$('#csvText').value=csvText();renderSup();renderMount();
-  const dm=drillMap(P,R.S,R.c);$('#drillList').innerHTML=dm.map(g=>`<details class="drill"><summary><b>${esc(g.name)}</b> <span class="num hint">${g.size} · ${g.qty} шт</span></summary><ul>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`).join('');
+  const dm=drillMap(P,R.S,R.c);$('#drillList').innerHTML=dm.map((g,i)=>`<details class="drill" data-dpi="${i}"><summary><b>${esc(g.name)}</b> <span class="num hint">${g.size} · ${g.qty} шт</span></summary><div class="dpic-box"></div><ul>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`).join('');
 }
 /* ---------- закупка по поставщикам ---------- */
 // куда что покупать: столешницы — в цех столешниц, купе — в цех дверей купе, зеркала — в стекольную, остальное — в магазин фурнитуры
@@ -3691,7 +3806,7 @@ function docBlocks(kind){const co=settings.company,c=R.c,d=describe(),k=R.cost,p
   }
   return B}
 function docTitle(kind){return kind==='contract'?'Договор':kind==='act'?'Акт приёма-передачи':'Памятка клиенту'}
-function docText(kind){const L=[];docBlocks(kind).forEach(b=>{if(b.title){L.push(b.title.toUpperCase());if(b.meta)L.push(b.meta.filter(Boolean).join(', '))}
+function docText(kind){if(kind==='tpl')return TPL_TXT;const L=[];docBlocks(kind).forEach(b=>{if(b.title){L.push(b.title.toUpperCase());if(b.meta)L.push(b.meta.filter(Boolean).join(', '))}
   if(b.h)L.push('',b.h);(b.p||[]).forEach(x=>L.push(x));(b.list||[]).forEach(x=>L.push(/^_+$/.test(x)?'______________________________':(/^☐/.test(x)?'':'• ')+x));
   (b.spec||[]).forEach(([k,v])=>L.push(`${k}: ${v}`));if(b.sign)L.push('',...b.sign.map(sd=>sd.filter(Boolean).join(', ')+'   ____________ (подпись)'))});return L.join('\n').replace(/\n{3,}/g,'\n\n')}
 function docHTML(kind){return docBlocks(kind).map(b=>{if(b.title)return `<h2>${esc(b.title)}</h2>${b.meta?`<div class="doc-meta">${b.meta.filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}`;
@@ -4008,6 +4123,7 @@ document.addEventListener('click',e=>{
   if(d.docopen){openDoc(d.docopen);return}
   if(d.docsend){const t=docText(d.docsend);if(navigator.share&&!inFrame)navigator.share({title:docTitle(d.docsend)+': '+P.name,text:t}).catch(()=>{});else copy(t,$('#docText'),docTitle(d.docsend)+' — текст скопирован');return}
   if(b.id==='closeDoc'){$('#docWrap').hidden=true;document.body.style.overflow='';return}
+  if(d.dtpl!==undefined){openTpl(d.dtpl);return}
   if(b.id==='docCopy'){copy(docText(DOC),$('#docText'),'Текст скопирован');$('#docWrap').hidden=true;document.body.style.overflow='';return}
   if(b.id==='docShare'){navigator.share({title:docTitle(DOC)+': '+P.name,text:docText(DOC)}).catch(()=>{});return}
   if(b.id==='docPrint'){try{window.print()}catch(e){}return}
@@ -4065,7 +4181,7 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
+window.ShkafMaster={drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
   // для проверок: текущий расчёт и тексты, которые видит клиент
   __hooks:{R:()=>R,offerText,docText,supplierLists,rub,mountText,T3:()=>T3}};
 // работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала

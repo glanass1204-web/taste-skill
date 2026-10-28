@@ -795,6 +795,9 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       <p class="hint">Поставьте цены вашего поставщика. Размеры ручек и вычеты для направляющих влияют на расчёт и проверки — берите их из карточки товара или инструкции.</p>
       <div id="setCat"></div></details>
     <details class="card fold"><summary><h3>Цены, ₽</h3></summary><div class="grid2" id="setPrice"></div></details>
+    <details class="card fold"><summary><h3>Цены инструмента, ₽</h3></summary>
+      <p class="hint">Для списка «Инструмент и оснастка на этот заказ». Поставьте цены вашего магазина; пустое поле — цена по умолчанию.</p>
+      <div class="grid2" id="setTools"></div></details>
     <details class="card fold"><summary><h3>Работа и прибыль</h3></summary><div class="grid2" id="setWork"></div></details>
     <details class="card fold"><summary><h3>Резервная копия</h3></summary>
       <p class="hint">Все заказы и цены в одном файле. Сохраните его, чтобы не потерять данные при смене телефона.</p>
@@ -898,13 +901,13 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='55 от 28.10.2026';
+const APP_VER='56 от 28.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
 const KIND_NAME={wardrobe:'Шкаф',kitchen:'Кухня',chest:'Комод, тумба'};
 
-const DEFAULT_SETTINGS={jig:'none',tools:{},t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
+const DEFAULT_SETTINGS={jig:'none',tools:{},toolPrice:{},t:16,sheetL:2800,sheetW:2070,kerf:4,trim:10,grain:true,edgeReserve:10,fMinArea:0,work:20,markup:40,
   company:{name:'',phone:'',city:'',lead:'14–21 рабочий день',warranty:'',person:'',inn:'',ogrn:'',addr:'',warrantyM:'24'},
   p:{ldsp:4800,hdf:1100,edge:40,edge08:15,edge1:20,edgeWork:35,cut:30,hinge:180,handle:250,confirmat:6,support:6,slides:650,rod:320,flange:60,rodPull:650,liftFloor:250,deliveryKm:40,dismantle:1500,trash:1000,panto:4500,trousers:3200,shoeOut:1800,mirrorOut:3500,iron:7000,ledSensor:900,basket:1900,mirror:3200,tie:30,
      coupeProfile:4200,coupeFill:2400,coupeMirror:3600,coupeTint:4500,coupeSand:5500,coupePhoto:6500,coupeDiv:300,coupeRail:750,worktop:3500,kplinth:450,leg:60,hanger:90,sinkCut:900,drying:1600,bracket:15,nail:1,cap:2,minifix:25,glide:10,hook:80,wallFix:40,anchor:35,radiusCut:250,hangRail:450,flip:900,cargo:6500,magic:17000,carousel:8000,bin:3000,glassFront:9000,gaslift:300,golaL:1800,golaC:2400,apron:3000,topPlinth:600,led:1200,ledPsu:1500,edge04:12,hobCut:900,grille:350,hinge170:450,hingeFold:400,plinthCorner:150,topEnd:150,topJoint:300,bedBase:2500,bedMech:2600,bedGas:750,bedBar:90}};
@@ -2518,10 +2521,14 @@ const DR_HORIZ=/рыша и дно|^Крышка|Царга под ракови�
 function drillParse(g){const m=/^(\d+(?:\.\d+)?)×(\d+(?:\.\d+)?)/.exec(g.size);if(!m)return null;
   const H=+m[1],W=+m[2],holes=[],marks=[],edges=[],cuts=[],notes=[],skip=[],refs=new Set(),horiz=DR_HORIZ.test(g.name.replace(/^[^:]*: /,''));
   const RX=new RegExp('X '+DRL),RY=new RegExp('Y(?: от низа:)? '+DRL),RL=new RegExp('от левого края '+DRL);
+  let lastPin=null;
   g.lines.forEach(raw=>{let face='A',l=raw;const fm=/^(Левая|Правая) (сторона|боковина)\. /.exec(l);if(fm){face=fm[1]==='Левая'?'L':'R';l=l.slice(fm[0].length)}
     const c=l.replace(/\s*\([^)]*\)/g,''),dm=/Ø(\d+)/.exec(c),d=dm?+dm[1]:0;let r;const n0={holes:holes.length,marks:marks.length,edges:edges.length};
     const ref=/от переднего края/.test(c)?'перед':/от края у стены/.test(c)?'край у стены':/от торца у изголовья/.test(c)?'торец у изголовья':'';
-    if((r=new RegExp('Чашки петель Ø(\\d+)[^:]*: центр в ('+DRN+') мм от (левого|правого) края; Y от низа: '+DRL).exec(c))){const x=r[3]==='левого'?+r[2]:W-r[2];drNums(r[4]).forEach(y=>holes.push({x,y,d:+r[1],face}))}
+    if((r=new RegExp('^Кондуктор 32: ряд через 32 мм от Y ('+DRN+') до Y ('+DRN+') — полки ставьте на Y '+DRL+'$').exec(c))&&lastPin&&lastPin.face===face){
+      const a=+r[1],k=Math.round((r[2]-a)/32)+1,snap=drNums(r[3]).map(v=>Math.round(v*2)/2);holes.splice(lastPin.start,lastPin.end-lastPin.start);
+      for(let i=0;i<k;i++){const y=Math.round((a+32*i)*2)/2;lastPin.xs.forEach(x=>holes.push({x,y,d:5,face,k:snap.includes(y)?'rowS':'row'}))}lastPin=null}
+    else if((r=new RegExp('Чашки петель Ø(\\d+)[^:]*: центр в ('+DRN+') мм от (левого|правого) края; Y от низа: '+DRL).exec(c))){const x=r[3]==='левого'?+r[2]:W-r[2];drNums(r[4]).forEach(y=>holes.push({x,y,d:+r[1],face}))}
     else if((r=new RegExp('чашки Ø(\\d+) у верхней кромки, центр в ('+DRN+') мм от неё; X '+DRL+' от левого края').exec(c)))drNums(r[3]).forEach(x=>holes.push({x,y:H-r[2],d:+r[1],face}));
     else if((r=new RegExp('^Планки петель[^;]*ось(?: в)? ('+DRN+') мм от переднего края; Y '+DRL).exec(c))){refs.add('перед');drNums(r[2]).forEach(y=>marks.push({k:'plate',x:+r[1],y,face}))}
     else if((r=new RegExp('^Штанга: центр флянца X ('+DRN+'), Y ('+DRN+')$').exec(c)))marks.push({k:'rod',x:+r[1],y:+r[2],face});
@@ -2533,13 +2540,13 @@ function drillParse(g){const m=/^(\d+(?:\.\d+)?)×(\d+(?:\.\d+)?)/.exec(g.size);
     else if((r=new RegExp('^Оба торца: Ø(\\d+) глубиной \\d+ — X '+DRL+'$').exec(c)))drNums(r[2]).forEach(x=>edges.push({e:'T',p:x,d:+r[1]},{e:'B',p:x,d:+r[1]}));
     else if((r=new RegExp('^Верхний торец: эксцентриковые стяжки крышки — X '+DRL+', по схеме стяжки$').exec(c)))drNums(r[1]).forEach(x=>edges.push({e:'T',p:x,d:0,k:'minifix'}));
     else if((r=new RegExp('^Вырез под плинтус: снизу у заднего края ('+DRN+') мм по высоте × ('+DRN+') мм по глубине$').exec(c)))cuts.push({x:W-r[2],y:0,w:+r[2],h:+r[1]});
-    else if(/^Кондуктор 32|^Без ручки|^Навес|^Задняя стенка ЛДСП|^Газлифты|^Крепится|^Навешивается|^Вытяжка|^Конфирматы в боковины|^Пантограф|^Полки с двух сторон|^Верх|^Низ —|^Стоит на полу|^Проставка/.test(c))notes.push(raw);
+    else if(/^Без ручки|^Навес|^Задняя стенка ЛДСП|^Газлифты|^Крепится|^Навешивается|^Вытяжка|^Конфирматы в боковины|^Пантограф|^Полки с двух сторон|^Верх|^Низ —|^Стоит на полу|^Проставка/.test(c))notes.push(raw);
     else if((dm||/^Снизу: эксцентриковые стяжки/.test(c))&&!/Только на|от торца у изножья|глубиной|Торец|торец|по высоте,|шт\. по высоте/.test(c)&&!/X от/.test(c)){
       // общий случай: «Y …; X …» или «X …, Y …» с одним диаметром; пары X/Y ищем внутри частей через «;»
       const minifix=/эксцентриков/.test(c),k=minifix?'minifix':'hole';let px=null,py=null,okAll=true;const add=(xs,ys)=>xs.forEach(x=>ys.forEach(y=>holes.push({x,y,d:minifix?0:d,face,k})));
       c.split(';').forEach(part=>{let xs=null,ys=null,q;if((q=RX.exec(part)))xs=drNums(q[1]);if((q=RL.exec(part)))ys=drNums(q[1]);if((q=RY.exec(part)))ys=drNums(q[1]);
         if(xs&&ys)add(xs,ys);else if(xs){if(py){add(xs,py);py=null}else px=xs}else if(ys){if(px){add(px,ys);px=null}else py=ys}});
-      if(px||py||holes.length===n0.holes)okAll=false;if(!okAll){holes.length=n0.holes;skip.push(raw)}else if(ref)refs.add(ref)}
+      if(px||py||holes.length===n0.holes)okAll=false;if(!okAll){holes.length=n0.holes;skip.push(raw)}else{if(ref)refs.add(ref);if(/олкодержател/.test(c)){const q=RX.exec(c);lastPin={face,xs:q?drNums(q[1]):[],start:n0.holes,end:holes.length}}}}
     else skip.push(raw)});
   // все точки должны лежать на детали — иначе картинку не показываем вовсе (лучше текст, чем неверная картинка)
   const inX=v=>v>=-0.5&&v<=W+0.5,inY=v=>v>=-0.5&&v<=H+0.5;
@@ -2551,14 +2558,14 @@ function drillSvg(g,P_){if(!P_||P_.bad)return '';const {W,H}=P_,M=Math.max(W,H),
   P_.cuts.forEach(c=>s+=`<rect x="${c.x}" y="${Y(c.y+c.h)}" width="${c.w}" height="${c.h}" fill="#FFFFFF" stroke="#3A4148" stroke-width="${sw}" stroke-dasharray="${sw*4} ${sw*3}"/>`);
   P_.marks.filter(q=>q.k==='slide').forEach(q=>s+=`<line x1="0" x2="${W}" y1="${Y(q.y)}" y2="${Y(q.y)}" stroke="#1E8C7E" stroke-width="${sw*1.6}" stroke-dasharray="${sw*8} ${sw*5}"/>`);
   const dash=f=>two&&f==='R'?` stroke-dasharray="${sw*3} ${sw*2}" fill-opacity=".25"`:'';
-  P_.holes.forEach(h=>{const r=h.k==='minifix'?Math.max(7.5,M*0.006):Math.max(h.d/2,M*0.005),col=h.k==='minifix'?'#7A4FB5':DR_COL(h.d);s+=`<circle cx="${h.x}" cy="${Y(h.y)}" r="${r}" fill="${col}" stroke="${col}" stroke-width="${sw}"${dash(h.face)}/>`});
+  P_.holes.forEach(h=>{const r=h.k==='minifix'?Math.max(7.5,M*0.006):Math.max(h.d/2,M*0.005),col=h.k==='minifix'?'#7A4FB5':DR_COL(h.d);s+=`<circle cx="${h.x}" cy="${Y(h.y)}" r="${r}" fill="${h.k==='row'?'#FFFFFF':col}" stroke="${col}" stroke-width="${h.k==='row'?sw*1.6:sw}"${dash(h.face)}/>`});
   P_.marks.filter(q=>q.k==='plate').forEach(q=>s+=`<rect x="${q.x-M*0.006}" y="${Y(q.y)-M*0.012}" width="${M*0.012}" height="${M*0.024}" fill="#2E8B57"${dash(q.face)}/>`);
   P_.marks.filter(q=>q.k==='rod').forEach(q=>s+=`<circle cx="${q.x}" cy="${Y(q.y)}" r="${Math.max(12,M*0.01)}" fill="none" stroke="#555E66" stroke-width="${sw*2}"/>`);
   P_.edges.forEach(e=>{const L=M*0.018,col=e.k==='minifix'?'#7A4FB5':DR_COL(e.d);
     s+=e.e==='T'?`<path d="M${e.p} ${0} l${-L/2} ${-L} h${L} z" fill="${col}"/>`:e.e==='B'?`<path d="M${e.p} ${H} l${-L/2} ${L} h${L} z" fill="${col}"/>`:e.e==='L'?`<path d="M0 ${Y(e.p)} l${-L} ${-L/2} v${L} z" fill="${col}"/>`:`<path d="M${W} ${Y(e.p)} l${L} ${-L/2} v${L} z" fill="${col}"/>`});
   // размерные засечки: все X — снизу, все Y — слева
   const uniq=a=>[...new Set(a.map(v=>Math.round(v*2)/2))].sort((a,b)=>a-b);
-  const xs=uniq([...P_.holes.map(h=>h.x),...P_.marks.filter(q=>q.x!==undefined).map(q=>q.x),...P_.edges.filter(e=>e.e==='T'||e.e==='B').map(e=>e.p)]),ys=uniq([...P_.holes.map(h=>h.y),...P_.marks.map(q=>q.y),...P_.edges.filter(e=>e.e==='L'||e.e==='R').map(e=>e.p)]);
+  const xs=uniq([...P_.holes.map(h=>h.x),...P_.marks.filter(q=>q.x!==undefined).map(q=>q.x),...P_.edges.filter(e=>e.e==='T'||e.e==='B').map(e=>e.p)]),ys=uniq([...P_.holes.filter(h=>h.k!=='row').map(h=>h.y),...P_.marks.map(q=>q.y),...P_.edges.filter(e=>e.e==='L'||e.e==='R').map(e=>e.p)]);
   // подписи не выбрасываем: раздвигаем на шаг шрифта и ведём выносную линию к своей засечке
   const spread=(a,gap)=>{const p=a.map(v=>v);for(let i=1;i<p.length;i++)if(p[i]<p[i-1]+gap)p[i]=p[i-1]+gap;return p};
   {const lx=spread(xs,fs*1.15);xs.forEach((x,i)=>{const q=lx[i];s+=`<path d="M${x} ${H}V${H+fs*.5}L${q} ${H+fs*1.3}" fill="none" stroke="#3A4148" stroke-width="${sw}"/><text x="${q+fs*.35}" y="${H+fs*1.5}" font-size="${fs}" transform="rotate(90 ${q+fs*.35} ${H+fs*1.5})" fill="#1D2227">${x}</text>`})}
@@ -2570,6 +2577,7 @@ function drillSvg(g,P_){if(!P_||P_.bad)return '';const {W,H}=P_,M=Math.max(W,H),
 function drillLegend(P_){const ds=[...new Set(P_.holes.filter(h=>h.k!=='minifix').map(h=>h.d))].sort((a,b)=>b-a),two=P_.faces.has('L')&&P_.faces.has('R'),o=[];
   ds.forEach(d=>o.push(`<span><i style="background:${DR_COL(d)}"></i>Ø${d}${d>=30?' чашка петли':d===5?' (полкодержатель, ручка, торец)':d===7||d===8?' сквозное под конфирмат':''}</span>`));
   if(P_.holes.some(h=>h.k==='minifix')||P_.edges.some(e=>e.k==='minifix'))o.push(`<span><i style="background:#7A4FB5"></i>эксцентриковая стяжка</span>`);
+  if(P_.holes.some(h=>h.k==='row'))o.push(`<span><i style="border:2px solid #2F6FB0;background:#FFFFFF"></i>ряд через 32 мм (кондуктор); сплошные — полки</span>`);
   if(P_.marks.some(q=>q.k==='plate'))o.push(`<span><i style="background:#2E8B57;border-radius:2px"></i>планка петли</span>`);
   if(P_.marks.some(q=>q.k==='rod'))o.push(`<span><i style="border:2px solid #555E66"></i>флянец штанги</span>`);
   if(P_.marks.some(q=>q.k==='slide'))o.push(`<span><i style="background:#1E8C7E;border-radius:0;height:3px"></i>низ ящика (направляющая)</span>`);
@@ -2602,8 +2610,15 @@ function openTpl(name){const g=drillMap(P,R.S,R.c).find(x=>x.name===name);if(!g)
   $('#docSheet').innerHTML=h;$('#docWrap').hidden=false;document.body.style.overflow='hidden';$('#docPrint').hidden=inFrame;$('#docShare').hidden=true;$('#docWrap').scrollTop=0}
 /* ---------- инструмент и оснастка на заказ ----------
    Список собирается из фурнитуры и присадки заказа. Цены — примерные (2026), только для оценки «сколько докупить». */
+// каталог инструмента: цена по умолчанию; свою цену мастер ставит в «Настройках» (settings.toolPrice)
+const TOOL_CAT=[['screw','Шуруповёрт с регулировкой усилия',6000],['tape','Рулетка 5 м и строительный угольник',900],['clamp','Струбцины угловые, 2 шт.',900],['level','Уровень 60 см',600],['awl','Шило и карандаш',150],
+  ['f35','Сверло Форстнера Ø35',600],['stop35','Упор глубины для Ø35 (стопорное кольцо)',200],['confd','Сверло конфирматное ступенчатое 5/7',350],['hex','Бита-шестигранник 4 мм под конфирмат',150],['d5','Сверло Ø5 с упором глубины',250],['d8','Сверло Ø8 по дереву',150],['f15','Сверло Форстнера Ø15',400],
+  ['perf','Перфоратор',6000],['dconc','Свёрла по бетону Ø6 и Ø8',300],['jigsaw','Электролобзик и пилки чистого реза',5000],['router','Фрезер и шаблон для стыка столешниц',8000],['miter','Торцовочная пила с диском по алюминию',9000],['iron','Утюг и кромочный нож (торцовка)',900],
+  ['jig32','Кондуктор-линейка с шагом 32 мм',2500],['jigU','Универсальный кондуктор с упорами',4500],['tplS','Шаблон для полкодержателей (полоса с отверстиями)',700],['jigC','Кондуктор для конфирматов',1500],['jigH','Кондуктор для петель Ø35',1200],['jigR','Шаблон для ручек',800],['jigS','Шаблон для направляющих',900]];
+const TOOL_DEF=Object.fromEntries(TOOL_CAT.map(t=>[t[0],t[2]]));
+const toolPrice=(s,id,def)=>{const v=(s.toolPrice||{})[id];return v!==undefined&&v!==null&&v!==''&&!isNaN(+v)&&+v>=0?+v:(TOOL_DEF[id]??def)};
 function toolsFor(p,s,c,dm){const H=c.hw.map(r=>r[0]).join('\n'),DL=dm.map(g=>g.lines.join('\n')).join('\n'),hd=HW(p,s).handle,jig=s.jig||'none',o=[];
-  const T=(id,grp,name,why,price,need)=>o.push({id,grp,name,why,price,need:need!==false});
+  const T=(id,grp,name,why,price,need)=>o.push({id,grp,name,why,price:toolPrice(s,id,price),def:price,need:need!==false});
   const hinge=/Петля/.test(H),conf=/Конфирмат/.test(H),minifix=/Эксцентриков/.test(H),sup=/Полкодержатель/.test(H),hcc=(hd.cc||0)>0&&/^Ручка/m.test(H),slides=/^Направляющие/m.test(H),d8=/Ø8/.test(DL),
     wall=/Крепление к стене|Навес|Шина монтажная|Дюбель/.test(H)||p.kind==='kitchen',worktop=p.kind==='kitchen'&&p.k.worktop,cut=/Врезка мойки|Вырез под варочную/.test(H),joint=/соединительная столешницы/i.test(H),
     coupe=p.kind==='wardrobe'&&p.type==='coupe',thin=[p.mat.edgeF,p.mat.edgeB].some(e=>String(e)==='0.4'),radius=/Радиусный рез/.test(H),edgeOrder=!thin;
@@ -2643,8 +2658,8 @@ function renderTools(dm){const box=$('#toolList');if(!box)return;const {list,not
     `<div class="tool-sum"><b>${need?`Не хватает нужного: ≈ ${rub(need)}`:'Всё нужное есть'}</b>${want?`<span class="hint">Оснастка и удобства (желательно): ≈ ${rub(want)}</span>`:''}</div>`+(notes.length?`<ul class="hint">${notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'')}
 // кондуктор 32: к строкам полкодержателей добавляем ряд через 32 мм и ближайшие отверстия ряда для каждой полки
 function jig32Lines(dm,s){if((s.jig||'none')!=='32')return dm;const re=/^((?:Левая|Правая) сторона\. )?(Полки для обуви: полкодержатели|Полкодержатели)[^:]*:? .*Y \(низ полки\) (.+)$/;
-  dm.forEach(g=>{const add=[];g.lines.forEach(l=>{const m=re.exec(l);if(!m)return;const ys=drNums(m[3]);if(!ys.length)return;const y0=Math.min(...ys),y1=Math.max(...ys),k=Math.round((y1-y0)/32),snap=ys.map(y=>R0(y0+32*Math.round((y-y0)/32)));
-    add.push(`${m[1]||''}Кондуктор 32: ряд через 32 мм от Y ${R0(y0)} до Y ${R0(y0+32*k)} (${k+1} отв. в ряду, те же X) — полки ставьте на Y ${LIST(snap)}`)});g.lines.push(...add)});return dm}
+  dm.forEach(g=>{const out=[];g.lines.forEach(l=>{out.push(l);const m=re.exec(l);if(!m)return;const ys=drNums(m[3]);if(!ys.length)return;const y0=Math.min(...ys),y1=Math.max(...ys),k=Math.round((y1-y0)/32),snap=ys.map(y=>R0(y0+32*Math.round((y-y0)/32)));
+    out.push(`${m[1]||''}Кондуктор 32: ряд через 32 мм от Y ${R0(y0)} до Y ${R0(y0+32*k)} (${k+1} отв. в ряду, те же X) — полки ставьте на Y ${LIST(snap)}`)});g.lines=out});return dm}
 function drillText(){const L=[`Присадка: ${P.name}`,'Y — от нижнего края детали, X — от переднего края (у стенок) или от края фасада. Размеры в мм.',''];
   drillMap(P,R.S,R.c).forEach(g=>{L.push(`${g.name} — ${g.size} — ${g.qty} шт`);g.lines.forEach(l=>L.push('  • '+l));L.push('')});return L.join('\n')}
 
@@ -3934,6 +3949,7 @@ function renderSettings(){
   const inp=(k,label,unit,val,grp)=>`<div class="field"><label for="s_${k}">${label}</label><div class="inwrap"><input id="s_${k}" data-s="${grp}:${k}" type="number" inputmode="decimal" value="${val}"><span>${unit}</span></div></div>`;
   $('#setMat').innerHTML=SET_MAT.map(([k,l,u])=>inp(k,l,u,settings[k],'')).join('');
   $('#setPrice').innerHTML=SET_PRICE.map(([k,l,u])=>inp(k,l,u,settings.p[k],'p')).join('');
+  {const tp=settings.toolPrice||{},box=$('#setTools'),ae=document.activeElement;if(box&&!(ae&&box.contains(ae)))box.innerHTML=TOOL_CAT.map(([id,nm,def])=>`<div class="field"><label for="tp_${id}">${esc(nm)}</label><div class="inwrap"><input id="tp_${id}" data-tp="${id}" type="number" inputmode="numeric" min="0" placeholder="${def}" value="${tp[id]??''}"><span>₽</span></div></div>`).join('')}
   $('#setWork').innerHTML=SET_WORK.map(([k,l,u])=>inp(k,l,u,settings[k],'')).join('');
   $('#sGrain').checked=settings.grain;
   const ci=(k,x,f,label,ro)=>`<div class="field"><label for="c_${k}_${x.id}_${f}">${label}</label><div class="inwrap"><input id="c_${k}_${x.id}_${f}" data-cat="${k}:${x.id}:${f}" type="number" inputmode="decimal" value="${x[f]}"${ro?' disabled':''}></div></div>`;
@@ -4061,6 +4077,7 @@ document.addEventListener('input',e=>{
   if(d.mname){const [st,k,id]=d.mname.split(':'),it=mineList(st,k).find(x=>x.id===id);if(it){it.name=el.value.trim()||'Без названия';save();renderHw();renderMat()}return}
   if(d.catname){const [k,id]=d.catname.split(':'),it=settings.cat[k].find(x=>x.id===id);if(it){it.name=el.value.trim()||'Без названия';save();renderHw()}return}
   if(d.cat){const [k,id,f]=d.cat.split(':'),v=+el.value;if(el.value===''||!Number.isFinite(v)||v<0)return;const it=settings.cat[k].find(x=>x.id===id);if(it){it[f]=v;change()}return}
+  if(d.tp){const v=+el.value,tp=Object.assign({},settings.toolPrice);if(el.value===''){delete tp[d.tp]}else{if(isNaN(v)||v<0||v>1e6)return;tp[d.tp]=v}settings.toolPrice=tp;change();return}
   if(d.s){const [g,k]=d.s.split(':');const v=+el.value;if(el.value===''||isNaN(v)||v<0)return;
     if(g==='p')settings.p[k]=v;else settings[k]=v;change();}
 });
@@ -4257,7 +4274,7 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
+window.ShkafMaster={TOOL_CAT,jig32Lines,toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
   // для проверок: текущий расчёт и тексты, которые видит клиент
   __hooks:{R:()=>R,offerText,docText,supplierLists,rub,mountText,T3:()=>T3}};
 // работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала

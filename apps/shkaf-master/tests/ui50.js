@@ -1,0 +1,16 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});const pg=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:1.5});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://localhost:8765/');await pg.evaluate(()=>localStorage.clear());await pg.reload();await pg.waitForTimeout(800);
+const log=(c,m)=>console.log(c?'✓':'✗',m);const C=()=>pg.evaluate(()=>window.ShkafMaster.__hooks.R().c);
+await pg.selectOption('#pEndR','round');await pg.waitForTimeout(300);log(await pg.isVisible('#pEndW'),'поле ширины торцевых полок появилось');
+await pg.fill('#pEndW','280');await pg.press('#pEndW','Tab');await pg.waitForTimeout(300);log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.parts.some(x=>/радиусная \(R 280/.test(x.name))),'радиусные 280 из меню');
+await (await pg.$('#front')).screenshot({path:'look/end50.png'});
+await pg.click('[data-view="3d"]');await pg.waitForTimeout(4500);await (await pg.$('#v3canvas')).screenshot({path:'look/end50-3d.png'});await pg.click('[data-view="2d"]');
+await pg.selectOption('#pEndR','');await pg.fill('#pSlope','1500');await pg.press('#pSlope','Tab');await pg.waitForTimeout(400);
+log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.parts.some(x=>/Крыша скошенная/.test(x.name))),'скос из меню');
+await pg.click('[data-view="3d"]');await pg.waitForTimeout(3000);await pg.evaluate(()=>{const T=window.ShkafMaster.__hooks.T3();const o=T.cam.position.clone().sub(T.ctl.target);o.applyAxisAngle(new T.cam.up.constructor(0,1,0),1.0);T.cam.position.copy(T.ctl.target).add(o);T.ctl.update()});await pg.waitForTimeout(800);
+await (await pg.$('#v3canvas')).screenshot({path:'look/slope50-3d.png'});await pg.click('[data-view="2d"]');
+await pg.click('[data-kind="chest"]');await pg.waitForTimeout(400);await pg.click('[data-preset="arounddoor"]');await pg.waitForTimeout(400);
+log(await pg.evaluate(()=>window.ShkafMaster.__hooks.R().c.parts.some(x=>/над проходом/.test(x.name))),'шкаф вокруг двери из кнопки');await (await pg.$('#front')).screenshot({path:'look/door50.png'});
+await pg.click('[data-preset="shelf"]');await pg.waitForTimeout(300);log(await pg.isChecked('#cHang'),'полка навесная: подвесная');
+console.log('errs',errs);await b.close()})();

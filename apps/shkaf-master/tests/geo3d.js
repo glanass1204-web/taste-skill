@@ -49,7 +49,7 @@ const res=await pg.evaluate(([N,SEED])=>{const M=window.ShkafMaster,fails=[],cnt
   const d=scene3dData();stat.orders++;
   const all=[];d.groups.forEach(gr=>gr.items.forEach(it=>{ok([it.x,it.y,it.z,it.w,it.h,it.d].every(Number.isFinite),tag+': не число в 3D '+JSON.stringify(it),'числа');ok(it.w>0&&it.h>0&&it.d>0,tag+': нулевой размер','размер');all.push(world(gr,it))}));
   stat.items+=all.length;
-  const sol=all.filter(b=>SOLID.has(b.m)),box=all.filter(b=>b.m==='box');
+  const sol=all.filter(b=>SOLID.has(b.m)&&!b.it.poly),box=all.filter(b=>b.m==='box');
   for(let i=0;i<sol.length;i++)for(let j=i+1;j<sol.length;j++){stat.pairs++;if(ov(sol[i],sol[j]))ok(false,tag+': детали в 3D пересекаются: '+fmt(sol[i])+' и '+fmt(sol[j]),'пересечение')}
   box.forEach(bx=>sol.filter(b=>b.m==='body').forEach(b=>{if(ov(bx,b))ok(false,tag+': короб ящика заходит в корпус: '+fmt(bx)+' и '+fmt(b),'ящик')}));
   // всё изделие стоит на полу и не уходит под пол

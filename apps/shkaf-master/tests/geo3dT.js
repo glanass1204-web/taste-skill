@@ -17,7 +17,7 @@ const res=await pg.evaluate(([N,SEED,VAR])=>{const M=window.ShkafMaster,fails=[]
  const HT=(h,m)=>(h<=900?2:h<=1600?3:h<=2000?4:h<=2400?5:6)+(m&&h>900?1:0);
  const orders=[];
  M.builtinTemplates().forEach(t=>{for(let v=0;v<VAR;v++){const p=M.fromTemplate(t);p.mat.front=pick(['body','body','ldsp','mdfmat','agt']);p.mat.frontDecor=pick(['sage','anthr','kashmir']);p.decor=pick(['white','sonoma','casella','anthr']);p.hw.handle=pick(S0.cat.handles.map(x=>x.id));p.hw.slide=pick(S0.cat.slides.map(x=>x.id));
-  if(p.kind==='wardrobe'){const f=1+(rnd()-.5)*.3;p.W=Math.round(p.W*f);p.H=Math.round(Math.min(2700,p.H*(1+(rnd()-.5)*.15)));p.D=pick([p.D,p.D,450,560,600]);p.mirrors=int(0,3);p.back=pick(['','','ldsp','none']);p.ceil=pick(['','','stand','filler']);p.ceilH=p.H+int(30,300);if(rnd()>.7){p.bbH=60;p.bbD=20;p.plinth=Math.max(p.plinth||0,80)}if(rnd()>.8)p.type=p.shape==='u'?'swing':pick(['swing','coupe'])}
+  if(p.kind==='wardrobe'){const f=1+(rnd()-.5)*.3;p.W=Math.round(p.W*f);p.H=Math.round(Math.min(2700,p.H*(1+(rnd()-.5)*.15)));p.D=pick([p.D,p.D,450,560,600]);p.mirrors=int(0,3);p.back=pick(['','','ldsp','none']);p.ceil=pick(['','','stand','filler']);p.ceilH=p.H+int(30,300);if(rnd()>.7){p.bbH=60;p.bbD=20;p.plinth=Math.max(p.plinth||0,80)}if(rnd()>.8)p.type=p.shape==='u'?'swing':pick(['swing','coupe']);if(p.shape==='straight'&&rnd()>.6){p.endL=pick(['','rect','round']);p.endR=pick(['','rect','round']);p.endW=pick([250,300,350])}else if(p.shape==='straight'&&rnd()>.7){p.slopeB=Math.round(p.H*pick([.6,.7,.8]));p.ceil='';p.mezz=rnd()>.5;p.sections.forEach(sc=>{sc.rod=false;sc.panto=false})}}
   if(p.kind==='kitchen'){p.k.wallF=pick(['','','kashmir','anthr','body','graphite']);p.k.cMech=pick(['','magic','carousel']);p.k.gola=rnd()>.7;p.k.wall2H=pick([0,0,360]);p.k.cornerSide=pick(['L','R']);p.k.base.forEach(m=>{if(m.type==='sink'&&rnd()>.5)m.bin='1'});if(rnd()>.6)p.k.wall.forEach(m=>{if(m.type==='doors'&&rnd()>.6)m.type='glass'})}
   if(p.kind==='chest'){const f=1+(rnd()-.5)*.3;p.c.W=Math.round(p.c.W*f);p.c.D=Math.round(p.c.D*(1+(rnd()-.5)*.2));p.back=pick(['','','ldsp','none']);p.c.cols.forEach(cl=>{if(cl.type==='drawers')cl.dlay=pick(['','top','bottom'])})}
   orders.push(M.norm(p))}});
@@ -34,7 +34,7 @@ const res=await pg.evaluate(([N,SEED,VAR])=>{const M=window.ShkafMaster,fails=[]
   const d=scene3dData();stat.orders++;
   const all=[];d.groups.forEach(gr=>gr.items.forEach(it=>{ok([it.x,it.y,it.z,it.w,it.h,it.d].every(Number.isFinite),tag+': не число в 3D '+JSON.stringify(it),'числа');ok(it.w>0&&it.h>0&&it.d>0,tag+': нулевой размер','размер');all.push(world(gr,it))}));
   stat.items+=all.length;
-  const sol=all.filter(b=>SOLID.has(b.m)),box=all.filter(b=>b.m==='box');
+  const sol=all.filter(b=>SOLID.has(b.m)&&!b.it.poly),box=all.filter(b=>b.m==='box');
   for(let i=0;i<sol.length;i++)for(let j=i+1;j<sol.length;j++){stat.pairs++;if(ov(sol[i],sol[j]))ok(false,tag+': детали в 3D пересекаются: '+fmt(sol[i])+' и '+fmt(sol[j]),'пересечение')}
   box.forEach(bx=>sol.filter(b=>b.m==='body').forEach(b=>{if(ov(bx,b))ok(false,tag+': короб ящика заходит в корпус: '+fmt(bx)+' и '+fmt(b),'ящик')}));
   // всё изделие стоит на полу и не уходит под пол

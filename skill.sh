@@ -9,6 +9,7 @@ declare -A SKILLS=(
   [imagegen-frontend-web]="skills/imagegen-frontend-web/SKILL.md"
   [imagegen-frontend-mobile]="skills/imagegen-frontend-mobile/SKILL.md"
   [brandkit]="skills/brandkit/SKILL.md"
+  [landing-page-skill]="skills/landing-page-skill/SKILL.md"
   [redesign-skill]="skills/redesign-skill/SKILL.md"
   [soft-skill]="skills/soft-skill/SKILL.md"
   [output-skill]="skills/output-skill/SKILL.md"

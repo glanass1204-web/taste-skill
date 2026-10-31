@@ -5,6 +5,7 @@ image-to-code-skill: Image-first frontend skill for generating premium website r
 imagegen-frontend-web: Image-generation-only skill for creating premium website design reference images. Does not write code.
 imagegen-frontend-mobile: Image-generation-only skill for creating premium mobile app screen concepts and flows. Does not write code.
 brandkit: Image-generation-only skill for creating premium brand-kit overview images with logo concepts, identity systems, color palettes, typography, and mockups. Does not write code.
+landing-page-skill: Step-by-step landing page from zero: intake, positioning, section plan by page type, conversion copy, build, pre-flight. All visual values live in one editable TOKENS block.
 redesign-skill: For upgrading existing projects by auditing and fixing design problems.
 soft-skill: Focuses on an expensive, soft UI look with premium fonts, whitespace, depth, and smooth animations.
 output-skill: Prevents AI from being lazy, skipping code blocks, or using placeholder comments.

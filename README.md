@@ -130,6 +130,7 @@ The `Install name` column is the exact value you pass to `--skill`.
 | **taste-skill-v1** | `design-taste-frontend-v1` | The original v1 of taste-skill, preserved for projects depending on its exact behavior. Use only if the v2 default breaks something specific in your workflow. |
 | **gpt-tasteskill** | `gpt-taste` | Stricter variant for GPT/Codex: higher layout variance, stronger GSAP direction, aggressive anti-slop. |
 | **image-to-code-skill** | `image-to-code` | Image-first pipeline: generate site references, analyze them, then implement the frontend to match. |
+| **landing-page-skill** | `landing-page-taste` | 🆕 Landing page from zero, step by step: intake, positioning, section plan by page type, conversion copy, build, pre-flight. All fonts, colors, spacing and motion live in one TOKENS block at the bottom, so forking it restyles the skill. |
 | **redesign-skill** | `redesign-existing-projects` | Existing projects: audit the UI first, then fix layout, spacing, hierarchy, styling. |
 | **soft-skill** | `high-end-visual-design` | Polished, calm, expensive UI with softer contrast, whitespace, premium fonts, spring motion. |
 | **output-skill** | `full-output-enforcement` | When the model ships half-finished work: full output, no placeholder comments. |
@@ -153,6 +154,7 @@ These produce design images only (no code). Use with ChatGPT Images, Codex image
 - If you depend on the exact behavior of the original taste-skill, install **taste-skill-v1** instead. 
 - Use **gpt-taste** when you want the stricter GPT/Codex-oriented rules and motion/layout enforcement. 
 - Use **image-to-code-skill** for image → analyze → code website workflows. 
+- Use **landing-page-skill** when you need a conversion-focused landing page built from zero and want a guided intake, copy and section plan.
 - Use **redesign-skill** to improve an existing codebase instead of greenfield styling. 
 - Add **soft-skill**, **minimalist-skill**, or **brutalist-skill** when the visual direction is already chosen. 
 - Add **output-skill** if the agent keeps truncating output. 

@@ -5,6 +5,8 @@ description: Teaches the AI to design like a high-end agency. Defines the exact 
 
 # Agent Skill: Principal UI/UX Architect & Motion Choreographer (Awwwards-Tier)
 
+> **Restyling:** every concrete visual value this skill uses (fonts, colors, type scale, spacing, radius, shadows, motion) is collected in the **TOKENS** section at the bottom of this file. When generating code, declare those tokens first (CSS custom properties or the Tailwind theme) and reference them everywhere. To restyle the skill, fork the file and edit only that block. If a value elsewhere in this file disagrees with the TOKENS block, the TOKENS block wins.
+
 ## 1. Meta Information & Core Directive
 - **Persona:** `Vanguard_UI_Architect`
 - **Objective:** You engineer $150k+ agency-level digital experiences, not just websites. Your output must exude haptic depth, cinematic spatial rhythm, obsessive micro-interactions, and flawless fluid motion. 
@@ -96,3 +98,88 @@ Evaluate your code against this matrix before delivering. This is the last filte
 - [ ] All animations use only `transform` and `opacity` — no layout-triggering properties
 - [ ] `backdrop-blur` is only applied to fixed/sticky elements, never to scrolling content
 - [ ] The overall impression reads as "$150k agency build", not "template with nice fonts"
+
+## 9. TOKENS
+> Single source of truth for this skill's look. Edit this block to restyle. Pick the token set that matches the Vibe Archetype rolled in Section 3.
+
+```css
+:root {
+  /* Type */
+  --font-display: "Clash Display", "Geist", "Plus Jakarta Sans", sans-serif;
+  --font-body: "Geist", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-serif: "PP Editorial New", "Instrument Serif", serif; /* Editorial Luxury only */
+  --text-hero: clamp(3rem, 1.8rem + 5.5vw, 7rem);
+  --text-h2: clamp(2rem, 1.4rem + 2.6vw, 3.75rem);
+  --text-body: 1.0625rem;
+  --text-eyebrow: 10px;
+  --tracking-display: -0.04em;
+  --tracking-eyebrow: 0.2em;
+  --leading-display: 1.02;
+  --leading-body: 1.6;
+
+  /* Spacing */
+  --space-section: clamp(6rem, 4rem + 8vw, 10rem); /* py-24 to py-40 */
+  --space-card: 2rem;
+  --bezel-gap: 0.375rem;                           /* outer shell padding, p-1.5 */
+  --container: 1280px;
+
+  /* Shape */
+  --radius-outer: 2rem;
+  --radius-inner: calc(var(--radius-outer) - var(--bezel-gap));
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-ui: 300ms;
+  --dur-reveal: 800ms;
+  --dur-layout: 700ms;
+  --reveal-y: 4rem;                                /* translate-y-16 */
+  --reveal-blur: 12px;                             /* blur-md */
+  --stagger: 50ms;
+  --press-scale: 0.98;
+}
+
+/* Vibe: Ethereal Glass (dark) */
+[data-vibe="glass"] {
+  --color-bg: #050505;
+  --color-surface: rgb(255 255 255 / 0.04);
+  --color-shell: rgb(255 255 255 / 0.05);
+  --color-hairline: rgb(255 255 255 / 0.10);
+  --color-text: #f5f5f4;
+  --color-muted: #a1a1aa;
+  --color-glow-a: rgb(124 58 237 / 0.18);
+  --color-glow-b: rgb(16 185 129 / 0.14);
+  --inner-highlight: inset 0 1px 1px rgb(255 255 255 / 0.15);
+  --shadow-ambient: 0 30px 80px -30px rgb(0 0 0 / 0.6);
+}
+
+/* Vibe: Editorial Luxury (warm light) */
+[data-vibe="editorial"] {
+  --color-bg: #fdfbf7;
+  --color-surface: #ffffff;
+  --color-shell: rgb(0 0 0 / 0.04);
+  --color-hairline: rgb(0 0 0 / 0.06);
+  --color-text: #2b2420;
+  --color-muted: #776c62;
+  --color-accent: #7d8b6a;                         /* muted sage */
+  --grain-opacity: 0.03;
+  --inner-highlight: inset 0 1px 1px rgb(255 255 255 / 0.7);
+  --shadow-ambient: 0 30px 60px -30px rgb(70 50 30 / 0.18);
+}
+
+/* Vibe: Soft Structuralism (cool light) */
+[data-vibe="soft"] {
+  --color-bg: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-shell: rgb(0 0 0 / 0.05);
+  --color-hairline: rgb(0 0 0 / 0.05);
+  --color-text: #18181b;
+  --color-muted: #71717a;
+  --inner-highlight: inset 0 1px 1px rgb(255 255 255 / 0.9);
+  --shadow-ambient: 0 40px 80px -40px rgb(24 24 27 / 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --reveal-y: 0px; --reveal-blur: 0px; --stagger: 0ms; }
+}
+```

@@ -91,6 +91,9 @@ h3{font-size:calc(12px * var(--fz));font-weight:600;text-transform:uppercase;let
 .price-chip.bad::after{content:attr(data-err);position:absolute;top:-7px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--err);color:#FFFFFF;font:700 11px/18px var(--f-mono);text-align:center;box-sizing:border-box}
 /* на телефоне выпадающему списку в сетке из трёх — две колонки, иначе текст обрезается */
 @media (max-width:420px){.grid3{grid-auto-flow:row dense}.grid3>.field:has(select){grid-column:span 2}}
+/* самые узкие телефоны (320–360): кнопки «что делаем» — по ширине текста, длинные списки — во всю строку */
+@media (max-width:380px){.seg.kind-seg{grid-auto-columns:auto}.seg.kind-seg button{padding-inline:2px;font-size:calc(12px * var(--fz))}}
+@media (max-width:360px){.grid2>.field:has(select){grid-column:1/-1}.grid3>.field:has(select){grid-column:1/-1}}
 @media (max-width:520px){#matPanel .grid2,#hwPanel .grid2{grid-template-columns:minmax(0,1fr)}}
 #v3canvas{height:min(62vh,520px);border-radius:8px;overflow:hidden;touch-action:none;background:var(--cavity)}
 #v3canvas canvas{display:block;width:100%;height:100%}
@@ -477,7 +480,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         </div>
         <div class="grid3">
           <div class="field"><label for="kaDw">Посудомойка</label><div class="inwrap"><select id="kaDw"><option value="">Нет</option><option value="450">45 см</option><option value="600" selected>60 см</option></select></div></div>
-          <div class="field"><label for="kaOv">Духовка</label><div class="inwrap"><select id="kaOv"><option value="">Нет</option><option value="under" selected>Под варочной панелью</option><option value="tall">В пенале с СВЧ</option></select></div></div>
+          <div class="field"><label for="kaOv">Духовка</label><div class="inwrap"><select id="kaOv"><option value="">Нет</option><option value="under" selected>Под плитой</option><option value="tall">В пенале с СВЧ</option></select></div></div>
         </div>
         <label class="switch"><input type="checkbox" id="kaHob" checked> Варочная панель и вытяжка</label>
         <label class="switch"><input type="checkbox" id="kaFr"> Холодильник в пенале</label>
@@ -904,7 +907,7 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='57 от 31.10.2026';
+const APP_VER='58 от 31.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -3366,6 +3369,9 @@ const issueKey=t=>String(t).replace(/^Сторона [АБВ]: /,'').replace(/\d
 function probe(p){const S=effSettings(p),c=calc(p,S),L=S.sheetL-2*S.trim,Wd=S.sheetW-2*S.trim,list=(c.warn||[]).map(x=>typeof x==='string'?{t:x,lvl:'warn'}:x);
   const over=c.parts.filter(x=>x.mat!=='order'&&(Math.max(x.L,x.Wd)>L+0.01||Math.min(x.L,x.Wd)>Wd+0.01));if(over.length)list.push({lvl:'err',t:'Не помещаются на лист'});return list}
 function fixCandidates(p,t){const out=[],secs=(k)=>k==='B'?'sectionsB':k==='V'?'sectionsV':'sections',add=(label,f)=>out.push({label,f});
+  // ручка: другая из каталога — сначала самая близкая по длине к выбранной (длинные — по убыванию), плоская — последней
+  if(/[Рр]учк/.test(t)){const inner=/внутренн/.test(t),key=inner?'handleIn':'handle',cur=p.hw[key],S=effSettings(p),hs=(S.cat||settings.cat).handles.filter(h=>h.id!==cur&&!h.push);
+    hs.sort((a,b)=>(b.len||0)-(a.len||0)).forEach(h=>add(`${inner?'ручки внутренних ящиков':'ручки'} — «${h.name}»`,q=>{q.hw[key]=h.id}));return out}
   if(p.kind!=='wardrobe')return out;
   const wing=/^Сторона Б/.test(t)?'B':/^Сторона В/.test(t)?'V':'A',key=secs(wing),n=p[key].length,m=/[Сс]екция (\d+)/.exec(t),si=m?+m[1]-1:-1;
   const blank=()=>({shelves:3,rod:false,drawers:0,baskets:0,open:!!p.walk});
@@ -3379,14 +3385,24 @@ function fixCandidates(p,t){const out=[],secs=(k)=>k==='B'?'sectionsB':k==='V'?'
   if(n<6)add('добавить секцию',q=>{q[key].splice(si>=0?si+1:n,0,si>=0?Object.assign(clone(q[key][si]),{drawers:0,baskets:0,seat:false,hooks:0}):blank())});
   if(n<5)add('добавить 2 секции',q=>{for(let i=0;i<2;i++)q[key].push(blank())});
   if(p.type==='coupe')[3,4].forEach(k=>{if(n<6)add(`${k} ${plural(k,'дверь','двери','дверей').replace(/^\d+ /,'')} купе и ещё секция`,q=>{q.coupeN=k;q[key].push(blank())});if(n<5)add(`${k} ${plural(k,'дверь','двери','дверей').replace(/^\d+ /,'')} купе и ещё 2 секции`,q=>{q.coupeN=k;q[key].push(blank(),blank())})});
-  if(n>1)add('убрать одну секцию',q=>{q[key].splice(si>=0&&si<n?si:n-1,1)});
+  const plain=x=>x&&!x.drawers&&!x.baskets&&!x.rod&&!x.panto&&!x.seat&&!x.hooks&&!x.shoes&&!x.shoeOut&&!x.trousers&&!x.iron&&!x.mirrorOut;
+  if(n>1){let k=si>=0&&si<n&&plain(p[key][si])?si:-1;for(let i=n-1;k<0&&i>=0;i--)if(plain(p[key][i]))k=i;if(k>=0)add(k===n-1&&si<0?'убрать одну секцию':`убрать секцию ${k+1} (в ней только полки)`,q=>{q[key].splice(k,1)})}
   if(si>=0)add('перенести ящики в более узкую секцию',q=>{const r=moveBoxes(q);if(!r)throw 0});
   if(/ниже цоколя|выше листа|длины листа/.test(t)){const S=effSettings(p),mx=S.sheetL-2*S.trim;add(`высота ${mx} мм`,q=>{q.H=mx})}
   return out}
+// что заказал клиент: считаем в штуках по фурнитуре (ящики — по направляющим, штанги — по флянцам; метры не считаем — секция уже, а штанга та же) и по деталям (сиденье)
+const FIX_KEEP=[['ящики','^Направляющие|^Ящик'],['корзины','Корзина'],['штанги','^Штанга|Флянец'],['пантограф','Пантограф'],['брючница','Брючница'],['выдвижные полки для обуви','Полка для обуви выдвижная'],['зеркало выдвижное','Зеркало выдвижное'],['гладильная доска','Гладильная'],['крючки','Крючок'],['сушка','Сушка'],['карго','Бутылочница|карго'],['ведро','Ведро'],['уголок','Волшебный уголок|Карусель'],['подъёмники','^Газлифт|Механизм подъёма'],['подсветка','Подсветка|Датчик включения подсветки|Блок питания подсветки']];
+const FIX_SEC=[['ящики','drawers',1],['корзины','baskets',1],['штанги','rod',0],['пантограф','panto',0],['сиденье','seat',0],['крючки','hooks',1],['полки для обуви','shoes',1],['выдвижные полки для обуви','shoeOut',1],['брючница','trousers',0],['гладильная доска','iron',0],['зеркало выдвижное','mirrorOut',0],['подсветка','led',0]];
+function fixKeep(p){
+  // шкаф: по секциям проекта — что стоит в секциях, а не сколько деталей в смете (выдвижных штанг в узкой секции меньше, а штанга та же)
+  if(p.kind==='wardrobe'){const o={};FIX_SEC.forEach(([k,f,num])=>{o[k]=['sections','sectionsB','sectionsV'].reduce((a,key)=>a+(p[key]||[]).reduce((b,x)=>b+(num?(+x[f]||0):(x[f]?1:0)),0),0)});return o}
+  const S=effSettings(p),c=calc(p,S),o={};FIX_KEEP.forEach(([k,re])=>{const r=new RegExp(re);o[k]=c.hw.filter(h=>r.test(h[0])&&h[2]!=='м').reduce((a,h)=>a+(+h[1]||0),0)});
+  o['сиденье']=c.parts.filter(x=>/^Сиденье/.test(x.name)).reduce((a,x)=>a+x.qty,0);return o}
+function fixLoses(p,q){const a=fixKeep(p),b=fixKeep(q);return Object.keys(a).filter(k=>b[k]<a[k])}
 function fixFor(t,P0){const P=P0||curP();const base=probe(P),errs=base.filter(x=>x.lvl==='err').length,k=issueKey(t),isErr=base.some(x=>x.lvl==='err'&&issueKey(x.t)===k);
   for(const c of fixCandidates(P,t)){const q=clone(P);try{c.f(q)}catch(e){continue}norm(q);let after;try{after=probe(q)}catch(e){continue}
     const e2=after.filter(x=>x.lvl==='err').length,still=after.some(x=>issueKey(x.t)===k);
-    if(!still&&(isErr?e2<errs:e2<=errs))return c}
+    if(!still&&(isErr?e2<errs:e2<=errs)&&!fixLoses(P,q).length)return c}
   return null}
 let FIXES=[];const curP=()=>P;
 // «Исправить всё»: по шагам, пока ошибок не останется; предлагаем, только если в конце ошибок нет совсем
@@ -3533,7 +3549,7 @@ function drawerUI(key,id,m,fr,oa='mopt',sa='mstep'){const cust=m.dlay==='cust';i
    +(fr.length?`<p class="hint">Фасады ящиков сверху вниз: <b class="num">${fr.join(' · ')}</b> мм</p>`:'')}
 // двери: «авто» — по ширине модуля, или своё число
 function doorUI(key,id,m,z){const has=['doors','sink','tall','tallOven','fridge'].includes(m.type)||(z==='wall'&&['doors','glass','drying','hood'].includes(m.type)&&m.open!=='lift');if(!has)return '';
-  return `<div class="field"><label for="mnd-${id}">Дверей</label><div class="inwrap"><select id="mnd-${id}" data-mopt="${key}:nd">${opts([['','Авто: до 600 мм — одна, шире — две'],['1','Одна дверь'],['2','Две двери']],m.nd?String(m.nd):'')}</select></div></div>`}
+  return `<div class="field"><label for="mnd-${id}">Дверей</label><div class="inwrap"><select id="mnd-${id}" data-mopt="${key}:nd">${opts([['','Авто: до 600 мм — одна'],['1','Одна дверь'],['2','Две двери']],m.nd?String(m.nd):'')}</select></div></div>`}
 function renderKitchenUI(c){
   const k=P.k,corner=k.shape==='corner';
   {const f=matItem('fronts',P.mat.front),el=$('#kWallF'),o=f.kind==='body'?Object.entries(DECORS).filter(([id])=>id!==P.decor).map(([id,d])=>[id,'ЛДСП «'+d.name+'»']):f.kind==='sheet'?[['body','В цвет корпуса «'+DECORS[P.decor].name+'»']]:Object.entries(FCOLORS).filter(([id])=>id!==P.mat.frontColor).map(([id,d])=>[id,d.name]);
@@ -4279,7 +4295,7 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={fixFor,TOOL_CAT,jig32Lines,toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
+window.ShkafMaster={fixFor,fixLoses,TOOL_CAT,jig32Lines,toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
   // для проверок: текущий расчёт и тексты, которые видит клиент
   __hooks:{R:()=>R,offerText,docText,supplierLists,rub,mountText,T3:()=>T3}};
 // работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала

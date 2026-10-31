@@ -9,6 +9,7 @@ All notable changes to taste-skill live here. The repo follows SemVer-ish discip
 ### Repo
 
 - New `landing-page-skill` (install name `landing-page-taste`): a step-by-step workflow for greenfield landing pages (intake, positioning, section plan by page type, conversion copy, build, pre-flight). Every visual value lives in a single TOKENS block at the end of the file, so the skill can be restyled by editing one section.
+- `soft-skill`, `minimalist-skill` and `brutalist-skill` now end with a **TOKENS** section that collects every font, color, spacing, radius, shadow and motion value the skill uses (per vibe or substrate where the skill has variants). The block is the source of truth; fork it to restyle the skill.
 - `taste-skill` (install name `design-taste-frontend`) is now **v2 (experimental)**. The previous v1 is preserved as `taste-skill-v1` (install name `design-taste-frontend-v1`).
 - New `CHANGELOG.md` (this file).
 

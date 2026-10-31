@@ -87,7 +87,10 @@ h3{font-size:calc(12px * var(--fz));font-weight:600;text-transform:uppercase;let
 .check.ok{background:var(--ok-soft);color:var(--ok)}
 .check.warn{background:var(--warn-soft);color:var(--warn)}
 .check.bad{background:var(--err-soft);color:var(--err)}
-.price-chip.bad{box-shadow:0 0 0 3px var(--err)}
+.price-chip.bad{box-shadow:0 0 0 3px var(--err);position:relative}
+.price-chip.bad::after{content:attr(data-err);position:absolute;top:-7px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--err);color:#FFFFFF;font:700 11px/18px var(--f-mono);text-align:center;box-sizing:border-box}
+/* на телефоне выпадающему списку в сетке из трёх — две колонки, иначе текст обрезается */
+@media (max-width:420px){.grid3{grid-auto-flow:row dense}.grid3>.field:has(select){grid-column:span 2}}
 @media (max-width:520px){#matPanel .grid2,#hwPanel .grid2{grid-template-columns:minmax(0,1fr)}}
 #v3canvas{height:min(62vh,520px);border-radius:8px;overflow:hidden;touch-action:none;background:var(--cavity)}
 #v3canvas canvas{display:block;width:100%;height:100%}
@@ -438,7 +441,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
       </div>
       <div class="grid3">
         <div class="field"><label for="pCeil">До потолка</label><div class="inwrap"><select id="pCeil" data-k="ceil"><option value="">Нет, собрать лёжа</option><option value="stand">Да, собрать стоя</option><option value="filler">Да, корпус + планка</option></select></div></div>
-        <div class="field" id="pCeilHF"><label for="pCeilH">Потолок</label><div class="inwrap"><input id="pCeilH" data-k="ceilH" inputmode="numeric" type="number" placeholder="из замера"><span>мм</span></div></div>
+        <div class="field" id="pCeilHF"><label for="pCeilH">Потолок</label><div class="inwrap"><input id="pCeilH" data-k="ceilH" inputmode="numeric" type="number" placeholder="нет"><span>мм</span></div></div>
         <div class="field"><label for="pBack">Задняя стенка</label><div class="inwrap"><select id="pBack" data-k="back"><option value="">ХДФ 3 мм</option><option value="ldsp">ЛДСП корпуса</option><option value="none">Без стенки</option></select></div></div>
       </div>
       <div id="ceilBox" class="row"><span class="hint" id="ceilHint"></span><button class="chip" type="button" id="ceilFit">Подогнать высоту</button></div>
@@ -470,7 +473,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         <div class="grid3">
           <div class="field"><label for="kaLA" id="kaLAl">Длина кухни</label><div class="inwrap"><input id="kaLA" type="number" inputmode="numeric"><span>мм</span></div></div>
           <div class="field" id="kaLBF"><label for="kaLB">Сторона Б</label><div class="inwrap"><input id="kaLB" type="number" inputmode="numeric"><span>мм</span></div></div>
-          <div class="field"><label for="kaCls">Класс</label><div class="inwrap"><select id="kaCls"><option value="">Оставить фурнитуру и фасады</option><option value="econ">Эконом: ЛДСП, КДМ, шариковые</option><option value="mid">Средний: МДФ ПВХ, Boyard</option><option value="prem">Премиум: эмаль, Blum</option></select></div></div>
+          <div class="field" style="grid-column:1/-1"><label for="kaCls">Класс</label><div class="inwrap"><select id="kaCls"><option value="">Оставить фурнитуру и фасады</option><option value="econ">Эконом: ЛДСП, КДМ, шариковые</option><option value="mid">Средний: МДФ ПВХ, Boyard</option><option value="prem">Премиум: эмаль, Blum</option></select></div></div>
         </div>
         <div class="grid3">
           <div class="field"><label for="kaDw">Посудомойка</label><div class="inwrap"><select id="kaDw"><option value="">Нет</option><option value="450">45 см</option><option value="600" selected>60 см</option></select></div></div>
@@ -508,7 +511,7 @@ ul.pk{margin:4px 0 8px;padding-left:18px;font-size:calc(14px * var(--fz));displa
         <div class="field" id="kW2oF"><label for="kW2o">Антресоли открываются</label><div class="inwrap"><select id="kW2o" data-ksel="wall2Open"><option value="lift">Вверх (газлифт)</option><option value="swing">Распашные</option></select></div></div>
       </div>
       <div class="field" id="kWallFF"><label for="kWallF">Верхние фасады (двухцветная кухня)</label><div class="inwrap"><select id="kWallF" data-ksel="wallF"></select></div></div>
-      <div class="row"><div class="field"><label for="kCeil">Потолок</label><div class="inwrap"><input id="kCeil" data-k="ceilH" inputmode="numeric" type="number" placeholder="из замера"><span>мм</span></div></div>
+      <div class="row"><div class="field"><label for="kCeil">Потолок</label><div class="inwrap"><input id="kCeil" data-k="ceilH" inputmode="numeric" type="number" placeholder="нет"><span>мм</span></div></div>
         <div class="btns"><button class="chip" type="button" id="kCeilWall">Антресоли до потолка</button><button class="chip" type="button" id="kCeilTall">Пеналы до потолка</button></div></div>
       <label class="switch"><input type="checkbox" data-kchk="islandOn"> Остров или барная стойка</label>
       <div class="grid3" id="kIslandBox">
@@ -901,7 +904,7 @@ const DECORS={white:{name:'Белый',fill:'#F3F3EF'},sonoma:{name:'Дуб Со
   halifax:{name:'Дуб галифакс натуральный (Egger H1180)',fill:'#B88D5E'},walnut:{name:'Орех (Kronospan 729)',fill:'#9A6A45'}};
 const MIRROR='#CFE2EA';
 const GROUPS={'Корпус':'--g5','Полки':'--g1','Фасады':'--g2','Ящики':'--g3','Задняя стенка':'--g4'};
-const APP_VER='56 от 28.10.2026';
+const APP_VER='57 от 31.10.2026';
 const STATUS=[['calc','Расчёт'],['meas','Замер'],['deal','Договор'],['work','В производстве'],['inst','Установка'],['done','Сдан']],STATUS_NAME=Object.fromEntries(STATUS);
 let stFilter='';
 const kindName=p=>p.kind==='wardrobe'&&p.walk?'Гардеробная':p.kind==='wardrobe'&&p.hall?'Прихожая':KIND_NAME[p.kind];
@@ -3370,6 +3373,8 @@ function fixCandidates(p,t){const out=[],secs=(k)=>k==='B'?'sectionsB':k==='V'?'
     // в самую узкую из секций, где нет ни ящиков, ни сиденья
     const S=effSettings(q),c=calc(q,S),w=c.wings.find(x=>x.key===wing)||c.wings[0];let best=-1;a.forEach((x,i)=>{if(i!==si&&!x.drawers&&!x.baskets&&!x.seat&&(best<0||w.ws[i]<w.ws[best]))best=i});
     if(best<0)return false;a[best].drawers=src.drawers;a[best].baskets=src.baskets;src.drawers=0;src.baskets=0;return best+1};
+  // глубина: секции не трогаем (иначе «исправление» просто удаляет ящики клиента) — предлагаем наименьшую глубину, при которой всё помещается
+  if(/глубин/.test(t)&&!/шир|узк/.test(t)){[350,400,450,500,560,600].filter(D=>D>p.D).forEach(D=>add(`глубина ${D} мм`,q=>{q.D=D}));return out}
   if(p.type==='coupe')[2,3,4,5].forEach(k=>{if(+p.coupeN!==k)add(`${k} ${plural(k,'дверь','двери','дверей').replace(/^\d+ /,'')} купе`,q=>{q.coupeN=k})});
   if(n<6)add('добавить секцию',q=>{q[key].splice(si>=0?si+1:n,0,si>=0?Object.assign(clone(q[key][si]),{drawers:0,baskets:0,seat:false,hooks:0}):blank())});
   if(n<5)add('добавить 2 секции',q=>{for(let i=0;i<2;i++)q[key].push(blank())});
@@ -3408,7 +3413,7 @@ function renderChecks(){const all=issues(),e=all.filter(x=>x.lvl==='err').length
   $('#checkLine').innerHTML=line;
   const ban=e?`<div class="alert err"><b>В заказе ${plural(e,'ошибка','ошибки','ошибок')}.</b><span>Сначала исправьте на вкладке «Изделие», потом отправляйте заказ поставщику или цену клиенту.</span></div>`:'';
   ['#partsErr','#costErr','#kpErr'].forEach(id=>{const el=$(id);if(el)el.innerHTML=ban});
-  $('#hdrPrice').classList.toggle('bad',!!e)}
+  $('#hdrPrice').classList.toggle('bad',!!e);$('#hdrPrice').dataset.err=e?String(e):'';{const t=e?`В заказе ${plural(e,'ошибка','ошибки','ошибок')} — нажмите, чтобы посмотреть`:'Открыть смету';$('#hdrPrice').title=t;$('#hdrPrice').setAttribute('aria-label',t)}}
 function renderAll(){
   compute();
   if(P.kind==='wardrobe'&&P.mirrors>R.c.doorsAll.length){P.mirrors=R.c.doorsAll.length;compute()}
@@ -3492,11 +3497,11 @@ function renderWardrobeUI(c){
   $$('[data-type="coupe"]').forEach(b=>b.disabled=uu);
   $('#lblW').textContent=uu?'Ширина А (дальняя стена)':corner?'Ширина А':'Ширина';
   $('#lblSecA').textContent=corner?'Секций на стороне А':'Секций';
-  {const C=ceilOf(P),on=!!P.ceil;$('#pCeilHF').style.visibility=on?'visible':'hidden';$('#ceilBox').hidden=!on;
+  {const C=ceilOf(P),on=!!P.ceil;$('#pCeilHF').hidden=!on;$('#ceilBox').hidden=!on;
    if(on){const h=ceilFitH(P),S=effSettings(P);$('#ceilFit').hidden=!C||h===P.H;
      $('#ceilHint').textContent=!C?'Впишите потолок или сделайте замер высоты.':`Потолок ${C} мм${+P.ceilH>0?'':' (по замеру)'}. ${P.ceil==='filler'?`Корпус ${h} мм поднимется после сборки, планка ${C-h} мм.`:h<C-20?`Лист ЛДСП ${S.sheetL} мм — шкаф не выше ${h} мм, сверху останется ${C-h} мм: лучше «корпус + планка».`:`Шкаф ${h} мм, до потолка 20 мм.`}`}}
-  $('#endBox').hidden=corner;$('#pSlopeF').hidden=corner;$('#pEndWF').style.visibility=P.endL||P.endR?'visible':'hidden';
-  $('#coupeNField').style.visibility=P.type==='coupe'?'visible':'hidden';$('#coupeFillBox').hidden=P.type!=='coupe';$('#pCs2').value=String(P.coupeSplit||1);$('#pCm').value=P.coupeMat||'mirror';
+  $('#endBox').hidden=corner;$('#pSlopeF').hidden=corner;$('#pEndWF').hidden=!(P.endL||P.endR);
+  $('#coupeNField').hidden=P.type!=='coupe';$('#coupeFillBox').hidden=P.type!=='coupe';$('#pCs2').value=String(P.coupeSplit||1);$('#pCm').value=P.coupeMat||'mirror';
   $('#secCount').textContent=P.sections.length;$('#secBCount').textContent=P.sectionsB.length;$('#secVCount').textContent=P.sectionsV.length;
   $('#mirCount').textContent=P.mirrors;$('#mirMax').textContent=`(из ${c.doorsAll.length})`;
   {const nd=c.doorsAll.length,on=P.mirrors>0;$('#mirBox').hidden=!nd;$('#mirRow').hidden=!on;$$('[data-mir]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.mir===(on?1:0))));
@@ -4144,7 +4149,7 @@ document.addEventListener('click',e=>{
     projects.forEach(p=>fld.forEach(f=>{if(p.hw[f]===id){p.hw[f]=first;n++}}));settings.cat[k]=settings.cat[k].filter(x=>x.id!==id);change();renderSettings();
     toast(n?`Удалено. В ${plural(n,'заказе','заказах','заказах')} поставлено «${CATALOG[k][0].name}»`:'Удалено');return}
   if(d.variant){const v=VARS&&VARS.find(x=>x.k===d.variant);if(v){P.mat=clone(v.q.mat);P.hw=clone(v.q.hw);change();toast('Взят вариант «'+v.name+'»')}return}
-  if(b.id==='hdrPrice'){openTab('cost');return}
+  if(b.id==='hdrPrice'){if(b.classList.contains('bad')){openTab('build');setTimeout(()=>{const el=$('#buildAlerts');if(el){const hd=document.querySelector('header.top'),y=el.getBoundingClientRect().top+scrollY-(hd?hd.offsetHeight:0)-12;scrollTo({top:y,behavior:'smooth'})}},60)}else openTab('cost');return}
   if(d.view){show3D(d.view==='3d');return}
   if(b.id==='msFit'){fitToMeas();return}
   if(b.id==='ceilFit'){if(!ceilOf(P)){toast('Впишите высоту потолка');return}P.H=ceilFitH(P);change();toast(`Высота шкафа ${P.H} мм`);return}
@@ -4274,7 +4279,7 @@ if(!inFrame&&'serviceWorker' in navigator&&(location.protocol==='https:'||locati
   const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('Программа обновилась — версия '+APP_VER)});
   navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
-window.ShkafMaster={TOOL_CAT,jig32Lines,toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
+window.ShkafMaster={fixFor,TOOL_CAT,jig32Lines,toolsFor,drillParse,drillTemplate,drillPicHTML,variantsOf:p=>variantsOf(p),applyVariant,svcRows,__render:p=>{P=p;renderAll();const kp=(renderKp(),document.getElementById('kpSheet').innerText.length);return{svg:document.querySelectorAll('#front svg').length,kp,drill:drillText().length,offer:offerText().length,scene:scene3dData().groups.reduce((a,g)=>a+g.items.length,0)}},kAuto:(p,o)=>{const keep=P;P=p;try{return kAuto(o)}finally{P=keep}},K_CLASS,calc,pack,costs,newProject,norm,effSettings,drillMap,cupYs,scene3dKitchen,kLayout,FILLER,K_HOBS,builtinTemplates:()=>builtinTemplates(),fromTemplate:t=>fromTemplate(t),scene3dData:()=>scene3dData(),settings:()=>settings,DEFAULT_SETTINGS,
   // для проверок: текущий расчёт и тексты, которые видит клиент
   __hooks:{R:()=>R,offerText,docText,supplierLists,rub,mountText,T3:()=>T3}};
 // работа без интернета: просим браузер не удалять данные программы при нехватке памяти и говорим, что сеть пропала

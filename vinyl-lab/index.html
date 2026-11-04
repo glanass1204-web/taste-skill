@@ -248,6 +248,7 @@ select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--
 .webres dt{color:var(--muted)}.webres dd{margin:0;font-variant-numeric:tabular-nums}
 .webres .src{font-size:12px;color:var(--muted);overflow-wrap:anywhere}.webres .src a{color:inherit}
 .webres .chips{margin-top:8px}
+.webres.wide{grid-column:1/-1;margin:0 0 4px}
 .chips button,.btn{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
 .chips button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);font-weight:600}
 .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:500}
@@ -388,7 +389,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.4</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.5</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -589,6 +590,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div class="field"><label for="y-p4">Мощность на 4 Ом</label><div class="unit"><input id="y-p4" inputmode="decimal" value=""><span>Вт/канал</span></div></div>
         <div class="field"><label for="y-aphono">Вход PHONO</label><select id="y-aphono"><option value="">нет</option><option value="MM">MM</option><option value="MM/MC">MM и MC</option></select></div>
         <div class="field"></div>
+        <div class="webres wide" id="y-web-res-amp" hidden aria-live="polite"></div>
         <div class="field"><label for="y-spk">Колонки</label><div class="unit"><input id="y-spk" value="" placeholder="модель" autocomplete="off"></div></div>
         <div class="field"><label for="y-z">Номинальный импеданс</label><div class="unit"><input id="y-z" inputmode="decimal" value="8"><span>Ом</span></div></div>
         <div class="field"><label for="y-zmin">Импеданс, минимум</label><div class="unit"><input id="y-zmin" inputmode="decimal" value="5"><span>Ом</span></div></div>
@@ -597,6 +599,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div class="field"><label for="y-f3">Нижняя частота (−3 дБ)</label><div class="unit"><input id="y-f3" inputmode="decimal" value=""><span>Гц</span></div></div>
         <div class="field"><label for="y-plo">Рекомендуемый усилитель, от</label><div class="unit"><input id="y-plo" inputmode="decimal" value=""><span>Вт</span></div></div>
         <div class="field"><label for="y-phi">до</label><div class="unit"><input id="y-phi" inputmode="decimal" value=""><span>Вт</span></div></div>
+        <div class="webres wide" id="y-web-res-spk" hidden aria-live="polite"></div>
         <div class="field"><label for="y-dist">До колонок от места слушателя</label><div class="unit"><input id="y-dist" inputmode="decimal" value="2.5"><span>м</span></div></div>
         <div class="field"></div>
         <div class="field"><label for="y-slen">Акустический кабель</label><div class="unit"><input id="y-slen" inputmode="decimal" value="5"><span>м</span></div></div>
@@ -1877,7 +1880,7 @@ function applySpk(k,extra){
   pickSave('Подставлены данные колонок '+k.name+': '+k.z+' Ом'+(k.zmin?' (минимум '+fmt(k.zmin,1)+')':' (минимум не указан — взята оценка '+fmt(k.z*0.8,1)+' Ом: по стандарту не ниже 80 % номинала)')+', '+fmt(k.sens,k.sens%1?1:0)+' дБ/Вт/м'+(k.f3?', бас до '+fmt(k.f3,k.f3%1?1:0)+' Гц':'')+'.'+(k.pmax&&!k.plo?' Производитель указывает допустимую мощность '+k.pmax+' Вт.':'')+(k.note?' '+k.note:'')+(extra||''))}
 $('y-pick-spk').addEventListener('change',()=>{const k=SPKS.find(x=>x.id===$('y-pick-spk').value);if(k)applySpk(k)});
 /* поиск характеристик в интернете: Claude + поиск Firecrawl (если подключён у зрителя) */
-const WEB={key:'vinyl-lab-found',ctl:null};
+const WEB={key:'vinyl-lab-found',ctl:null,out:'y-web-res',tried:{}};
 function webLoad(){try{return JSON.parse(localStorage.getItem(WEB.key))||{amp:[],spk:[]}}catch(e){return {amp:[],spk:[]}}}
 function webStore(kind,o){try{const d=webLoad();d[kind]=(d[kind]||[]).filter(x=>x.name.toLowerCase()!==o.name.toLowerCase());d[kind].push(o);localStorage.setItem(WEB.key,JSON.stringify(d))}catch(e){}}
 function webAddToList(kind,o){const list=kind==='amp'?AMPS:SPKS,sel=$(kind==='amp'?'y-pick-amp':'y-pick-spk');
@@ -1899,18 +1902,19 @@ function webPrompt(kind,q,canSearch){const amp=kind==='amp';
   '{"found":true,"name":"точное название модели","p8":мощность Вт на канал на 8 Ом,"p4":Вт на канал на 4 Ом или null,"df":коэффициент демпфирования или null,"ph":"MM" | "MM/MC" | "" (встроенный вход для проигрывателя),"note":"коротко по-русски важная оговорка или пусто","sources":["url"]}':
   '{"found":true,"name":"точное название модели","z":номинальный импеданс Ом,"zmin":минимальный импеданс Ом или null,"sens":чувствительность дБ (2,83 В или 1 Вт / 1 м),"f3":нижняя граница АЧХ Гц при −3 дБ или null,"plo":рекомендуемая мощность усилителя от, Вт или null,"phi":до, Вт или null,"pmax":допустимая мощность Вт или null,"note":"коротко по-русски важная оговорка или пусто","sources":["url"]}')}
 function webLinks(q){const u=encodeURIComponent(q+' характеристики');return '<a href="https://yandex.ru/search/?text='+u+'" target="_blank" rel="noopener">Яндекс</a> · <a href="https://www.google.com/search?q='+u+'" target="_blank" rel="noopener">Google</a>'}
-function webShow(html){const r=$('y-web-res');r.innerHTML=html;r.hidden=false}
-function webCard(kind,o,how){const amp=kind==='amp',f=(v,u)=>v==null?'<span style="color:var(--muted)">нет данных</span>':esc(fmt(v,v%1?1:0))+' '+u;
+function webShow(html){const r=$(WEB.out);r.innerHTML=html;r.hidden=false}
+function webCard(kind,o,how){const box=$(WEB.out);const amp=kind==='amp',f=(v,u)=>v==null?'<span style="color:var(--muted)">нет данных</span>':esc(fmt(v,v%1?1:0))+' '+u;
   const rows=amp?[['На 8 Ом',f(o.p8,'Вт')],['На 4 Ом',f(o.p4,'Вт')],['Демпфирование',f(o.df,'')],['Вход PHONO',o.ph?esc(o.ph):'нет']]:
     [['Импеданс',f(o.z,'Ом')],['Минимум',f(o.zmin,'Ом')],['Чувствительность',f(o.sens,'дБ')],['Бас до',f(o.f3,'Гц')],['Усилитель',o.plo||o.phi?esc((o.plo||'?')+'–'+(o.phi||'?'))+' Вт':o.pmax?'до '+esc(o.pmax)+' Вт':'<span style="color:var(--muted)">нет данных</span>']];
   webShow('<h4>'+esc(o.name)+'</h4><dl>'+rows.map(r=>'<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>').join('')+'</dl>'+(o.note?'<p class="src" style="color:var(--ink)">'+esc(o.note)+'</p>':'')+
     '<p class="src">'+how+(o.src&&o.src.length?': '+o.src.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])+'</a>').join(', '):'')+'. Сверьте с паспортом — ошибки возможны.</p>'+
-    '<div class="chips"><button type="button" class="btn primary" id="y-web-apply">Подставить в систему</button><button type="button" class="btn" id="y-web-x">Отмена</button></div>');
-  $('y-web-apply').onclick=()=>{const it=webAddToList(kind,Object.assign({},o));webStore(kind,o);$(amp?'y-pick-amp':'y-pick-spk').value=it.id;
-    const extra=' Данные найдены '+(o.src&&o.src.length?'в интернете':'по памяти Claude')+' — сверьте с паспортом.';amp?applyAmp(it,extra):applySpk(it,extra);$('y-web-res').hidden=true;$('y-web-q').value=''};
-  $('y-web-x').onclick=()=>{$('y-web-res').hidden=true}}
-async function webFind(){const q=$('y-web-q').value.trim(),kind=$('y-web-kind').value,btn=$('y-web-go');if(q.length<3){$('y-web-q').focus();return}
-  if(WEB.ctl){WEB.ctl.abort();WEB.ctl=null;return}
+    '<div class="chips"><button type="button" class="btn primary w-apply">Подставить в систему</button><button type="button" class="btn w-x">Отмена</button></div>');
+  box.querySelector('.w-apply').onclick=()=>{const it=webAddToList(kind,Object.assign({},o));webStore(kind,o);$(amp?'y-pick-amp':'y-pick-spk').value=it.id;
+    const extra=' Данные найдены '+(o.src&&o.src.length?'в интернете':'по памяти Claude')+' — сверьте с паспортом.';amp?applyAmp(it,extra):applySpk(it,extra);$(WEB.out).hidden=true;if(WEB.out==='y-web-res')$('y-web-q').value=''};
+  box.querySelector('.w-x').onclick=()=>{$(WEB.out).hidden=true}}
+async function webFind(man){const q=man?man.q:$('y-web-q').value.trim(),kind=man?man.kind:$('y-web-kind').value,btn=$('y-web-go');if(q.length<3){if(!man)$('y-web-q').focus();return}
+  if(WEB.ctl){WEB.ctl.abort();WEB.ctl=null;if(!man)return}
+  ['y-web-res','y-web-res-amp','y-web-res-spk'].forEach(id=>{$(id).hidden=true;$(id).innerHTML=''});WEB.out=man?'y-web-res-'+kind:'y-web-res';
   const has=window.claude&&window.claude.use;let sample=null,mcp=null;
   if(has){webShow('Подключаюсь…');try{[sample,mcp]=await Promise.all([window.claude.use('sample'),window.claude.use('mcp')])}catch(e){}}
   if(!sample){webShow('Автоматический поиск работает в версии на claude.ai. Здесь можно открыть поиск и вписать цифры вручную: '+webLinks(q)+'.');return}
@@ -1928,7 +1932,13 @@ async function webFind(){const q=$('y-web-q').value.trim(),kind=$('y-web-kind').
     webCard(kind,o,o.src&&o.src.length?'Найдено в интернете':'По памяти Claude, без поиска в интернете')}
   catch(e){const c=e&&e.code;webShow(c==='cancelled'?'Поиск остановлен.':c==='not_granted'?'Без разрешения на Claude поиск не работает. Можно поискать вручную: '+webLinks(q)+'.':c==='rate_limited'?'Слишком много запросов подряд — попробуйте через минуту.':'Не получилось найти: '+esc((e&&e.message)||'ошибка')+'. Поищите вручную: '+webLinks(q)+'.')}
   finally{WEB.ctl=null;btn.textContent='Найти'}}
-$('y-web-go').addEventListener('click',webFind);
+$('y-web-go').addEventListener('click',()=>webFind());
+/* модель вписана вручную: есть в списке — подставляем, нет — ищем в интернете */
+[['amp','y-amp'],['spk','y-spk']].forEach(([kind,id])=>$(id).addEventListener('change',()=>{const q=$(id).value.trim(),list=kind==='amp'?AMPS:SPKS;
+  const out=$('y-web-res-'+kind);if(q.length<3){out.hidden=true;return}
+  const norm=t=>t.toLowerCase().replace(/[\s\-–]+/g,'');let hit=list.find(x=>norm(x.name)===norm(q));if(!hit&&norm(q).length>=4){const part=list.filter(x=>norm(x.name).includes(norm(q)));if(part.length===1)hit=part[0]}
+  if(hit){$(kind==='amp'?'y-pick-amp':'y-pick-spk').value=hit.id;kind==='amp'?applyAmp(hit):applySpk(hit);out.hidden=true;return}
+  const key=kind+':'+norm(q);if(WEB.tried[key])return;WEB.tried[key]=1;webFind({kind,q})}));
 $('y-web-q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();webFind()}});
 /* расчёт: мощность и громкость на месте слушателя */
 function powerCalc(o){const lowZ=isFinite(o.z)&&o.z<=5,P=lowZ&&isFinite(o.p4)?o.p4:o.p8;

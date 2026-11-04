@@ -23,6 +23,13 @@
   --bg:#0F1318; --panel:#171C23; --ink:#E5E9EE; --muted:#8E99A7; --line:#2B333D;
   --amber:#F3AE45; --glow:#F0A21A; --glow-soft:#4A3510;
   --good:#3FB97A; --warn:#E5A532; --bad:#EF6A5E; --c2:#6AA8E8; --c3:#B590E6; color-scheme:dark}
+/* Ночной режим: только красный свет, чтобы не сбивать ночное зрение у проигрывателя */
+:root[data-night]{
+  --bg:#000000; --panel:#0A0101; --ink:#F04A3A; --muted:#B8382B; --line:#3A0B07;
+  --amber:#FF5A3C; --glow:#C42418; --glow-soft:#260402;
+  --good:#E0503B; --warn:#FF6A3D; --bad:#FF2A1A; --c2:#B03A2E; --c3:#7E271F;
+  --paper:#120000; --paper-ink:#F04A3A; color-scheme:dark}
+:root[data-night] img{filter:grayscale(1) sepia(1) hue-rotate(-50deg) saturate(4) brightness(.6)}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -134,6 +141,17 @@ code,.f{font-family:var(--f-mono);font-size:13px;color:var(--ink);background:var
 .check span.v{grid-column:1;font-size:13px;color:var(--muted)}
 .check .pill{grid-row:1/span 2;grid-column:2;justify-self:end}
 .pill.info{color:var(--muted)}
+.hdr-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#night[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+.shops{display:flex;flex-direction:column;gap:14px}
+.shops h4{margin:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.shops ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.shops li{font-size:14px;line-height:1.4}
+.shops a{color:var(--amber);font-weight:600}
+.shops li span{color:var(--muted)}
+.searchlinks{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.searchlinks a{color:var(--amber);border:1px solid var(--line);border-radius:5px;padding:4px 8px;text-decoration:none;background:var(--bg)}
+.searchlinks a:hover{border-color:var(--amber)}
 a.nowlink{color:inherit;text-decoration:none;border-radius:6px}
 a.nowlink:hover b{color:var(--amber)}
 a.nowlink b::after{content:" →";color:var(--muted);font-weight:400}
@@ -179,7 +197,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб</h1>
     <p class="tag">Профиль системы, коллекция пластинок и калькуляторы для настройки винилового тракта: резонанс тонарма, юстировка с протрактором, скорость диска, провода и журнал износа иглы.</p>
   </div>
-  <span class="badge">прототип · v0.3</span>
+  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.4</span></div>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
@@ -446,6 +464,31 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="chips"><button type="submit" class="btn primary" id="w-submit">Добавить в список</button><button type="button" class="btn" id="w-cancel" hidden>Отмена</button></div>
       <p class="status" id="w-msg" aria-live="polite"></p>
     </form>
+    <div class="panel">
+      <h3>Где купить в России</h3>
+      <div class="shops">
+        <div><h4>Аукционы и частные продавцы</h4><ul>
+          <li><a href="https://meshok.net/" target="_blank" rel="noopener">Мешок</a> — <span>интернет-аукцион: советские пластинки, недорогой импорт, редкие фирменные издания.</span></li>
+          <li><a href="https://www.avito.ru/" target="_blank" rel="noopener">Авито</a> — <span>частные продавцы, бывают находки сильно дешевле аукционов. Просите фото конверта и винила.</span></li>
+          <li><a href="https://www.discogs.com/" target="_blank" rel="noopener">Discogs</a> — <span>мировая база изданий и маркетплейс. Доставка в Россию 3–6 недель, часто через посредников.</span></li>
+        </ul></div>
+        <div><h4>Маркетплейсы</h4><ul>
+          <li><a href="https://www.ozon.ru/" target="_blank" rel="noopener">Ozon</a>, <a href="https://www.wildberries.ru/" target="_blank" rel="noopener">Wildberries</a>, <a href="https://market.yandex.ru/" target="_blank" rel="noopener">Яндекс Маркет</a> — <span>новые пластинки и переиздания. Проверяйте продавца и указанное издание.</span></li>
+        </ul></div>
+        <div><h4>Специализированные магазины</h4><ul>
+          <li><a href="https://plastinka.com/" target="_blank" rel="noopener">Plastinka.com</a> — <span>большой каталог, сотни новых поступлений в неделю.</span></li>
+          <li><a href="https://aisheff.ru/" target="_blank" rel="noopener">Ай-Шефф</a> — <span>Москва, больше 10 тысяч пластинок в наличии.</span></li>
+          <li><a href="https://maximumvinyl.ru/" target="_blank" rel="noopener">Максимум Винил</a>, <a href="https://long-play.ru/" target="_blank" rel="noopener">Long-play.ru</a>, <a href="https://vinyl.ru/" target="_blank" rel="noopener">Vinyl.ru</a> — <span>Москва, доставка по России.</span></li>
+          <li><a href="https://dissonance.shop/" target="_blank" rel="noopener">Dissonance.shop</a> — <span>Санкт-Петербург, только пластинки и аксессуары.</span></li>
+          <li><a href="https://vinylpark.ru/" target="_blank" rel="noopener">Винилпарк</a>, <a href="https://korobkavinyla.ru/" target="_blank" rel="noopener">Коробка винила</a>, <a href="https://vinyl-is.ru/" target="_blank" rel="noopener">Это винил</a>, <a href="https://tishina.shop/" target="_blank" rel="noopener">Тишина</a> — <span>новинки и импорт с доставкой по России.</span></li>
+          <li><a href="https://stereozona.ru/catalog/plastinki/" target="_blank" rel="noopener">Stereozona</a> — <span>пластинки вместе с техникой.</span></li>
+        </ul></div>
+        <div><h4>Офлайн</h4><ul>
+          <li><span>«Звуковой барьер» (Москва), «Фонотека на Марата» (Санкт-Петербург), барахолки и блошиные рынки — по данным Т—Ж.</span></li>
+        </ul></div>
+      </div>
+      <p class="note">Кнопка «Искать» у пластинки из списка сразу открывает поиск на Мешке, Авито, Discogs и маркетплейсах. Покупая б/у, сверяйте состояние по шкале Goldmine и номер издания на Discogs.</p>
+    </div>
   </div>
   <div class="col">
     <div class="panel">
@@ -1601,6 +1644,7 @@ function colStore(name,lsKey,onChange){const s={mode:'local',list:[],col:null,ch
 
 /* ---------- Хочу купить ---------- */
 let W=null,wEdit=null,pendingWant=null;
+const SEARCH=[['Мешок','https://meshok.net/?search={q}'],['Авито','https://www.avito.ru/rossiya?q={q}%20%D0%BF%D0%BB%D0%B0%D1%81%D1%82%D0%B8%D0%BD%D0%BA%D0%B0'],['Discogs','https://www.discogs.com/sell/list?q={q}&format=Vinyl'],['Ozon','https://www.ozon.ru/search/?text={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB'],['Wildberries','https://www.wildberries.ru/catalog/0/search.aspx?search={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB'],['Яндекс Маркет','https://market.yandex.ru/search?text={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB']];
 const PRI={1:['Очень хочу','no'],2:['Хочу','mid'],3:['Когда-нибудь','info']};
 const keyAT=(a,t)=>((a||'')+'|'+(t||'')).toLowerCase().trim();
 function renderW(){if(!W)return;const l=W.list,q=$('w-q').value.trim().toLowerCase(),own=new Set(RECS.map(r=>keyAT(r.a,r.t)));
@@ -1616,12 +1660,15 @@ function renderW(){if(!W)return;const l=W.list,q=$('w-q').value.trim().toLowerCa
     if(+w.max){const m=document.createElement('span');m.className='grade info';m.textContent='до '+Math.round(w.max).toLocaleString('ru-RU')+' ₽';tags.appendChild(m)}
     if(own.has(keyAT(w.a,w.t))){const o=document.createElement('span');o.className='tag-warn';o.textContent='уже есть в коллекции';tags.appendChild(o)}
     const acts=document.createElement('div');acts.className='acts';const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b)};
+    const sl=document.createElement('div');sl.className='searchlinks';sl.hidden=true;const q=encodeURIComponent((w.a+' '+w.t).trim());
+    sl.innerHTML='<span class="status">Искать на:</span>'+SEARCH.map(([n,u])=>'<a href="'+u.replace('{q}',q)+'" target="_blank" rel="noopener">'+n+'</a>').join('');
+    mk('Искать',b=>{sl.hidden=!sl.hidden;b.textContent=sl.hidden?'Искать':'Скрыть поиск'});
     mk('Купил',()=>{resetForm();pendingWant=w.id;$('k-a').value=w.a;$('k-t').value=w.t;$('k-n').value=w.ed||'';$('k-p').value=w.max||'';$('k-cancel').hidden=false;
       $('k-msg').textContent='Проверьте состояние и цену и нажмите «Добавить в коллекцию». Пластинка уйдёт из списка желаний.';location.hash='kollekciya';setTimeout(()=>$('k-form').scrollIntoView({block:'start'}),60)});
     mk('Изменить',()=>{wEdit=w.id;$('w-a').value=w.a;$('w-t').value=w.t;$('w-ed').value=w.ed||'';$('w-max').value=w.max||'';$('w-pri').value=w.pri||2;$('w-where').value=w.where||'';
       $('w-formtitle').textContent='Изменить';$('w-submit').textContent='Сохранить';$('w-cancel').hidden=false;$('w-a').focus()});
     mk('Удалить',b=>{if(b.classList.contains('arm'))W.del(w.id);else{b.classList.add('arm');b.textContent='Точно удалить?';setTimeout(()=>{b.classList.remove('arm');b.textContent='Удалить'},4000)}});
-    li.append(ttl,tags,acts);ul.appendChild(li)});renderNow()}
+    li.append(ttl,tags,acts,sl);ul.appendChild(li)});renderNow()}
 function wReset(){wEdit=null;$('w-form').reset();$('w-pri').value='2';$('w-formtitle').textContent='Добавить в список';$('w-submit').textContent='Добавить в список';$('w-cancel').hidden=true}
 $('w-cancel').addEventListener('click',wReset);$('w-q').addEventListener('input',renderW);
 $('w-form').addEventListener('submit',e=>{e.preventDefault();const a=$('w-a').value.trim(),t=$('w-t').value.trim();if(!a||!t){$('w-msg').textContent='Укажите исполнителя и альбом.';return}
@@ -1804,6 +1851,11 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();window.__vlNow=true;renderNow();
 showTab();
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{calcRes();calcAlign();if(lastAnalysis)showAnalysis(lastAnalysis,num('s-nom')||3150)});
+function redrawAll(){try{calcRes();calcAlign();drawProtractor();renderN();renderStats();renderRoom();if(lastAnalysis)showAnalysis(lastAnalysis,num('s-nom')||3150)}catch(e){}}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);
+function setNight(on){document.documentElement.toggleAttribute('data-night',on);$('night').setAttribute('aria-pressed',on?'true':'false');$('night').textContent=on?'Дневной режим':'Ночной режим';
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=on?'#000000':'#0F1318';lsSet('vinyl-lab-night',on?'1':null);redrawAll()}
+$('night').addEventListener('click',()=>setNight(!document.documentElement.hasAttribute('data-night')));
+if(lsGet('vinyl-lab-night')==='1')setNight(true);
 })();
 </script>

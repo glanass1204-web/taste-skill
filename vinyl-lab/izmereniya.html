@@ -27,6 +27,9 @@
 @media (prefers-color-scheme:dark){:root{
   --bg:#0F1318; --panel:#171C23; --ink:#E5E9EE; --muted:#8E99A7; --line:#2B333D;
   --amber:#F3AE45; --glow:#F0A21A; --glow-soft:#4A3510; --good:#3FB97A; --warn:#E5A532; --bad:#EF6A5E; --c2:#6AA8E8; color-scheme:dark}}
+:root[data-night]{--bg:#000000; --panel:#0A0101; --ink:#F04A3A; --muted:#B8382B; --line:#3A0B07;
+  --amber:#FF5A3C; --glow:#C42418; --glow-soft:#260402; --good:#E0503B; --warn:#FF6A3D; --bad:#FF2A1A; --c2:#B03A2E; color-scheme:dark}
+:root[data-night] .vu div{background:var(--glow)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -83,7 +86,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб — измерения</h1>
     <p class="tag">Измерения микрофоном телефона или компьютера: скорость диска и детонация, АЧХ в комнате, баланс каналов, уровень громкости.</p>
   </div>
-  <a class="btn" href="./" style="text-decoration:none">← Винил·Лаб: система, коллекция, калькуляторы</a>
+  <div class="row"><a class="btn" href="./" style="text-decoration:none">← Винил·Лаб: система, коллекция, калькуляторы</a><button type="button" class="btn" id="night" aria-pressed="false">Ночной режим</button></div>
 </header>
 
 <div class="micbar">
@@ -176,6 +179,10 @@ const num=id=>{const v=parseFloat(String($(id).value).replace(',','.'));return i
 const NS='http://www.w3.org/2000/svg';
 function el(tag,a,p,txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
 function setPill(p,cls,t){p.className='pill '+cls;p.textContent=t}
+function setNight(on){document.documentElement.toggleAttribute('data-night',on);$('night').setAttribute('aria-pressed',on?'true':'false');$('night').textContent=on?'Дневной режим':'Ночной режим';
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=on?'#000000':'#0F1318';try{on?localStorage.setItem('vinyl-lab-night','1'):localStorage.removeItem('vinyl-lab-night')}catch(e){}}
+$('night').addEventListener('click',()=>setNight(!document.documentElement.hasAttribute('data-night')));
+try{if(localStorage.getItem('vinyl-lab-night')==='1')setNight(true)}catch(e){}
 
 let ac=null,stream=null,an=null,timeBuf=null,freqBuf=null,running=false,raf=0;
 let noise=null;

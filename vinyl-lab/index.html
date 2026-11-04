@@ -91,6 +91,16 @@ p{margin:0}
 .unit{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--bg);overflow:hidden}
 .unit input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-family:var(--f-mono);font-size:15px;padding:9px 10px}
 .unit span{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding:0 10px;white-space:nowrap}
+textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;resize:vertical;min-height:72px}
+.feed{display:flex;flex-direction:column;gap:18px}
+.fday h4{margin:0 0 6px;font-family:var(--f-display);font-weight:500;font-size:14px}
+.fday ul{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.fday li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:baseline;font-size:14px}
+.fday .ft{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;min-width:86px}
+.fday .fx{min-width:0;overflow-wrap:anywhere}
+.fday .fx small{display:block;color:var(--muted);font-size:13px}
+.fday .del{justify-self:end}
+@media (max-width:520px){.fday li{grid-template-columns:minmax(0,1fr) auto}.fday .ft{grid-column:1/-1;min-width:0}}
 select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px}
 .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .unit input{width:100%}
@@ -155,6 +165,8 @@ code,.f{font-family:var(--f-mono);font-size:13px;color:var(--ink);background:var
 .check span.v{grid-column:1;font-size:13px;color:var(--muted)}
 .check .pill{grid-row:1/span 2;grid-column:2;justify-self:end}
 .pill.info{color:var(--muted)}
+details.more{border-top:1px solid var(--line);padding-top:12px}
+details.more summary{font-size:14px;color:var(--amber)}
 .hdr-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 #night[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
 .shops{display:flex;flex-direction:column;gap:14px}
@@ -209,12 +221,13 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 <header>
   <div>
     <h1>Винил<span>·</span>Лаб</h1>
-    <p class="tag">Профиль системы, коллекция пластинок и калькуляторы для настройки винилового тракта: резонанс тонарма, юстировка с протрактором, скорость диска, провода и журнал износа иглы.</p>
+    <p class="tag">Личный дневник винильщика: система, пластинки, износ иглы и подсказки по настройке — всё в одном месте.</p>
   </div>
-  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.4</span></div>
+  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.5</span></div>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
+  <a href="#dnevnik" data-tab="dnevnik">Дневник</a>
   <a href="#sistema" data-tab="sistema">Моя система</a>
   <a href="#kollekciya" data-tab="kollekciya">Коллекция</a>
   <a href="#hochu" data-tab="hochu">Хочу купить</a>
@@ -226,8 +239,44 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
   <a href="#igla" data-tab="igla">Игла</a>
 </nav>
 
+<!-- ============ ДНЕВНИК ============ -->
+<section class="tool" id="dnevnik">
+  <div class="col">
+    <div><h2>Дневник</h2></div>
+    <p class="note">Всё, что происходит с вашей системой и пластинками, в одной ленте, и подсказки, что сделать дальше.</p>
+    <div class="panel">
+      <h3>Подсказки</h3>
+      <div class="checks" id="d-hints"></div>
+    </div>
+    <div class="panel">
+      <h3>Записать в дневник</h3>
+      <div class="chips" id="d-quick">
+        <button type="button" data-m="20">Слушал сторону · 20 мин</button>
+        <button type="button" data-m="40">Слушал LP · 40 мин</button>
+      </div>
+      <div class="field"><label for="d-note">Заметка</label><textarea id="d-note" rows="3" placeholder="Например: поменял фонокорректор, бас стал плотнее"></textarea></div>
+      <button type="button" class="btn primary" id="d-save">Добавить заметку</button>
+      <p class="status" id="d-msg" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Лента</h3>
+      <div class="chips" id="d-filter">
+        <button type="button" data-v="all" aria-pressed="true">Всё</button>
+        <button type="button" data-v="listen" aria-pressed="false">Прослушивания</button>
+        <button type="button" data-v="setup" aria-pressed="false">Настройка</button>
+        <button type="button" data-v="coll" aria-pressed="false">Коллекция</button>
+        <button type="button" data-v="note" aria-pressed="false">Заметки</button>
+      </div>
+      <div class="feed" id="d-feed"></div>
+      <div class="chips"><button type="button" class="btn" id="d-more" hidden>Показать раньше</button></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ СИСТЕМА ============ -->
-<section class="tool" id="sistema">
+<section class="tool" id="sistema" hidden>
   <div class="col" id="sys-a">
     <div><h2>Моя система</h2></div>
     <p class="note" id="y-state">Сейчас в форме пример. Впишите свою технику и сохраните: данные подставятся во все калькуляторы.</p>
@@ -370,6 +419,9 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="row2">
         <div class="field"><label for="k-y">Год</label><div class="unit"><input id="k-y" inputmode="numeric" autocomplete="off"></div></div>
         <div class="field"><label for="k-f">Формат</label><select id="k-f"><option>LP 33</option><option>12″ 45</option><option>7″ 45</option><option>78</option></select></div>
+      </div>
+      <details id="k-morefields" class="more"><summary>Подробнее: состояние, цена, мойка, жанр</summary>
+      <div class="row2" style="margin-top:12px">
         <div class="field"><label for="k-mc">Винил</label><select id="k-mc"></select></div>
         <div class="field"><label for="k-sc">Конверт</label><select id="k-sc"></select></div>
         <div class="field"><label for="k-l">Лейбл, номер</label><div class="unit"><input id="k-l" autocomplete="off"></div></div>
@@ -379,6 +431,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       </div>
       <div class="field"><label for="k-g">Жанр, настроение</label><div class="unit"><input id="k-g" list="k-glist" autocomplete="off" placeholder="джаз, рок, для вечера…"></div><datalist id="k-glist"></datalist></div>
       <div class="field"><label for="k-n">Заметки</label><div class="unit"><input id="k-n" autocomplete="off" placeholder="издание, страна, особенности"></div></div>
+      <p class="note">Состояние — по шкале Goldmine: M — новая, NM — почти идеальная, VG+ — следы есть, на звук не влияют, VG — слышны щелчки, G и ниже — сильный шум.</p>
+      </details>
       <div class="chips"><button type="submit" class="btn primary" id="k-submit">Добавить в коллекцию</button><button type="button" class="btn" id="k-cancel" hidden>Отмена</button></div>
       <p class="status" id="k-msg" aria-live="polite"></p>
     </form>
@@ -429,8 +483,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <ul class="records" id="k-list"></ul>
       <div id="k-empty" class="empty" hidden>
         <p><strong>Коллекция пока пуста.</strong></p>
-        <p class="note">Добавьте пластинку в форме слева или импортируйте всю коллекцию из Discogs. Для каждой пластинки здесь будут видны состояние, дата мойки и сколько раз её слушали. Кнопка «Слушаю» записывает время и в журнал иглы.</p>
+        <p class="note">Добавьте пластинку в форме ниже или импортируйте всю коллекцию из Discogs. Для каждой пластинки здесь будут видны состояние, дата мойки и сколько раз её слушали. Кнопка «Слушаю» записывает время и в журнал иглы.</p>
+        <div class="chips"><button type="button" class="btn primary" id="k-demo">Показать на примерах</button></div>
       </div>
+      <div id="k-demobar" class="confirm" hidden><p>Сейчас в коллекции есть примеры, чтобы посмотреть, как всё работает. Ваши пластинки они не затронут.</p><div class="chips"><button type="button" class="btn" id="k-demodel">Убрать примеры</button></div></div>
       <p class="note" id="k-more"></p>
       <p class="status" id="k-store"></p>
     </div>
@@ -998,7 +1054,7 @@ function chips(id,cb){const box=$(id);box.addEventListener('click',e=>{const b=e
 function chipVal(id){const b=$(id).querySelector('[aria-pressed="true"]');return b?b.dataset.v:null}
 
 /* ---------- tabs ---------- */
-const TABS=['sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
+const TABS=['dnevnik','sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
 function showTab(){const h=location.hash.slice(1);const t=TABS.includes(h)?h:TABS[0];
   TABS.forEach(x=>{$(x).hidden=x!==t;document.querySelector('[data-tab="'+x+'"]').toggleAttribute('aria-current',x===t);if(x===t)document.querySelector('[data-tab="'+x+'"]').setAttribute('aria-current','page')});
   if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo();
@@ -1424,7 +1480,7 @@ function docStore(name,lsKey,onData){
 /* ---------- 0. Моя система ---------- */
 const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','vlo','vhi','vrec','clo','chi','phono','pcap','icpf','iclen','armc','amp','df','spk','z','zmin','zmax','slen','ssec'];
 const YTXT=['tt','cart','type','hz','prof','phono','amp','spk'];
-let P={system:null,setups:[],prefs:{washEvery:20}};
+let P={system:null,setups:[],notes:[],prefs:{washEvery:20}};
 function readSys(){const o={};YF.forEach(k=>{const v=$('y-'+k).value;o[k]=YTXT.includes(k)?v.trim():parseFloat(String(v).replace(',','.'))});return o}
 function fillSys(o){YF.forEach(k=>{if(!(k in o))return;const v=o[k];$('y-'+k).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v})}
 /* база проигрывателей и головок — паспортные данные производителей */
@@ -1447,12 +1503,12 @@ const TT=[
 ];
 const BRAND=t=>t.name.split(' ')[0];
 const CARTS=[
-  {id:'2mred',name:'Ortofon 2M Red',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
-  {id:'2mblue',name:'Ortofon 2M Blue',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
+  {id:'2mred',name:'Ortofon 2M Red',life:1000,type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
+  {id:'2mblue',name:'Ortofon 2M Blue',life:1000,type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
   {id:'vm95e',name:'Audio-Technica AT-VM95E',type:'MM',m:6.1,c:7,hz:100,prof:'elliptical',vlo:1.8,vhi:2.2,vrec:2.0,clo:100,chi:200},
   {id:'mp110',name:'Nagaoka MP-110',type:'MM',m:6.5,c:20,hz:100,prof:'elliptical',vlo:1.5,vhi:2.0,vrec:1.8,clo:100,chi:200},
-  {id:'2mbronze',name:'Ortofon 2M Bronze',type:'MM',m:7.2,c:22,hz:10,prof:'microline',vlo:1.4,vhi:1.7,vrec:1.5,clo:150,chi:300,note:'Игла Fine Line (линейного контакта).'},
-  {id:'2mblack',name:'Ortofon 2M Black',type:'MM',m:7.2,c:22,hz:10,prof:'shibata',vlo:1.4,vhi:1.7,vrec:1.5,clo:150,chi:300},
+  {id:'2mbronze',name:'Ortofon 2M Bronze',life:1000,type:'MM',m:7.2,c:22,hz:10,prof:'microline',vlo:1.4,vhi:1.7,vrec:1.5,clo:150,chi:300,note:'Игла Fine Line (линейного контакта).'},
+  {id:'2mblack',name:'Ortofon 2M Black',life:1000,type:'MM',m:7.2,c:22,hz:10,prof:'shibata',vlo:1.4,vhi:1.7,vrec:1.5,clo:150,chi:300},
   {id:'vm95ml',name:'Audio-Technica AT-VM95ML',type:'MM',m:6.1,c:10,hz:100,prof:'microline',vlo:1.8,vhi:2.2,vrec:2.0,clo:100,chi:200},
   {id:'oc9xml',name:'Audio-Technica AT-OC9XML (MC)',type:'MC',m:7.6,c:null,hz:100,prof:'microline',vlo:1.8,vhi:2.2,vrec:2.0,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом. Audio-Technica на сайте даёт только статическую гибкость (20): для расчёта резонанса нужна динамическая, впишите её из инструкции.'},
   {id:'e3',name:'Goldring E3',type:'MM',m:6.8,c:null,hz:10,prof:'elliptical',vlo:1.75,vhi:2.25,vrec:2.0,clo:100,chi:200,note:'Goldring указывает только статическую гибкость (20 мм/Н) и рекомендует тонармы с эффективной массой 10–30 г.'},
@@ -1467,7 +1523,7 @@ function fillSelect(sel,list){const groups={};list.forEach(x=>{(groups[BRAND(x)]
   Object.keys(groups).sort().forEach(b=>{const g=document.createElement('optgroup');g.label=b;groups[b].forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;g.appendChild(o)});sel.appendChild(g)})}
 fillSelect($('y-pick-tt'),TT);fillSelect($('y-pick-cart'),CARTS);
 function cartFields(c){return {cart:c.name.replace(/ \(.*\)$/,''),type:c.type,cmass:c.m,comp:c.c,hz:String(c.hz),prof:c.prof,vlo:c.vlo,vhi:c.vhi,vrec:c.vrec,clo:c.clo,chi:c.chi}}
-function pickSave(note){const o=readSys();P.system=o;saveP();applySys(o);renderChecks();vtfPill();
+function pickSave(note){const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;clearTimeout(sysTimer);saveP();applySys(o);renderChecks();vtfPill();
   $('y-pick-note').textContent=note;$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-pick-tt').addEventListener('change',()=>{const t=TT.find(x=>x.id===$('y-pick-tt').value);if(!t)return;
   fillSys({tt:t.name,D:t.D,ov:t.ov,off:t.off,meff:t.meff});const notes=['Подставлены паспортные данные: '+t.name+'.'];
@@ -1499,6 +1555,7 @@ function applySys(o){
   if(isFinite(o.D))setVal('v-L',(o.D+(isFinite(o.ov)?o.ov:0)).toFixed(1));
   if(o.cart)$('n-name').value=o.cart;
   const opt=[...$('n-profile').options].find(x=>x.value.startsWith(o.prof+'|'));if(opt){$('n-profile').value=opt.value;$('n-limit').value=opt.value.split('|')[1]}
+  const cl=CARTS.find(c=>c.name.replace(/ \(.*\)$/,'')===o.cart);if(cl&&cl.life)$('n-limit').value=cl.life;
   if(isFinite(o.vlo)&&isFinite(o.vhi)&&!$('j-vtf').dataset.touched)$('j-vtf').value=+((o.vlo+o.vhi)/2).toFixed(2);
   calcRes();calcMM();calcCable();calcVta();$('c-sec').dispatchEvent(new Event('input'));calcAlign();
 }
@@ -1533,17 +1590,25 @@ function renderSetups(){const tb=$('j-list');tb.innerHTML='';const list=P.setups
 let PS=null;
 function saveP(){PS.save(JSON.parse(JSON.stringify(P)))}
 function onProfile(d,mode){
-  if(d&&typeof d==='object'){P={system:normSys(d.system)||null,setups:Array.isArray(d.setups)?d.setups:[],prefs:Object.assign({washEvery:20},d.prefs||{})}}
-  if(P.prefs.room){const r=P.prefs.room;['L','W','H','rt','front'].forEach(k=>{if(isFinite(r[k]))$('o-'+k).value=r[k]})}
+  if(d&&typeof d==='object'){P={system:normSys(d.system)||null,setups:Array.isArray(d.setups)?d.setups:[],notes:Array.isArray(d.notes)?d.notes:[],prefs:Object.assign({washEvery:20},d.prefs||{})}}
+  /* Хранилище присылает данные повторно: форму и калькуляторы переписываем только если данные действительно изменились
+     и пользователь сейчас ничего не вводит — иначе ввод откатывается. */
+  const rj=JSON.stringify(P.prefs.room||null);
+  if(P.prefs.room&&!roomDirty&&rj!==lastRoomJSON){lastRoomJSON=rj;const r=P.prefs.room;['L','W','H','rt','front'].forEach(k=>{if(isFinite(r[k]))$('o-'+k).value=r[k]})}
   renderRoom();
-  if(P.system){const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(/ \(.*\)$/,'')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';}
-  if(P.system){fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
-  $('k-every').value=P.prefs.washEvery;renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
+  const sj=JSON.stringify(P.system);
+  if(P.system&&!sysDirty&&sj!==lastSysJSON){lastSysJSON=sj;
+    const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(/ \(.*\)$/,'')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';
+    fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
+  if(document.activeElement!==$('k-every'))$('k-every').value=P.prefs.washEvery;renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
 }
-$('y-form').addEventListener('submit',e=>{e.preventDefault();const o=readSys();if(!(o.D>100&&o.D<400)){$('y-msg').textContent='Проверьте расстояние от шпинделя до оси тонарма: обычно 200–300 мм.';return}
-  P.system=o;saveP();applySys(o);renderChecks();vtfPill();$('y-msg').textContent='Сохранено. Калькуляторы обновлены.';
-  $('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'});
-$('y-form').addEventListener('input',()=>{if(!P.system)renderChecks();$('y-msg').textContent=''});
+$('y-form').addEventListener('submit',e=>{e.preventDefault();commitSys()});
+let sysDirty=false,sysTimer=null,lastSysJSON='',roomDirty=false,roomTimer=null,lastRoomJSON='';
+function commitSys(){clearTimeout(sysTimer);const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;saveP();applySys(o);renderChecks();vtfPill();
+  $('y-msg').textContent='Сохранено. Калькуляторы обновлены.';$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
+$('y-form').addEventListener('input',e=>{sysDirty=true;$('y-msg').textContent='Сохраняю…';
+  if(e.target.id==='y-tt')$('y-pick-tt').value='';if(e.target.id==='y-cart')$('y-pick-cart').value='';
+  clearTimeout(sysTimer);sysTimer=setTimeout(commitSys,900);renderChecks()});
 $('j-vtf').addEventListener('input',()=>{$('j-vtf').dataset.touched='1';vtfPill()});
 $('j-form').addEventListener('submit',e=>{e.preventDefault();const v=num('j-vtf');
   P.setups.push({id:rid(),d:$('j-date').value||today(),vtf:isFinite(v)?v:null,as:$('j-as').value.trim().slice(0,30),h:$('j-h').value.trim().slice(0,40),n:$('j-note').value.trim().slice(0,160),t:Date.now()});
@@ -1575,7 +1640,7 @@ function renderCat(){
   $('k-cnt').textContent=RECS.length.toLocaleString('ru-RU');
   const sum=RECS.reduce((a,r)=>a+(+r.p||0),0);$('k-sum').textContent=sum?Math.round(sum).toLocaleString('ru-RU')+' ₽':'—';
   $('k-wash').textContent=RECS.filter(needsWash).length;$('k-month').textContent=RECS.filter(r=>r.lp&&t-dayNum(r.lp)<30).length;
-  $('k-empty').hidden=!!RECS.length;
+  $('k-empty').hidden=!!RECS.length;$('k-demobar').hidden=!RECS.some(r=>r.demo);
   const l=filtered(),ul=$('k-list');ul.innerHTML='';
   l.slice(0,150).forEach(r=>{const li=document.createElement('li');
     const ttl=document.createElement('div');ttl.className='ttl';ttl.textContent=(r.a||'—')+' — '+(r.t||'—');
@@ -1583,6 +1648,7 @@ function renderCat(){
     if(r.n){const n=document.createElement('small');n.textContent=r.n;ttl.appendChild(n)}
     const tags=document.createElement('div');tags.className='tags';
     const g=document.createElement('span');g.className='grade '+gradeCls(r.mc);g.title=r.mc?GRN[r.mc]:'';g.textContent=(r.mc||'?')+' / '+(r.sc||'?');tags.appendChild(g);
+    if(r.demo){const d=document.createElement('span');d.className='grade info';d.textContent='пример';tags.appendChild(d)}
     const w=document.createElement('span');w.className='pill '+(needsWash(r)?'mid':'ok');w.textContent=!r.wd?'не мыта':needsWash(r)?'пора мыть':'помыта '+fmtDate(r.wd);tags.appendChild(w);
     const acts=document.createElement('div');acts.className='acts';
     const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b);return b};
@@ -1594,10 +1660,18 @@ function renderCat(){
   $('k-store').textContent=recMode==='db'?'Коллекция сохраняется в вашем аккаунте.':'Коллекция хранится только в этом браузере.';
   renderStats();renderPick(false);if(W)renderW();renderNow();
 }
+function dAgo(n){const d=new Date((dayNum(today())-n)*864e5);return d.toISOString().slice(0,10)}
+const DEMO=[['Pink Floyd','The Dark Side Of The Moon','1973','рок','VG+','VG',4500,30,5,2,'Harvest, SHVL 804'],['Miles Davis','Kind Of Blue','1959','джаз','NM','NM',3200,4,3,0,'Columbia, переиздание'],
+  ['Кино','Группа крови','1988','рок','VG','G+',2500,95,1,null,'Мелодия'],['Daft Punk','Random Access Memories','2013','электроника','M','M',6000,null,0,0,''],
+  ['John Coltrane','Blue Train','1957','джаз','NM','VG+',3800,12,2,40,'Blue Note'],['Аквариум','Радио Африка','1983','рок','VG+','VG+',2200,200,0,null,'Мелодия']];
+$('k-demo').addEventListener('click',()=>{DEMO.forEach(([a,t,y,g,mc,sc,p,lp,pc,wd,l],i)=>recPut({id:'demo'+i,demo:true,a,t,y,g,mc,sc,p,f:'LP 33',l,n:'',wm:wd!=null?'вручную':'',wd:wd!=null?dAgo(wd):'',lp:lp!=null?dAgo(lp):'',pc,psw:pc,ws:wd!=null?1:0,add:dAgo(300-i*40)}));
+  $('k-msg').textContent='Добавлены 6 примеров. Попробуйте «Что послушать сегодня», фильтры и статистику.'});
+$('k-demodel').addEventListener('click',()=>{RECS.filter(r=>r.demo).forEach(r=>recDel(r.id));$('k-msg').textContent='Примеры убраны.'});
 function playRec(r){const m=MINUTES[r.f]||40;recPut(Object.assign({},r,{pc:(r.pc||0)+1,psw:(r.psw||0)+1,lp:today()}));
+  if(r.demo){$('k-msg').textContent='Это пример: прослушивание отмечено только у пластинки, в журнал иглы не записано.';return}
   const st=active();if(st&&!st.retired){addSession(m,today(),r.a+' — '+r.t);$('k-msg').textContent='Записано: '+r.a+' — '+r.t+', '+m+' мин в журнал иглы «'+st.name+'».'}
   else $('k-msg').textContent='Прослушивание отмечено. Добавьте иглу на вкладке «Игла», чтобы время шло в её журнал.'}
-function editRec(r){editId=r.id;['a','t','y','l','p','n','wd','g'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
+function editRec(r){editId=r.id;$('k-morefields').open=true;['a','t','y','l','p','n','wd','g'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
   $('k-formtitle').textContent='Изменить пластинку';$('k-submit').textContent='Сохранить изменения';$('k-cancel').hidden=false;$('k-a').focus();
   if(location.hash!=='#kollekciya')location.hash='kollekciya';document.getElementById('k-form').scrollIntoView({block:'start'})}
 function resetForm(){editId=null;$('k-form').reset();$('k-mc').value='NM';$('k-sc').value='NM';$('k-formtitle').textContent='Добавить пластинку';$('k-submit').textContent='Добавить в коллекцию';$('k-cancel').hidden=true}
@@ -1657,7 +1731,7 @@ function colStore(name,lsKey,onChange){const s={mode:'local',list:[],col:null,ch
   return s}
 
 /* ---------- Хочу купить ---------- */
-let W=null,wEdit=null,pendingWant=null;
+let W=null,wEdit=null,pendingWant=null;const wOpen=new Set();
 const SEARCH=[['Мешок','https://meshok.net/?search={q}'],['Авито','https://www.avito.ru/rossiya?q={q}%20%D0%BF%D0%BB%D0%B0%D1%81%D1%82%D0%B8%D0%BD%D0%BA%D0%B0'],['Discogs','https://www.discogs.com/sell/list?q={q}&format=Vinyl'],['Ozon','https://www.ozon.ru/search/?text={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB'],['Wildberries','https://www.wildberries.ru/catalog/0/search.aspx?search={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB'],['Яндекс Маркет','https://market.yandex.ru/search?text={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB']];
 const PRI={1:['Очень хочу','no'],2:['Хочу','mid'],3:['Когда-нибудь','info']};
 const keyAT=(a,t)=>((a||'')+'|'+(t||'')).toLowerCase().trim();
@@ -1674,9 +1748,9 @@ function renderW(){if(!W)return;const l=W.list,q=$('w-q').value.trim().toLowerCa
     if(+w.max){const m=document.createElement('span');m.className='grade info';m.textContent='до '+Math.round(w.max).toLocaleString('ru-RU')+' ₽';tags.appendChild(m)}
     if(own.has(keyAT(w.a,w.t))){const o=document.createElement('span');o.className='tag-warn';o.textContent='уже есть в коллекции';tags.appendChild(o)}
     const acts=document.createElement('div');acts.className='acts';const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b)};
-    const sl=document.createElement('div');sl.className='searchlinks';sl.hidden=true;const q=encodeURIComponent((w.a+' '+w.t).trim());
+    const sl=document.createElement('div');sl.className='searchlinks';sl.hidden=!wOpen.has(w.id);const q=encodeURIComponent((w.a+' '+w.t).trim());
     sl.innerHTML='<span class="status">Искать на:</span>'+SEARCH.map(([n,u])=>'<a href="'+u.replace('{q}',q)+'" target="_blank" rel="noopener">'+n+'</a>').join('');
-    mk('Искать',b=>{sl.hidden=!sl.hidden;b.textContent=sl.hidden?'Искать':'Скрыть поиск'});
+    mk(sl.hidden?'Искать':'Скрыть поиск',b=>{sl.hidden=!sl.hidden;sl.hidden?wOpen.delete(w.id):wOpen.add(w.id);b.textContent=sl.hidden?'Искать':'Скрыть поиск'});
     mk('Купил',()=>{resetForm();pendingWant=w.id;$('k-a').value=w.a;$('k-t').value=w.t;$('k-n').value=w.ed||'';$('k-p').value=w.max||'';$('k-cancel').hidden=false;
       $('k-msg').textContent='Проверьте состояние и цену и нажмите «Добавить в коллекцию». Пластинка уйдёт из списка желаний.';location.hash='kollekciya';setTimeout(()=>$('k-form').scrollIntoView({block:'start'}),60)});
     mk('Изменить',()=>{wEdit=w.id;$('w-a').value=w.a;$('w-t').value=w.t;$('w-ed').value=w.ed||'';$('w-max').value=w.max||'';$('w-pri').value=w.pri||2;$('w-where').value=w.where||'';
@@ -1814,7 +1888,8 @@ function playTone(f,dur){try{startOsc(f,dur);$('o-play').textContent='Играе
 $('o-sweep').addEventListener('click',()=>{try{const D=40,{o,t}=startOsc(20,D);o.frequency.exponentialRampToValueAtTime(200,t+D);const t0=Date.now();
   sweepInt=setInterval(()=>{const e=(Date.now()-t0)/1000;$('o-play').textContent='Свип: сейчас ≈ '+fmt(20*Math.pow(10,Math.min(1,e/D)),0)+' Гц'},250)}catch(e){$('o-play').textContent='Звук недоступен в этом окне.'}});
 $('o-stop').addEventListener('click',stopTone);
-$('o-form').addEventListener('input',()=>{renderRoom();$('o-msg').textContent=''});
+$('o-form').addEventListener('input',()=>{renderRoom();roomDirty=true;$('o-msg').textContent='Сохраняю…';clearTimeout(roomTimer);
+  roomTimer=setTimeout(()=>{const r=readRoom();roomDirty=false;if(r.L>1&&r.W>1&&r.H>1){P.prefs.room=r;lastRoomJSON=JSON.stringify(r);saveP();$('o-msg').textContent='Комната сохранена.'}else $('o-msg').textContent='Проверьте размеры комнаты.'},900)});
 $('o-form').addEventListener('submit',e=>{e.preventDefault();const r=readRoom();if(!(r.L>1&&r.W>1&&r.H>1)){$('o-msg').textContent='Проверьте размеры комнаты.';return}
   P.prefs.room=r;saveP();$('o-msg').textContent='Комната сохранена.'});
 
@@ -1834,7 +1909,7 @@ $('bk-file').addEventListener('change',async e=>{const f=e.target.files[0];e.tar
   catch(err){$('bk-msg').textContent='Это не файл резервной копии Винил·Лаб.'}});
 $('bk-no').addEventListener('click',()=>{bkData=null;$('bk-confirm').hidden=true});
 $('bk-yes').addEventListener('click',()=>{const d=bkData;if(!d)return;$('bk-confirm').hidden=true;
-  if(d.profile){P={system:normSys(d.profile.system)||null,setups:Array.isArray(d.profile.setups)?d.profile.setups:[],prefs:Object.assign({washEvery:20},d.profile.prefs||{})};saveP();onProfile(P,PS.mode)}
+  if(d.profile){lastSysJSON='';lastRoomJSON='';P={system:normSys(d.profile.system)||null,setups:Array.isArray(d.profile.setups)?d.profile.setups:[],notes:Array.isArray(d.profile.notes)?d.profile.notes:[],prefs:Object.assign({washEvery:20},d.profile.prefs||{})};saveP();onProfile(P,PS.mode)}
   if(d.stylus){N=normalize(d.stylus);persist();renderN()}
   (d.records||[]).forEach(r=>{if(r&&r.id&&r.a)recPut(r)});(d.wants||[]).forEach(w=>{if(w&&w.id&&w.a)W.put(w)});
   $('bk-msg').textContent='Данные восстановлены.';bkData=null});
@@ -1859,7 +1934,58 @@ function renderNow(){if(!window.__vlNow)return;const rows=[],t=dayNum(today());
   if(STANDALONE||PS.mode!=='db'){const lb=P.prefs.lastBackup,ago=lb?t-dayNum(lb):Infinity;
     rows.push(`<a class="check nowlink" href="#sistema" data-scroll="bk-panel"><b>Резервная копия</b><span class="v">${lb?'последняя '+fmtDate(lb):'ещё не делали'} · данные хранятся только на этом устройстве</span><span class="pill ${ago>30?'mid':'ok'}">${ago>30?'пора сделать':'свежая'}</span></a>`)}
   if(W&&W.list.length){const top=W.list.filter(x=>+x.pri===1).length;rows.push(`<a class="check nowlink" href="#hochu"><b>Хочу купить: ${W.list.length}</b><span class="v">очень хочу: ${top}</span><span class="pill info">список</span></a>`)}
-  $('y-now').innerHTML=rows.join('')}
+  $('y-now').innerHTML=rows.join('');renderDiary()}
+/* ---------- Дневник: подсказки и лента ---------- */
+let dLimit=30;
+function hintRow(href,title,detail,cls,label){return `<a class="check nowlink" href="${href}"><b>${esc(title)}</b><span class="v">${esc(detail)}</span><span class="pill ${cls}">${esc(label)}</span></a>`}
+function renderDiary(){if(!window.__vlNow)return;const H=[],t=dayNum(today()),o=P.system;
+  if(!o)H.push(hintRow('#sistema','Расскажите о своей системе','выберите проигрыватель и головку из списка — установки подставятся сами','info','начать'));
+  else{const fx=TT.find(x=>x.name===o.tt&&x.fixed);
+    if(!fx){const C=o.hz==100?o.comp*1.7:o.comp,f=1000/(2*Math.PI*Math.sqrt((o.meff+o.cmass+1)*C));
+      if(isFinite(f)&&(f<8||f>12))H.push(hintRow('#rezonans','Резонанс '+fmt(f,1)+' Гц — вне нормы 8–12 Гц',f<8?'головка слишком гибкая для тонарма: возможны прыжки иглы на покоробленных пластинках':'головка жёсткая для лёгкого тонарма: может страдать бас и трекинг',f<7||f>14?'no':'mid',f<7||f>14?'важно':'на грани'));
+      if(o.type!=='MC'&&isFinite(o.clo)){const c=o.icpf*o.iclen+o.armc+o.pcap;if(isFinite(c)&&(c<o.clo||c>o.chi))H.push(hintRow('#provoda','Ёмкость нагрузки '+fmt(c,0)+' пФ вне рекомендации '+fmt(o.clo,0)+'–'+fmt(o.chi,0),c>o.chi?'короче кабель или меньше ёмкость входа фонокорректора':'можно добавить ёмкость на входе фонокорректора','mid','совет'))}}}
+  const st=active();
+  if(!st)H.push(hintRow('#igla','Начните учёт иглы','добавьте иглу — дневник будет следить за износом','info','игла'));
+  else if(!st.retired){const used=usedH(st),lim=+st.limit||1000,pct=used/lim*100;
+    if(pct>=100)H.push(hintRow('#igla','Ресурс иглы выработан',st.name+': '+fmt(used,0)+' из '+fmt(lim,0)+' ч. Изношенная игла портит канавки — замените её','no','заменить'));
+    else if(pct>=80)H.push(hintRow('#igla','Пора присмотреть сменную иглу',st.name+': осталось около '+fmt(lim-used,0)+' ч','mid','скоро'))}
+  const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
+  if(o&&!(TT.find(x=>x.name===o.tt&&x.fixed))){if(!last)H.push(hintRow('#sistema','Запишите текущую прижимную силу','так будет с чем сравнить, если звук изменится','info','настройка'));
+    else if(t-dayNum(last.d)>180)H.push(hintRow('#sistema','Полгода не проверяли прижимную силу','последняя запись '+fmtDate(last.d)+'. Проверьте весами и запишите','mid','проверить'))}
+  const w=RECS.filter(r=>needsWash(r)).length;if(w)H.push(hintRow('#kollekciya',w+' '+plural(w,'пластинку','пластинки','пластинок')+' пора помыть','немытые пластинки быстрее изнашивают иглу','mid','мойка'));
+  const idle=RECS.filter(r=>r.lp?t-dayNum(r.lp)>365:(r.add&&t-dayNum(r.add)>365)).length;if(idle)H.push(hintRow('#kollekciya',idle+' '+plural(idle,'пластинку','пластинки','пластинок')+' не слушали больше года','загляните в «Что послушать сегодня»','info','идея'));
+  if(STANDALONE||PS.mode!=='db'){const lb=P.prefs.lastBackup;if(!lb||t-dayNum(lb)>30)H.push(hintRow('#sistema','Сделайте резервную копию','данные хранятся только на этом устройстве'+(lb?'; последняя копия '+fmtDate(lb):''),'mid','копия'))}
+  if(!H.length)H.push('<div class="check"><b>Всё в порядке</b><span class="v">система настроена, игла в норме. Хорошего прослушивания!</span><span class="pill ok">порядок</span></div>');
+  $('d-hints').innerHTML=H.join('');
+  // лента
+  const E=[],f=chipVal('d-filter');const add=(d,type,label,title,detail,id)=>{if(d)E.push({d,type,label,title,detail,id})};
+  const byDay={};N.sessions.forEach(s=>{const k=s.d+'|'+s.sid;(byDay[k]=byDay[k]||{d:s.d,sid:s.sid,m:0,n:[]});byDay[k].m+=s.m;if(s.n&&!byDay[k].n.includes(s.n))byDay[k].n.push(s.n)});
+  Object.values(byDay).forEach(g=>{const sty=N.styli.find(x=>x.id===g.sid);add(g.d,'listen','слушал',hm(g.m)+(g.n.length?': '+g.n.slice(0,4).join(', ')+(g.n.length>4?' и ещё '+(g.n.length-4):''):''),sty?'игла '+sty.name:'')});
+  N.styli.forEach(x=>{add(x.installed,'setup','игла','Установлена игла '+x.name,'ресурс '+fmt(+x.limit,0)+' ч');if(x.retired)add(x.retired,'setup','игла','Снята игла '+x.name,'наиграно '+fmt(usedH(x),0)+' ч')});
+  P.setups.forEach(x=>add(x.d,'setup','настройка','Тонарм: '+[isFinite(x.vtf)?fmt(x.vtf,2)+' г':'',x.as?'антискейтинг '+x.as:'',x.h?'высота '+x.h:''].filter(Boolean).join(', '),x.n||''));
+  RECS.forEach(r=>{if(r.add)add(r.add,'coll','пластинка','В коллекции: '+r.a+' — '+r.t,r.demo?'пример':'');if(r.wd)add(r.wd,'coll','мойка','Помыта: '+r.a+' — '+r.t,r.wm||'')});
+  if(W)W.list.forEach(x=>add(x.add,'coll','хочу','В список желаний: '+x.a+' — '+x.t,x.ed||''));
+  (P.notes||[]).forEach(x=>add(x.d,'note','заметка',x.text,'',x.id));
+  const list=E.filter(e=>f==='all'||e.type===f).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
+  const days=[...new Set(list.map(e=>e.d))],show=days.slice(0,dLimit),feed=$('d-feed');feed.innerHTML='';
+  if(!list.length){feed.innerHTML='<p class="note">Пока пусто. Здесь появятся прослушивания, настройки, новые пластинки и ваши заметки.</p>'}
+  show.forEach(d=>{const box=document.createElement('div');box.className='fday';const h=document.createElement('h4');const n=t-dayNum(d);
+    h.textContent=n===0?'Сегодня':n===1?'Вчера':new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});box.appendChild(h);
+    const ul=document.createElement('ul');list.filter(e=>e.d===d).forEach(e=>{const li=document.createElement('li');
+      const a=document.createElement('span');a.className='ft';a.textContent=e.label;const x=document.createElement('span');x.className='fx';x.textContent=e.title;
+      if(e.detail){const sm=document.createElement('small');sm.textContent=e.detail;x.appendChild(sm)}li.append(a,x);
+      if(e.type==='note'){const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Удалить';
+        del.addEventListener('click',()=>{if(del.classList.contains('arm')){P.notes=P.notes.filter(z=>z.id!==e.id);saveP();renderDiary()}else{del.classList.add('arm');del.textContent='Точно?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});li.appendChild(del)}
+      ul.appendChild(li)});box.appendChild(ul);feed.appendChild(box)});
+  $('d-more').hidden=days.length<=dLimit}
+function plural(n,a,b,c){const x=n%10,y=n%100;return x===1&&y!==11?a:x>=2&&x<=4&&(y<12||y>14)?b:c}
+chips('d-filter',()=>{dLimit=30;renderDiary()});
+$('d-more').addEventListener('click',()=>{dLimit+=30;renderDiary()});
+$('d-save').addEventListener('click',()=>{const v=$('d-note').value.trim();if(!v){$('d-msg').textContent='Напишите заметку.';return}
+  P.notes=(P.notes||[]).concat([{id:rid(),d:today(),text:v.slice(0,500),t:Date.now()}]).slice(-500);saveP();$('d-note').value='';$('d-msg').textContent='Заметка добавлена.';renderDiary()});
+$('d-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const st=active();
+  if(!st||st.retired){$('d-msg').textContent='Сначала добавьте иглу на вкладке «Игла» — тогда время прослушивания пойдёт в её журнал.';return}
+  addSession(+b.dataset.m,today(),'');$('d-msg').textContent='Записано: '+hm(+b.dataset.m)+'.'});
 document.addEventListener('click',e=>{const a=e.target.closest('[data-scroll]');if(!a)return;setTimeout(()=>{const t=$(a.dataset.scroll);if(t)t.scrollIntoView({block:'start',behavior:'smooth'})},60)});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 

@@ -94,6 +94,17 @@ p{margin:0}
 textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;resize:vertical;min-height:72px}
 .feed{display:flex;flex-direction:column;gap:18px}
 .flabel{font-size:13px;font-weight:500}
+.sedit{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:4px 0;white-space:normal}
+.sedit .unit{width:auto}.sedit .sd{flex:0 0 160px}.sedit .sm{flex:0 0 120px}.sedit .sn{flex:1 1 200px}
+tr.editrow td{background:var(--glow-soft)}
+td.acts-cell{white-space:nowrap;text-align:right}
+@media (max-width:600px){
+  #n-hist{display:block}#n-hist tr{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  #n-hist td{border:0;padding:0;white-space:normal}#n-hist td.note-cell{min-width:0;color:var(--muted)}
+  #n-hist td.acts-cell{grid-column:1/-1;text-align:left;display:flex;gap:4px}
+  #n-hist tr.editrow{display:block;padding:10px 8px}#n-hist tr.editrow td{display:block}
+  #n-hist .sedit .sd,#n-hist .sedit .sm{flex:1 1 130px}
+  table:has(#n-hist) thead{display:none}}
 .records small.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .phgrid{display:flex;flex-wrap:wrap;gap:8px}
 .phgrid figure{margin:0;position:relative;width:76px;height:76px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
@@ -250,7 +261,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб</h1>
     <p class="tag">Личный дневник винильщика: система, пластинки, износ иглы и подсказки по настройке — всё в одном месте.</p>
   </div>
-  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.8</span></div>
+  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.9</span></div>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
@@ -1085,6 +1096,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
           <thead><tr><th>Дата</th><th>Время</th><th>Что слушали</th><th></th></tr></thead>
           <tbody id="n-hist"></tbody></table></div>
         <p class="note" id="n-histnote"></p>
+        <div class="chips"><button type="button" class="btn" id="n-histall" hidden>Показать все записи</button></div>
         <div class="chips" style="justify-content:space-between;align-items:center">
           <span class="chips"><button type="button" class="btn" id="n-edit">Изменить иглу</button><button type="button" class="btn" id="n-replace">Игла заменена</button></span>
           <span class="status" id="n-store"></span>
@@ -1441,6 +1453,7 @@ function persist(){
   else lsSet(LSKEY,JSON.stringify(N));
 }
 function mutate(fn){fn();renderN();persist()}
+let sessEdit=null,sessFocus=false,histAll=false;
 const active=()=>N.styli.find(s=>s.id===N.activeId)||N.styli.filter(s=>!s.retired).slice(-1)[0]||null;
 function usedH(st){return (+st.start||0)+N.sessions.filter(s=>s.sid===st.id).reduce((a,s)=>a+s.m,0)/60}
 function renderN(){
@@ -1468,12 +1481,30 @@ function renderN(){
   const weeks=new Array(12).fill(0),mon=t-((new Date(t*864e5).getUTCDay()+6)%7);
   N.sessions.filter(s=>s.sid===st.id).forEach(s=>{const sd=dayNum(s.d),ws=sd-((new Date(sd*864e5).getUTCDay()+6)%7),idx=11-Math.round((mon-ws)/7);if(idx>=0&&idx<12)weeks[idx]+=s.m/60});
   drawWeeks(weeks,mon);
-  const hist=N.sessions.filter(s=>s.sid===st.id).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.t||0)-(a.t||0)),tb=$('n-hist');tb.innerHTML='';
-  hist.slice(0,12).forEach(s=>{const tr=document.createElement('tr');tr.innerHTML='<td class="n">'+fmtDate(s.d)+'</td><td class="n">'+hm(s.m)+'</td><td class="note-cell"></td><td></td>';
-    tr.children[2].textContent=s.n||'';const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Удалить';
+  const hist=N.sessions.filter(s=>s.sid===st.id).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.t||0)-(a.t||0)),tb=$('n-hist');const keepEdit=!!(sessEdit&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#n-hist tr.editrow'));if(!keepEdit)tb.innerHTML='';
+  const shown=keepEdit?[]:histAll?hist:hist.slice(0,12);
+  if(!keepEdit&&sessEdit&&!shown.some(x=>x.id===sessEdit.id))shown.push(hist.find(x=>x.id===sessEdit.id)||shown[0]);
+  shown.filter(Boolean).forEach(s=>{const tr=document.createElement('tr');
+    if(sessEdit&&sessEdit.id===s.id){ // строка редактирования
+      const td=document.createElement('td');td.colSpan=4;td.innerHTML='<div class="sedit"><div class="unit sd"><input type="date" aria-label="Дата"></div><div class="unit sm"><input inputmode="numeric" aria-label="Сколько минут"><span>мин</span></div><div class="unit sn"><input aria-label="Что слушали" placeholder="что слушали" autocomplete="off"></div><div class="chips"><button type="button" class="btn primary">Сохранить</button><button type="button" class="btn">Отмена</button></div></div>';
+      const [di,mi,ni]=td.querySelectorAll('input'),[sv,cn]=td.querySelectorAll('button');di.value=sessEdit.d;mi.value=sessEdit.m;ni.value=sessEdit.n;di.max=today();
+      di.oninput=()=>{sessEdit.d=di.value};mi.oninput=()=>{sessEdit.m=mi.value};ni.oninput=()=>{sessEdit.n=ni.value};
+      const save=()=>{const e=sessEdit,m=parseFloat(String(e.m).replace(',','.'));
+        if(!(m>=1&&m<=1440)){$('n-logmsg').textContent='Укажите время от 1 до 1440 минут.';mi.focus();return}
+        if(!/^\d{4}-\d\d-\d\d$/.test(e.d)||e.d>today()){$('n-logmsg').textContent='Проверьте дату: она не может быть в будущем.';di.focus();return}
+        sessEdit=null;mutate(()=>{const x=N.sessions.find(z=>z.id===e.id);if(x){x.d=e.d;x.m=Math.round(m);x.n=String(e.n||'').trim().slice(0,120)}});$('n-logmsg').textContent='Запись исправлена.'};
+      sv.onclick=save;cn.onclick=()=>{sessEdit=null;renderN();$('n-logmsg').textContent=''};
+      [di,mi,ni].forEach(x=>x.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();save()}if(ev.key==='Escape')cn.onclick()}));
+      tr.className='editrow';tr.appendChild(td);tb.appendChild(tr);if(sessFocus){sessFocus=false;setTimeout(()=>mi.focus(),0)}return}
+    tr.innerHTML='<td class="n">'+fmtDate(s.d)+'</td><td class="n">'+hm(s.m)+'</td><td class="note-cell"></td><td class="acts-cell"></td>';
+    tr.children[2].textContent=s.n||'';
+    const ed=document.createElement('button');ed.type='button';ed.className='del';ed.textContent='Изменить';ed.setAttribute('aria-label','Изменить запись от '+fmtDate(s.d));
+    ed.addEventListener('click',()=>{sessEdit={id:s.id,d:s.d,m:s.m,n:s.n||''};sessFocus=true;renderN()});
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Удалить';
     del.addEventListener('click',()=>{if(del.classList.contains('arm'))mutate(()=>{N.sessions=N.sessions.filter(x=>x.id!==s.id)});else{del.classList.add('arm');del.textContent='Точно удалить?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});
-    if(!st.retired)tr.children[3].appendChild(del);tb.appendChild(tr)});
-  $('n-histnote').textContent=!hist.length?'Записей пока нет. Отметьте первое прослушивание слева.':hist.length>12?'Показаны последние 12 из '+hist.length+' записей.':'';
+    tr.children[3].append(ed,del);tb.appendChild(tr)});
+  $('n-histnote').textContent=!hist.length?'Записей пока нет. Отметьте первое прослушивание слева.':hist.length>12&&!histAll?'Показаны последние 12 из '+hist.length+' записей.':'';
+  $('n-histall').hidden=hist.length<=12;$('n-histall').textContent=histAll?'Свернуть':'Показать все записи ('+hist.length+')';
   $('n-replace').hidden=!!st.retired;renderNow();
 }
 function drawWeeks(w,mon){
@@ -1490,6 +1521,7 @@ function addSession(min,day,note){const st=active();if(!st||!(min>0))return;
 $('n-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(b)addSession(+b.dataset.m,today(),'')});
 $('n-logform').addEventListener('submit',e=>{e.preventDefault();const m=num('n-min');if(!(m>0&&m<1440)){$('n-logmsg').textContent='Укажите время от 1 до 1440 минут.';return}
   addSession(m,$('n-day').value||today(),$('n-note').value.trim());$('n-note').value=''});
+$('n-histall').addEventListener('click',()=>{histAll=!histAll;renderN()});
 $('n-addtoggle').addEventListener('click',()=>{$('n-form').hidden=!$('n-form').hidden});
 $('n-cancel').addEventListener('click',()=>{nEdit=null;$('n-formbtn').textContent='Сохранить иглу';if(N.styli.length)$('n-form').hidden=true});
 $('n-profile').addEventListener('change',()=>{$('n-limit').value=$('n-profile').value.split('|')[1]});

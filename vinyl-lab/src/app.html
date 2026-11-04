@@ -185,6 +185,12 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
   <div class="col">
     <div><h2>Моя система</h2></div>
     <p class="note" id="y-state">Сейчас в форме пример. Впишите свою технику и сохраните: данные подставятся во все калькуляторы.</p>
+    <div class="panel">
+      <h3>Быстрый выбор из списка</h3>
+      <div class="field"><label for="y-pick-tt">Проигрыватель</label><select id="y-pick-tt"><option value="">— другой, ввести вручную —</option></select></div>
+      <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
+      <p class="note" id="y-pick-note">Выберите свой проигрыватель и головку: паспортные данные подставятся сами, система сохранится, а справа появятся рекомендуемые установки.</p>
+    </div>
     <form class="panel" id="y-form">
       <h3>Проигрыватель и тонарм</h3>
       <div class="field"><label for="y-tt">Модель</label><div class="unit"><input id="y-tt" value="Technics SL-1200MK2" autocomplete="off"></div></div>
@@ -205,6 +211,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
           <option value="conical">Конический</option><option value="elliptical" selected>Эллиптический</option><option value="shibata">Shibata</option><option value="microline">MicroLine</option><option value="dj">DJ</option></select></div>
         <div class="field"><label for="y-vlo">Прижимная сила, от</label><div class="unit"><input id="y-vlo" inputmode="decimal" value="1.6"><span>г</span></div></div>
         <div class="field"><label for="y-vhi">до</label><div class="unit"><input id="y-vhi" inputmode="decimal" value="2.0"><span>г</span></div></div>
+        <div class="field"><label for="y-vrec">Прижимная сила, рекомендуемая</label><div class="unit"><input id="y-vrec" inputmode="decimal" value="1.8"><span>г</span></div></div>
+        <div class="field"></div>
         <div class="field"><label for="y-clo">Ёмкость нагрузки, от</label><div class="unit"><input id="y-clo" inputmode="decimal" value="150"><span>пФ</span></div></div>
         <div class="field"><label for="y-chi">до</label><div class="unit"><input id="y-chi" inputmode="decimal" value="300"><span>пФ</span></div></div>
       </div>
@@ -232,6 +240,11 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     </form>
   </div>
   <div class="col">
+    <div class="panel">
+      <h3>Рекомендуемые установки</h3>
+      <div class="checks" id="y-setup"></div>
+      <p class="note">Это стартовые значения по паспортам. Тонкую подстройку делают на слух или с измерениями и записывают в журнал настроек ниже.</p>
+    </div>
     <div class="panel">
       <h3>Проверка системы</h3>
       <div class="checks" id="y-checks"></div>
@@ -896,7 +909,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 (function(){
 const $=id=>document.getElementById(id);
 const num=id=>{const v=parseFloat(String($(id).value).replace(',','.').trim());return isFinite(v)?v:NaN};
-const fmt=(v,d=1)=>isFinite(v)?v.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const fmt=(v,d=1)=>typeof v==="number"&&isFinite(v)?v.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e}
@@ -1320,16 +1333,57 @@ function docStore(name,lsKey,onData){
 }
 
 /* ---------- 0. Моя система ---------- */
-const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','vlo','vhi','clo','chi','phono','pcap','icpf','iclen','armc','amp','df','spk','z','zmin','zmax','slen','ssec'];
+const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','vlo','vhi','vrec','clo','chi','phono','pcap','icpf','iclen','armc','amp','df','spk','z','zmin','zmax','slen','ssec'];
 const YTXT=['tt','cart','type','hz','prof','phono','amp','spk'];
 let P={system:null,setups:[],prefs:{washEvery:20}};
 function readSys(){const o={};YF.forEach(k=>{const v=$('y-'+k).value;o[k]=YTXT.includes(k)?v.trim():parseFloat(String(v).replace(',','.'))});return o}
-function fillSys(o){YF.forEach(k=>{if(o[k]!=null&&!(typeof o[k]==='number'&&!isFinite(o[k])))$('y-'+k).value=o[k]})}
-function setVal(id,v){if(v!=null&&!(typeof v==='number'&&!isFinite(v)))$(id).value=v}
+function fillSys(o){YF.forEach(k=>{if(!(k in o))return;const v=o[k];$('y-'+k).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v})}
+/* база проигрывателей и головок — паспортные данные производителей */
+const TT=[
+  {id:'sl1200mk7',name:'Technics SL-1200MK7 / GR / G',D:215,ov:15,off:22,meff:12},
+  {id:'sl1200mk2',name:'Technics SL-1200MK2 – MK5',D:215,ov:15,off:22,meff:12},
+  {id:'sl1500c',name:'Technics SL-1500C',D:215,ov:15,off:22,meff:12,cart:'2mred'},
+  {id:'sl100c',name:'Technics SL-100C',D:215,ov:15,off:22,meff:12},
+  {id:'lp120x',name:'Audio-Technica AT-LP120XUSB',D:214.5,ov:16,off:null,meff:null,cart:'vm95e',note:'Audio-Technica не публикует угол офсета и эффективную массу тонарма: эти поля оставлены пустыми.'},
+  {id:'dce',name:'Pro-Ject Debut Carbon EVO',D:200,ov:18.5,off:null,meff:6,cart:'2mred',note:'Pro-Ject не указывает угол офсета: поле оставлено пустым.'},
+  {id:'devo2',name:'Pro-Ject Debut EVO 2',D:200,ov:18.5,off:null,meff:7,note:'Pro-Ject не указывает угол офсета. Штатная головка Pick it MM EVO выбирается вручную: в её паспорте нет гибкости.'},
+  {id:'planar3',name:'Rega Planar 3 (тонарм RB330)',D:222,ov:14.5,off:21.55,meff:11},
+  {id:'dp400',name:'Denon DP-400',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет. Головодержатель весит 11 г с крепежом.'}
+];
+const CARTS=[
+  {id:'2mred',name:'Ortofon 2M Red',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
+  {id:'2mblue',name:'Ortofon 2M Blue',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
+  {id:'vm95e',name:'Audio-Technica AT-VM95E',type:'MM',m:6.1,c:7,hz:100,prof:'elliptical',vlo:1.8,vhi:2.2,vrec:2.0,clo:100,chi:200},
+  {id:'mp110',name:'Nagaoka MP-110',type:'MM',m:6.5,c:20,hz:100,prof:'elliptical',vlo:1.5,vhi:2.0,vrec:1.8,clo:100,chi:200},
+  {id:'dl103',name:'Denon DL-103 (MC)',type:'MC',m:8.5,c:5,hz:100,prof:'conical',vlo:2.2,vhi:2.8,vrec:2.5,clo:null,chi:null}
+];
+TT.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;$('y-pick-tt').appendChild(o)});
+CARTS.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$('y-pick-cart').appendChild(o)});
+function cartFields(c){return {cart:c.name.replace(' (MC)',''),type:c.type,cmass:c.m,comp:c.c,hz:String(c.hz),prof:c.prof,vlo:c.vlo,vhi:c.vhi,vrec:c.vrec,clo:c.clo,chi:c.chi}}
+function pickSave(note){const o=readSys();P.system=o;saveP();applySys(o);renderChecks();vtfPill();
+  $('y-pick-note').textContent=note;$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
+$('y-pick-tt').addEventListener('change',()=>{const t=TT.find(x=>x.id===$('y-pick-tt').value);if(!t)return;
+  fillSys({tt:t.name,D:t.D,ov:t.ov,off:t.off,meff:t.meff});const notes=['Подставлены паспортные данные: '+t.name+'.'];
+  const c=t.cart&&CARTS.find(x=>x.id===t.cart);if(c){fillSys(cartFields(c));$('y-pick-cart').value=c.id;notes.push('Головка '+c.name+' — штатная для этого проигрывателя.')}
+  if(t.note)notes.push(t.note);pickSave(notes.join(' '))});
+$('y-pick-cart').addEventListener('change',()=>{const c=CARTS.find(x=>x.id===$('y-pick-cart').value);if(!c)return;fillSys(cartFields(c));
+  pickSave('Подставлены паспортные данные головки '+c.name+'.'+(c.hz===100?' Гибкость указана при 100 Гц и пересчитана к 10 Гц приблизительно.':''))});
+function renderSetup(){const o=P.system||readSys(),rows=[];
+  const vr=isFinite(o.vrec)?o.vrec:(o.vlo+o.vhi)/2;
+  rows.push(isFinite(vr)?checkRow('Прижимная сила',fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г':''),'ok','старт'):checkRow('Прижимная сила','укажите диапазон головки','info','—'));
+  rows.push(isFinite(vr)?checkRow('Антискейтинг','≈ '+fmt(vr,1)+' по шкале — столько же, сколько прижимная сила','ok','старт'):checkRow('Антискейтинг','равен прижимной силе по шкале','info','—'));
+  if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);
+    rows.push(checkRow('Свес (overhang)',(isFinite(o.ov)?'заводской '+fmt(o.ov,1)+' мм · ':'')+'по Baerwald '+fmt(g.ov,1)+' мм при офсете '+fmt(g.beta*DEG,1)+'°','ok','юстировка'))}
+  rows.push(o.type==='MC'?checkRow('Нагрузка фонокорректора','MC-головка: сопротивление нагрузки по паспорту головки, ёмкость не важна','info','MC'):
+    isFinite(o.clo)?checkRow('Ёмкость нагрузки',fmt(o.clo,0)+'–'+fmt(o.chi,0)+' пФ вместе с кабелем, сопротивление 47 кОм','ok','MM'):checkRow('Ёмкость нагрузки','укажите рекомендацию головки','info','—'));
+  rows.push(checkRow('Высота тонарма (VTA)','для начала трубка тонарма параллельна пластинке, затем подстройка на слух','ok','старт'));
+  $('y-setup').innerHTML=rows.join('')}
+function setVal(id,v){$(id).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v}
+function normSys(o){if(!o)return o;const r=Object.assign({},o);YF.forEach(k=>{if(!YTXT.includes(k)&&(r[k]==null||r[k]===''))r[k]=NaN});return r}
 function applySys(o){
   ['r-arm','r-cart','a-preset'].forEach(i=>$(i).value='');
   setVal('r-eff',o.meff);setVal('r-mass',o.cmass);setVal('r-comp',o.comp);setVal('r-hz',o.hz);
-  setVal('a-d',o.D);setVal('a-fov',o.ov);setVal('a-foff',o.off);
+  setVal('a-d',o.D);$('a-fov').value=isFinite(o.ov)&&isFinite(o.off)?o.ov:'';$('a-foff').value=isFinite(o.ov)&&isFinite(o.off)?o.off:'';
   setVal('m-pf',o.icpf);setVal('m-len',o.iclen);setVal('m-arm',o.armc);setVal('m-pre',o.pcap);setVal('m-lo',o.clo);setVal('m-hi',o.chi);
   setVal('c-len',o.slen);setVal('c-sec',o.ssec);setVal('c-z',o.z);setVal('c-zmin',o.zmin);setVal('c-zmax',o.zmax);setVal('c-df',o.df);
   if(isFinite(o.D))setVal('v-L',(o.D+(isFinite(o.ov)?o.ov:0)).toFixed(1));
@@ -1347,11 +1401,11 @@ function renderChecks(){
   else{const t=o.icpf*o.iclen+o.armc+o.pcap;rows.push(isFinite(t)?checkRow('Ёмкость нагрузки MM',fmt(t,0)+' пФ · рекомендация '+fmt(o.clo,0)+'–'+fmt(o.chi,0),t>=o.clo&&t<=o.chi?'ok':t<o.clo?'mid':'no',t>=o.clo&&t<=o.chi?'в норме':t<o.clo?'меньше нормы':'больше нормы'):checkRow('Ёмкость нагрузки','заполните данные кабеля','info','—'))}
   const R=2*RHO*o.slen/o.ssec,zo=8/o.df,rc=ripple(zo+R,o.zmin,o.zmax)-ripple(zo,o.zmin,o.zmax);
   rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','заполните длину и сечение','info','—'));
-  if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм, '+fmt(o.off,1)+'°':''),'info','справка'))}
+  if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм'+(isFinite(o.off)?', '+fmt(o.off,1)+'°':''):''),'info','справка'))}
   const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
   if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
   else rows.push(checkRow('Прижимная сила','запишите настройку в журнал ниже','info','нет данных'));
-  $('y-checks').innerHTML=rows.join('');
+  $('y-checks').innerHTML=rows.join('');renderSetup();
 }
 function vtfPill(){const v=num('j-vtf'),o=P.system||readSys(),p=$('j-pill');
   if(!isFinite(v)||!isFinite(o.vlo))setPill(p,'info','—');else if(v<o.vlo)setPill(p,'no','легче нормы');else if(v>o.vhi)setPill(p,'mid','тяжелее нормы');else setPill(p,'ok','в диапазоне головки')}
@@ -1365,9 +1419,10 @@ function renderSetups(){const tb=$('j-list');tb.innerHTML='';const list=P.setups
 let PS=null;
 function saveP(){PS.save(JSON.parse(JSON.stringify(P)))}
 function onProfile(d,mode){
-  if(d&&typeof d==='object'){P={system:d.system||null,setups:Array.isArray(d.setups)?d.setups:[],prefs:Object.assign({washEvery:20},d.prefs||{})}}
+  if(d&&typeof d==='object'){P={system:normSys(d.system)||null,setups:Array.isArray(d.setups)?d.setups:[],prefs:Object.assign({washEvery:20},d.prefs||{})}}
   if(P.prefs.room){const r=P.prefs.room;['L','W','H','rt','front'].forEach(k=>{if(isFinite(r[k]))$('o-'+k).value=r[k]})}
   renderRoom();
+  if(P.system){const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(' (MC)','')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';}
   if(P.system){fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
   $('k-every').value=P.prefs.washEvery;renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
 }
@@ -1657,7 +1712,7 @@ $('bk-file').addEventListener('change',async e=>{const f=e.target.files[0];e.tar
   catch(err){$('bk-msg').textContent='Это не файл резервной копии Винил·Лаб.'}});
 $('bk-no').addEventListener('click',()=>{bkData=null;$('bk-confirm').hidden=true});
 $('bk-yes').addEventListener('click',()=>{const d=bkData;if(!d)return;$('bk-confirm').hidden=true;
-  if(d.profile){P={system:d.profile.system||null,setups:Array.isArray(d.profile.setups)?d.profile.setups:[],prefs:Object.assign({washEvery:20},d.profile.prefs||{})};saveP();onProfile(P,PS.mode)}
+  if(d.profile){P={system:normSys(d.profile.system)||null,setups:Array.isArray(d.profile.setups)?d.profile.setups:[],prefs:Object.assign({washEvery:20},d.profile.prefs||{})};saveP();onProfile(P,PS.mode)}
   if(d.stylus){N=normalize(d.stylus);persist();renderN()}
   (d.records||[]).forEach(r=>{if(r&&r.id&&r.a)recPut(r)});(d.wants||[]).forEach(w=>{if(w&&w.id&&w.a)W.put(w)});
   $('bk-msg').textContent='Данные восстановлены.';bkData=null});

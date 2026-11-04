@@ -1,0 +1,31 @@
+{
+  "name": "Корпус Мастер — расчёт мебели",
+  "short_name": "Корпус Мастер",
+  "description": "Расчёт корпусной мебели без ошибок: шкафы, кухни, комоды, кровати. Чертёж, присадка, раскрой ЛДСП, смета.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ECEFEE",
+  "theme_color": "#F2B705",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

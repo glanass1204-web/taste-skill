@@ -910,6 +910,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 const $=id=>document.getElementById(id);
 const num=id=>{const v=parseFloat(String($(id).value).replace(',','.').trim());return isFinite(v)?v:NaN};
 const fmt=(v,d=1)=>typeof v==="number"&&isFinite(v)?v.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const fmtF=v=>fmt(v,Math.abs(Math.round(v*10)-v*10)<1e-9?1:2);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e}
@@ -1362,6 +1363,12 @@ const CARTS=[
   {id:'2mblue',name:'Ortofon 2M Blue',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
   {id:'vm95e',name:'Audio-Technica AT-VM95E',type:'MM',m:6.1,c:7,hz:100,prof:'elliptical',vlo:1.8,vhi:2.2,vrec:2.0,clo:100,chi:200},
   {id:'mp110',name:'Nagaoka MP-110',type:'MM',m:6.5,c:20,hz:100,prof:'elliptical',vlo:1.5,vhi:2.0,vrec:1.8,clo:100,chi:200},
+  {id:'2mbronze',name:'Ortofon 2M Bronze',type:'MM',m:7.2,c:22,hz:10,prof:'microline',vlo:1.4,vhi:1.7,vrec:1.5,clo:150,chi:300,note:'Игла Fine Line (линейного контакта).'},
+  {id:'2mblack',name:'Ortofon 2M Black',type:'MM',m:7.2,c:22,hz:10,prof:'shibata',vlo:1.4,vhi:1.7,vrec:1.5,clo:150,chi:300},
+  {id:'vm95ml',name:'Audio-Technica AT-VM95ML',type:'MM',m:6.1,c:10,hz:100,prof:'microline',vlo:1.8,vhi:2.2,vrec:2.0,clo:100,chi:200},
+  {id:'oc9xml',name:'Audio-Technica AT-OC9XML (MC)',type:'MC',m:7.6,c:null,hz:100,prof:'microline',vlo:1.8,vhi:2.2,vrec:2.0,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом. Audio-Technica на сайте даёт только статическую гибкость (20): для расчёта резонанса нужна динамическая, впишите её из инструкции.'},
+  {id:'e3',name:'Goldring E3',type:'MM',m:6.8,c:null,hz:10,prof:'elliptical',vlo:1.75,vhi:2.25,vrec:2.0,clo:100,chi:200,note:'Goldring указывает только статическую гибкость (20 мм/Н) и рекомендует тонармы с эффективной массой 10–30 г.'},
+  {id:'nd3',name:'Rega Nd3',type:'MM',m:null,c:null,hz:10,prof:'elliptical',vlo:null,vhi:null,vrec:1.75,clo:null,chi:null,note:'Rega указывает только прижимную силу 1,75 г.'},
   {id:'dl103',name:'Denon DL-103 (MC)',type:'MC',m:8.5,c:5,hz:100,prof:'conical',vlo:2.2,vhi:2.8,vrec:2.5,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом.'},
   {id:'dl103r',name:'Denon DL-103R (MC)',type:'MC',m:8.5,c:5,hz:100,prof:'conical',vlo:2.2,vhi:2.8,vrec:2.5,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом (от 40 Ом с повышающим трансформатором).'},
   {id:'dl301',name:'Denon DL-301 II (MC)',type:'MC',m:6,c:13,hz:100,prof:'elliptical',vlo:1.2,vhi:1.6,vrec:1.4,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом. Гибкость 13 — по данным продавца.'},
@@ -1385,7 +1392,7 @@ function renderSetup(){const o=P.system||readSys(),rows=[],tt=TT.find(t=>t.name=
   if(tt&&tt.fixed){$('y-setup').innerHTML=checkRow('Тонарм и головка','настраивать не нужно: прижимная сила, антискейтинг и юстировка выставлены на заводе','ok','заводская')+
     checkRow('Что стоит проверять','скорость диска — вкладка «Скорость» или измерения микрофоном; износ иглы — журнал на вкладке «Игла»','info','уход');return}
   const vr=isFinite(o.vrec)?o.vrec:(o.vlo+o.vhi)/2;
-  rows.push(isFinite(vr)?checkRow('Прижимная сила',fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г':''),'ok','старт'):checkRow('Прижимная сила','укажите диапазон головки','info','—'));
+  rows.push(isFinite(vr)?checkRow('Прижимная сила',fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmtF(o.vlo)+'–'+fmtF(o.vhi)+' г':''),'ok','старт'):checkRow('Прижимная сила','укажите диапазон головки','info','—'));
   rows.push(isFinite(vr)?checkRow('Антискейтинг','≈ '+fmt(vr,1)+' по шкале — столько же, сколько прижимная сила','ok','старт'):checkRow('Антискейтинг','равен прижимной силе по шкале','info','—'));
   if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);
     rows.push(checkRow('Свес (overhang)',(isFinite(o.ov)?'заводской '+fmt(o.ov,1)+' мм · ':'')+'по Baerwald '+fmt(g.ov,1)+' мм при офсете '+fmt(g.beta*DEG,1)+'°','ok','юстировка'))}
@@ -1419,7 +1426,7 @@ function renderChecks(){
   if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм'+(isFinite(o.off)?', '+fmt(o.off,1)+'°':''):''),'info','справка'))}
   const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
   if(last&&isFinite(last.vtf)&&!isFinite(o.vlo))rows.push(checkRow('Прижимная сила',fmt(last.vtf,2)+' г от '+fmtDate(last.d)+' · диапазон головки не указан','info','справка'));
-  else if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
+  else if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmtF(o.vlo)+'–'+fmtF(o.vhi)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
   else rows.push(checkRow('Прижимная сила','запишите настройку в журнал ниже','info','нет данных'));
   $('y-checks').innerHTML=rows.join('');renderSetup();
 }

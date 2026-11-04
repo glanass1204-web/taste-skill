@@ -94,6 +94,7 @@ p{margin:0}
 textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;resize:vertical;min-height:72px}
 .feed{display:flex;flex-direction:column;gap:18px}
 .flabel{font-size:13px;font-weight:500}
+.records small.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .phgrid{display:flex;flex-wrap:wrap;gap:8px}
 .phgrid figure{margin:0;position:relative;width:76px;height:76px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
 .phgrid img{width:100%;height:100%;object-fit:cover;display:block}
@@ -249,7 +250,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб</h1>
     <p class="tag">Личный дневник винильщика: система, пластинки, износ иглы и подсказки по настройке — всё в одном месте.</p>
   </div>
-  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.7</span></div>
+  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.8</span></div>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
@@ -1054,6 +1055,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div><div class="tlabel">Секундомер прослушивания</div><div class="tval" id="n-tval">0:00:00</div></div>
         <button type="button" class="btn" id="n-timer">Начать</button>
       </div>
+      <div id="n-tconfirm" class="confirm" hidden>
+        <p id="n-tq"></p>
+        <div class="chips"><button type="button" class="btn" id="n-tall"></button><button type="button" class="btn primary" id="n-tlp">Записать 40 мин</button><button type="button" class="btn" id="n-tno">Не записывать</button></div>
+      </div>
       <p class="status" id="n-logmsg" aria-live="polite"></p>
     </div>
   </div>
@@ -1508,7 +1513,12 @@ let tStart=+lsGet(TKEY)||0,tInt=null;
 function tick(){const s=tStart?Math.floor((Date.now()-tStart)/1000):0;$('n-tval').textContent=Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function syncTimer(){const b=$('n-timer');b.textContent=tStart?'Остановить и записать':'Начать';b.classList.toggle('on',!!tStart);clearInterval(tInt);if(tStart)tInt=setInterval(tick,1000);tick()}
 $('n-timer').addEventListener('click',()=>{if(!tStart){tStart=Date.now();lsSet(TKEY,String(tStart))}else{const min=(Date.now()-tStart)/60000;tStart=0;lsSet(TKEY,null);
-  if(min>=1)addSession(min,today(),$('n-note').value.trim());else $('n-logmsg').textContent='Меньше минуты — не записано.'}syncTimer()});
+  if(min>180){tLong=min;$('n-tq').textContent='Секундомер шёл '+hm(min)+' — похоже, его забыли выключить. Сколько записать?';$('n-tall').textContent='Записать '+hm(min);$('n-tconfirm').hidden=false}
+  else if(min>=1)addSession(min,today(),$('n-note').value.trim());else $('n-logmsg').textContent='Меньше минуты — не записано.'}syncTimer()});
+let tLong=0;
+$('n-tall').addEventListener('click',()=>{addSession(tLong,today(),$('n-note').value.trim());$('n-tconfirm').hidden=true});
+$('n-tlp').addEventListener('click',()=>{addSession(40,today(),$('n-note').value.trim());$('n-tconfirm').hidden=true});
+$('n-tno').addEventListener('click',()=>{$('n-tconfirm').hidden=true;$('n-logmsg').textContent='Не записано.'});
 $('n-date').value=today();$('n-day').value=today();
 function loadLocal(){mode='local';try{N=normalize(JSON.parse(lsGet(LSKEY)||'{}'))}catch(e){N=normalize({})}renderN()}
 loadLocal();syncTimer();
@@ -1701,11 +1711,13 @@ function recWrite(r){const body=Object.assign({},r);delete body.id;
 function recPut(r){const i=RECS.findIndex(x=>x.id===r.id);if(i>=0)RECS[i]=r;else RECS.push(r);recWrite(r);renderCat()}
 function recDel(id){RECS=RECS.filter(x=>x.id!==id);if(recMode==='db'&&recCol)recChain=recChain.then(()=>recCol.doc(id).delete()).catch(()=>{});else recLocalSave();renderCat()}
 const washEvery=()=>Math.max(1,+P.prefs.washEvery||20);
-const needsWash=r=>!r.wd||(r.psw||0)>=washEvery();
-function filtered(){const q=$('k-q').value.trim().toLowerCase(),f=chipVal('k-filter'),srt=$('k-sort').value;
-  let l=RECS.filter(r=>!q||[r.a,r.t,r.l,r.n,r.g].join(' ').toLowerCase().includes(q));
+const needsWash=r=>r.wd?(r.psw||0)>=washEvery():(r.pc||0)>0;
+const nrm=v=>String(v||'').toLowerCase().replace(/ё/g,'е');
+const sortName=v=>nrm(v).replace(/^the\s+/,'');
+function filtered(){const q=nrm($('k-q').value.trim()),f=chipVal('k-filter'),srt=$('k-sort').value;
+  let l=RECS.filter(r=>!q||nrm([r.a,r.t,r.l,r.n,r.g].join(' ')).includes(q));
   if(f==='wash')l=l.filter(needsWash);if(f==='never')l=l.filter(r=>!r.pc);
-  const by={a:(x,y)=>(x.a||'').localeCompare(y.a||'','ru')||(x.y||0)-(y.y||0),add:(x,y)=>(y.add||'').localeCompare(x.add||''),lp:(x,y)=>(y.lp||'').localeCompare(x.lp||''),y:(x,y)=>(+x.y||9999)-(+y.y||9999),mc:(x,y)=>GR.indexOf(x.mc)-GR.indexOf(y.mc)};
+  const by={a:(x,y)=>sortName(x.a).localeCompare(sortName(y.a),'ru')||(x.t||'').localeCompare(y.t||'','ru')||(x.y||0)-(y.y||0),add:(x,y)=>(y.add||'').localeCompare(x.add||''),lp:(x,y)=>(y.lp||'').localeCompare(x.lp||''),y:(x,y)=>(+x.y||9999)-(+y.y||9999),mc:(x,y)=>GR.indexOf(x.mc)-GR.indexOf(y.mc)};
   return l.sort(by[srt]||by.a)}
 function renderCat(){
   const t=dayNum(today());
@@ -1717,11 +1729,11 @@ function renderCat(){
   l.slice(0,150).forEach(r=>{const li=document.createElement('li');
     const ttl=document.createElement('div');ttl.className='ttl';ttl.textContent=(r.a||'—')+' — '+(r.t||'—');
     const sm=document.createElement('small');sm.textContent=[r.y,r.f,r.g,r.l].filter(Boolean).join(' · ')+(r.pc?' · слушали '+razy(r.pc)+', последний '+fmtDate(r.lp):' · ещё не слушали');ttl.appendChild(sm);
-    if(r.n){const n=document.createElement('small');n.textContent=r.n;ttl.appendChild(n)}
+    if(r.n){const n=document.createElement('small');n.className='clamp';n.textContent=r.n;n.title=r.n;ttl.appendChild(n)}
     const tags=document.createElement('div');tags.className='tags';
     const g=document.createElement('span');g.className='grade '+gradeCls(r.mc);g.title=r.mc?GRN[r.mc]:'';g.textContent=(r.mc||'?')+' / '+(r.sc||'?');tags.appendChild(g);
     if(r.demo){const d=document.createElement('span');d.className='grade info';d.textContent='пример';tags.appendChild(d)}
-    const w=document.createElement('span');w.className='pill '+(needsWash(r)?'mid':'ok');w.textContent=!r.wd?'не мыта':needsWash(r)?'пора мыть':'помыта '+fmtDate(r.wd);tags.appendChild(w);
+    const w=document.createElement('span');w.className='pill '+(needsWash(r)?'mid':!r.wd?'info':'ok');w.textContent=needsWash(r)?'пора помыть':!r.wd?'не мыта':'помыта '+fmtDate(r.wd);tags.appendChild(w);
     const acts=document.createElement('div');acts.className='acts';
     const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b);return b};
     mk('Слушаю',()=>playRec(r));mk('Помыта сегодня',()=>{recPut(Object.assign({},r,{wd:today(),ws:(r.ws||0)+1,psw:0}));$('k-msg').textContent='Отмечена мойка: '+r.a+' — '+r.t+'.'});
@@ -1749,7 +1761,8 @@ async function phSave(file){const blob=await shrink(file);if(!blob)throw new Err
 async function phSrc(ref){if(!ref)return null;if(PH.urls[ref])return PH.urls[ref];if(ref.startsWith('a:'))return '/_blob/'+ref.slice(2);
   try{const b=await idbDo('readonly',st=>st.get(ref.slice(2)));if(!b)return null;return PH.urls[ref]=URL.createObjectURL(b)}catch(e){return null}}
 async function phDel(ref){try{if(ref.startsWith('a:')){const a=await phAssets();if(a)await a.delete(ref.slice(2))}else await idbDo('readwrite',st=>st.delete(ref.slice(2)))}catch(e){}}
-function setImg(img,ref){phSrc(ref).then(u=>{if(u)img.src=u;else img.alt='фото недоступно'})}
+function setImg(img,ref){const gone=()=>{const t=img.closest('.thumb');if(t)t.hidden=true;else if(img.classList.contains('pcover'))img.hidden=true;else{img.removeAttribute('src');img.alt='нет фото';img.title='Фото хранилось на другом устройстве'}};
+  img.onerror=gone;phSrc(ref).then(u=>{if(u)img.src=u;else gone()})}
 let formPh=[],formPhNew=[],formPhDrop=[];
 function renderFormPh(){const g=$('k-ph');g.innerHTML='';formPh.forEach((ref,i)=>{const f=document.createElement('figure');const im=document.createElement('img');im.alt='Фото '+(i+1);setImg(im,ref);
   const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','Убрать фото '+(i+1));
@@ -1840,12 +1853,12 @@ let W=null,wEdit=null,pendingWant=null;const wOpen=new Set();
 const SEARCH=[['Мешок','https://meshok.net/?search={q}'],['Авито','https://www.avito.ru/rossiya?q={q}%20%D0%BF%D0%BB%D0%B0%D1%81%D1%82%D0%B8%D0%BD%D0%BA%D0%B0'],['Discogs','https://www.discogs.com/sell/list?q={q}&format=Vinyl'],['Ozon','https://www.ozon.ru/search/?text={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB'],['Wildberries','https://www.wildberries.ru/catalog/0/search.aspx?search={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB'],['Яндекс Маркет','https://market.yandex.ru/search?text={q}%20%D0%B2%D0%B8%D0%BD%D0%B8%D0%BB']];
 const PRI={1:['Очень хочу','no'],2:['Хочу','mid'],3:['Когда-нибудь','info']};
 const keyAT=(a,t)=>((a||'')+'|'+(t||'')).toLowerCase().trim();
-function renderW(){if(!W)return;const l=W.list,q=$('w-q').value.trim().toLowerCase(),own=new Set(RECS.map(r=>keyAT(r.a,r.t)));
+function renderW(){if(!W)return;const l=W.list,q=nrm($('w-q').value.trim()),own=new Set(RECS.map(r=>keyAT(r.a,r.t)));
   $('w-cnt').textContent=l.length;$('w-top').textContent=l.filter(w=>+w.pri===1).length;
   const sum=l.reduce((a,w)=>a+(+w.max||0),0);$('w-sum').textContent=sum?Math.round(sum).toLocaleString('ru-RU')+' ₽':'—';
   $('w-empty').hidden=!!l.length;$('w-store').textContent=W.mode==='db'?'Список сохраняется в вашем аккаунте.':'Список хранится только в этом браузере.';
   const ul=$('w-list');ul.innerHTML='';
-  l.filter(w=>!q||[w.a,w.t,w.ed,w.where].join(' ').toLowerCase().includes(q)).sort((x,y)=>(+x.pri||2)-(+y.pri||2)||(y.add||'').localeCompare(x.add||'')).forEach(w=>{
+  l.filter(w=>!q||nrm([w.a,w.t,w.ed,w.where].join(' ')).includes(q)).sort((x,y)=>(+x.pri||2)-(+y.pri||2)||(y.add||'').localeCompare(x.add||'')).forEach(w=>{
     const li=document.createElement('li'),ttl=document.createElement('div');ttl.className='ttl';ttl.textContent=w.a+' — '+w.t;
     [w.ed,w.where?'видел: '+w.where:''].filter(Boolean).forEach(s=>{const sm=document.createElement('small');sm.textContent=s;ttl.appendChild(sm)});
     const tags=document.createElement('div');tags.className='tags';const pr=PRI[w.pri]||PRI[2];

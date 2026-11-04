@@ -365,7 +365,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.1</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.2</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -511,6 +511,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <h3>Быстрый выбор из списка</h3>
       <div class="field"><label for="y-pick-tt">Проигрыватель</label><select id="y-pick-tt"><option value="">— другой, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
+      <div class="field"><label for="y-pick-amp">Усилитель</label><select id="y-pick-amp"><option value="">— другой, ввести вручную —</option></select></div>
+      <div class="field"><label for="y-pick-spk">Колонки</label><select id="y-pick-spk"><option value="">— другие, ввести вручную —</option></select></div>
       <div class="field"><span class="flabel">Фото вашего проигрывателя</span>
         <div class="ttph"><img id="y-ttimg" alt="Ваш проигрыватель" hidden><div class="chips"><label class="btn" for="y-ttfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-ttdel" hidden>Убрать фото</button></div></div>
         <input type="file" id="y-ttfile" accept="image/*" hidden aria-label="Фото проигрывателя">
@@ -556,10 +558,20 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="row2">
         <div class="field"><label for="y-amp">Усилитель</label><div class="unit"><input id="y-amp" value="" placeholder="модель" autocomplete="off"></div></div>
         <div class="field"><label for="y-df">Коэфф. демпфирования</label><div class="unit"><input id="y-df" inputmode="decimal" value="100"><span>на 8 Ом</span></div></div>
+        <div class="field"><label for="y-p8">Мощность на 8 Ом</label><div class="unit"><input id="y-p8" inputmode="decimal" value="50"><span>Вт/канал</span></div></div>
+        <div class="field"><label for="y-p4">Мощность на 4 Ом</label><div class="unit"><input id="y-p4" inputmode="decimal" value=""><span>Вт/канал</span></div></div>
+        <div class="field"><label for="y-aphono">Вход PHONO</label><select id="y-aphono"><option value="">нет</option><option value="MM">MM</option><option value="MM/MC">MM и MC</option></select></div>
+        <div class="field"></div>
         <div class="field"><label for="y-spk">Колонки</label><div class="unit"><input id="y-spk" value="" placeholder="модель" autocomplete="off"></div></div>
         <div class="field"><label for="y-z">Номинальный импеданс</label><div class="unit"><input id="y-z" inputmode="decimal" value="8"><span>Ом</span></div></div>
         <div class="field"><label for="y-zmin">Импеданс, минимум</label><div class="unit"><input id="y-zmin" inputmode="decimal" value="5"><span>Ом</span></div></div>
         <div class="field"><label for="y-zmax">максимум</label><div class="unit"><input id="y-zmax" inputmode="decimal" value="25"><span>Ом</span></div></div>
+        <div class="field"><label for="y-sens">Чувствительность</label><div class="unit"><input id="y-sens" inputmode="decimal" value="88"><span>дБ/Вт/м</span></div></div>
+        <div class="field"><label for="y-f3">Нижняя частота (−3 дБ)</label><div class="unit"><input id="y-f3" inputmode="decimal" value=""><span>Гц</span></div></div>
+        <div class="field"><label for="y-plo">Рекомендуемый усилитель, от</label><div class="unit"><input id="y-plo" inputmode="decimal" value=""><span>Вт</span></div></div>
+        <div class="field"><label for="y-phi">до</label><div class="unit"><input id="y-phi" inputmode="decimal" value=""><span>Вт</span></div></div>
+        <div class="field"><label for="y-dist">До колонок от места слушателя</label><div class="unit"><input id="y-dist" inputmode="decimal" value="2.5"><span>м</span></div></div>
+        <div class="field"></div>
         <div class="field"><label for="y-slen">Акустический кабель</label><div class="unit"><input id="y-slen" inputmode="decimal" value="5"><span>м</span></div></div>
         <div class="field"><label for="y-ssec">Сечение жилы</label><div class="unit"><input id="y-ssec" inputmode="decimal" value="1.5"><span>мм²</span></div></div>
       </div>
@@ -1753,8 +1765,8 @@ function docStore(name,lsKey,onData){
 }
 
 /* ---------- 0. Моя система ---------- */
-const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','vlo','vhi','vrec','clo','chi','phono','pcap','icpf','iclen','armc','amp','df','spk','z','zmin','zmax','slen','ssec'];
-const YTXT=['tt','cart','type','hz','prof','phono','amp','spk'];
+const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','vlo','vhi','vrec','clo','chi','phono','pcap','icpf','iclen','armc','amp','df','p8','p4','aphono','spk','z','zmin','zmax','sens','f3','plo','phi','dist','slen','ssec'];
+const YTXT=['tt','cart','type','hz','prof','phono','amp','aphono','spk'];
 let P={system:null,setups:[],notes:[],prefs:{washEvery:20}};
 function readSys(){const o={};YF.forEach(k=>{const v=$('y-'+k).value;o[k]=YTXT.includes(k)?v.trim():parseFloat(String(v).replace(',','.'))});return o}
 function fillSys(o){YF.forEach(k=>{if(!(k in o))return;const v=o[k];$('y-'+k).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v})}
@@ -1797,8 +1809,43 @@ const CARTS=[
 function fillSelect(sel,list){const groups={};list.forEach(x=>{(groups[BRAND(x)]=groups[BRAND(x)]||[]).push(x)});
   Object.keys(groups).sort().forEach(b=>{const g=document.createElement('optgroup');g.label=b;groups[b].forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;g.appendChild(o)});sel.appendChild(g)})}
 fillSelect($('y-pick-tt'),TT);fillSelect($('y-pick-cart'),CARTS);
+/* усилители и колонки — паспортные данные производителей */
+const AMPS=[
+  {id:'yas501',name:'Yamaha A-S501',p8:85,p4:null,df:240,ph:'MM'},
+  {id:'pm6007',name:'Marantz PM6007',p8:45,p4:60,df:100,ph:'MM'},
+  {id:'pma600',name:'Denon PMA-600NE',p8:45,p4:70,df:null,ph:'MM',note:'Мощность на 4 Ом Denon указывает при 1 кГц.'},
+  {id:'c316',name:'NAD C 316BEE V2',p8:40,p4:40,df:200,ph:'MM'},
+  {id:'brio',name:'Rega Brio',p8:50,p4:73,df:null,ph:'MM'},
+  {id:'cxa61',name:'Cambridge Audio CXA61',p8:60,p4:90,df:null,ph:'',note:'Встроенного фонокорректора нет — нужен внешний.'}
+];
+const SPKS=[
+  {id:'br02',name:'Triangle Borea BR02',z:8,zmin:4.2,sens:89,f3:51,pmax:80},
+  {id:'br03',name:'Triangle Borea BR03',z:8,zmin:4.2,sens:90,f3:46,plo:25,phi:130},
+  {id:'br04',name:'Triangle Borea BR04',z:8,zmin:4.4,sens:90,f3:44,pmax:110},
+  {id:'br05',name:'Triangle Borea BR05',z:8,zmin:4.7,sens:90,f3:42,pmax:120},
+  {id:'br08',name:'Triangle Borea BR08',z:8,zmin:3,sens:92,f3:40,pmax:150},
+  {id:'titus',name:'Triangle Esprit Titus EZ',z:8,zmin:3.8,sens:90,f3:55,pmax:60},
+  {id:'comete',name:'Triangle Esprit Comète EZ',z:8,zmin:4.2,sens:90,f3:49,pmax:80},
+  {id:'gaia',name:'Triangle Esprit Gaïa EZ',z:8,zmin:3.3,sens:89.5,f3:47,pmax:90},
+  {id:'antal',name:'Triangle Esprit Antal EZ',z:8,zmin:3,sens:92,f3:40,pmax:120},
+  {id:'q350',name:'KEF Q350',z:8,zmin:3.7,sens:87,f3:null,plo:15,phi:120},
+  {id:'oberon5',name:'DALI Oberon 5',z:6,zmin:null,sens:88,f3:null,plo:30,phi:150},
+  {id:'d121',name:'Wharfedale Diamond 12.1',z:8,zmin:null,sens:88,f3:null},
+  {id:'s90',name:'Радиотехника S-90 (35АС-012)',z:4,zmin:null,sens:85,f3:31.5,plo:35,phi:90,note:'Чувствительность 85 дБ (0,338 Па/√Вт), номинальная мощность 35 Вт, паспортная 90 Вт — по паспорту.'}
+];
+fillSelect($('y-pick-amp'),AMPS);fillSelect($('y-pick-spk'),SPKS);
+$('y-pick-amp').addEventListener('change',()=>{const a=AMPS.find(x=>x.id===$('y-pick-amp').value);if(!a)return;
+  {const f={amp:a.name,p8:a.p8,p4:a.p4,aphono:a.ph};if(a.df)f.df=a.df;fillSys(f)}
+  pickSave('Подставлены данные усилителя '+a.name+': '+a.p8+' Вт на 8 Ом'+(a.p4?', '+a.p4+' Вт на 4 Ом':'')+(a.ph?', вход PHONO '+a.ph+'.':', без входа PHONO.')+(a.df?'':' Коэффициент демпфирования производитель не указывает — оставлено прежнее значение.')+(a.note?' '+a.note:''))});
+$('y-pick-spk').addEventListener('change',()=>{const k=SPKS.find(x=>x.id===$('y-pick-spk').value);if(!k)return;
+  const f={spk:k.name,z:k.z,sens:k.sens,f3:k.f3,plo:k.plo||null,phi:k.phi||k.pmax||null,zmin:k.zmin||+(k.z*0.8).toFixed(1)};fillSys(f);
+  pickSave('Подставлены данные колонок '+k.name+': '+k.z+' Ом'+(k.zmin?' (минимум '+fmt(k.zmin,1)+')':' (минимум не указан — взята оценка '+fmt(k.z*0.8,1)+' Ом: по стандарту не ниже 80 % номинала)')+', '+fmt(k.sens,k.sens%1?1:0)+' дБ/Вт/м'+(k.f3?', бас до '+fmt(k.f3,k.f3%1?1:0)+' Гц':'')+'.'+(k.pmax&&!k.plo?' Производитель указывает допустимую мощность '+k.pmax+' Вт.':'')+(k.note?' '+k.note:''))});
+/* расчёт: мощность и громкость на месте слушателя */
+function powerCalc(o){const lowZ=isFinite(o.z)&&o.z<=5,P=lowZ&&isFinite(o.p4)?o.p4:o.p8;
+  const spl=isFinite(o.sens)&&P>0&&o.dist>0?o.sens+10*Math.log10(P)-20*Math.log10(o.dist)+3:NaN;return {P,spl,lowZ}}
+
 function cartFields(c){return {cart:c.name.replace(/ \(.*\)$/,''),type:c.type,cmass:c.m,comp:c.c,hz:String(c.hz),prof:c.prof,vlo:c.vlo,vhi:c.vhi,vrec:c.vrec,clo:c.clo,chi:c.chi}}
-function pickSave(note){const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;clearTimeout(sysTimer);saveP();renderDeck();applySys(o);renderChecks();vtfPill();
+function pickSave(note){const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;clearTimeout(sysTimer);saveP();renderDeck();renderNow();applySys(o);renderChecks();vtfPill();
   $('y-pick-note').textContent=note;$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-pick-tt').addEventListener('change',()=>{const t=TT.find(x=>x.id===$('y-pick-tt').value);if(!t)return;
   fillSys({tt:t.name,D:t.D,ov:t.ov,off:t.off,meff:t.meff});const notes=['Подставлены паспортные данные: '+t.name+'.'];
@@ -1844,6 +1891,16 @@ function renderChecks(){
   else if(o.type==='MC')rows.push(checkRow('Ёмкость нагрузки','для MC-головки почти не важна','ok','не важно'));
   else if(!isFinite(o.clo))rows.push(checkRow('Ёмкость нагрузки','рекомендация головки не указана','info','—'));
   else{const t=o.icpf*o.iclen+o.armc+o.pcap;rows.push(isFinite(t)?checkRow('Ёмкость нагрузки MM',fmt(t,0)+' пФ · рекомендация '+fmt(o.clo,0)+'–'+fmt(o.chi,0),t>=o.clo&&t<=o.chi?'ok':t<o.clo?'mid':'no',t>=o.clo&&t<=o.chi?'в норме':t<o.clo?'меньше нормы':'больше нормы'):checkRow('Ёмкость нагрузки','заполните данные кабеля','info','—'))}
+  {const pc=powerCalc(o);
+    if(isFinite(pc.P)&&isFinite(o.plo)){const ok=pc.P>=o.plo,over=isFinite(o.phi)&&pc.P>o.phi;
+      rows.push(checkRow('Мощность усилителя',fmt(pc.P,0)+' Вт на '+(pc.lowZ?'4':'8')+' Ом · колонкам нужно '+fmt(o.plo,0)+(isFinite(o.phi)?'–'+fmt(o.phi,0):'+')+' Вт',ok?(over?'mid':'ok'):'mid',ok?(over?'запас большой':'подходит'):'маловато'))}
+    else if(isFinite(pc.P)&&isFinite(o.phi))rows.push(checkRow('Мощность усилителя',fmt(pc.P,0)+' Вт · колонки выдерживают до '+fmt(o.phi,0)+' Вт',pc.P<=o.phi*1.5?'ok':'mid',pc.P<=o.phi*1.5?'подходит':'не выкручивайте до упора'));
+    if(isFinite(pc.spl))rows.push(checkRow('Громкость на месте слушателя','до '+fmt(pc.spl,0)+' дБ на '+fmt(o.dist,1)+' м (обе колонки, без учёта комнаты)',pc.spl>=102?'ok':pc.spl>=96?'mid':'no',pc.spl>=102?'с запасом':pc.spl>=96?'хватит для спокойной музыки':'мало'));
+    if(isFinite(o.zmin)&&o.zmin<4)rows.push(checkRow('Низкий импеданс колонок','минимум '+fmt(o.zmin,1)+' Ом'+(isFinite(o.p4)?' · усилитель рассчитан на 4 Ом':' · убедитесь, что усилитель работает на 4 Ом'),isFinite(o.p4)?'ok':'mid',isFinite(o.p4)?'выдержит':'проверить'));
+    if(!fixedTT){const ph=o.aphono||'',ext=!!(o.phono&&o.phono.trim());
+      if(o.type==='MC'&&ph==='MM'&&!ext)rows.push(checkRow('Вход PHONO','у усилителя только MM, а головка MC — нужен MC-фонокорректор или повышающий трансформатор','no','не подходит'));
+      else if(!ph&&!ext&&o.amp)rows.push(checkRow('Фонокорректор','у усилителя нет входа PHONO — нужен внешний фонокорректор','mid','нужен'));
+      else if(ph&&!ext)rows.push(checkRow('Вход PHONO','головку можно подключать прямо к усилителю ('+ph+')','ok','подходит'))}}
   const R=2*RHO*o.slen/o.ssec,zo=8/o.df,rc=ripple(zo+R,o.zmin,o.zmax)-ripple(zo,o.zmin,o.zmax);
   rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','заполните длину и сечение','info','—'));
   if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм'+(isFinite(o.off)?', '+fmt(o.off,1)+'°':''):''),'info','справка'))}
@@ -1872,14 +1929,14 @@ function onProfile(d,mode){
   if(P.prefs.room&&!roomDirty&&rj!==lastRoomJSON){lastRoomJSON=rj;const r=P.prefs.room;['L','W','H','rt','front'].forEach(k=>{if(isFinite(r[k]))$('o-'+k).value=r[k]})}
   renderRoom();
   const sj=JSON.stringify(P.system);
-  if(P.system&&!sysDirty&&sj!==lastSysJSON){lastSysJSON=sj;
+  if(P.system&&!sysDirty&&sj!==lastSysJSON){lastSysJSON=sj;{const a=AMPS.find(x=>x.name===P.system.amp),k=SPKS.find(x=>x.name===P.system.spk);$('y-pick-amp').value=a?a.id:'';$('y-pick-spk').value=k?k.id:''}
     const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(/ \(.*\)$/,'')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';
     fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
   if(document.activeElement!==$('k-every'))$('k-every').value=P.prefs.washEvery;if(window.__vlNow)renderDeck();renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
 }
 $('y-form').addEventListener('submit',e=>{e.preventDefault();commitSys()});
 let sysDirty=false,sysTimer=null,lastSysJSON='',roomDirty=false,roomTimer=null,lastRoomJSON='';
-function commitSys(){clearTimeout(sysTimer);const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;saveP();renderDeck();applySys(o);renderChecks();vtfPill();
+function commitSys(){clearTimeout(sysTimer);const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;saveP();renderDeck();renderNow();applySys(o);renderChecks();vtfPill();
   $('y-msg').textContent='Сохранено. Калькуляторы обновлены.';$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-form').addEventListener('input',e=>{sysDirty=true;$('y-msg').textContent='Сохраняю…';
   if(e.target.id==='y-tt')$('y-pick-tt').value='';if(e.target.id==='y-cart')$('y-pick-cart').value='';
@@ -2284,7 +2341,7 @@ function deckSkin(tt){const t=TT.find(x=>x.name===tt);if(t&&t.skin)return {skin:
   return {skin:'',arm:'line',pitch:0}}
 function renderDeck(){const h=$('hero'),o=P.system||{},k=deckSkin(o.tt||'');
   if(k.skin)h.dataset.skin=k.skin;else delete h.dataset.skin;h.dataset.arm=k.arm;h.dataset.pitch=k.pitch?'1':'0';
-  const model=(o.tt||'').replace(/\s*\(.*\)\s*$/,'').slice(0,34);$('deck-model').textContent=model;$('dp-model').textContent=model;$('dp-model').hidden=!model;
+  const model=(o.tt||'').replace(/\s*\(.*\)\s*$/,'').slice(0,34);$('deck-model').textContent=[model,o.amp,o.spk].map(x=>String(x||'').replace(/\s*\(.*\)\s*$/,'').trim()).filter(Boolean).join(' · ');$('dp-model').textContent=model;$('dp-model').hidden=!model;
   const ref=P.prefs.ttPhoto,view=P.prefs.deckView||'photo';$('h-view').hidden=!ref;$('h-view').textContent=view==='photo'?'Показать рисунок':'Показать фото';
   h.classList.toggle('photo',!!ref&&view==='photo');
   if(ref){if($('deck-img').dataset.ref!==ref){$('deck-img').dataset.ref=ref;setImg($('deck-img'),ref,()=>{h.classList.remove('photo');$('h-view').hidden=true})}
@@ -2319,6 +2376,8 @@ function renderDiary(){if(!window.__vlNow)return;const H=[],t=dayNum(today()),o=
     if(!fx){const C=o.hz==100?o.comp*1.7:o.comp,f=1000/(2*Math.PI*Math.sqrt((o.meff+o.cmass+1)*C));
       if(isFinite(f)&&(f<8||f>12))H.push(hintRow('#rezonans','Резонанс '+fmt(f,1)+' Гц — вне нормы 8–12 Гц',f<8?'головка слишком гибкая для тонарма: возможны прыжки иглы на покоробленных пластинках':'головка жёсткая для лёгкого тонарма: может страдать бас и трекинг',f<7||f>14?'no':'mid',f<7||f>14?'важно':'на грани'));
       if(o.type!=='MC'&&isFinite(o.clo)){const c=o.icpf*o.iclen+o.armc+o.pcap;if(isFinite(c)&&(c<o.clo||c>o.chi))H.push(hintRow('#provoda','Ёмкость нагрузки '+fmt(c,0)+' пФ вне рекомендации '+fmt(o.clo,0)+'–'+fmt(o.chi,0),c>o.chi?'короче кабель или меньше ёмкость входа фонокорректора':'можно добавить ёмкость на входе фонокорректора','mid','совет'))}}}
+  if(o){const pc=powerCalc(o);if(isFinite(pc.P)&&isFinite(o.plo)&&pc.P<o.plo)H.push(hintRow('#sistema','Усилителю может не хватать мощности',fmt(pc.P,0)+' Вт, а колонкам рекомендуют от '+fmt(o.plo,0)+' Вт: на громких местах возможны искажения','mid','мощность'));
+    if(o.type==='MC'&&o.aphono==='MM'&&!(o.phono&&o.phono.trim()))H.push(hintRow('#sistema','MC-головке нужен свой фонокорректор','вход PHONO усилителя рассчитан только на MM','no','важно'))}
   const st=active();
   if(st&&!st.retired){const used=usedH(st),lim=+st.limit||1000,pct=used/lim*100;
     if(pct>=100)H.push(hintRow('#igla','Ресурс иглы выработан',st.name+': '+fmt(used,0)+' из '+fmt(lim,0)+' ч. Изношенная игла портит канавки — замените её','no','заменить'));

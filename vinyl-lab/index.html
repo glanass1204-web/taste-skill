@@ -21,8 +21,8 @@
 /* Layout: aluminium faceplate header, a selector-switch row of four tools, each tool = inputs column + readout column */
 :root{
   --bg:#E8EBEE; --panel:#F7F8FA; --ink:#141A21; --muted:#56616E; --line:#C9D0D8;
-  --amber:#A15F00; --glow:#F0A21A; --glow-soft:#F6D9A6;
-  --good:#1E7A4C; --warn:#C27A00; --bad:#B3261E;
+  --amber:#8F5300; --glow:#F0A21A; --glow-soft:#F6D9A6;
+  --good:#1A6E43; --warn:#9A4A00; --bad:#B3261E;
   --c2:#2F6FB0; --c3:#7A4FB0;
   --paper:#FFFFFF; --paper-ink:#000000;
   --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
@@ -324,7 +324,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       </div>
       <p class="note" id="app-ios">На iPhone: откройте версию для установки в Safari → кнопка «Поделиться» → «На экран „Домой“». На Android: в Chrome меню ⋮ → «Установить приложение» или «Добавить на главный экран».</p>
     </div>
-    <div class="panel">
+    <div class="panel" id="bk-panel">
       <h3>Резервная копия и перенос данных</h3>
       <p class="note">Сохраните все данные в файл: систему, журналы, коллекцию и список желаний. Из этого файла их можно восстановить или перенести, например из приложения на телефоне сюда и обратно.</p>
       <div class="chips">
@@ -359,6 +359,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div class="field"><label for="k-wd">Последняя мойка</label><div class="unit"><input id="k-wd" type="date"></div></div>
         <div class="field"><label for="k-wm">Способ мойки</label><select id="k-wm"><option value="">—</option><option>вручную</option><option>вакуумная машина</option><option>ультразвук</option></select></div>
       </div>
+      <div class="field"><label for="k-g">Жанр, настроение</label><div class="unit"><input id="k-g" list="k-glist" autocomplete="off" placeholder="джаз, рок, для вечера…"></div><datalist id="k-glist"></datalist></div>
       <div class="field"><label for="k-n">Заметки</label><div class="unit"><input id="k-n" autocomplete="off" placeholder="издание, страна, особенности"></div></div>
       <div class="chips"><button type="submit" class="btn primary" id="k-submit">Добавить в коллекцию</button><button type="button" class="btn" id="k-cancel" hidden>Отмена</button></div>
       <p class="status" id="k-msg" aria-live="polite"></p>
@@ -366,7 +367,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <div class="panel">
       <h3>Импорт из Discogs</h3>
       <p class="note">На Discogs откройте «Collection» → «Export» и скачайте CSV-файл, затем выберите его здесь. Состояние винила и конверта, заметки и даты перенесутся.</p>
-      <div class="drop"><input type="file" id="k-file" accept=".csv,text/csv"></div>
+      <div class="drop"><input type="file" id="k-file" accept=".csv,text/csv" aria-label="CSV-файл экспорта коллекции Discogs"></div>
       <p class="status" id="k-imp" aria-live="polite"></p>
       <h3>Экспорт</h3>
       <button type="button" class="btn" id="k-export">Скачать коллекцию в CSV</button>
@@ -384,6 +385,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="pickcard" id="q-card"></div>
       <div class="toolbar">
         <select id="q-dec" aria-label="Десятилетие" style="width:auto"><option value="">Любое десятилетие</option></select>
+        <select id="q-gen" aria-label="Жанр" style="width:auto"><option value="">Любой жанр</option></select>
         <select id="q-fmt" aria-label="Формат" style="width:auto"><option value="">Любой формат</option><option>LP 33</option><option>12″ 45</option><option>7″ 45</option><option>78</option></select>
         <label class="chk"><input type="checkbox" id="q-old" checked> давно не слушали</label>
       </div>
@@ -740,7 +742,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <h3>Анализ записи тестового тона</h3>
       <p class="note">Замер в реальном времени через микрофон — на <a href="izmereniya.html" target="_blank" rel="noopener" style="color:var(--amber)">странице измерений</a>. Здесь можно разобрать готовую запись: запишите на телефон тестовую дорожку 3150 Гц с пластинки и загрузите файл. Программа покажет среднюю скорость и детонацию. Анализ идёт в браузере, файл никуда не отправляется.</p>
       <div class="drop">
-        <input type="file" id="s-file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg">
+        <input type="file" id="s-file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg" aria-label="Запись тестового тона">
         <button type="button" class="btn" id="s-demo">Пример: синтетический сигнал</button>
       </div>
       <p class="status" id="s-status">Сейчас показан синтетический пример: +0,40 % скорости и детонация 0,55 Гц амплитудой ±0,15 %.</p>
@@ -861,7 +863,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         </div>
         <div class="field"><label for="n-date">Дата установки</label>
           <div class="unit"><input id="n-date" type="date"></div></div>
-        <div class="chips"><button type="submit" class="btn primary">Сохранить иглу</button><button type="button" class="btn" id="n-cancel">Отмена</button></div>
+        <div class="chips"><button type="submit" class="btn primary" id="n-formbtn">Сохранить иглу</button><button type="button" class="btn" id="n-cancel">Отмена</button></div>
       </form>
     </div>
     <div class="panel" id="n-logpanel">
@@ -913,7 +915,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
           <tbody id="n-hist"></tbody></table></div>
         <p class="note" id="n-histnote"></p>
         <div class="chips" style="justify-content:space-between;align-items:center">
-          <button type="button" class="btn" id="n-replace">Игла заменена</button>
+          <span class="chips"><button type="button" class="btn" id="n-edit">Изменить иглу</button><button type="button" class="btn" id="n-replace">Игла заменена</button></span>
           <span class="status" id="n-store"></span>
         </div>
         <div id="n-confirm" class="confirm" hidden>
@@ -1313,12 +1315,19 @@ $('n-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(
 $('n-logform').addEventListener('submit',e=>{e.preventDefault();const m=num('n-min');if(!(m>0&&m<1440)){$('n-logmsg').textContent='Укажите время от 1 до 1440 минут.';return}
   addSession(m,$('n-day').value||today(),$('n-note').value.trim());$('n-note').value=''});
 $('n-addtoggle').addEventListener('click',()=>{$('n-form').hidden=!$('n-form').hidden});
-$('n-cancel').addEventListener('click',()=>{if(N.styli.length)$('n-form').hidden=true});
+$('n-cancel').addEventListener('click',()=>{nEdit=null;$('n-formbtn').textContent='Сохранить иглу';if(N.styli.length)$('n-form').hidden=true});
 $('n-profile').addEventListener('change',()=>{$('n-limit').value=$('n-profile').value.split('|')[1]});
 $('n-form').addEventListener('submit',e=>{e.preventDefault();const name=$('n-name').value.trim()||'Игла',[profile]=$('n-profile').value.split('|');
   const limit=num('n-limit'),start=num('n-start')||0;if(!(limit>0))return;
+  if(nEdit){const id=nEdit;nEdit=null;mutate(()=>{const s=N.styli.find(x=>x.id===id);if(s)Object.assign(s,{name:name.slice(0,60),profile,limit,start,installed:$('n-date').value||s.installed})});
+    $('n-form').hidden=true;$('n-formbtn').textContent='Сохранить иглу';$('n-logmsg').textContent='Данные иглы обновлены.';return}
   mutate(()=>{const s={id:rid(),name:name.slice(0,60),profile,limit,start,installed:$('n-date').value||today(),retired:null};N.styli.push(s);N.activeId=s.id});
   $('n-form').hidden=true});
+let nEdit=null;
+$('n-edit').addEventListener('click',()=>{const st=active();if(!st)return;nEdit=st.id;$('n-name').value=st.name;
+  const opt=[...$('n-profile').options].find(o=>o.value.startsWith(st.profile+'|'));if(opt)$('n-profile').value=opt.value;
+  $('n-limit').value=st.limit;$('n-start').value=+(+st.start||0).toFixed(1);$('n-date').value=st.installed||today();$('n-formbtn').textContent='Сохранить изменения';
+  $('n-form').hidden=false;$('n-form').scrollIntoView({block:'center'});$('n-name').focus()});
 $('n-replace').addEventListener('click',()=>{$('n-confirm').hidden=false});
 $('n-no').addEventListener('click',()=>{$('n-confirm').hidden=true});
 $('n-yes').addEventListener('click',()=>{const st=active();if(!st)return;$('n-confirm').hidden=true;
@@ -1514,7 +1523,7 @@ function recDel(id){RECS=RECS.filter(x=>x.id!==id);if(recMode==='db'&&recCol)rec
 const washEvery=()=>Math.max(1,+P.prefs.washEvery||20);
 const needsWash=r=>!r.wd||(r.psw||0)>=washEvery();
 function filtered(){const q=$('k-q').value.trim().toLowerCase(),f=chipVal('k-filter'),srt=$('k-sort').value;
-  let l=RECS.filter(r=>!q||[r.a,r.t,r.l,r.n].join(' ').toLowerCase().includes(q));
+  let l=RECS.filter(r=>!q||[r.a,r.t,r.l,r.n,r.g].join(' ').toLowerCase().includes(q));
   if(f==='wash')l=l.filter(needsWash);if(f==='never')l=l.filter(r=>!r.pc);
   const by={a:(x,y)=>(x.a||'').localeCompare(y.a||'','ru')||(x.y||0)-(y.y||0),add:(x,y)=>(y.add||'').localeCompare(x.add||''),lp:(x,y)=>(y.lp||'').localeCompare(x.lp||''),y:(x,y)=>(+x.y||9999)-(+y.y||9999),mc:(x,y)=>GR.indexOf(x.mc)-GR.indexOf(y.mc)};
   return l.sort(by[srt]||by.a)}
@@ -1527,7 +1536,7 @@ function renderCat(){
   const l=filtered(),ul=$('k-list');ul.innerHTML='';
   l.slice(0,150).forEach(r=>{const li=document.createElement('li');
     const ttl=document.createElement('div');ttl.className='ttl';ttl.textContent=(r.a||'—')+' — '+(r.t||'—');
-    const sm=document.createElement('small');sm.textContent=[r.y,r.f,r.l].filter(Boolean).join(' · ')+(r.pc?' · слушали '+razy(r.pc)+', последний '+fmtDate(r.lp):' · ещё не слушали');ttl.appendChild(sm);
+    const sm=document.createElement('small');sm.textContent=[r.y,r.f,r.g,r.l].filter(Boolean).join(' · ')+(r.pc?' · слушали '+razy(r.pc)+', последний '+fmtDate(r.lp):' · ещё не слушали');ttl.appendChild(sm);
     if(r.n){const n=document.createElement('small');n.textContent=r.n;ttl.appendChild(n)}
     const tags=document.createElement('div');tags.className='tags';
     const g=document.createElement('span');g.className='grade '+gradeCls(r.mc);g.title=r.mc?GRN[r.mc]:'';g.textContent=(r.mc||'?')+' / '+(r.sc||'?');tags.appendChild(g);
@@ -1545,14 +1554,14 @@ function renderCat(){
 function playRec(r){const m=MINUTES[r.f]||40;recPut(Object.assign({},r,{pc:(r.pc||0)+1,psw:(r.psw||0)+1,lp:today()}));
   const st=active();if(st&&!st.retired){addSession(m,today(),r.a+' — '+r.t);$('k-msg').textContent='Записано: '+r.a+' — '+r.t+', '+m+' мин в журнал иглы «'+st.name+'».'}
   else $('k-msg').textContent='Прослушивание отмечено. Добавьте иглу на вкладке «Игла», чтобы время шло в её журнал.'}
-function editRec(r){editId=r.id;['a','t','y','l','p','n','wd'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
+function editRec(r){editId=r.id;['a','t','y','l','p','n','wd','g'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
   $('k-formtitle').textContent='Изменить пластинку';$('k-submit').textContent='Сохранить изменения';$('k-cancel').hidden=false;$('k-a').focus();
   if(location.hash!=='#kollekciya')location.hash='kollekciya';document.getElementById('k-form').scrollIntoView({block:'start'})}
 function resetForm(){editId=null;$('k-form').reset();$('k-mc').value='NM';$('k-sc').value='NM';$('k-formtitle').textContent='Добавить пластинку';$('k-submit').textContent='Добавить в коллекцию';$('k-cancel').hidden=true}
 $('k-cancel').addEventListener('click',()=>{pendingWant=null;resetForm();$('k-msg').textContent=''});
 $('k-form').addEventListener('submit',e=>{e.preventDefault();const a=$('k-a').value.trim(),t=$('k-t').value.trim();if(!a||!t){$('k-msg').textContent='Укажите исполнителя и альбом.';return}
   const old=editId?RECS.find(x=>x.id===editId):null;const wd=$('k-wd').value||'';
-  const r=Object.assign({},old||{id:rid(),add:today(),pc:0,psw:0,ws:0},{a:a.slice(0,120),t:t.slice(0,160),y:$('k-y').value.trim().slice(0,4),f:$('k-f').value,mc:$('k-mc').value,sc:$('k-sc').value,l:$('k-l').value.trim().slice(0,80),p:num('k-p')||0,n:$('k-n').value.trim().slice(0,200),wd,wm:$('k-wm').value});
+  const r=Object.assign({},old||{id:rid(),add:today(),pc:0,psw:0,ws:0},{a:a.slice(0,120),t:t.slice(0,160),y:$('k-y').value.trim().slice(0,4),f:$('k-f').value,mc:$('k-mc').value,sc:$('k-sc').value,l:$('k-l').value.trim().slice(0,80),p:num('k-p')||0,n:$('k-n').value.trim().slice(0,200),g:$('k-g').value.trim().slice(0,40),wd,wm:$('k-wm').value});
   if(wd&&(!old||old.wd!==wd)){r.psw=0;r.ws=(r.ws||0)+1}
   recPut(r);$('k-msg').textContent=(old?'Сохранено: ':'Добавлено: ')+a+' — '+t+'.';
   if(pendingWant&&!old){W.del(pendingWant);$('k-msg').textContent+=' Убрана из списка «Хочу купить».'}pendingWant=null;resetForm()});
@@ -1582,8 +1591,8 @@ $('k-file').addEventListener('change',async e=>{const file=e.target.files[0];if(
 const csvCell=v=>{v=v==null?'':String(v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 $('k-export').addEventListener('click',async()=>{const st=$('k-exp');if(!RECS.length){st.textContent='Коллекция пуста.';return}
   const dl=await getDownloads();if(!dl){st.textContent='В этом окне скачивание недоступно. Откройте страницу на claude.ai в браузере.';return}
-  const head=['Исполнитель','Альбом','Год','Формат','Лейбл, номер','Винил','Конверт','Цена','Последняя мойка','Способ мойки','Прослушиваний','Последнее прослушивание','Добавлена','Заметки'];
-  const lines=[head].concat(filtered().map(r=>[r.a,r.t,r.y,r.f,r.l,r.mc,r.sc,r.p||'',r.wd,r.wm,r.pc||0,r.lp||'',r.add,r.n])).map(r=>r.map(csvCell).join(','));
+  const head=['Исполнитель','Альбом','Год','Формат','Жанр','Лейбл, номер','Винил','Конверт','Цена','Последняя мойка','Способ мойки','Прослушиваний','Последнее прослушивание','Добавлена','Заметки'];
+  const lines=[head].concat(filtered().map(r=>[r.a,r.t,r.y,r.f,r.g||'',r.l,r.mc,r.sc,r.p||'',r.wd,r.wm,r.pc||0,r.lp||'',r.add,r.n])).map(r=>r.map(csvCell).join(','));
   try{await dl.save({filename:'vinyl-collection-'+today()+'.csv',data:'﻿'+lines.join('\r\n')});st.textContent='Файл сохранён.'}
   catch(e){st.textContent=e&&e.code==='declined'?'Скачивание отменено.':'Скачать не получилось.'}});
 function loadRecs(){try{RECS=JSON.parse(lsGet('vinyl-lab-records')||'[]')}catch(e){RECS=[]}renderCat();
@@ -1636,13 +1645,17 @@ $('w-form').addEventListener('submit',e=>{e.preventDefault();const a=$('w-a').va
   $('w-msg').textContent=(old?'Сохранено: ':'Добавлено: ')+a+' — '+t+'.'+(dup?' Такая пластинка уже есть в коллекции — может, ищете другое издание?':'');wReset()});
 
 /* ---------- Что послушать ---------- */
-let pickId=null,decKey='';
+let pickId=null,decKey='',genKey=null;
 const decOf=y=>{y=parseInt(y);return y>1900&&y<2100?String(Math.floor(y/10)*10):''};
-function candidates(){const dec=$('q-dec').value,f=$('q-fmt').value,old=$('q-old').checked,t=dayNum(today());
-  return RECS.filter(r=>(!dec||decOf(r.y)===dec)&&(!f||r.f===f)&&(!old||!r.lp||t-dayNum(r.lp)>=60))}
+function candidates(){const dec=$('q-dec').value,f=$('q-fmt').value,gn=$('q-gen').value,old=$('q-old').checked,t=dayNum(today());
+  return RECS.filter(r=>(!dec||decOf(r.y)===dec)&&(!f||r.f===f)&&(!gn||(r.g||'').toLowerCase()===gn)&&(!old||!r.lp||t-dayNum(r.lp)>=60))}
 function renderPick(force){
   const decs=[...new Set(RECS.map(r=>decOf(r.y)).filter(Boolean))].sort(),k=decs.join(',');
   if(k!==decKey){decKey=k;const sel=$('q-dec'),cur=sel.value;sel.innerHTML='<option value="">Любое десятилетие</option>'+decs.map(d=>`<option value="${d}">${d}-е</option>`).join('');if(decs.includes(cur))sel.value=cur}
+  const gens=[...new Set(RECS.map(r=>(r.g||'').trim().toLowerCase()).filter(Boolean))].sort(),gk=gens.join('|');
+  if(gk!==genKey){genKey=gk;const sel=$('q-gen'),cur=sel.value;sel.innerHTML='<option value="">Любой жанр</option>';
+    gens.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o)});if(gens.includes(cur))sel.value=cur;sel.hidden=!gens.length;
+    const dl=$('k-glist');dl.innerHTML='';gens.forEach(g=>{const o=document.createElement('option');o.value=g;dl.appendChild(o)})}
   const card=$('q-card'),c=candidates();
   if(force||!c.some(r=>r.id===pickId)){
     const sorted=c.slice().sort((a,b)=>(a.lp||'').localeCompare(b.lp||'')),pool=sorted.slice(0,Math.max(1,Math.ceil(sorted.length/2)));
@@ -1652,10 +1665,10 @@ function renderPick(force){
   card.innerHTML='';const add=(cls,txt)=>{const d=document.createElement('div');d.className=cls;d.textContent=txt;card.appendChild(d)};
   if(!RECS.length){add('pm','Добавьте пластинки в коллекцию, и здесь появится подсказка, что поставить.');return}
   if(!r){add('pm','Под эти условия ничего не подходит. Снимите галочку «давно не слушали» или выберите другое десятилетие.');return}
-  add('pa',r.a);add('pt',r.t);add('pm',[r.y,r.f,r.mc].filter(Boolean).join(' · ')+(r.lp?' · последний раз '+fmtDate(r.lp):' · ещё не слушали'));
+  add('pa',r.a);add('pt',r.t);add('pm',[r.y,r.f,r.g,r.mc].filter(Boolean).join(' · ')+(r.lp?' · последний раз '+fmtDate(r.lp):' · ещё не слушали'));
 }
 $('q-next').addEventListener('click',()=>{renderPick(true);$('q-msg').textContent=''});
-['q-dec','q-fmt','q-old'].forEach(i=>$(i).addEventListener('change',()=>renderPick(true)));
+['q-dec','q-fmt','q-gen','q-old'].forEach(i=>$(i).addEventListener('change',()=>renderPick(true)));
 $('q-play').addEventListener('click',()=>{const r=RECS.find(x=>x.id===pickId);if(!r)return;playRec(r);$('q-msg').textContent=$('k-msg').textContent});
 
 /* ---------- Статистика ---------- */
@@ -1765,7 +1778,7 @@ let bkData=null;
 $('bk-save').addEventListener('click',async()=>{const st=$('bk-msg'),dl=await getDownloads();
   if(!dl){st.textContent='В этом окне скачивание недоступно. Откройте страницу на claude.ai в браузере.';return}
   const body={app:'vinyl-lab',v:1,date:today(),profile:P,stylus:N,records:RECS,wants:W?W.list:[]};
-  try{await dl.save({filename:'vinyl-lab-'+today()+'.json',data:JSON.stringify(body)});st.textContent='Копия сохранена. Пластинок: '+RECS.length+', записей в журнале иглы: '+N.sessions.length+'.'}
+  try{await dl.save({filename:'vinyl-lab-'+today()+'.json',data:JSON.stringify(body)});P.prefs.lastBackup=today();saveP();renderNow();st.textContent='Копия сохранена. Пластинок: '+RECS.length+', записей в журнале иглы: '+N.sessions.length+'.'}
   catch(e){st.textContent=e&&e.code==='declined'?'Сохранение отменено.':'Сохранить не получилось.'}});
 $('bk-file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   try{const d=JSON.parse(await f.text());if(!d||d.app!=='vinyl-lab')throw 0;bkData=d;
@@ -1796,8 +1809,11 @@ function renderNow(){if(!window.__vlNow)return;const rows=[],t=dayNum(today());
     rows.push(`<a class="check nowlink" href="#kollekciya"><b>Коллекция: ${RECS.length}</b><span class="v">слушали за 30 дней: ${m} · пора помыть: ${w}</span><span class="pill ${w?'mid':'ok'}">${w?'есть что помыть':'всё чистое'}</span></a>`)}
   const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
   if(last){const ago=t-dayNum(last.d);rows.push(`<div class="check"><b>Последняя настройка тонарма</b><span class="v">${fmtDate(last.d)}${isFinite(last.vtf)?' · '+fmt(last.vtf,2)+' г':''}</span><span class="pill ${ago>180?'mid':'ok'}">${ago>180?'больше полугода':'недавно'}</span></div>`)}
+  if(STANDALONE||PS.mode!=='db'){const lb=P.prefs.lastBackup,ago=lb?t-dayNum(lb):Infinity;
+    rows.push(`<a class="check nowlink" href="#sistema" data-scroll="bk-panel"><b>Резервная копия</b><span class="v">${lb?'последняя '+fmtDate(lb):'ещё не делали'} · данные хранятся только на этом устройстве</span><span class="pill ${ago>30?'mid':'ok'}">${ago>30?'пора сделать':'свежая'}</span></a>`)}
   if(W&&W.list.length){const top=W.list.filter(x=>+x.pri===1).length;rows.push(`<a class="check nowlink" href="#hochu"><b>Хочу купить: ${W.list.length}</b><span class="v">очень хочу: ${top}</span><span class="pill info">список</span></a>`)}
   $('y-now').innerHTML=rows.join('')}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-scroll]');if(!a)return;setTimeout(()=>{const t=$(a.dataset.scroll);if(t)t.scrollIntoView({block:'start',behavior:'smooth'})},60)});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();window.__vlNow=true;renderNow();

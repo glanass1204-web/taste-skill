@@ -375,7 +375,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.5</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.6</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -523,9 +523,9 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-amp">Усилитель</label><select id="y-pick-amp"><option value="">— другой, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-spk">Колонки</label><select id="y-pick-spk"><option value="">— другие, ввести вручную —</option></select></div>
-      <div class="field webf"><label for="y-web-q">Нет в списке — найти в интернете</label>
+      <div class="field webf"><label for="y-web-q">Найти модель по названию</label>
         <div class="webq"><select id="y-web-kind" aria-label="Что ищем"><option value="amp">Усилитель</option><option value="spk">Колонки</option></select><div class="unit"><input id="y-web-q" placeholder="например, Yamaha A-S301" autocomplete="off" enterkeyhint="search"></div><button type="button" class="btn primary" id="y-web-go">Найти</button></div>
-        <span class="hint" id="y-web-hint">Характеристики найдутся сами: мощность, импеданс, чувствительность, вход PHONO. Перед подстановкой вы их увидите.</span>
+        <span class="hint" id="y-web-hint">Ищет во встроенном каталоге — интернет не нужен. Если модели нет, подскажет, где найти паспорт.</span>
         <div class="webres" id="y-web-res" hidden aria-live="polite"></div></div>
       <div class="field"><span class="flabel">Фото вашего проигрывателя</span>
         <div class="ttph"><img id="y-ttimg" alt="Ваш проигрыватель" hidden><div class="chips"><label class="btn" for="y-ttfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-ttdel" hidden>Убрать фото</button></div></div>
@@ -1804,7 +1804,7 @@ const TT=[
   {id:'pslx310',skin:'sony',arm:'line',pitch:0,name:'Sony PS-LX310BT',fixed:true,D:null,ov:null,off:null,meff:null,note:'Автоматический проигрыватель с несъёмной головкой: прижимная сила, антискейтинг и юстировка выставлены на заводе и не регулируются. Пригодятся журнал иглы, коллекция и проверка скорости.'},
   {id:'psx50',skin:'silver',arm:'line',pitch:0,name:'Sony PS-X50 (винтаж)',D:221,ov:14,off:null,meff:null,note:'Эффективная длина 235 мм и свес 14 мм — по инструкции, со слов владельцев. Эффективную массу и офсет впишите сами.'}
 ];
-const BRAND=t=>{const m=t.name.match(/^(Monitor Audio|Q Acoustics|Cambridge Audio|Pro-Ject|Audio-Technica)\b/);return m?m[1]:t.name.split(' ')[0]};
+const BRAND=t=>{const m=t.name.match(/^(Monitor Audio|Q Acoustics|Cambridge Audio|Sonus Faber|Pro-Ject|Audio-Technica)\b/);return m?m[1]:t.name.split(' ')[0]};
 const CARTS=[
   {id:'2mred',name:'Ortofon 2M Red',life:1000,type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
   {id:'2mblue',name:'Ortofon 2M Blue',life:1000,type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
@@ -1833,6 +1833,37 @@ const AMPS=[
   {id:'c316',name:'NAD C 316BEE V2',p8:40,p4:40,df:200,ph:'MM'},
   {id:'brio',name:'Rega Brio',p8:50,p4:73,df:null,ph:'MM'},
   {id:'cxa61',name:'Cambridge Audio CXA61',p8:60,p4:90,df:null,ph:'',note:'Встроенного фонокорректора нет — нужен внешний.'}
+,
+  {id:'b-yamaha_a_s301',name:'Yamaha A-S301',p8:60,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-yamaha_a_s701',name:'Yamaha A-S701',p8:100,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-yamaha_a_s801',name:'Yamaha A-S801',p8:100,p4:null,df:null,ph:'MM/MC',src:1},
+  {id:'b-denon_pma900hne',name:'Denon PMA-900HNE',p8:50,p4:85,df:null,ph:'MM/MC',src:1},
+  {id:'b-denon_pma_1600ne',name:'Denon PMA-1600NE',p8:70,p4:null,df:null,ph:'MM/MC',src:1},
+  {id:'b-marantz_pm7000n',name:'Marantz PM7000N',p8:60,p4:80,df:null,ph:'MM',src:1},
+  {id:'b-marantz_pm8006',name:'Marantz PM8006',p8:70,p4:100,df:null,ph:'MM',src:1},
+  {id:'b-nad_c3050',name:'NAD C 3050',p8:100,p4:100,df:null,ph:'MM',src:1},
+  {id:'b-nad_c368',name:'NAD C 368',p8:80,p4:120,df:null,ph:'MM',src:1},
+  {id:'b-nad_3020',name:'NAD 3020 (винтаж)',p8:20,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-cambridge_cxa81',name:'Cambridge Audio CXA81',p8:80,p4:null,df:null,ph:'',src:1,note:'Встроенного фонокорректора нет — нужен внешний.'},
+  {id:'b-nad_c399',name:'NAD C 399',p8:180,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-nad_d3020_v2',name:'NAD D 3020 V2',p8:30,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-cambridge_axa35',name:'Cambridge Audio AXA35',p8:35,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-rega_io',name:'Rega io',p8:30,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-rega_elex',name:'Rega Elex MK4',p8:72,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-rotel_a11_tribute',name:'Rotel A11 Tribute',p8:50,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-rotel_a12_mk2',name:'Rotel A12 MKII',p8:60,p4:120,df:null,ph:'MM',src:1},
+  {id:'b-arcam_sa20',name:'Arcam SA20',p8:90,p4:150,df:null,ph:'MM',src:1},
+  {id:'b-hegel_h120',name:'Hegel H120',p8:75,p4:null,df:null,ph:'',src:1,note:'Встроенного фонокорректора нет — нужен внешний.'},
+  {id:'b-naim_nait_xs_3',name:'Naim NAIT XS 3',p8:70,p4:100,df:null,ph:'MM',src:1},
+  {id:'b-technics_su_g700m2',name:'Technics SU-G700M2',p8:70,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-luxman_l_505uxii',name:'Luxman L-505uXII',p8:100,p4:150,df:null,ph:'MM/MC',src:1},
+  {id:'b-pioneer_a_400',name:'Pioneer A-400 (винтаж)',p8:50,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-sansui_au_717',name:'Sansui AU-717 (винтаж)',p8:85,p4:125,df:null,ph:'MM/MC',src:1},
+  {id:'b-wiim_amp',name:'WiiM Amp',p8:60,p4:120,df:null,ph:'',src:1,note:'Встроенного фонокорректора нет — нужен внешний.'},
+  {id:'b-sony_strdh190',name:'Sony STR-DH190',p8:100,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-primaluna_evo_100',name:'PrimaLuna EVO 100 (ламповый)',p8:40,p4:null,df:null,ph:'',src:1,note:'Встроенного фонокорректора нет — нужен внешний.'},
+  {id:'b-hegel_h190v2',name:'Hegel H190v',p8:150,p4:null,df:null,ph:'MM',src:1},
+  {id:'b-yamaha_rn303',name:'Yamaha R-N303',p8:100,p4:null,df:null,ph:'MM',src:1}
 ];
 const SPKS=[
   {id:'br02',name:'Triangle Borea BR02',z:8,zmin:4.2,sens:89,f3:51,pmax:80},
@@ -1849,24 +1880,82 @@ const SPKS=[
   {id:'d121',name:'Wharfedale Diamond 12.1',z:8,zmin:null,sens:88,f3:null},
   {id:'ls50m',name:'KEF LS50 Meta',z:8,zmin:3.5,sens:85,f3:79,plo:40,phi:100,note:'Чувствительность низкая (85 дБ) — усилителю нужен запас мощности.'},
   {id:'spektor2',name:'DALI Spektor 2',z:6,zmin:null,sens:84.5,f3:54,plo:25,phi:100,note:'Снята с производства, но часто встречается б/у.'},
-  {id:'bw607s3',name:'B&W 607 S3',z:8,zmin:3,sens:84,f3:null,plo:30,phi:100,note:'Минимум импеданса 3 Ом — нужен усилитель, уверенно работающий на 4 Ом.'},
-  {id:'bw606s3',name:'B&W 606 S3',z:8,zmin:3.7,sens:88,f3:null,plo:30,phi:120},
+  {id:'bw607s3',name:'B&W 607 S3',z:8,zmin:3,sens:84,f3:52,plo:30,phi:100,note:'Минимум импеданса 3 Ом — нужен усилитель, уверенно работающий на 4 Ом.'},
+  {id:'bw606s3',name:'B&W 606 S3',z:8,zmin:3.7,sens:88,f3:52,plo:30,phi:120},
   {id:'q3020i',name:'Q Acoustics 3020i',z:6,zmin:4,sens:88,f3:64,plo:25,phi:75},
   {id:'rp600m2',name:'Klipsch RP-600M II',z:8,zmin:null,sens:94.5,f3:44,phi:100,note:'94,5 дБ Klipsch указывает в комнате; в безэховой камере измеряют около 86 дБ — реальная громкость будет ниже расчётной.'},
   {id:'bronze100',name:'Monitor Audio Bronze 100',z:8,zmin:null,sens:87,f3:null,plo:30,phi:100},
   {id:'chora806',name:'Focal Chora 806',z:8,zmin:4.6,sens:89,f3:58,plo:25,phi:120},
   {id:'s90',name:'Радиотехника S-90 (35АС-012)',z:4,zmin:null,sens:85,f3:31.5,plo:35,phi:90,note:'Чувствительность 85 дБ (0,338 Па/√Вт), номинальная мощность 35 Вт, паспортная 90 Вт — по паспорту.'}
+,
+  {id:'b-bowers_wilkins_603_s3',name:'B&W 603 S3',z:8,zmin:null,sens:90,f3:46,plo:30,phi:200,src:1},
+  {id:'b-bowers_wilkins_705_s3',name:'B&W 705 S3',z:8,zmin:null,sens:88,f3:50,plo:30,phi:120,src:1},
+  {id:'b-bowers_wilkins_702_s3',name:'B&W 702 S3',z:8,zmin:null,sens:90,f3:46,plo:30,phi:300,src:1},
+  {id:'b-dali_oberon_7',name:'DALI Oberon 7',z:6,zmin:null,sens:88.5,f3:36,plo:30,phi:180,src:1},
+  {id:'b-dali_opticon_8_mk2',name:'DALI Opticon 8 MK2',z:4,zmin:null,sens:88.5,f3:38,plo:40,phi:300,src:1},
+  {id:'b-kef_q150',name:'KEF Q150',z:8,zmin:null,sens:86,f3:51,plo:10,phi:100,src:1},
+  {id:'b-kef_q550',name:'KEF Q550',z:8,zmin:null,sens:88,f3:48,plo:15,phi:150,src:1},
+  {id:'b-kef_q3_meta',name:'KEF Q3 Meta',z:4,zmin:null,sens:87,f3:49,plo:15,phi:150,src:1},
+  {id:'b-kef_q1_meta',name:'KEF Q1 Meta',z:4,zmin:null,sens:86,f3:51,plo:10,phi:150,src:1},
+  {id:'b-kef_q750',name:'KEF Q750',z:8,zmin:null,sens:88,f3:48,plo:15,phi:150,src:1},
+  {id:'b-kef_r3_meta',name:'KEF R3 Meta',z:4,zmin:null,sens:87,f3:56,plo:15,phi:180,src:1},
+  {id:'b-q_acoustics_3010i',name:'Q Acoustics 3010i',z:6,zmin:null,sens:null,f3:65,plo:15,phi:75,note:'Чувствительность в паспорте не найдена — впишите сами.',src:1},
+  {id:'b-q_acoustics_3030i',name:'Q Acoustics 3030i',z:6,zmin:null,sens:88,f3:46,plo:25,phi:75,src:1},
+  {id:'b-q_acoustics_3050i',name:'Q Acoustics 3050i',z:6,zmin:null,sens:null,f3:44,plo:25,phi:180,note:'Чувствительность в паспорте не найдена — впишите сами.',src:1},
+  {id:'b-q_acoustics_5020',name:'Q Acoustics 5020',z:6,zmin:null,sens:null,f3:48,plo:25,phi:100,note:'Чувствительность в паспорте не найдена — впишите сами.',src:1},
+  {id:'b-q_acoustics_concept_30',name:'Q Acoustics Concept 30',z:6,zmin:null,sens:null,f3:45,plo:25,phi:150,note:'Чувствительность в паспорте не найдена — впишите сами.',src:1},
+  {id:'b-wharfedale_diamond_12_2i',name:'Wharfedale Diamond 12.2',z:8,zmin:null,sens:88,f3:50,plo:20,phi:120,src:1},
+  {id:'b-wharfedale_diamond_12_3',name:'Wharfedale Diamond 12.3',z:8,zmin:null,sens:87.5,f3:45,plo:30,phi:150,src:1},
+  {id:'b-wharfedale_diamond_12_4',name:'Wharfedale Diamond 12.4',z:8,zmin:null,sens:89,f3:45,plo:30,phi:150,src:1},
+  {id:'b-wharfedale_denton_85',name:'Wharfedale Denton 85th Anniversary',z:6,zmin:null,sens:88,f3:45,plo:20,phi:120,src:1},
+  {id:'b-wharfedale_linton_85',name:'Wharfedale Linton 85th Anniversary',z:6,zmin:null,sens:90,f3:40,plo:25,phi:200,src:1},
+  {id:'b-wharfedale_evo_4_4',name:'Wharfedale EVO 4.4',z:8,zmin:null,sens:89,f3:44,plo:25,phi:200,src:1},
+  {id:'b-klipsch_rp_500m_ii',name:'Klipsch RP-500M II',z:8,zmin:null,sens:92,f3:50,note:'Высокая чувствительность — хватит и маломощного усилителя; рекомендуемую мощность Klipsch не указывает.',src:1},
+  {id:'b-klipsch_rp8000f_ii',name:'Klipsch RP-8000F II',z:8,zmin:null,sens:98,f3:35,note:'Высокая чувствительность — хватит и маломощного усилителя; рекомендуемую мощность Klipsch не указывает.',src:1},
+  {id:'b-klipsch_r51m',name:'Klipsch R-51M',z:8,zmin:null,sens:93,f3:62,note:'Высокая чувствительность — хватит и маломощного усилителя; рекомендуемую мощность Klipsch не указывает.',src:1},
+  {id:'b-klipsch_heresy_iv',name:'Klipsch Heresy IV',z:8,zmin:null,sens:99,f3:48,note:'Высокая чувствительность — хватит и маломощного усилителя; рекомендуемую мощность Klipsch не указывает.',src:1},
+  {id:'b-klipsch_forte_iv',name:'Klipsch Forte IV',z:8,zmin:null,sens:99,f3:38,note:'Высокая чувствительность — хватит и маломощного усилителя; рекомендуемую мощность Klipsch не указывает.',src:1},
+  {id:'b-monitor_audio_silver_100',name:'Monitor Audio Silver 100 7G',z:8,zmin:null,sens:87,f3:35,plo:40,phi:120,src:1},
+  {id:'b-focal_vestia_no3',name:'Focal Vestia No3',z:8,zmin:null,sens:92,f3:35,plo:40,phi:300,src:1},
+  {id:'b-polk_audio_signature_eli',name:'Polk Signature Elite ES20',z:8,zmin:null,sens:88,f3:56,plo:20,phi:150,src:1},
+  {id:'b-polk_audio_t50',name:'Polk T50',z:8,zmin:null,sens:90,f3:40,plo:20,phi:200,src:1},
+  {id:'b-elac_debut_b62',name:'ELAC Debut B6.2',z:6,zmin:null,sens:87,f3:44,plo:20,phi:120,src:1},
+  {id:'b-elac_debut_f52',name:'ELAC Debut F5.2',z:6,zmin:null,sens:86,f3:42,plo:30,phi:200,src:1},
+  {id:'b-jbl_l100_classic',name:'JBL L100 Classic',z:4,zmin:null,sens:90,f3:40,plo:25,phi:200,src:1},
+  {id:'b-jbl_l52_classic',name:'JBL L52 Classic',z:4,zmin:null,sens:85,f3:47,plo:10,phi:75,src:1},
+  {id:'b-jamo_s_803',name:'Jamo S 803',z:8,zmin:null,sens:87,f3:57,plo:80,phi:160,src:1},
+  {id:'b-dynaudio_emit_10',name:'Dynaudio Emit 10',z:6,zmin:null,sens:86,f3:64,plo:30,phi:150,src:1},
+  {id:'b-sonus_faber_lumina_ii',name:'Sonus Faber Lumina II',z:4,zmin:null,sens:86,f3:55,plo:30,phi:150,src:1},
+  {id:'b-tannoy_revolution_xt6',name:'Tannoy Revolution XT 6',z:8,zmin:null,sens:89,f3:54,plo:20,phi:120,src:1},
+  {id:'b-tannoy_revolution_xt6f',name:'Tannoy Revolution XT 6F',z:8,zmin:null,sens:91,f3:34,plo:20,phi:200,src:1},
+  {id:'b-harbeth_p3esr',name:'Harbeth P3ESR XD',z:6,zmin:null,sens:83.5,f3:75,plo:15,phi:150,src:1},
+  {id:'b-triangle_borea_br09',name:'Triangle Borea BR09',z:8,zmin:null,sens:92,f3:35,plo:60,phi:300,src:1},
+  {id:'b-triangle_esprit_ez_austr',name:'Triangle Esprit Australe EZ',z:8,zmin:null,sens:92.5,f3:35,plo:100,phi:200,src:1},
+  {id:'b-triangle_magellan_duetto',name:'Triangle Magellan Duetto 40th',z:8,zmin:null,sens:88,f3:40,plo:30,phi:200,src:1},
+  {id:'b-bowers_wilkins_707_s3',name:'B&W 707 S3',z:8,zmin:null,sens:84,f3:50,plo:30,phi:100,src:1},
+  {id:'b-dali_epicon_2',name:'DALI Epicon 2',z:4,zmin:null,sens:87,f3:47,plo:30,phi:200,src:1},
+  {id:'b-sony_sscs5',name:'Sony SS-CS5',z:6,zmin:null,sens:87,f3:53,plo:30,phi:100,src:1},
+  {id:'b-triangle_borea_br10',name:'Triangle Borea BR10',z:8,zmin:null,sens:92,f3:30,plo:75,phi:350,src:1},
+  {id:'b-kef_q950',name:'KEF Q950',z:8,zmin:null,sens:91,f3:44,plo:15,phi:200,src:1},
+  {id:'b-bowers_wilkins_805_d4',name:'B&W 805 D4',z:8,zmin:null,sens:88,f3:42,plo:50,phi:120,src:1},
+  {id:'b-focal_sopra_n2',name:'Focal Sopra N°2',z:8,zmin:null,sens:91,f3:34,plo:40,phi:300,src:1},
+  {id:'b-sonus_faber_sonetto_ii',name:'Sonus Faber Sonetto II G2',z:4,zmin:null,sens:87,f3:42,plo:30,phi:200,src:1},
+  {id:'b-paradigm_monitor_se_atom',name:'Paradigm Monitor SE Atom',z:8,zmin:null,sens:86,f3:61,plo:15,phi:100,src:1},
+  {id:'b-psb_alpha_p5',name:'PSB Alpha P5',z:8,zmin:null,sens:87,f3:55,plo:20,phi:100,src:1},
+  {id:'b-jbl_l82_classic',name:'JBL L82 Classic',z:8,zmin:null,sens:88,f3:44,plo:25,phi:125,src:1},
+  {id:'b-dynaudio_emit_30',name:'Dynaudio Emit 30',z:4,zmin:null,sens:88,f3:45,plo:30,phi:180,src:1},
+  {id:'b-polk_audio_signature_eli',name:'Polk Signature Elite ES15',z:8,zmin:null,sens:88,f3:48,plo:20,phi:100,src:1}
 ];
 fillSelect($('y-pick-amp'),AMPS);fillSelect($('y-pick-spk'),SPKS);
 function applyAmp(a,extra){{const f={amp:a.name,p8:a.p8,p4:a.p4,aphono:a.ph};if(a.df)f.df=a.df;fillSys(f)}
-  pickSave('Подставлены данные усилителя '+a.name+': '+a.p8+' Вт на 8 Ом'+(a.p4?', '+a.p4+' Вт на 4 Ом':'')+(a.ph?', вход PHONO '+a.ph+'.':', без входа PHONO.')+(a.df?'':' Коэффициент демпфирования '+(a.src?'не найден':'производитель не указывает')+' — оставлено прежнее значение.')+(a.note?' '+a.note:'')+(extra||''))}
+  pickSave('Подставлены данные усилителя '+a.name+': '+a.p8+' Вт на 8 Ом'+(a.p4?', '+a.p4+' Вт на 4 Ом':'')+(a.ph?', вход PHONO '+a.ph+'.':', без входа PHONO.')+(a.df?'':' Коэффициент демпфирования не указан — оставлено прежнее значение.')+(a.note?' '+a.note:'')+(a.src===1?' Источник: каталог BuildHiFi (паспорта производителей).':'')+(extra||''))}
 $('y-pick-amp').addEventListener('change',()=>{const a=AMPS.find(x=>x.id===$('y-pick-amp').value);if(a)applyAmp(a)});
 function applySpk(k,extra){
   const f={spk:k.name,z:k.z,sens:k.sens,f3:k.f3,plo:k.plo||null,phi:k.phi||k.pmax||null,zmin:k.zmin||+(k.z*0.8).toFixed(1)};fillSys(f);
-  pickSave('Подставлены данные колонок '+k.name+': '+k.z+' Ом'+(k.zmin?' (минимум '+fmt(k.zmin,1)+')':' (минимум не указан — взята оценка '+fmt(k.z*0.8,1)+' Ом: по стандарту не ниже 80 % номинала)')+', '+fmt(k.sens,k.sens%1?1:0)+' дБ/Вт/м'+(k.f3?', бас до '+fmt(k.f3,k.f3%1?1:0)+' Гц':'')+'.'+(k.pmax&&!k.plo?' Производитель указывает допустимую мощность '+k.pmax+' Вт.':'')+(k.note?' '+k.note:'')+(extra||''))}
+  pickSave('Подставлены данные колонок '+k.name+': '+k.z+' Ом'+(k.zmin?' (минимум '+fmt(k.zmin,1)+')':' (минимум не указан — взята оценка '+fmt(k.z*0.8,1)+' Ом: по стандарту не ниже 80 % номинала)')+(k.sens!=null?', '+fmt(k.sens,k.sens%1?1:0)+' дБ/Вт/м':', чувствительность не указана')+(k.f3?', бас до '+fmt(k.f3,k.f3%1?1:0)+' Гц':'')+'.'+(k.pmax&&!k.plo?' Производитель указывает допустимую мощность '+k.pmax+' Вт.':'')+(k.note?' '+k.note:'')+(k.src===1?' Источник: каталог BuildHiFi (паспорта производителей).':'')+(extra||''))}
 $('y-pick-spk').addEventListener('change',()=>{const k=SPKS.find(x=>x.id===$('y-pick-spk').value);if(k)applySpk(k)});
-/* поиск характеристик в интернете: Claude + поиск Firecrawl (если подключён у зрителя) */
-const WEB={key:'vinyl-lab-found',ctl:null,out:'y-web-res',tried:{}};
+/* поиск модели во встроенном каталоге; найденные ранее через Claude модели остаются в списке */
+const WEB={key:'vinyl-lab-found',out:'y-web-res',tried:{}};
 function webLoad(){try{return JSON.parse(localStorage.getItem(WEB.key))||{amp:[],spk:[]}}catch(e){return {amp:[],spk:[]}}}
 function webStore(kind,o){try{const d=webLoad();d[kind]=(d[kind]||[]).filter(x=>x.name.toLowerCase()!==o.name.toLowerCase());d[kind].push(o);localStorage.setItem(WEB.key,JSON.stringify(d))}catch(e){}}
 function webAddToList(kind,o){const list=kind==='amp'?AMPS:SPKS,sel=$(kind==='amp'?'y-pick-amp':'y-pick-spk');
@@ -1874,50 +1963,15 @@ function webAddToList(kind,o){const list=kind==='amp'?AMPS:SPKS,sel=$(kind==='am
   o.id='w-'+o.name.toLowerCase().replace(/[^a-z0-9а-яё]+/g,'-');list.push(o);
   sel.querySelectorAll('optgroup').forEach(g=>g.remove());fillSelect(sel,list);return o}
 {const d=webLoad();(d.amp||[]).forEach(o=>webAddToList('amp',o));(d.spk||[]).forEach(o=>webAddToList('spk',o))}
-const NUM=(v,lo,hi)=>{v=typeof v==='string'?parseFloat(v.replace(',','.')):v;return typeof v==='number'&&isFinite(v)&&v>=lo&&v<=hi?+v:null};
-function webClean(kind,r){if(!r||typeof r!=='object'||!r.found)return null;const name=String(r.name||'').trim().slice(0,80);if(!name)return null;
-  const src=(Array.isArray(r.sources)?r.sources:[]).map(String).filter(u=>/^https?:\/\//.test(u)).slice(0,3);let note=r.note?String(r.note).trim().slice(0,240):'';if(note&&!/[.!?…]$/.test(note))note+='.';
-  if(kind==='amp'){const o={name,p8:NUM(r.p8,1,1000),p4:NUM(r.p4,1,2000),df:NUM(r.df,5,10000),ph:['MM','MM/MC'].includes(r.ph)?r.ph:'',note,src};return o.p8?o:null}
-  const o={name,z:NUM(r.z,2,16),zmin:NUM(r.zmin,1,16),sens:NUM(r.sens,75,110),f3:NUM(r.f3,10,200),plo:NUM(r.plo,1,1000),phi:NUM(r.phi,1,2000),pmax:NUM(r.pmax,1,2000),note,src};
-  if(o.zmin&&o.z&&o.zmin>o.z)o.zmin=null;return o.z&&o.sens?o:null}
-function webPrompt(kind,q,canSearch){const amp=kind==='amp';
-  return 'Найди паспортные характеристики '+(amp?'стереоусилителя':'акустических колонок (пассивных)')+' «'+q+'» для приложения меломана.\n'+
-  (canSearch?'Сначала найди данные инструментом web_search (не больше 3 запросов, лучше сайт производителя или крупный магазин) и опирайся на найденное. В sources перечисли адреса страниц, где видел цифры.\n':'Поиска в интернете нет — отвечай по своим знаниям; sources оставь пустым.\n')+
-  'Не выдумывай: если цифры нет или ты не уверен, ставь null. Если модель не найдена или это не '+(amp?'усилитель':'колонки')+', верни {"found":false}.\n'+
-  'Ответь только JSON без пояснений:\n'+(amp?
-  '{"found":true,"name":"точное название модели","p8":мощность Вт на канал на 8 Ом,"p4":Вт на канал на 4 Ом или null,"df":коэффициент демпфирования или null,"ph":"MM" | "MM/MC" | "" (встроенный вход для проигрывателя),"note":"коротко по-русски важная оговорка или пусто","sources":["url"]}':
-  '{"found":true,"name":"точное название модели","z":номинальный импеданс Ом,"zmin":минимальный импеданс Ом или null,"sens":чувствительность дБ (2,83 В или 1 Вт / 1 м),"f3":нижняя граница АЧХ Гц при −3 дБ или null,"plo":рекомендуемая мощность усилителя от, Вт или null,"phi":до, Вт или null,"pmax":допустимая мощность Вт или null,"note":"коротко по-русски важная оговорка или пусто","sources":["url"]}')}
 function webLinks(q){const u=encodeURIComponent(q+' характеристики');return '<a href="https://yandex.ru/search/?text='+u+'" target="_blank" rel="noopener">Яндекс</a> · <a href="https://www.google.com/search?q='+u+'" target="_blank" rel="noopener">Google</a>'}
 function webShow(html){const r=$(WEB.out);r.innerHTML=html;r.hidden=false}
-function webCard(kind,o,how){const box=$(WEB.out);const amp=kind==='amp',f=(v,u)=>v==null?'<span style="color:var(--muted)">нет данных</span>':esc(fmt(v,v%1?1:0))+' '+u;
-  const rows=amp?[['На 8 Ом',f(o.p8,'Вт')],['На 4 Ом',f(o.p4,'Вт')],['Демпфирование',f(o.df,'')],['Вход PHONO',o.ph?esc(o.ph):'нет']]:
-    [['Импеданс',f(o.z,'Ом')],['Минимум',f(o.zmin,'Ом')],['Чувствительность',f(o.sens,'дБ')],['Бас до',f(o.f3,'Гц')],['Усилитель',o.plo||o.phi?esc((o.plo||'?')+'–'+(o.phi||'?'))+' Вт':o.pmax?'до '+esc(o.pmax)+' Вт':'<span style="color:var(--muted)">нет данных</span>']];
-  webShow('<h4>'+esc(o.name)+'</h4><dl>'+rows.map(r=>'<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>').join('')+'</dl>'+(o.note?'<p class="src" style="color:var(--ink)">'+esc(o.note)+'</p>':'')+
-    '<p class="src">'+how+(o.src&&o.src.length?': '+o.src.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])+'</a>').join(', '):'')+'. Сверьте с паспортом — ошибки возможны.</p>'+
-    '<div class="chips"><button type="button" class="btn primary w-apply">Подставить в систему</button><button type="button" class="btn w-x">Отмена</button></div>');
-  box.querySelector('.w-apply').onclick=()=>{const it=webAddToList(kind,Object.assign({},o));webStore(kind,o);$(amp?'y-pick-amp':'y-pick-spk').value=it.id;
-    const extra=' Данные найдены '+(o.src&&o.src.length?'в интернете':'по памяти Claude')+' — сверьте с паспортом.';amp?applyAmp(it,extra):applySpk(it,extra);$(WEB.out).hidden=true;if(WEB.out==='y-web-res')$('y-web-q').value=''};
-  box.querySelector('.w-x').onclick=()=>{$(WEB.out).hidden=true}}
-async function webFind(man){const q=man?man.q:$('y-web-q').value.trim(),kind=man?man.kind:$('y-web-kind').value,btn=$('y-web-go');if(q.length<3){if(!man)$('y-web-q').focus();return}
-  if(WEB.ctl){WEB.ctl.abort();WEB.ctl=null;if(!man)return}
+function webFind(man){const q=man?man.q:$('y-web-q').value.trim(),kind=man?man.kind:$('y-web-kind').value;if(q.length<3){if(!man)$('y-web-q').focus();return}
   ['y-web-res','y-web-res-amp','y-web-res-spk'].forEach(id=>{$(id).hidden=true;$(id).innerHTML=''});WEB.out=man?'y-web-res-'+kind:'y-web-res';
-  const has=window.claude&&window.claude.use;let sample=null,mcp=null;
-  if(has){webShow('Подключаюсь…');try{[sample,mcp]=await Promise.all([window.claude.use('sample'),window.claude.use('mcp')])}catch(e){}}
-  if(!sample){webShow('Автоматический поиск работает в версии на claude.ai. Здесь можно открыть поиск и вписать цифры вручную: '+webLinks(q)+'.');return}
-  const ctl=WEB.ctl=new AbortController();btn.textContent='Стоп';let n=0;
-  const tools=mcp?[{name:'web_search',description:'Поиск в интернете. Возвращает заголовки, адреса и выдержки страниц.',inputSchema:{type:'object',properties:{query:{type:'string'}},required:['query']},
-    execute:async(i)=>{if(++n>3)throw new Error('Лимит поиска исчерпан — отвечай по найденному.');const qq=String(i&&i.query||q).slice(0,200);webShow('Ищу в интернете: «'+esc(qq)+'»…');
-      const r=await mcp.callTool('Firecrawl','firecrawl_search',{query:qq,objective:'Найти паспортные характеристики hi-fi техники для дневника меломана',limit:5});
-      const web=(r&&r.payload&&r.payload.data&&r.payload.data.web)||[];return web.slice(0,5).map(w=>({title:w.title,url:w.url,text:String(w.description||'').slice(0,700)}))}}]:undefined;
-  webShow(mcp?'Ищу в интернете…':'Спрашиваю Claude…');
-  try{let r;try{r=await sample.json(webPrompt(kind,q,!!mcp),{signal:ctl.signal,tools,modelTier:'default'})}
-    catch(e){const soft=e&&!['cancelled','not_granted','rate_limited'].includes(e.code);if(!(mcp&&soft))throw e;
-      mcp=null;webShow('Поиск недоступен — спрашиваю Claude…');r=await sample.json(webPrompt(kind,q,false),{signal:ctl.signal,modelTier:'default'})}
-    const o=webClean(kind,r);
-    if(!o){webShow('Не нашёл надёжных данных по «'+esc(q)+'». Проверьте название или поищите сами: '+webLinks(q)+'.');return}
-    webCard(kind,o,o.src&&o.src.length?'Найдено в интернете':'По памяти Claude, без поиска в интернете')}
-  catch(e){const c=e&&e.code;webShow(c==='cancelled'?'Поиск остановлен.':c==='not_granted'?'Без разрешения на Claude поиск не работает. Можно поискать вручную: '+webLinks(q)+'.':c==='rate_limited'?'Слишком много запросов подряд — попробуйте через минуту.':'Не получилось найти: '+esc((e&&e.message)||'ошибка')+'. Поищите вручную: '+webLinks(q)+'.')}
-  finally{WEB.ctl=null;btn.textContent='Найти'}}
+  const list=kind==='amp'?AMPS:SPKS,norm=t=>t.toLowerCase().replace(/[^a-z0-9а-яё]+/g,'');const nq=norm(q);
+  const hits=list.filter(x=>norm(x.name).includes(nq)||nq.includes(norm(x.name))).slice(0,6);
+  if(hits.length){webShow('<h4>Нашлось в каталоге</h4><div class="chips">'+hits.map(x=>'<button type="button" class="btn w-pick" data-id="'+esc(x.id)+'">'+esc(x.name)+'</button>').join('')+'</div>');
+    $(WEB.out).querySelectorAll('.w-pick').forEach(b=>b.onclick=()=>{const it=list.find(x=>x.id===b.dataset.id);$(kind==='amp'?'y-pick-amp':'y-pick-spk').value=it.id;kind==='amp'?applyAmp(it):applySpk(it);$(WEB.out).hidden=true;if(!man)$('y-web-q').value=''});return}
+  webShow('«'+esc(q)+'» нет во встроенном каталоге ('+(kind==='amp'?AMPS.length+' усилителей':SPKS.length+' моделей колонок')+'). Откройте паспорт в поиске и впишите цифры в поля «'+(kind==='amp'?'Усилитель и колонки':'Колонки')+'» ниже: '+webLinks(q)+'.')}
 $('y-web-go').addEventListener('click',()=>webFind());
 /* модель вписана вручную: есть в списке — подставляем, нет — ищем в интернете */
 [['amp','y-amp'],['spk','y-spk']].forEach(([kind,id])=>$(id).addEventListener('change',()=>{const q=$(id).value.trim(),list=kind==='amp'?AMPS:SPKS;

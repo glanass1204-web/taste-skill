@@ -1,0 +1,1676 @@
+<title>Винил-Лаб</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: aluminium faceplate header, a selector-switch row of four tools, each tool = inputs column + readout column */
+:root{
+  --bg:#E8EBEE; --panel:#F7F8FA; --ink:#141A21; --muted:#56616E; --line:#C9D0D8;
+  --amber:#A15F00; --glow:#F0A21A; --glow-soft:#F6D9A6;
+  --good:#1E7A4C; --warn:#C27A00; --bad:#B3261E;
+  --c2:#2F6FB0; --c3:#7A4FB0;
+  --paper:#FFFFFF; --paper-ink:#000000;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1318; --panel:#171C23; --ink:#E5E9EE; --muted:#8E99A7; --line:#2B333D;
+  --amber:#F3AE45; --glow:#F0A21A; --glow-soft:#4A3510;
+  --good:#3FB97A; --warn:#E5A532; --bad:#EF6A5E; --c2:#6AA8E8; --c3:#B590E6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1318; --panel:#171C23; --ink:#E5E9EE; --muted:#8E99A7; --line:#2B333D;
+  --amber:#F3AE45; --glow:#F0A21A; --glow-soft:#4A3510;
+  --good:#3FB97A; --warn:#E5A532; --bad:#EF6A5E; --c2:#6AA8E8; --c3:#B590E6; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1120px;margin:0 auto}
+header{padding-block:36px 20px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,44px);letter-spacing:-.01em;margin:0;line-height:1}
+h1 span{color:var(--amber)}
+.tag{color:var(--muted);max-width:52ch;margin:10px 0 0}
+.badge{font-family:var(--f-mono);font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap}
+
+nav.tabs{display:flex;flex-wrap:wrap;gap:8px;padding-block:20px}
+nav.tabs a{font-family:var(--f-display);font-size:13px;font-weight:500;text-decoration:none;color:var(--muted);
+  border:1px solid var(--line);border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;background:var(--panel)}
+nav.tabs a::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line)}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--ink)}
+nav.tabs a[aria-current="page"]::before{background:var(--glow);box-shadow:0 0 8px var(--glow)}
+nav.tabs a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+section.tool{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;align-items:start}
+section.tool[hidden]{display:none!important}
+@media (max-width:820px){section.tool{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+h2{font-family:var(--f-display);font-weight:500;font-size:20px;margin:0;text-wrap:balance}
+h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
+p{margin:0}
+.lead{color:var(--muted);max-width:60ch}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:500}
+.field .hint{font-size:12px;color:var(--muted)}
+.unit{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--bg);overflow:hidden}
+.unit input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-family:var(--f-mono);font-size:15px;padding:9px 10px}
+.unit span{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding:0 10px;white-space:nowrap}
+select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.unit input{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button,.btn{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+.chips button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);font-weight:600}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:500}
+.btn:hover,.chips button:hover{border-color:var(--muted)}
+
+.readout{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.big{font-family:var(--f-display);font-weight:700;font-size:clamp(40px,8vw,64px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big small{font-size:.4em;font-weight:500;color:var(--muted);margin-left:4px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid currentColor}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.ok{color:var(--good)} .mid{color:var(--warn)} .no{color:var(--bad)}
+
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.kv div{background:var(--panel);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kv dt{font-size:12px;color:var(--muted)}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:16px;font-variant-numeric:tabular-nums}
+
+.scale{position:relative;height:56px;margin-top:6px}
+.scale svg{width:100%;height:100%;overflow:visible}
+.chart{width:100%;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:480px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:500}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr.sel td{background:var(--glow-soft)}
+.tablewrap{overflow-x:auto}
+
+details{border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+details .how{margin-top:10px;display:flex;flex-direction:column;gap:8px;color:var(--muted);font-size:14px;max-width:68ch}
+code,.f{font-family:var(--f-mono);font-size:13px;color:var(--ink);background:var(--bg);padding:1px 5px;border-radius:4px}
+.note{font-size:13px;color:var(--muted);max-width:66ch}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.drop input[type=file]{font-size:13px;max-width:100%}
+.status{font-size:13px;color:var(--muted)}
+.protr{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:560px){.protr{grid-template-columns:minmax(0,1fr)}.paper{max-width:280px}}
+.paper{background:var(--paper);border:1px solid var(--line);border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.12);aspect-ratio:210/297;max-width:100%}
+.paper svg{display:block;width:100%;height:100%}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.meter{position:relative;height:12px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.meter>div{height:100%;width:0;background:var(--good);transition:width .4s}
+.meter>i{position:absolute;top:0;bottom:0;width:1px;background:var(--muted)}
+.timer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:14px;flex-wrap:wrap}
+.tlabel{font-size:12px;color:var(--muted)}
+.tval{font-family:var(--f-mono);font-size:24px;font-variant-numeric:tabular-nums}
+.timer .btn.on{border-color:var(--bad);color:var(--bad)}
+.confirm{border:1px solid var(--amber);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.checks{display:flex;flex-direction:column}
+.check{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:center}
+.check:last-child{border-bottom:0}
+.check b{font-weight:600;font-size:14px}
+.check span.v{grid-column:1;font-size:13px;color:var(--muted)}
+.check .pill{grid-row:1/span 2;grid-column:2;justify-self:end}
+.pill.info{color:var(--muted)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+.records{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.records li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.records .ttl{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.records .ttl small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.records .tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
+.records .acts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.records .acts button{font:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink);cursor:pointer}
+.records .acts button.arm{border-color:var(--bad);color:var(--bad)}
+.grade{font-family:var(--f-mono);font-size:12px;font-weight:500;padding:2px 7px;border-radius:4px;border:1px solid currentColor}
+.empty{display:flex;flex-direction:column;gap:6px;padding:12px 0}
+@media (max-width:820px){#kollekciya>.col:last-child,#hochu>.col:last-child{order:-1}}
+.pickcard{display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:8px;background:var(--glow-soft);min-height:96px;justify-content:center}
+.pickcard .pa{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pickcard .pt{font-family:var(--f-display);font-weight:500;font-size:clamp(20px,3.4vw,28px);line-height:1.15;text-wrap:balance;overflow-wrap:anywhere}
+.pickcard .pm{font-size:13px;color:var(--muted)}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:14px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.hbars{display:flex;flex-direction:column;gap:6px}
+.hbar{display:grid;grid-template-columns:minmax(0,1fr) 2fr auto;gap:8px;align-items:center;font-size:13px}
+.hbar span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .b{height:10px;border-radius:3px;background:var(--glow);min-width:2px}
+.hbar .c{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.toplist{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.toplist span{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.plan{max-width:420px;width:100%;margin:0 auto}
+.plan svg{display:block;width:100%;height:auto}
+.tag-warn{font-size:12px;padding:2px 7px;border-radius:4px;border:1px solid var(--warn);color:var(--warn)}
+@media (max-width:520px){.records li{grid-template-columns:minmax(0,1fr)}.records .tags{justify-content:flex-start}}
+td.note-cell{white-space:normal;min-width:120px}
+.del{font:inherit;font-size:12px;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 4px}
+.del.arm{color:var(--bad);font-weight:600}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+@media (prefers-reduced-motion:no-preference){.needle{transition:transform .5s cubic-bezier(.3,1.4,.5,1)}}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Винил<span>·</span>Лаб</h1>
+    <p class="tag">Профиль системы, коллекция пластинок и калькуляторы для настройки винилового тракта: резонанс тонарма, юстировка с протрактором, скорость диска, провода и журнал износа иглы.</p>
+  </div>
+  <span class="badge">прототип · v0.2</span>
+</header>
+
+<nav class="tabs" aria-label="Инструменты">
+  <a href="#sistema" data-tab="sistema">Моя система</a>
+  <a href="#kollekciya" data-tab="kollekciya">Коллекция</a>
+  <a href="#hochu" data-tab="hochu">Хочу купить</a>
+  <a href="#komnata" data-tab="komnata">Комната</a>
+  <a href="#rezonans" data-tab="rezonans">Резонанс</a>
+  <a href="#yustirovka" data-tab="yustirovka">Юстировка</a>
+  <a href="#skorost" data-tab="skorost">Скорость</a>
+  <a href="#provoda" data-tab="provoda">Провода</a>
+  <a href="#igla" data-tab="igla">Игла</a>
+</nav>
+
+<!-- ============ СИСТЕМА ============ -->
+<section class="tool" id="sistema">
+  <div class="col">
+    <div><h2>Моя система</h2></div>
+    <p class="note" id="y-state">Сейчас в форме пример. Впишите свою технику и сохраните: данные подставятся во все калькуляторы.</p>
+    <form class="panel" id="y-form">
+      <h3>Проигрыватель и тонарм</h3>
+      <div class="field"><label for="y-tt">Модель</label><div class="unit"><input id="y-tt" value="Technics SL-1200MK2" autocomplete="off"></div></div>
+      <div class="row2">
+        <div class="field"><label for="y-D">Ось шпинделя — ось тонарма</label><div class="unit"><input id="y-D" inputmode="decimal" value="215"><span>мм</span></div></div>
+        <div class="field"><label for="y-meff">Эффективная масса</label><div class="unit"><input id="y-meff" inputmode="decimal" value="12"><span>г</span></div></div>
+        <div class="field"><label for="y-ov">Заводской свес</label><div class="unit"><input id="y-ov" inputmode="decimal" value="15"><span>мм</span></div></div>
+        <div class="field"><label for="y-off">Заводской офсет</label><div class="unit"><input id="y-off" inputmode="decimal" value="22"><span>°</span></div></div>
+      </div>
+      <h3>Головка</h3>
+      <div class="row2">
+        <div class="field"><label for="y-cart">Модель</label><div class="unit"><input id="y-cart" value="Ortofon 2M Red" autocomplete="off"></div></div>
+        <div class="field"><label for="y-type">Тип</label><select id="y-type"><option value="MM">MM</option><option value="MC">MC</option></select></div>
+        <div class="field"><label for="y-cmass">Масса</label><div class="unit"><input id="y-cmass" inputmode="decimal" value="7.2"><span>г</span></div></div>
+        <div class="field"><label for="y-comp">Гибкость</label><div class="unit"><input id="y-comp" inputmode="decimal" value="20"><span>мкм/мН</span></div></div>
+        <div class="field"><label for="y-hz">Гибкость указана при</label><select id="y-hz"><option value="10">10 Гц</option><option value="100">100 Гц</option></select></div>
+        <div class="field"><label for="y-prof">Профиль иглы</label><select id="y-prof">
+          <option value="conical">Конический</option><option value="elliptical" selected>Эллиптический</option><option value="shibata">Shibata</option><option value="microline">MicroLine</option><option value="dj">DJ</option></select></div>
+        <div class="field"><label for="y-vlo">Прижимная сила, от</label><div class="unit"><input id="y-vlo" inputmode="decimal" value="1.6"><span>г</span></div></div>
+        <div class="field"><label for="y-vhi">до</label><div class="unit"><input id="y-vhi" inputmode="decimal" value="2.0"><span>г</span></div></div>
+        <div class="field"><label for="y-clo">Ёмкость нагрузки, от</label><div class="unit"><input id="y-clo" inputmode="decimal" value="150"><span>пФ</span></div></div>
+        <div class="field"><label for="y-chi">до</label><div class="unit"><input id="y-chi" inputmode="decimal" value="300"><span>пФ</span></div></div>
+      </div>
+      <h3>Фонокорректор и кабель</h3>
+      <div class="row2">
+        <div class="field"><label for="y-phono">Фонокорректор</label><div class="unit"><input id="y-phono" value="" placeholder="модель" autocomplete="off"></div></div>
+        <div class="field"><label for="y-pcap">Входная ёмкость</label><div class="unit"><input id="y-pcap" inputmode="decimal" value="100"><span>пФ</span></div></div>
+        <div class="field"><label for="y-icpf">Межблочный кабель</label><div class="unit"><input id="y-icpf" inputmode="decimal" value="100"><span>пФ/м</span></div></div>
+        <div class="field"><label for="y-iclen">Его длина</label><div class="unit"><input id="y-iclen" inputmode="decimal" value="1.2"><span>м</span></div></div>
+        <div class="field"><label for="y-armc">Проводка тонарма</label><div class="unit"><input id="y-armc" inputmode="decimal" value="50"><span>пФ</span></div></div>
+      </div>
+      <h3>Усилитель и колонки</h3>
+      <div class="row2">
+        <div class="field"><label for="y-amp">Усилитель</label><div class="unit"><input id="y-amp" value="" placeholder="модель" autocomplete="off"></div></div>
+        <div class="field"><label for="y-df">Коэфф. демпфирования</label><div class="unit"><input id="y-df" inputmode="decimal" value="100"><span>на 8 Ом</span></div></div>
+        <div class="field"><label for="y-spk">Колонки</label><div class="unit"><input id="y-spk" value="" placeholder="модель" autocomplete="off"></div></div>
+        <div class="field"><label for="y-z">Номинальный импеданс</label><div class="unit"><input id="y-z" inputmode="decimal" value="8"><span>Ом</span></div></div>
+        <div class="field"><label for="y-zmin">Импеданс, минимум</label><div class="unit"><input id="y-zmin" inputmode="decimal" value="5"><span>Ом</span></div></div>
+        <div class="field"><label for="y-zmax">максимум</label><div class="unit"><input id="y-zmax" inputmode="decimal" value="25"><span>Ом</span></div></div>
+        <div class="field"><label for="y-slen">Акустический кабель</label><div class="unit"><input id="y-slen" inputmode="decimal" value="5"><span>м</span></div></div>
+        <div class="field"><label for="y-ssec">Сечение жилы</label><div class="unit"><input id="y-ssec" inputmode="decimal" value="1.5"><span>мм²</span></div></div>
+      </div>
+      <button type="submit" class="btn primary">Сохранить систему</button>
+      <p class="status" id="y-msg" aria-live="polite"></p>
+    </form>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Проверка системы</h3>
+      <div class="checks" id="y-checks"></div>
+      <p class="note">Подробности и расчёты — на вкладках калькуляторов. Масса крепежа головки принята за 1 г.</p>
+    </div>
+    <div class="panel">
+      <h3>Журнал настроек тонарма</h3>
+      <form id="j-form" class="col" style="gap:12px">
+        <div class="row2">
+          <div class="field"><label for="j-date">Дата</label><div class="unit"><input id="j-date" type="date"></div></div>
+          <div class="field"><label for="j-vtf">Прижимная сила</label><div class="unit"><input id="j-vtf" inputmode="decimal" value="1.8"><span>г</span></div></div>
+          <div class="field"><label for="j-as">Антискейтинг</label><div class="unit"><input id="j-as" value="1.8" autocomplete="off"><span>по шкале</span></div></div>
+          <div class="field"><label for="j-h">Высота тонарма / VTA</label><div class="unit"><input id="j-h" value="" placeholder="напр. 2,5 по шкале" autocomplete="off"></div></div>
+        </div>
+        <div class="field"><label for="j-note">Что изменили и как звучит</label><div class="unit"><input id="j-note" placeholder="необязательно" autocomplete="off"></div></div>
+        <div class="chips" style="align-items:center"><button type="submit" class="btn primary">Записать настройку</button><span id="j-pill" class="pill ok">—</span></div>
+      </form>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Дата</th><th>Сила</th><th>Антискейт</th><th>Высота</th><th>Заметка</th><th></th></tr></thead>
+        <tbody id="j-list"></tbody></table></div>
+      <p class="note" id="j-empty">Записей пока нет. Отмечайте каждую настройку: так легко вернуться к варианту, который звучал лучше.</p>
+    </div>
+    <div class="panel">
+      <details><summary>Как выставить прижимную силу</summary><div class="how">
+        <p>1. Выключите антискейтинг. Вращая противовес, добейтесь, чтобы тонарм парил горизонтально без опоры.</p>
+        <p>2. Не трогая противовес, поверните его шкалу на ноль. Затем крутите противовес вместе со шкалой до нужной силы.</p>
+        <p>3. Проверьте электронными весами для иглы: шкалы противовеса нередко ошибаются на 0,1–0,3 г.</p>
+        <p>Начинайте с середины или верхней части рекомендованного диапазона. Слишком лёгкая игла опаснее тяжёлой: она дребезжит в канавке и повреждает её.</p>
+      </div></details>
+      <details><summary>Как настроить антискейтинг</summary><div class="how">
+        <p>Стартовое значение для большинства тонармов со шкалой — то же число, что и прижимная сила.</p>
+        <p>Точнее — по тестовой пластинке или на слух на громких местах ближе к концу стороны. Искажения в правом канале — антискейтинга мало. В левом — много.</p>
+        <p>Метод «гладкого диска», когда тонарм ставят на пластинку без канавок, неточен: без канавки сила трения другая.</p>
+      </div></details>
+    </div>
+    <div class="panel" id="app-panel">
+      <h3>Приложение на телефон</h3>
+      <p class="note" id="app-text">Винил·Лаб можно установить на телефон как обычное приложение: иконка на рабочем столе, работает без интернета, микрофон для измерений включается.</p>
+      <div class="chips">
+        <a class="btn primary" id="app-open" href="https://glanass1204-web.github.io/taste-skill/vinyl-lab/" target="_blank" rel="noopener" style="text-decoration:none">Открыть версию для установки</a>
+        <button type="button" class="btn primary" id="app-install" hidden>Установить приложение</button>
+        <a class="btn" id="app-zip" href="https://glanass1204-web.github.io/taste-skill/vinyl-lab/vinyl-lab.zip" target="_blank" rel="noopener" style="text-decoration:none">Скачать архивом (ZIP)</a>
+      </div>
+      <p class="note" id="app-ios">На iPhone: откройте версию для установки в Safari → кнопка «Поделиться» → «На экран „Домой“». На Android: в Chrome меню ⋮ → «Установить приложение» или «Добавить на главный экран».</p>
+    </div>
+    <div class="panel">
+      <h3>Резервная копия и перенос данных</h3>
+      <p class="note">Сохраните все данные в файл: систему, журналы, коллекцию и список желаний. Из этого файла их можно восстановить или перенести, например из приложения на телефоне сюда и обратно.</p>
+      <div class="chips">
+        <button type="button" class="btn" id="bk-save">Сохранить копию в файл</button>
+        <label class="btn" for="bk-file" style="display:inline-flex;align-items:center">Восстановить из файла</label>
+        <input type="file" id="bk-file" accept=".json,application/json" hidden>
+      </div>
+      <div id="bk-confirm" class="confirm" hidden>
+        <p id="bk-what"></p>
+        <div class="chips"><button type="button" class="btn primary" id="bk-yes">Да, восстановить</button><button type="button" class="btn" id="bk-no">Отмена</button></div>
+      </div>
+      <p class="status" id="bk-msg" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КОЛЛЕКЦИЯ ============ -->
+<section class="tool" id="kollekciya" hidden>
+  <div class="col">
+    <div><h2>Коллекция пластинок</h2></div>
+    <form class="panel" id="k-form">
+      <h3 id="k-formtitle">Добавить пластинку</h3>
+      <div class="field"><label for="k-a">Исполнитель</label><div class="unit"><input id="k-a" autocomplete="off" required></div></div>
+      <div class="field"><label for="k-t">Альбом</label><div class="unit"><input id="k-t" autocomplete="off" required></div></div>
+      <div class="row2">
+        <div class="field"><label for="k-y">Год</label><div class="unit"><input id="k-y" inputmode="numeric" autocomplete="off"></div></div>
+        <div class="field"><label for="k-f">Формат</label><select id="k-f"><option>LP 33</option><option>12″ 45</option><option>7″ 45</option><option>78</option></select></div>
+        <div class="field"><label for="k-mc">Винил</label><select id="k-mc"></select></div>
+        <div class="field"><label for="k-sc">Конверт</label><select id="k-sc"></select></div>
+        <div class="field"><label for="k-l">Лейбл, номер</label><div class="unit"><input id="k-l" autocomplete="off"></div></div>
+        <div class="field"><label for="k-p">Цена</label><div class="unit"><input id="k-p" inputmode="decimal" autocomplete="off"><span>₽</span></div></div>
+        <div class="field"><label for="k-wd">Последняя мойка</label><div class="unit"><input id="k-wd" type="date"></div></div>
+        <div class="field"><label for="k-wm">Способ мойки</label><select id="k-wm"><option value="">—</option><option>вручную</option><option>вакуумная машина</option><option>ультразвук</option></select></div>
+      </div>
+      <div class="field"><label for="k-n">Заметки</label><div class="unit"><input id="k-n" autocomplete="off" placeholder="издание, страна, особенности"></div></div>
+      <div class="chips"><button type="submit" class="btn primary" id="k-submit">Добавить в коллекцию</button><button type="button" class="btn" id="k-cancel" hidden>Отмена</button></div>
+      <p class="status" id="k-msg" aria-live="polite"></p>
+    </form>
+    <div class="panel">
+      <h3>Импорт из Discogs</h3>
+      <p class="note">На Discogs откройте «Collection» → «Export» и скачайте CSV-файл, затем выберите его здесь. Состояние винила и конверта, заметки и даты перенесутся.</p>
+      <div class="drop"><input type="file" id="k-file" accept=".csv,text/csv"></div>
+      <p class="status" id="k-imp" aria-live="polite"></p>
+      <h3>Экспорт</h3>
+      <button type="button" class="btn" id="k-export">Скачать коллекцию в CSV</button>
+      <p class="status" id="k-exp"></p>
+    </div>
+    <div class="panel">
+      <h3>Мойка</h3>
+      <div class="field"><label for="k-every">Напоминать о мойке после</label><div class="unit"><input id="k-every" inputmode="numeric" value="20"><span>прослушиваний</span></div>
+        <span class="hint">Новые и купленные с рук пластинки стоит помыть перед первым прослушиванием.</span></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel" id="q-panel">
+      <h3>Что послушать сегодня</h3>
+      <div class="pickcard" id="q-card"></div>
+      <div class="toolbar">
+        <select id="q-dec" aria-label="Десятилетие" style="width:auto"><option value="">Любое десятилетие</option></select>
+        <select id="q-fmt" aria-label="Формат" style="width:auto"><option value="">Любой формат</option><option>LP 33</option><option>12″ 45</option><option>7″ 45</option><option>78</option></select>
+        <label class="chk"><input type="checkbox" id="q-old" checked> давно не слушали</label>
+      </div>
+      <div class="chips"><button type="button" class="btn primary" id="q-play">Слушаю</button><button type="button" class="btn" id="q-next">Другую</button></div>
+      <p class="status" id="q-msg" aria-live="polite"></p>
+    </div>
+    <div class="panel">
+      <dl class="kv">
+        <div><dt>Пластинок</dt><dd id="k-cnt">0</dd></div>
+        <div><dt>Стоимость</dt><dd id="k-sum">—</dd></div>
+        <div><dt>Пора помыть</dt><dd id="k-wash">0</dd></div>
+        <div><dt>Слушали за 30 дней</dt><dd id="k-month">0</dd></div>
+      </dl>
+      <div class="toolbar">
+        <div class="unit" style="flex:1;min-width:180px"><input id="k-q" placeholder="Поиск по исполнителю, альбому, лейблу" aria-label="Поиск" autocomplete="off"></div>
+        <select id="k-sort" aria-label="Сортировка" style="width:auto"><option value="a">По исполнителю</option><option value="add">Недавно добавленные</option><option value="lp">Недавно слушали</option><option value="y">По году</option><option value="mc">По состоянию</option></select>
+      </div>
+      <div class="chips" id="k-filter">
+        <button type="button" data-v="all" aria-pressed="true">Все</button>
+        <button type="button" data-v="wash" aria-pressed="false">Пора помыть</button>
+        <button type="button" data-v="never" aria-pressed="false">Ни разу не слушали</button>
+      </div>
+      <ul class="records" id="k-list"></ul>
+      <div id="k-empty" class="empty" hidden>
+        <p><strong>Коллекция пока пуста.</strong></p>
+        <p class="note">Добавьте пластинку в форме слева или импортируйте всю коллекцию из Discogs. Для каждой пластинки здесь будут видны состояние, дата мойки и сколько раз её слушали. Кнопка «Слушаю» записывает время и в журнал иглы.</p>
+      </div>
+      <p class="note" id="k-more"></p>
+      <p class="status" id="k-store"></p>
+    </div>
+    <div class="panel">
+      <h3>Статистика коллекции</h3>
+      <p class="note" id="st-empty">Появится, когда в коллекции будут пластинки.</p>
+      <div id="st-body" class="col">
+        <dl class="kv">
+          <div><dt>Исполнителей</dt><dd id="st-art-n">—</dd></div>
+          <div><dt>Всего прослушиваний</dt><dd id="st-plays">—</dd></div>
+          <div><dt>Средний год издания</dt><dd id="st-avg">—</dd></div>
+          <div><dt>Не слушали больше года</dt><dd id="st-idle">—</dd></div>
+        </dl>
+        <h3>По десятилетиям</h3>
+        <div class="chart"><svg id="st-dec" viewBox="0 0 640 200" role="img" aria-label="Пластинки по десятилетиям"></svg></div>
+        <div class="statgrid">
+          <div class="col" style="gap:10px"><h3>Больше всего пластинок</h3><div id="st-art" class="hbars"></div></div>
+          <div class="col" style="gap:10px"><h3>Состояние винила</h3><div id="st-gr" class="hbars"></div></div>
+        </div>
+        <h3>Чаще всего слушали</h3>
+        <ol id="st-top" class="toplist"></ol>
+        <div id="st-valwrap" class="col" style="gap:10px">
+          <h3>Стоимость коллекции по месяцам покупки</h3>
+          <div class="chart"><svg id="st-val" viewBox="0 0 640 200" role="img" aria-label="Рост стоимости коллекции"></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ХОЧУ КУПИТЬ ============ -->
+<section class="tool" id="hochu" hidden>
+  <div class="col">
+    <div><h2>Хочу купить</h2></div>
+    <form class="panel" id="w-form">
+      <h3 id="w-formtitle">Добавить в список</h3>
+      <div class="field"><label for="w-a">Исполнитель</label><div class="unit"><input id="w-a" autocomplete="off" required></div></div>
+      <div class="field"><label for="w-t">Альбом</label><div class="unit"><input id="w-t" autocomplete="off" required></div></div>
+      <div class="field"><label for="w-ed">Какое издание</label><div class="unit"><input id="w-ed" autocomplete="off" placeholder="страна, год, лейбл, номер"></div></div>
+      <div class="row2">
+        <div class="field"><label for="w-max">Готов заплатить до</label><div class="unit"><input id="w-max" inputmode="decimal" autocomplete="off"><span>₽</span></div></div>
+        <div class="field"><label for="w-pri">Насколько хочу</label><select id="w-pri"><option value="1">Очень хочу</option><option value="2" selected>Хочу</option><option value="3">Когда-нибудь</option></select></div>
+      </div>
+      <div class="field"><label for="w-where">Где видел</label><div class="unit"><input id="w-where" autocomplete="off" placeholder="магазин, Авито, ярмарка, ссылка"></div></div>
+      <div class="chips"><button type="submit" class="btn primary" id="w-submit">Добавить в список</button><button type="button" class="btn" id="w-cancel" hidden>Отмена</button></div>
+      <p class="status" id="w-msg" aria-live="polite"></p>
+    </form>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <dl class="kv">
+        <div><dt>В списке</dt><dd id="w-cnt">0</dd></div>
+        <div><dt>Очень хочу</dt><dd id="w-top">0</dd></div>
+        <div><dt>Бюджет на всё</dt><dd id="w-sum">—</dd></div>
+      </dl>
+      <div class="toolbar"><div class="unit" style="flex:1;min-width:180px"><input id="w-q" placeholder="Поиск" aria-label="Поиск по списку" autocomplete="off"></div></div>
+      <ul class="records" id="w-list"></ul>
+      <div id="w-empty" class="empty" hidden>
+        <p><strong>Список пока пуст.</strong></p>
+        <p class="note">Записывайте пластинки, которые ищете: нужное издание, сколько готовы отдать и где видели. Когда купите, кнопка «Купил» перенесёт пластинку в коллекцию.</p>
+      </div>
+      <p class="status" id="w-store"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КОМНАТА ============ -->
+<section class="tool" id="komnata" hidden>
+  <div class="col">
+    <div><h2>Комната и колонки</h2></div>
+    <form class="panel" id="o-form">
+      <h3>Размеры комнаты</h3>
+      <div class="row2">
+        <div class="field"><label for="o-L">Длина</label><div class="unit"><input id="o-L" inputmode="decimal" value="5.2"><span>м</span></div><span class="hint">от стены за колонками до противоположной</span></div>
+        <div class="field"><label for="o-W">Ширина</label><div class="unit"><input id="o-W" inputmode="decimal" value="3.6"><span>м</span></div></div>
+        <div class="field"><label for="o-H">Высота</label><div class="unit"><input id="o-H" inputmode="decimal" value="2.7"><span>м</span></div></div>
+        <div class="field"><label for="o-rt">Реверберация</label><div class="unit"><input id="o-rt" inputmode="decimal" value="0.4"><span>с</span></div><span class="hint">жилая комната — 0,3–0,5 с</span></div>
+      </div>
+      <div class="field"><label for="o-front">От стены за колонкой до её НЧ-динамика</label><div class="unit"><input id="o-front" inputmode="decimal" value="0.8"><span>м</span></div></div>
+      <button type="submit" class="btn primary">Сохранить комнату</button>
+      <p class="status" id="o-msg" aria-live="polite"></p>
+    </form>
+    <div class="panel">
+      <h3>Проверка на слух</h3>
+      <p class="note">Сыграйте тон на системе и пройдитесь по комнате: на частотах мод бас в одних местах гудит, в других пропадает. Начните с малой громкости.</p>
+      <div class="chips"><button type="button" class="btn" id="o-sweep">Плавный свип 20–200 Гц</button><button type="button" class="btn" id="o-stop">Остановить</button></div>
+      <p class="status" id="o-play"></p>
+      <h3>Измерение микрофоном</h3>
+      <p class="note">Здесь микрофон не включается: в claude.ai такого разрешения для страниц нет. Поэтому измерения с микрофоном вынесены на отдельную страницу: скорость и детонация, АЧХ в комнате с розовым шумом, баланс каналов и уровень громкости.</p>
+      <a class="btn primary" href="https://glanass1204-web.github.io/taste-skill/vinyl-lab/izmereniya.html" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">Открыть измерения с микрофоном</a>
+      <p class="note">Для точного замера АЧХ комнаты используют бесплатную программу Room EQ Wizard (REW) и измерительный USB-микрофон, например miniDSP UMIK-1. Микрофон телефона на басу ниже 50 Гц сильно занижает уровень.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Расстановка колонок по методу Cardas</h3>
+      <div class="plan"><svg id="o-plan" viewBox="0 0 400 400" role="img" aria-label="План комнаты с колонками и местом слушателя"></svg></div>
+      <dl class="kv">
+        <div><dt>Колонка — боковая стена</dt><dd id="o-side">—</dd></div>
+        <div><dt>Колонка — фронтальная стена</dt><dd id="o-fr">—</dd></div>
+        <div><dt>Между колонками</dt><dd id="o-sep">—</dd></div>
+        <div><dt>Слушатель — фронтальная стена</dt><dd id="o-lis">—</dd></div>
+      </dl>
+      <p class="note" id="o-lisnote"></p>
+      <details><summary>Как считается</summary><div class="how">
+        <p>Метод Cardas для прямоугольной комнаты: колонки на расстоянии 0,276 ширины от боковых стен и 0,447 ширины от фронтальной стены (до передней панели). Слушатель сидит в вершине равностороннего треугольника.</p>
+        <p>Центр комнаты по длине — плохое место: там провал первой продольной моды. Прижатое к задней стене место даёт гулкий бас. Часто удачна точка на 38 % длины от задней стены.</p>
+      </div></details>
+    </div>
+    <div class="panel">
+      <h3>Отражение от стены за колонкой</h3>
+      <div class="readout"><div class="big" id="o-sbir" style="font-size:40px">—</div><span class="pill info" id="o-sbirpill">провал АЧХ</span></div>
+      <p class="note">Звук НЧ-динамика отражается от стены за колонкой и в противофазе гасит прямой звук на частоте <span class="f">f = 343 / (4 · d)</span>. Ставьте колонку либо ближе к стене (провал уходит выше, в зону среднечастотника), либо дальше 1,5 м (провал опускается ниже 60 Гц, где он короче и тише).</p>
+      <div class="tablewrap"><table><thead><tr><th>Расстояние</th><th>Провал на</th></tr></thead><tbody id="o-sbirtab"></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h3>Комнатные моды до 200 Гц</h3>
+      <div class="legend"><span><i style="background:var(--amber)"></i>осевые — самые сильные</span><span><i style="background:var(--c2)"></i>тангенциальные</span><span><i style="background:var(--muted)"></i>косые</span></div>
+      <div class="chart"><svg id="o-modes" viewBox="0 0 640 220" role="img" aria-label="Распределение комнатных мод по частоте"></svg></div>
+      <p class="note" id="o-verdict"></p>
+      <div class="tablewrap"><table><thead><tr><th>Мода</th><th>Частота</th><th>Направление</th><th></th></tr></thead><tbody id="o-axial"></tbody></table></div>
+      <dl class="kv"><div><dt>Частота Шрёдера</dt><dd id="o-schr">—</dd></div><div><dt>Объём комнаты</dt><dd id="o-vol">—</dd></div></dl>
+      <details><summary>Как считается</summary><div class="how">
+        <p>Частота моды <span class="f">f = (c/2)·√((p/L)² + (q/W)² + (r/H)²)</span>, c = 343 м/с. Осевые моды идут вдоль одного размера и звучат сильнее всего.</p>
+        <p>Если осевые моды разных направлений совпадают (ближе 3 Гц), на этой частоте бас гудит. Это бывает, когда размеры комнаты равны или кратны друг другу.</p>
+        <p>Частота Шрёдера <span class="f">2000·√(RT60 / V)</span>: ниже неё звук определяется модами, выше — отражениями, и расчёт мод теряет смысл.</p>
+      </div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ РЕЗОНАНС ============ -->
+<section class="tool" id="rezonans" hidden>
+  <div class="col">
+    <div><h2>Совместимость тонарма и головки</h2></div>
+    <div class="panel">
+      <div class="field"><label for="r-arm">Тонарм</label>
+        <select id="r-arm">
+          <option value="">Свой</option>
+          <option value="12">Technics SL-1200MK2 (12 г с головодержателем)</option>
+          <option value="8">Лёгкий тонарм (≈8 г)</option>
+          <option value="20">Тяжёлый тонарм (≈20 г)</option>
+        </select></div>
+      <div class="field"><label for="r-eff">Эффективная масса тонарма</label>
+        <div class="unit"><input id="r-eff" inputmode="decimal" value="12"><span>г</span></div></div>
+      <div class="field"><label for="r-cart">Головка</label>
+        <select id="r-cart">
+          <option value="">Своя</option>
+          <option value="7.2|20|10">Ortofon 2M Red — 7,2 г, 20 мкм/мН @10 Гц</option>
+          <option value="6.6|25|10">Shure M97xE — 6,6 г, 25 мкм/мН @10 Гц</option>
+          <option value="6.1|7|100">Audio-Technica VM95E — 6,1 г, 7 мкм/мН @100 Гц</option>
+          <option value="8.5|5|100">Denon DL-103 — 8,5 г, 5 мкм/мН @100 Гц</option>
+        </select>
+        <span class="hint">Значения из паспортов; сверьте со своей головкой.</span></div>
+      <div class="row2">
+        <div class="field"><label for="r-mass">Масса головки</label>
+          <div class="unit"><input id="r-mass" inputmode="decimal" value="7.2"><span>г</span></div></div>
+        <div class="field"><label for="r-screw">Крепёж</label>
+          <div class="unit"><input id="r-screw" inputmode="decimal" value="1"><span>г</span></div></div>
+      </div>
+      <div class="field"><label for="r-comp">Гибкость иглы (compliance)</label>
+        <div class="unit"><input id="r-comp" inputmode="decimal" value="20"><span>мкм/мН</span></div>
+        <span class="hint">1 мкм/мН = 10⁻⁶ см/дин = 1 cu</span></div>
+      <div class="field"><label for="r-hz">Гибкость в паспорте указана при</label>
+        <select id="r-hz"><option value="10">10 Гц (европейские производители)</option><option value="100">100 Гц (японские производители, пересчёт ×1,7)</option></select></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Резонансная частота</h3>
+      <div class="readout"><div class="big" id="r-f">—</div><span id="r-pill" class="pill ok">—</span></div>
+      <div class="scale"><svg id="r-scale" viewBox="0 0 600 56" preserveAspectRatio="none" role="img" aria-label="Шкала резонансной частоты 4–20 Гц"></svg></div>
+      <p id="r-text" class="note"></p>
+      <dl class="kv">
+        <div><dt>Полная подвижная масса</dt><dd id="r-M">—</dd></div>
+        <div><dt>Гибкость при 10 Гц</dt><dd id="r-C">—</dd></div>
+        <div><dt>Головка + крепёж для 10 Гц</dt><dd id="r-ideal">—</dd></div>
+        <div><dt>Диапазон для 8–12 Гц</dt><dd id="r-range">—</dd></div>
+      </dl>
+      <details><summary>Как считается</summary><div class="how">
+        <p>Игла с подвесом и тонарм образуют пружинный маятник. Его частота <span class="f">f = 1000 / (2π·√(M·C))</span>, где M — сумма эффективной массы тонарма, массы головки и крепежа в граммах, C — динамическая гибкость в мкм/мН при 10 Гц.</p>
+        <p>Зона 8–12 Гц лежит выше частот коробления пластинки и шагов по полу (до ~6 Гц) и ниже звукового диапазона. Ближе к 10 Гц — лучше.</p>
+        <p>Японские производители указывают гибкость при 100 Гц. Пересчёт к 10 Гц приблизительный: множитель от 1,5 до 2, здесь взят 1,7.</p>
+      </div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ЮСТИРОВКА ============ -->
+<section class="tool" id="yustirovka" hidden>
+  <div class="col">
+    <div><h2>Геометрия юстировки головки</h2></div>
+    <div class="panel">
+      <div class="field"><label for="a-preset">Тонарм</label>
+        <select id="a-preset">
+          <option value="">Свой</option>
+          <option value="215|15|22">Technics SL-1200 (215 мм, свес 15 мм, 22°)</option>
+          <option value="222|17|23">Rega RB300/RB330 (222 мм)</option>
+          <option value="211|17.5|22">Тонарм 9″ (~211 мм)</option>
+          <option value="280|13|17.5">Тонарм 12″ (~280 мм)</option>
+        </select></div>
+      <div class="field"><label for="a-d">Расстояние ось шпинделя — ось тонарма</label>
+        <div class="unit"><input id="a-d" inputmode="decimal" value="215"><span>мм</span></div>
+        <span class="hint">Mounting distance, pivot-to-spindle</span></div>
+      <div class="field"><label>Стандарт канавок</label>
+        <div class="chips" id="a-std">
+          <button type="button" data-v="iec" aria-pressed="true">IEC 60,325–146,05</button>
+          <button type="button" data-v="din" aria-pressed="false">DIN 57,5–146,05</button>
+        </div></div>
+      <div class="field"><label>Схема юстировки</label>
+        <div class="chips" id="a-kind">
+          <button type="button" data-v="baerwald" aria-pressed="true">Baerwald</button>
+          <button type="button" data-v="lofgrenB" aria-pressed="false">Löfgren B</button>
+          <button type="button" data-v="stevenson" aria-pressed="false">Stevenson</button>
+        </div></div>
+      <h3>Заводская геометрия, для сравнения</h3>
+      <div class="row2">
+        <div class="field"><label for="a-fov">Свес (overhang)</label>
+          <div class="unit"><input id="a-fov" inputmode="decimal" value="15"><span>мм</span></div></div>
+        <div class="field"><label for="a-foff">Угол офсета</label>
+          <div class="unit"><input id="a-foff" inputmode="decimal" value="22"><span>°</span></div></div>
+      </div>
+      <span class="hint">Оставьте пустым, чтобы не показывать на графике.</span>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Установочные параметры</h3>
+      <dl class="kv">
+        <div><dt>Внутренняя нулевая точка</dt><dd id="a-n1">—</dd></div>
+        <div><dt>Внешняя нулевая точка</dt><dd id="a-n2">—</dd></div>
+        <div><dt>Свес (overhang)</dt><dd id="a-ov">—</dd></div>
+        <div><dt>Эффективная длина</dt><dd id="a-L">—</dd></div>
+        <div><dt>Угол офсета</dt><dd id="a-off">—</dd></div>
+        <div><dt>Макс. ошибка трекинга</dt><dd id="a-max">—</dd></div>
+      </dl>
+      <h3>Ошибка трекинга по радиусу пластинки</h3>
+      <div class="legend" id="a-legend"></div>
+      <div class="chart"><svg id="a-chart" viewBox="0 0 640 300" role="img" aria-label="График ошибки трекинга"></svg></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Схема</th><th>Нули, мм</th><th>Свес, мм</th><th>Офсет</th><th>Макс. ошибка</th><th>Макс. искажение*</th></tr></thead>
+        <tbody id="a-table"></tbody>
+      </table></div>
+      <p class="note">* Ошибка в градусах, делённая на радиус, ×1000. Пропорционально второй гармонике от ошибки трекинга; удобно для сравнения схем между собой.</p>
+      <details><summary>Как считается</summary><div class="how">
+        <p>Расстояния точные, без приближений. При монтажном расстоянии D и нулевых точках n₁, n₂ эффективная длина <span class="f">L = √(D² + n₁·n₂)</span>, свес <span class="f">L − D</span>, офсет <span class="f">β = arcsin((n₁ + n₂) / 2L)</span>.</p>
+        <p>Ошибка трекинга на радиусе r: <span class="f">β − arcsin((r² + L² − D²) / 2rL)</span>.</p>
+        <p>Для IEC используются опубликованные нули: Baerwald 66,00 / 120,89, Löfgren B 70,29 / 116,60, Stevenson 60,325 / 117,42 мм. Для DIN Baerwald считается по формуле Лёфгрена A, остальные — численной оптимизацией: минимум среднеквадратичного искажения для Löfgren B и минимум пикового при нуле на последней канавке для Stevenson.</p>
+        <p>На тонармах с фиксированным офсетом, как у Technics, меняется только свес. Офсет остаётся заводским, поэтому смотрите на заводскую кривую.</p>
+      </div></details>
+    </div>
+    <div class="panel">
+      <h3>Протрактор для печати 1:1</h3>
+      <div class="protr">
+        <div class="paper"><svg id="p-svg" viewBox="0 0 210 297" role="img" aria-label="Предпросмотр протрактора на листе A4"></svg></div>
+        <div class="col" style="gap:12px">
+          <p class="note" id="p-sum"></p>
+          <button type="button" class="btn primary" id="p-dl">Скачать PDF (A4, 1:1)</button>
+          <p class="status" id="p-status"></p>
+          <ol class="steps">
+            <li>Печатайте в масштабе 100 % («Фактический размер»), без «Подогнать по странице».</li>
+            <li>Проверьте линейкой: шкала вверху листа должна быть ровно 100 мм, а слева — 50 мм.</li>
+            <li>Вырежьте отверстие под шпиндель (7,24 мм) и наденьте лист на диск.</li>
+            <li>Игла должна идти по пунктирной дуге. В обеих нулевых точках боковые грани головки ставятся параллельно длинным линиям сетки.</li>
+            <li>Подстраивайте вынос головки и её поворот, пока совпадение не будет в обеих точках.</li>
+          </ol>
+          <p class="note">Подписи на листе по-английски, как на большинстве протракторов.</p>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Высота тонарма и VTA</h3>
+      <p class="note">Поднимая или опуская ось тонарма, вы меняете вертикальный угол головки (VTA) и угол иглы в канавке (SRA). Посчитайте, на сколько подкрутить высоту, вместо того чтобы искать на слух с нуля.</p>
+      <div class="row2">
+        <div class="field"><label for="v-L">Ось тонарма — игла</label>
+          <div class="unit"><input id="v-L" inputmode="decimal" value="230"><span>мм</span></div></div>
+        <div class="field"><label>&nbsp;</label><button type="button" class="btn" id="v-useL">Взять из юстировки</button></div>
+        <div class="field"><label for="v-dh">Изменение высоты оси</label>
+          <div class="unit"><input id="v-dh" inputmode="decimal" value="1"><span>мм</span></div></div>
+        <div class="field"><label for="v-da">Нужно изменить угол на</label>
+          <div class="unit"><input id="v-da" inputmode="decimal" value="1"><span>°</span></div></div>
+      </div>
+      <dl class="kv">
+        <div><dt>Угол изменится на</dt><dd id="v-a">—</dd></div>
+        <div><dt>Нужно поднять ось на</dt><dd id="v-h">—</dd></div>
+        <div><dt>Пластинка толще на 0,5 мм</dt><dd id="v-rec">—</dd></div>
+      </dl>
+      <p class="note">Формула: <span class="f">Δугла = arctg(Δh / L)</span>. Подъём оси тонарма наклоняет иглу назад и увеличивает угол. Целевой SRA около 92°, но игла на конкретной головке может быть посажена неточно, поэтому финальную настройку делают на слух или по микроскопу.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ СКОРОСТЬ ============ -->
+<section class="tool" id="skorost" hidden>
+  <div class="col">
+    <div><h2>Скорость вращения диска</h2></div>
+    <div class="panel">
+      <h3>По частоте тестового тона</h3>
+      <div class="row2">
+        <div class="field"><label for="s-nom">Тон на пластинке</label>
+          <div class="unit"><input id="s-nom" inputmode="decimal" value="3150"><span>Гц</span></div></div>
+        <div class="field"><label for="s-meas">Измерено</label>
+          <div class="unit"><input id="s-meas" inputmode="decimal" value="3162"><span>Гц</span></div></div>
+      </div>
+      <div class="field"><label for="s-rpm">Номинальная скорость</label>
+        <select id="s-rpm"><option value="33.3333333">33⅓ об/мин</option><option value="45">45 об/мин</option><option value="78">78 об/мин</option></select></div>
+      <dl class="kv">
+        <div><dt>Отклонение</dt><dd id="s-dev">—</dd></div>
+        <div><dt>Реальная скорость</dt><dd id="s-real">—</dd></div>
+      </dl>
+      <p id="s-verdict" class="note"></p>
+    </div>
+    <div class="panel">
+      <h3>Стробоскоп: число меток на диске</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Скорость</th><th>Сеть 50 Гц</th><th>Сеть 60 Гц</th></tr></thead>
+        <tbody>
+          <tr><td>33⅓</td><td class="n">180</td><td class="n">216</td></tr>
+          <tr><td>45</td><td class="n">133⅓</td><td class="n">160</td></tr>
+          <tr><td>78</td><td class="n">76,9</td><td class="n">92,3</td></tr>
+        </tbody></table></div>
+      <p class="note">Лампа от сети мерцает с удвоенной частотой: 100 или 120 раз в секунду. Число меток <span class="f">N = 60 · 2f / об/мин</span>. Светодиодные лампы часто не мерцают, и стробоскоп с ними не работает.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Анализ записи тестового тона</h3>
+      <p class="note">Замер в реальном времени через микрофон — на <a href="https://glanass1204-web.github.io/taste-skill/vinyl-lab/izmereniya.html" target="_blank" rel="noopener" style="color:var(--amber)">странице измерений</a>. Здесь можно разобрать готовую запись: запишите на телефон тестовую дорожку 3150 Гц с пластинки и загрузите файл. Программа покажет среднюю скорость и детонацию. Анализ идёт в браузере, файл никуда не отправляется.</p>
+      <div class="drop">
+        <input type="file" id="s-file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg">
+        <button type="button" class="btn" id="s-demo">Пример: синтетический сигнал</button>
+      </div>
+      <p class="status" id="s-status">Сейчас показан синтетический пример: +0,40 % скорости и детонация 0,55 Гц амплитудой ±0,15 %.</p>
+      <dl class="kv">
+        <div><dt>Средняя частота</dt><dd id="s-fm">—</dd></div>
+        <div><dt>Ошибка скорости</dt><dd id="s-err">—</dd></div>
+        <div><dt>Детонация, пик</dt><dd id="s-wpk">—</dd></div>
+        <div><dt>Детонация, 2σ</dt><dd id="s-w2s">—</dd></div>
+      </dl>
+      <div class="chart"><svg id="s-chart" viewBox="0 0 640 240" role="img" aria-label="Отклонение скорости во времени"></svg></div>
+      <details><summary>Как считается</summary><div class="how">
+        <p>Сигнал режется на окна по ~90 мс с перекрытием 75 %. В каждом окне ищется пик спектра около ожидаемой частоты, и его частота уточняется параболической интерполяцией по логарифму амплитуды. Отклонение частоты от номинала равно отклонению скорости.</p>
+        <p>Детонация здесь невзвешенная: пик и 2σ отклонения от средней частоты. Она не равна стандартной W&amp;F по DIN/IEC с взвешивающим фильтром, но для сравнения настроек достаточна. Учтите, что пластинка, отцентрованная со смещением, сама даёт детонацию раз в оборот (0,55 Гц на 33⅓).</p>
+      </div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ПРОВОДА ============ -->
+<section class="tool" id="provoda" hidden>
+  <div class="col">
+    <div><h2>Акустический кабель</h2></div>
+    <div class="panel">
+      <div class="field"><label for="c-len">Длина кабеля до одной колонки</label>
+        <div class="unit"><input id="c-len" inputmode="decimal" value="5"><span>м</span></div></div>
+      <div class="field"><label for="c-sec">Сечение одной жилы</label>
+        <div class="unit"><input id="c-sec" inputmode="decimal" value="1.5"><span>мм²</span></div>
+        <div class="chips" id="c-chips">
+          <button type="button" data-v="0.75" aria-pressed="false">0,75</button>
+          <button type="button" data-v="1.5" aria-pressed="true">1,5</button>
+          <button type="button" data-v="2.5" aria-pressed="false">2,5</button>
+          <button type="button" data-v="4" aria-pressed="false">4</button>
+          <button type="button" data-v="6" aria-pressed="false">6</button>
+        </div>
+        <span class="hint" id="c-awg"></span></div>
+      <div class="field"><label for="c-z">Номинальный импеданс колонки</label>
+        <div class="unit"><input id="c-z" inputmode="decimal" value="8"><span>Ом</span></div></div>
+      <div class="row2">
+        <div class="field"><label for="c-zmin">Минимум импеданса</label>
+          <div class="unit"><input id="c-zmin" inputmode="decimal" value="5"><span>Ом</span></div></div>
+        <div class="field"><label for="c-zmax">Максимум импеданса</label>
+          <div class="unit"><input id="c-zmax" inputmode="decimal" value="25"><span>Ом</span></div></div>
+      </div>
+      <div class="field"><label for="c-df">Коэффициент демпфирования усилителя</label>
+        <div class="unit"><input id="c-df" inputmode="decimal" value="100"><span>на 8 Ом</span></div>
+        <span class="hint">Из паспорта. Ламповые усилители — обычно 3–15, транзисторные — 50–500.</span></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <h3>Неравномерность АЧХ из-за кабеля</h3>
+      <div class="readout"><div class="big" id="c-rip">—</div><span id="c-pill" class="pill ok">—</span></div>
+      <p id="c-text" class="note"></p>
+      <dl class="kv">
+        <div><dt>Сопротивление (туда и обратно)</dt><dd id="c-R">—</dd></div>
+        <div><dt>Потеря уровня на номинале</dt><dd id="c-loss">—</dd></div>
+        <div><dt>Демпфирование на колонке</dt><dd id="c-dfe">—</dd></div>
+        <div><dt>Неравномерность от усилителя и кабеля</dt><dd id="c-ripall">—</dd></div>
+      </dl>
+      <h3>Неравномерность АЧХ от кабеля по сечениям</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Сечение</th><th>≈ AWG</th><th>Сопротивление</th><th>Неравномерность</th></tr></thead>
+        <tbody id="c-table"></tbody></table></div>
+      <details><summary>Как считается</summary><div class="how">
+        <p>Сопротивление медной пары <span class="f">R = 2 · 0,0172 · длина / сечение</span> (ρ меди при 20 °C). Выходное сопротивление усилителя <span class="f">Zвых = 8 / КД</span>.</p>
+        <p>Импеданс колонки меняется с частотой. Кабель и усилитель образуют с ним делитель напряжения, поэтому на частотах с низким импедансом уровень проседает сильнее. Неравномерность <span class="f">20·lg[(Zmax/(Zmax+R)) / (Zmin/(Zmin+R))]</span> — это реальное, измеримое влияние провода на звук.</p>
+        <p>Порог слышимости широкополосных изменений тембра — примерно 0,2–0,5 дБ. До 0,1 дБ различия считаются неслышимыми.</p>
+      </div></details>
+    </div>
+
+    <div class="panel">
+      <h3>Ёмкость нагрузки MM-головки</h3>
+      <div class="row2">
+        <div class="field"><label for="m-pf">Межблочный кабель</label>
+          <div class="unit"><input id="m-pf" inputmode="decimal" value="100"><span>пФ/м</span></div></div>
+        <div class="field"><label for="m-len">Длина</label>
+          <div class="unit"><input id="m-len" inputmode="decimal" value="1.2"><span>м</span></div></div>
+        <div class="field"><label for="m-arm">Проводка тонарма</label>
+          <div class="unit"><input id="m-arm" inputmode="decimal" value="50"><span>пФ</span></div></div>
+        <div class="field"><label for="m-pre">Вход фонокорректора</label>
+          <div class="unit"><input id="m-pre" inputmode="decimal" value="100"><span>пФ</span></div></div>
+        <div class="field"><label for="m-lo">Рекомендация головки, от</label>
+          <div class="unit"><input id="m-lo" inputmode="decimal" value="150"><span>пФ</span></div></div>
+        <div class="field"><label for="m-hi">до</label>
+          <div class="unit"><input id="m-hi" inputmode="decimal" value="300"><span>пФ</span></div></div>
+      </div>
+      <div class="readout"><div class="big" id="m-tot" style="font-size:40px">—</div><span id="m-pill" class="pill ok">—</span></div>
+      <p class="note">Индуктивность MM-головки вместе с ёмкостью нагрузки образует резонанс в районе 15–25 кГц. Лишняя ёмкость сдвигает его вниз и даёт подъём или завал верхов. Для MC-головок ёмкость почти не важна.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ИГЛА ============ -->
+<section class="tool" id="igla" hidden>
+  <div class="col">
+    <div><h2>Журнал износа иглы</h2></div>
+    <div class="panel">
+      <h3>Мои иглы</h3>
+      <div class="chips" id="n-list"></div>
+      <button type="button" class="btn" id="n-addtoggle">Добавить иглу</button>
+      <form id="n-form" class="col" style="gap:12px" hidden>
+        <div class="field"><label for="n-name">Головка или игла</label>
+          <div class="unit"><input id="n-name" value="Ortofon 2M Red" autocomplete="off"></div></div>
+        <div class="field"><label for="n-profile">Профиль иглы</label>
+          <select id="n-profile">
+            <option value="conical|500">Конический (сферический) — до 500 ч</option>
+            <option value="elliptical|300" selected>Эллиптический — 300 ч</option>
+            <option value="shibata|800">Shibata — 800 ч</option>
+            <option value="microline|1000">MicroLine / line contact — 1000 ч</option>
+            <option value="dj|500">DJ-игла — 500 ч</option>
+          </select>
+          <span class="hint">Ресурс по данным Audio-Technica. Ortofon заявляет до 1000 ч для своих игл: поправьте срок ниже.</span></div>
+        <div class="row2">
+          <div class="field"><label for="n-limit">Ресурс</label>
+            <div class="unit"><input id="n-limit" inputmode="decimal" value="1000"><span>ч</span></div></div>
+          <div class="field"><label for="n-start">Уже наиграно</label>
+            <div class="unit"><input id="n-start" inputmode="decimal" value="0"><span>ч</span></div></div>
+        </div>
+        <div class="field"><label for="n-date">Дата установки</label>
+          <div class="unit"><input id="n-date" type="date"></div></div>
+        <div class="chips"><button type="submit" class="btn primary">Сохранить иглу</button><button type="button" class="btn" id="n-cancel">Отмена</button></div>
+      </form>
+    </div>
+    <div class="panel" id="n-logpanel">
+      <h3>Записать прослушивание</h3>
+      <div class="chips" id="n-quick">
+        <button type="button" data-m="20">+20 мин · сторона LP</button>
+        <button type="button" data-m="40">+40 мин · весь LP</button>
+        <button type="button" data-m="60">+1 час</button>
+      </div>
+      <form id="n-logform" class="col" style="gap:12px">
+        <div class="row2">
+          <div class="field"><label for="n-min">Сколько</label>
+            <div class="unit"><input id="n-min" inputmode="numeric" value="40"><span>мин</span></div></div>
+          <div class="field"><label for="n-day">Когда</label>
+            <div class="unit"><input id="n-day" type="date"></div></div>
+        </div>
+        <div class="field"><label for="n-note">Что слушали</label>
+          <div class="unit"><input id="n-note" placeholder="необязательно" autocomplete="off"></div></div>
+        <button type="submit" class="btn primary">Записать</button>
+      </form>
+      <div class="timer">
+        <div><div class="tlabel">Секундомер прослушивания</div><div class="tval" id="n-tval">0:00:00</div></div>
+        <button type="button" class="btn" id="n-timer">Начать</button>
+      </div>
+      <p class="status" id="n-logmsg" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel">
+      <div id="n-empty">
+        <h3>Пока нет ни одной иглы</h3>
+        <p class="note" style="margin-top:8px">Добавьте иглу слева: укажите профиль и сколько она уже наиграла. Здесь появятся наработка в часах, остаток ресурса, прогноз даты замены и история прослушиваний.</p>
+      </div>
+      <div id="n-body" class="col" hidden>
+        <h3 id="n-title"></h3>
+        <div class="readout"><div class="big" id="n-hours">—</div><span id="n-pill" class="pill ok">—</span></div>
+        <div class="meter" aria-hidden="true"><div id="n-fill"></div><i style="left:70%"></i></div>
+        <dl class="kv">
+          <div><dt>Осталось</dt><dd id="n-left">—</dd></div>
+          <div><dt>Прогноз замены</dt><dd id="n-when">—</dd></div>
+          <div><dt>Темп за 30 дней</dt><dd id="n-rate">—</dd></div>
+          <div><dt>Установлена</dt><dd id="n-inst">—</dd></div>
+        </dl>
+        <h3>Часы прослушивания по неделям</h3>
+        <div class="chart"><svg id="n-chart" viewBox="0 0 640 200" role="img" aria-label="Часы прослушивания за последние 12 недель"></svg></div>
+        <h3>История</h3>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Дата</th><th>Время</th><th>Что слушали</th><th></th></tr></thead>
+          <tbody id="n-hist"></tbody></table></div>
+        <p class="note" id="n-histnote"></p>
+        <div class="chips" style="justify-content:space-between;align-items:center">
+          <button type="button" class="btn" id="n-replace">Игла заменена</button>
+          <span class="status" id="n-store"></span>
+        </div>
+        <div id="n-confirm" class="confirm" hidden>
+          <p>Начать учёт новой иглы с теми же настройками? История старой иглы сохранится.</p>
+          <div class="chips"><button type="button" class="btn primary" id="n-yes">Да, игла новая</button><button type="button" class="btn" id="n-no">Отмена</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <details open><summary>Как понять, что игла износилась</summary><div class="how">
+        <p>Первые признаки: шипящие согласные «с» и «ш» звучат с призвуком, на последних треках стороны появляется хрип, растёт треск на чистых пластинках.</p>
+        <p>Изношенная игла режет стенки канавки, и этот ущерб уже не исправить. Поэтому иглу меняют по наработке, не дожидаясь, пока износ станет слышен.</p>
+        <p>Ресурс сильно зависит от чистоты пластинок, прижимной силы и юстировки. Чистите иглу щёточкой перед каждой стороной. После 500 часов полезно посмотреть на кончик под USB-микроскопом: на изношенной игле видны плоские блестящие площадки.</p>
+      </div></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Винил·Лаб — прототип для оценки. Методика расчётов раскрыта в блоках «Как считается».</span>
+  <span>Данные системы, коллекции и журналов видны только вам.</span>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const num=id=>{const v=parseFloat(String($(id).value).replace(',','.').trim());return isFinite(v)?v:NaN};
+const fmt=(v,d=1)=>isFinite(v)?v.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e}
+function setPill(p,cls,text){p.className='pill '+cls;p.textContent=text}
+function chips(id,cb){const box=$(id);box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;box.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));cb(b.dataset.v)})}
+function chipVal(id){const b=$(id).querySelector('[aria-pressed="true"]');return b?b.dataset.v:null}
+
+/* ---------- tabs ---------- */
+const TABS=['sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
+function showTab(){const h=location.hash.slice(1);const t=TABS.includes(h)?h:TABS[0];
+  TABS.forEach(x=>{$(x).hidden=x!==t;document.querySelector('[data-tab="'+x+'"]').toggleAttribute('aria-current',x===t);if(x===t)document.querySelector('[data-tab="'+x+'"]').setAttribute('aria-current','page')});
+  if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo();}
+addEventListener('hashchange',showTab);
+
+/* ---------- generic line chart ---------- */
+function lineChart(svg,{series,x0,x1,y0,y1,xTicks,yTicks,xLabel,yLabel,zeroLine,W=640,H=300}){
+  svg.innerHTML='';const m={l:52,r:14,t:12,b:40};const pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const X=x=>m.l+(x-x0)/(x1-x0)*pw, Y=y=>m.t+(1-(y-y0)/(y1-y0))*ph;
+  const muted=css('--muted'),line=css('--line'),ink=css('--ink');
+  yTicks.forEach(v=>{el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:line,'stroke-width':1},svg);
+    el('text',{x:m.l-8,y:Y(v)+4,'text-anchor':'end','font-size':11,fill:muted,'font-family':'IBM Plex Mono, monospace'},svg,fmt(v,Math.abs(v)<1&&v!==0?2:(Number.isInteger(v)?0:1)))});
+  xTicks.forEach(v=>{el('line',{x1:X(v),x2:X(v),y1:m.t+ph,y2:m.t+ph+4,stroke:muted},svg);
+    el('text',{x:X(v),y:m.t+ph+18,'text-anchor':'middle','font-size':11,fill:muted,'font-family':'IBM Plex Mono, monospace'},svg,fmt(v,Number.isInteger(v)?0:1))});
+  if(zeroLine)el('line',{x1:m.l,x2:W-m.r,y1:Y(0),y2:Y(0),stroke:ink,'stroke-width':1,opacity:.5},svg);
+  el('text',{x:m.l+pw/2,y:H-4,'text-anchor':'middle','font-size':12,fill:muted},svg,xLabel);
+  el('text',{x:12,y:m.t+ph/2,'text-anchor':'middle','font-size':12,fill:muted,transform:`rotate(-90 12 ${m.t+ph/2})`},svg,yLabel);
+  series.forEach(s=>{if(s.band){el('rect',{x:m.l,width:pw,y:Y(s.band[1]),height:Y(s.band[0])-Y(s.band[1]),fill:s.color,opacity:.12},svg);return}
+    const d=s.pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(Math.max(y0,Math.min(y1,p[1]))).toFixed(1)).join(' ');
+    el('path',{d,fill:'none',stroke:s.color,'stroke-width':s.width||2,'stroke-dasharray':s.dash||'','stroke-linejoin':'round',opacity:s.opacity||1},svg);
+    (s.dots||[]).forEach(p=>el('circle',{cx:X(p[0]),cy:Y(p[1]),r:4,fill:s.color,stroke:css('--panel'),'stroke-width':2},svg))});
+}
+function niceStep(range,n){const raw=range/n,p=Math.pow(10,Math.floor(Math.log10(raw)));const f=raw/p;return (f<1.5?1:f<3?2:f<7?5:10)*p}
+function ticks(a,b,n){const s=niceStep(b-a,n);const out=[];for(let v=Math.ceil(a/s)*s;v<=b+1e-9;v+=s)out.push(+v.toFixed(6));return out}
+
+/* ---------- 1. Резонанс ---------- */
+function calcRes(){
+  const eff=num('r-eff'),cm=num('r-mass'),sc=num('r-screw')||0,c0=num('r-comp'),hz=+$('r-hz').value;
+  const C=hz===100?c0*1.7:c0, M=eff+cm+sc, f=1000/(2*Math.PI*Math.sqrt(M*C));
+  $('r-f').innerHTML=isFinite(f)?fmt(f,1)+'<small>Гц</small>':'—';
+  $('r-M').textContent=fmt(M,1)+' г'; $('r-C').textContent=fmt(C,1)+' мкм/мН';
+  const massFor=fr=>Math.pow(1000/(2*Math.PI*fr),2)/C-eff-sc;
+  const mi=massFor(10),lo=massFor(12),hi=massFor(8);
+  $('r-ideal').textContent=isFinite(mi)?(mi>0?fmt(mi,1)+' г':'недостижимо'):'—';
+  $('r-range').textContent=isFinite(lo)?(hi<=0?'недостижимо':lo<=0?'до '+fmt(hi,1)+' г':fmt(lo,1)+'–'+fmt(hi,1)+' г'):'—';
+  const p=$('r-pill'),t=$('r-text');
+  if(!isFinite(f)){setPill(p,'mid','введите данные');t.textContent='';}
+  else if(f>=8&&f<=12){setPill(p,'ok','хорошо');t.textContent='Резонанс в оптимальной зоне: головка и тонарм совместимы.'}
+  else if(f>=7&&f<8){setPill(p,'mid','на грани');t.textContent='Частота низковата. Тонарм может реагировать на коробление пластинки и шаги по полу. Подойдёт более лёгкая головка или менее гибкая игла.'}
+  else if(f>12&&f<=14){setPill(p,'mid','на грани');t.textContent='Частота высоковата. Возможен подъём низа и хуже трекинг на сильно модулированных местах. Подойдёт более тяжёлая головка или утяжелитель.'}
+  else if(f<7){setPill(p,'no','несовместимо');t.textContent='Резонанс слишком низкий: тонарм слишком тяжёлый для такой гибкой иглы. Возможны прыжки иглы и «качание» диффузоров на НЧ.'}
+  else {setPill(p,'no','несовместимо');t.textContent='Резонанс слишком высокий: тонарм слишком лёгкий для такой жёсткой иглы. Резонанс подходит к звуковому диапазону, искажения на басу.'}
+  drawScale(f);
+}
+function drawScale(f){
+  const s=$('r-scale');s.innerHTML='';const W=600,a=4,b=20,X=v=>(v-a)/(b-a)*W;
+  const zones=[[4,7,'--bad'],[7,8,'--warn'],[8,12,'--good'],[12,14,'--warn'],[14,20,'--bad']];
+  zones.forEach(([z0,z1,c])=>el('rect',{x:X(z0),y:14,width:X(z1)-X(z0),height:10,fill:css(c),opacity:.85},s));
+  for(let v=4;v<=20;v+=2){el('line',{x1:X(v),x2:X(v),y1:26,y2:32,stroke:css('--muted')},s);
+    el('text',{x:Math.min(W-8,Math.max(8,X(v))),y:46,'text-anchor':'middle','font-size':12,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},s,v)}
+  if(isFinite(f)){const x=X(Math.max(a,Math.min(b,f)));
+    el('path',{d:`M${x-7} 0 L${x+7} 0 L${x} 12 Z`,fill:css('--ink')},s);
+    el('line',{x1:x,x2:x,y1:10,y2:26,stroke:css('--ink'),'stroke-width':2.5},s)}
+}
+$('r-arm').addEventListener('change',e=>{if(e.target.value){$('r-eff').value=e.target.value}calcRes()});
+$('r-cart').addEventListener('change',e=>{if(e.target.value){const [m,c,h]=e.target.value.split('|');$('r-mass').value=m;$('r-comp').value=c;$('r-hz').value=h}calcRes()});
+['r-eff','r-mass','r-screw','r-comp','r-hz'].forEach(i=>$(i).addEventListener('input',calcRes));
+
+/* ---------- 2. Юстировка ---------- */
+const DEG=180/Math.PI;
+const STD={iec:[60.325,146.05],din:[57.5,146.05]};
+const PUB={iec:{baerwald:[66.0,120.89],lofgrenB:[70.29,116.60],stevenson:[60.325,117.42]}};
+const NAMES={baerwald:'Baerwald',lofgrenB:'Löfgren B',stevenson:'Stevenson',factory:'Заводская'};
+function geomNulls(D,n1,n2){const L=Math.sqrt(D*D+n1*n2);return {D,L,beta:Math.asin((n1+n2)/(2*L)),n1,n2,ov:L-D}}
+function geomFactory(D,ov,offDeg){const L=D+ov,beta=offDeg/DEG;const s=2*L*Math.sin(beta),p=L*L-D*D,disc=s*s-4*p;
+  const n1=disc>=0?(s-Math.sqrt(disc))/2:NaN,n2=disc>=0?(s+Math.sqrt(disc))/2:NaN;return {D,L,beta,n1,n2,ov}}
+function errAt(r,g){let s=(r*r+g.L*g.L-g.D*g.D)/(2*r*g.L);s=Math.max(-1,Math.min(1,s));return (g.beta-Math.asin(s))*DEG}
+function costs(g,Ri,Ro){let pk=0,ss=0,N=200;for(let i=0;i<=N;i++){const r=Ri+(Ro-Ri)*i/N,d=errAt(r,g)/r;pk=Math.max(pk,Math.abs(d));ss+=d*d}return {peak:pk,rms:Math.sqrt(ss/(N+1))}}
+function optimize(D,Ri,Ro,kind){
+  const cf=(a,b)=>{if(b<=a+5)return 1e9;const c=costs(geomNulls(D,a,b),Ri,Ro);return kind==='lofgrenB'?c.rms:c.peak};
+  let n1=kind==='stevenson'?Ri:2*Ri*Ro/(Ri+Ro+(Ro-Ri)/Math.SQRT2),n2=2*Ri*Ro/(Ri+Ro-(Ro-Ri)/Math.SQRT2),st=4,best=cf(n1,n2);
+  while(st>1e-3){let moved=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){if(kind==='stevenson'&&a)continue;
+    const c=cf(n1+a*st,n2+b*st);if(c<best){best=c;n1+=a*st;n2+=b*st;moved=true;break}}if(!moved)st/=2}
+  return [n1,n2];
+}
+function nullsFor(std,kind,D){const [Ri,Ro]=STD[std];
+  if(PUB[std]&&PUB[std][kind])return PUB[std][kind];
+  if(kind==='baerwald')return [2*Ri*Ro/(Ri+Ro+(Ro-Ri)/Math.SQRT2),2*Ri*Ro/(Ri+Ro-(Ro-Ri)/Math.SQRT2)];
+  return optimize(D,Ri,Ro,kind)}
+function calcAlign(){
+  if($('yustirovka').hidden)return;
+  const D=num('a-d'),std=chipVal('a-std'),kind=chipVal('a-kind'),[Ri,Ro]=STD[std];
+  if(!(D>100&&D<400)){['a-n1','a-n2','a-ov','a-L','a-off','a-max'].forEach(i=>$(i).textContent='—');$('a-chart').innerHTML='';return}
+  const colors={baerwald:css('--amber'),lofgrenB:css('--c2'),stevenson:css('--c3'),factory:css('--ink')};
+  const geoms={};['baerwald','lofgrenB','stevenson'].forEach(k=>{const [a,b]=nullsFor(std,k,D);geoms[k]=geomNulls(D,a,b)});
+  const fov=num('a-fov'),foff=num('a-foff');if(isFinite(fov)&&isFinite(foff))geoms.factory=geomFactory(D,fov,foff);
+  const g=geoms[kind];
+  const maxErr=gg=>{let m=0;for(let i=0;i<=200;i++){const r=Ri+(Ro-Ri)*i/200;m=Math.max(m,Math.abs(errAt(r,gg)))}return m};
+  $('a-n1').textContent=fmt(g.n1,2)+' мм';$('a-n2').textContent=fmt(g.n2,2)+' мм';
+  $('a-ov').textContent=fmt(g.ov,2)+' мм';$('a-L').textContent=fmt(g.L,2)+' мм';
+  $('a-off').textContent=fmt(g.beta*DEG,2)+'°';$('a-max').textContent='±'+fmt(maxErr(g),2)+'°';
+  const tb=$('a-table');tb.innerHTML='';
+  Object.keys(geoms).forEach(k=>{const gg=geoms[k],c=costs(gg,Ri,Ro);const tr=document.createElement('tr');if(k===kind)tr.className='sel';
+    tr.innerHTML=`<td>${NAMES[k]}</td><td class="n">${isFinite(gg.n1)?fmt(gg.n1,1)+' / '+fmt(gg.n2,1):'нет нулей'}</td><td class="n">${fmt(gg.ov,2)}</td><td class="n">${fmt(gg.beta*DEG,2)}°</td><td class="n">±${fmt(maxErr(gg),2)}°</td><td class="n">${fmt(c.peak*1000,1)}</td>`;tb.appendChild(tr)});
+  const x0=Math.floor(Ri-3),x1=Math.ceil(Ro+3);const series=[];let ymax=0;
+  const order=Object.keys(geoms).filter(k=>k!==kind).concat([kind]);
+  order.forEach(k=>{const gg=geoms[k],pts=[];for(let r=x0;r<=x1;r+=0.5){const e=errAt(r,gg);pts.push([r,e]);if(r>=Ri&&r<=Ro)ymax=Math.max(ymax,Math.abs(e))}
+    series.push({pts,color:colors[k],width:k===kind?3:1.6,dash:k==='factory'?'6 4':'',opacity:k===kind?1:.75,dots:k===kind&&isFinite(gg.n1)?[[gg.n1,0],[gg.n2,0]]:[]})});
+  const yl=Math.max(1,Math.ceil(ymax*1.15*2)/2);
+  lineChart($('a-chart'),{series:[{band:[-0.0001,0.0001],color:colors.baerwald}].concat(series),x0,x1,y0:-yl,y1:yl,xTicks:ticks(x0,x1,8),yTicks:ticks(-yl,yl,6),xLabel:'Радиус канавки, мм',yLabel:'Ошибка, °',zeroLine:true});
+  // shade the groove area
+  const svg=$('a-chart'),pw=640-52-14;const X=x=>52+(x-x0)/(x1-x0)*pw;
+  const r=el('rect',{x:X(Ri),y:12,width:X(Ro)-X(Ri),height:300-12-40,fill:css('--glow'),opacity:.06});svg.insertBefore(r,svg.firstChild);
+  protState={g,std,kind};drawProtractor();
+  $('a-legend').innerHTML=Object.keys(geoms).map(k=>`<span><i style="background:${colors[k]};${k==='factory'?'opacity:.7':''}"></i>${NAMES[k]}${k===kind?' (выбрана)':''}</span>`).join('');
+}
+/* ---------- протрактор 1:1 (все размеры в мм, лист A4) ---------- */
+let protState=null;
+function protractorPrims(g,std,kind){
+  const P=[],Sx=105,Sy=278,[Ri,Ro]=STD[std],D=g.D,nn=g.n1*g.n2,f2=v=>v.toFixed(2);
+  const pt=r=>{const lx=(r*r-nn)/(2*D);return [Sx+lx,Sy-Math.sqrt(Math.max(0,r*r-lx*lx))]};
+  const line=(x1,y1,x2,y2,w,dash)=>P.push({t:'line',x1,y1,x2,y2,w,dash});
+  const text=(x,y,s,size,align,bold)=>P.push({t:'text',x,y,s,size,align:align||'left',bold});
+  // дуга движения иглы
+  const arc=[];for(let r=Ri-8;r<=Ro+4;r+=0.5)arc.push(pt(r));P.push({t:'poly',pts:arc,w:.3,dash:[1.6,1.2]});
+  // границы канавок
+  const f3=v=>String(+v.toFixed(3));
+  [[Ri,'LAST GROOVE '+f3(Ri)],[Ro,'FIRST GROOVE '+f3(Ro)]].forEach(([R,lab])=>{const c=pt(R),a0=Math.atan2(c[1]-Sy,c[0]-Sx),pts=[],span=30/R;
+    for(let a=-span;a<=span+1e-9;a+=span/20)pts.push([Sx+R*Math.cos(a0+a),Sy+R*Math.sin(a0+a)]);P.push({t:'poly',pts,w:.3});
+    const e=pts[pts.length-1];text(e[0]+2,e[1]+1,lab+' mm',6.5)});
+  // шпиндель
+  P.push({t:'circle',x:Sx,y:Sy,r:3.62,w:.3});line(Sx-7,Sy,Sx+7,Sy,.2);line(Sx,Sy-7,Sx,Sy+7,.2);
+  text(Sx+9,Sy+1,'SPINDLE  7.24 mm  (cut out)',7);
+  // нулевые точки с сеткой
+  [[g.n1,'INNER NULL'],[g.n2,'OUTER NULL']].forEach(([r,lab])=>{const N=pt(r),ur=[(N[0]-Sx)/r,(N[1]-Sy)/r],ut=[-ur[1],ur[0]];
+    line(Sx+ur[0]*(r-16),Sy+ur[1]*(r-16),Sx+ur[0]*(r+16),Sy+ur[1]*(r+16),.15);
+    for(let k=-4;k<=4;k++){const o=k*3,cx=N[0]+ur[0]*o,cy=N[1]+ur[1]*o,h=21;line(cx-ut[0]*h,cy-ut[1]*h,cx+ut[0]*h,cy+ut[1]*h,k===0?.4:.15)}
+    for(let k=-7;k<=7;k++){const o=k*3,cx=N[0]+ut[0]*o,cy=N[1]+ut[1]*o,h=12;line(cx-ur[0]*h,cy-ur[1]*h,cx+ur[0]*h,cy+ur[1]*h,k===0?.3:.12)}
+    P.push({t:'dot',x:N[0],y:N[1],r:.6});
+    text(N[0]-ut[0]*24,N[1]-ut[1]*24-1.5,lab,7.5,'right',true);text(N[0]-ut[0]*24,N[1]-ut[1]*24+2.5,f2(r)+' mm',7.5,'right')});
+  // заголовок и параметры
+  text(12,22,'VINYL LAB  ARC PROTRACTOR',13,'left',true);
+  text(12,29,NAMES[kind]+'  /  '+(std==='iec'?'IEC':'DIN')+' '+f3(Ri)+' - '+f3(Ro)+' mm',9);
+  [['Pivot-to-spindle',f2(D)+' mm'],['Effective length',f2(g.L)+' mm'],['Overhang',f2(g.ov)+' mm'],['Offset angle',f2(g.beta*DEG)+' deg'],['Null points',f2(g.n1)+' / '+f2(g.n2)+' mm']]
+    .forEach(([k,v],i)=>{text(12,40+i*5,k,8);text(70,40+i*5,v,8,'right',true)});
+  ['Print at 100% / Actual size. Rulers must measure 100 mm and 50 mm.','Stylus tip follows the dashed arc.','At both null points: cartridge sides parallel to the long grid lines.']
+    .forEach((s,i)=>text(12,72+i*4.5,s,7));
+  // контрольные линейки
+  const rx=95,ry=12;line(rx,ry,rx+100,ry,.25);
+  for(let i=0;i<=100;i++){const h=i%10===0?3:i%5===0?2:1;line(rx+i,ry,rx+i,ry+h,i%10===0?.25:.12);if(i%10===0)text(rx+i,ry+6,String(i),5.5,'center')}
+  text(rx+100,ry-2,'100 mm',7,'right',true);
+  const vx=12,vy=225;line(vx,vy,vx,vy+50,.25);
+  for(let i=0;i<=50;i++){const h=i%10===0?3:i%5===0?2:1;line(vx,vy+i,vx+h,vy+i,i%10===0?.25:.12);if(i%10===0)text(vx+4.5,vy+i+1,String(i),5.5)}
+  text(vx,vy-3,'50 mm',7,'left',true);
+  return P;
+}
+function drawProtractor(){
+  if(!protState)return;const {g,std,kind}=protState,svg=$('p-svg');svg.innerHTML='';const ink=css('--paper-ink');
+  protractorPrims(g,std,kind).forEach(p=>{
+    if(p.t==='line')el('line',{x1:p.x1,y1:p.y1,x2:p.x2,y2:p.y2,stroke:ink,'stroke-width':p.w},svg);
+    else if(p.t==='poly')el('polyline',{points:p.pts.map(q=>q[0].toFixed(2)+','+q[1].toFixed(2)).join(' '),fill:'none',stroke:ink,'stroke-width':p.w,'stroke-dasharray':p.dash?p.dash.join(' '):''},svg);
+    else if(p.t==='circle')el('circle',{cx:p.x,cy:p.y,r:p.r,fill:'none',stroke:ink,'stroke-width':p.w},svg);
+    else if(p.t==='dot')el('circle',{cx:p.x,cy:p.y,r:p.r,fill:ink},svg);
+    else el('text',{x:p.x,y:p.y,'font-size':p.size*0.3528,'font-family':'Helvetica, Arial, sans-serif','font-weight':p.bold?700:400,fill:ink,'text-anchor':p.align==='right'?'end':p.align==='center'?'middle':'start'},svg,p.s)});
+  $('p-sum').textContent=NAMES[kind]+', '+(std==='iec'?'IEC':'DIN')+', монтажное расстояние '+fmt(g.D,1)+' мм: свес '+fmt(g.ov,2)+' мм, офсет '+fmt(g.beta*DEG,2)+'°.';
+}
+function buildPdf(){
+  const {g,std,kind}=protState;const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+  try{doc.viewerPreferences({PrintScaling:'None'})}catch(e){}
+  doc.setDrawColor(0);doc.setTextColor(0);
+  protractorPrims(g,std,kind).forEach(p=>{
+    if(p.t==='text'){doc.setFont('helvetica',p.bold?'bold':'normal');doc.setFontSize(p.size);doc.text(p.s,p.x,p.y,{align:p.align});return}
+    if(p.t==='dot'){doc.setFillColor(0);doc.circle(p.x,p.y,p.r,'F');return}
+    doc.setLineWidth(p.w);doc.setLineDashPattern(p.dash||[],0);
+    if(p.t==='line')doc.line(p.x1,p.y1,p.x2,p.y2);
+    else if(p.t==='circle')doc.circle(p.x,p.y,p.r,'S');
+    else for(let i=1;i<p.pts.length;i++)doc.line(p.pts[i-1][0],p.pts[i-1][1],p.pts[i][0],p.pts[i][1]);
+    doc.setLineDashPattern([],0)});
+  doc.setProperties({title:'Vinyl Lab protractor: '+NAMES[kind]+' '+std.toUpperCase()+' '+g.D.toFixed(1)+' mm'});
+  return doc.output('blob');
+}
+let downloadsApi;
+const STANDALONE=!/claude|anthropic/.test(location.hostname)&&!(window.claude&&window.claude.use);
+const localSaver={save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);return {status:'saved'}}};
+async function getDownloads(){if(downloadsApi!==undefined)return downloadsApi;
+  if(STANDALONE){downloadsApi=localSaver;return downloadsApi}
+  try{downloadsApi=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){downloadsApi=null}return downloadsApi}
+$('p-dl').addEventListener('click',async()=>{
+  const st=$('p-status');if(!protState){st.textContent='Сначала введите монтажное расстояние тонарма.';return}
+  if(!window.jspdf){st.textContent='Не загрузился модуль PDF. Обновите страницу.';return}
+  const dl=await getDownloads();
+  if(!dl){st.textContent='В этом окне скачивание недоступно. Откройте страницу на claude.ai в браузере.';return}
+  const {g,std,kind}=protState;const name='protractor-'+kind+'-'+std+'-'+g.D.toFixed(0)+'mm.pdf';
+  st.textContent='Готовлю PDF…';
+  try{await dl.save({filename:name,data:buildPdf()});st.textContent='Файл '+name+' сохранён. Печатайте в масштабе 100 %.'}
+  catch(e){const c=e&&e.code;st.textContent=c==='declined'?'Скачивание отменено.':c==='rate_limited'?'Окно сохранения уже открыто. Завершите его и попробуйте снова.':'Скачать не получилось. Откройте страницу на claude.ai в браузере.';
+    if(c==='unavailable'||c==='not_granted'||c==='capability_disabled')$('p-dl').disabled=true}
+});
+
+$('a-preset').addEventListener('change',e=>{if(e.target.value){const [d,ov,off]=e.target.value.split('|');$('a-d').value=d;$('a-fov').value=ov;$('a-foff').value=off}calcAlign()});
+['a-d','a-fov','a-foff'].forEach(i=>$(i).addEventListener('input',calcAlign));
+chips('a-std',calcAlign);chips('a-kind',calcAlign);
+
+/* ---------- 3. Скорость ---------- */
+function calcSpeed(){
+  const n=num('s-nom'),m=num('s-meas'),rpm=+$('s-rpm').value;const dev=(m/n-1)*100;
+  $('s-dev').textContent=isFinite(dev)?(dev>0?'+':'')+fmt(dev,2)+' %':'—';
+  $('s-real').textContent=isFinite(dev)?fmt(rpm*(1+dev/100),2)+' об/мин':'—';
+  const a=Math.abs(dev);$('s-verdict').textContent=!isFinite(dev)?'':a<=0.3?'В пределах нормы для хорошего проигрывателя (±0,3 %).':a<=1?'Заметно на слух музыкантам с абсолютным слухом. Стоит подстроить скорость.':'Слышимая ошибка высоты тона. Требуется регулировка или замена пассика.';
+}
+['s-nom','s-meas','s-rpm'].forEach(i=>$(i).addEventListener('input',calcSpeed));
+
+function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
+  for(let len=2;len<=n;len<<=1){const ang=-2*Math.PI/len,wr=Math.cos(ang),wi=Math.sin(ang),h=len>>1;
+    for(let i=0;i<n;i+=len){let cr=1,ci=0;for(let k=0;k<h;k++){const a=i+k,b=a+h,xr=re[b]*cr-im[b]*ci,xi=re[b]*ci+im[b]*cr;re[b]=re[a]-xr;im[b]=im[a]-xi;re[a]+=xr;im[a]+=xi;const t=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=t}}}}
+function analyze(x,sr,f0){
+  const N=sr>60000?8192:4096,hop=N/4,win=new Float32Array(N);for(let i=0;i<N;i++)win[i]=0.5-0.5*Math.cos(2*Math.PI*i/(N-1));
+  const kLo=Math.floor(f0*0.9*N/sr),kHi=Math.ceil(f0*1.1*N/sr),re=new Float64Array(N),im=new Float64Array(N);
+  const out=[],amps=[];const maxLen=Math.min(x.length,sr*60);
+  for(let s=0;s+N<=maxLen;s+=hop){for(let i=0;i<N;i++){re[i]=x[s+i]*win[i];im[i]=0}fft(re,im);
+    let kb=kLo,mb=0;for(let k=kLo;k<=kHi;k++){const m=re[k]*re[k]+im[k]*im[k];if(m>mb){mb=m;kb=k}}
+    const L=k=>Math.log(re[k]*re[k]+im[k]*im[k]+1e-30);const a=L(kb-1),b=L(kb),c=L(kb+1),den=a-2*b+c,p=den!==0?0.5*(a-c)/den:0;
+    out.push([(s+N/2)/sr,(kb+p)*sr/N]);amps.push(mb)}
+  const sorted=amps.slice().sort((a,b)=>a-b),med=sorted[Math.floor(sorted.length/2)]||0;
+  const good=out.filter((_,i)=>amps[i]>med*0.1);
+  if(good.length<8)return null;
+  const mean=good.reduce((s,p)=>s+p[1],0)/good.length;
+  const devs=good.map(p=>[p[0],(p[1]/mean-1)*100]);
+  const sd=Math.sqrt(devs.reduce((s,p)=>s+p[1]*p[1],0)/devs.length);
+  const pk=devs.reduce((m,p)=>Math.max(m,Math.abs(p[1])),0);
+  return {mean,err:(mean/f0-1)*100,sd,pk,devs};
+}
+let lastAnalysis=null;
+function showAnalysis(r,f0){
+  lastAnalysis=r;
+  if(!r){$('s-status').textContent='Не удалось найти тон около '+fmt(f0,0)+' Гц. Проверьте, что запись содержит тестовую дорожку и в поле «Тон на пластинке» указана её частота.';return}
+  $('s-fm').textContent=fmt(r.mean,1)+' Гц';$('s-err').textContent=(r.err>0?'+':'')+fmt(r.err,2)+' %';
+  $('s-wpk').textContent='±'+fmt(r.pk,3)+' %';$('s-w2s').textContent='±'+fmt(2*r.sd,3)+' %';
+  const t1=r.devs[r.devs.length-1][0],t0=r.devs[0][0];const yl=Math.max(0.1,Math.ceil(r.pk*1.2*20)/20);
+  lineChart($('s-chart'),{W:640,H:240,series:[{pts:r.devs,color:css('--amber'),width:2}],x0:Math.floor(t0),x1:Math.ceil(t1),y0:-yl,y1:yl,xTicks:ticks(Math.floor(t0),Math.ceil(t1),8),yTicks:ticks(-yl,yl,4),xLabel:'Время, с',yLabel:'Отклонение от средней, %',zeroLine:true});
+}
+function runDemo(){
+  const sr=44100,T=12,f0=num('s-nom')||3150,x=new Float32Array(sr*T);let ph=0;let seed=1;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647-0.5};
+  for(let i=0;i<x.length;i++){const t=i/sr;const f=f0*1.004*(1+0.0015*Math.sin(2*Math.PI*0.555*t));ph+=2*Math.PI*f/sr;x[i]=0.6*Math.sin(ph)+0.05*rnd()}
+  showAnalysis(analyze(x,sr,f0),f0);
+  $('s-status').textContent='Сейчас показан синтетический пример: +0,40 % скорости и детонация 0,55 Гц амплитудой ±0,15 %.';
+}
+$('s-demo').addEventListener('click',runDemo);
+$('s-file').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;const f0=num('s-nom')||3150;$('s-status').textContent='Анализирую «'+f.name+'»…';
+  try{const buf=await f.arrayBuffer();const AC=window.OfflineAudioContext||window.webkitOfflineAudioContext;const ctx=new AC(1,1,44100);
+    const audio=await new Promise((res,rej)=>{const p=ctx.decodeAudioData(buf,res,rej);if(p&&p.then)p.then(res,rej)});
+    const x=audio.getChannelData(0);const r=analyze(x,audio.sampleRate,f0);showAnalysis(r,f0);
+    if(r)$('s-status').textContent='Файл «'+f.name+'»: проанализировано '+fmt(Math.min(audio.duration,60),1)+' с.';
+  }catch(err){$('s-status').textContent='Не получилось прочитать файл. Подойдут WAV, MP3, M4A или FLAC.'}
+});
+
+/* ---------- 4. Провода ---------- */
+const RHO=0.0172;
+const awgOf=mm2=>{const d=Math.sqrt(4*mm2/Math.PI);return 36-39*Math.log(d/0.127)/Math.log(92)};
+function ripple(Rs,zmin,zmax){return 20*Math.log10((zmax/(zmax+Rs))/(zmin/(zmin+Rs)))}
+function calcCable(){
+  const len=num('c-len'),A=num('c-sec'),z=num('c-z'),zmin=num('c-zmin'),zmax=num('c-zmax'),df=num('c-df');
+  const R=2*RHO*len/A,zo=8/df;
+  $('c-awg').textContent=isFinite(A)?'≈ AWG '+Math.round(awgOf(A)):'';
+  const ripC=ripple(zo+R,zmin,zmax)-ripple(zo,zmin,zmax),ripAll=ripple(zo+R,zmin,zmax);
+  const loss=20*Math.log10((z/(z+zo+R))/(z/(z+zo)));
+  $('c-rip').innerHTML=isFinite(ripC)?fmt(ripC,2)+'<small>дБ</small>':'—';
+  $('c-R').textContent=fmt(R*1000,0)+' мОм';$('c-loss').textContent=fmt(loss,2)+' дБ';
+  $('c-dfe').textContent=fmt(z/(zo+R),0);$('c-ripall').textContent=fmt(ripAll,2)+' дБ';
+  const p=$('c-pill'),t=$('c-text');
+  if(!isFinite(ripC)){setPill(p,'mid','введите данные');t.textContent=''}
+  else if(ripC<0.1){setPill(p,'ok','неслышимо');t.textContent='Кабель такого сечения и длины на звук не влияет. Более толстый или дорогой провод ничего не изменит.'}
+  else if(ripC<0.5){setPill(p,'mid','на грани слышимости');t.textContent='Кабель слегка окрашивает АЧХ. Если хотите полностью исключить влияние, возьмите сечение побольше или укоротите провод.'}
+  else {setPill(p,'no','слышимо');t.textContent='Сопротивление кабеля заметно меняет тембр. Нужен провод большего сечения.'}
+  const tb=$('c-table');tb.innerHTML='';
+  [0.5,0.75,1,1.5,2.5,4,6].forEach(a=>{const r=2*RHO*len/a,rc=ripple(zo+r,zmin,zmax)-ripple(zo,zmin,zmax);const tr=document.createElement('tr');
+    if(Math.abs(a-A)<1e-6)tr.className='sel';
+    tr.innerHTML=`<td class="n">${fmt(a,a<1?2:1)} мм²</td><td class="n">${Math.round(awgOf(a))}</td><td class="n">${fmt(r*1000,0)} мОм</td><td class="n"><span class="${rc<0.1?'ok':rc<0.5?'mid':'no'}">${fmt(rc,2)} дБ</span></td>`;tb.appendChild(tr)});
+}
+chips('c-chips',v=>{$('c-sec').value=v;calcCable()});
+$('c-sec').addEventListener('input',()=>{const v=num('c-sec');$('c-chips').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',Math.abs(+b.dataset.v-v)<1e-6?'true':'false'));calcCable()});
+['c-len','c-z','c-zmin','c-zmax','c-df'].forEach(i=>$(i).addEventListener('input',calcCable));
+
+function calcMM(){
+  const tot=num('m-pf')*num('m-len')+num('m-arm')+num('m-pre'),lo=num('m-lo'),hi=num('m-hi');
+  $('m-tot').innerHTML=isFinite(tot)?fmt(tot,0)+'<small>пФ</small>':'—';
+  const p=$('m-pill');if(!isFinite(tot))setPill(p,'mid','—');else if(tot>=lo&&tot<=hi)setPill(p,'ok','в рекомендации');
+  else if(tot<lo)setPill(p,'mid','меньше рекомендации: можно добавить ёмкость на входе');else setPill(p,'no','больше рекомендации: короче кабель или меньше ёмкость входа');
+}
+['m-pf','m-len','m-arm','m-pre','m-lo','m-hi'].forEach(i=>$(i).addEventListener('input',calcMM));
+
+/* ---------- 5. Журнал иглы ---------- */
+const LSKEY='vinyl-lab-stylus',TKEY='vinyl-lab-timer',MAXS=2000;
+const rid=()=>Math.random().toString(36).slice(2,10);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dayNum=s=>Math.floor(Date.parse(s+'T12:00:00')/864e5);
+const fmtDate=s=>{if(!s)return '—';const [y,m,d]=s.split('-');return d+'.'+m+'.'+y};
+const hm=min=>{min=Math.round(min);const h=Math.floor(min/60),m=min%60;return h?h+' ч '+(m?m+' мин':''):m+' мин'};
+const PROF={conical:'конический',elliptical:'эллиптический',shibata:'Shibata',microline:'MicroLine',dj:'DJ'};
+let N={styli:[],activeId:null,sessions:[]},mode='local',ref=null,chain=Promise.resolve();
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+function normalize(d){const o=d&&typeof d==='object'?d:{};return {styli:Array.isArray(o.styli)?o.styli.map(s=>Object.assign({},s)):[],activeId:o.activeId||null,sessions:Array.isArray(o.sessions)?o.sessions.map(s=>Object.assign({},s)):[]}}
+function storeNote(){$('n-store').textContent=mode==='db'?'Журнал сохраняется в вашем аккаунте.':'Журнал хранится только в этом браузере.'}
+function persist(){
+  if(N.sessions.length>MAXS){ // старые сеансы сворачиваются в «уже наиграно»
+    const cut=N.sessions.sort((a,b)=>a.d<b.d?-1:1).splice(0,N.sessions.length-MAXS);
+    cut.forEach(s=>{const st=N.styli.find(x=>x.id===s.sid);if(st)st.start=(+st.start||0)+s.m/60})}
+  if(mode==='db'&&ref){const body=JSON.parse(JSON.stringify(N));
+    chain=chain.then(()=>ref.set(body)).catch(e=>{if(e&&(e.code==='invalid_argument'||e.code==='revoked'||e.code==='not_granted')){mode='local';lsSet(LSKEY,JSON.stringify(N));storeNote()}
+      else if(e&&e.code==='quota_exceeded')$('n-logmsg').textContent='Хранилище заполнено: удалите старые записи.';
+      else $('n-logmsg').textContent='Не удалось сохранить. Проверьте соединение.'})}
+  else lsSet(LSKEY,JSON.stringify(N));
+}
+function mutate(fn){fn();renderN();persist()}
+const active=()=>N.styli.find(s=>s.id===N.activeId)||N.styli.filter(s=>!s.retired).slice(-1)[0]||null;
+function usedH(st){return (+st.start||0)+N.sessions.filter(s=>s.sid===st.id).reduce((a,s)=>a+s.m,0)/60}
+function renderN(){
+  const list=$('n-list');list.innerHTML='';const st=active();
+  N.styli.forEach(s=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed',st&&s.id===st.id?'true':'false');
+    b.textContent=s.name+(s.retired?' (снята '+fmtDate(s.retired)+')':'');b.addEventListener('click',()=>mutate(()=>{N.activeId=s.id}));list.appendChild(b)});
+  if(!N.styli.length){$('n-form').hidden=false;$('n-addtoggle').hidden=true}else{$('n-addtoggle').hidden=false}
+  $('n-empty').hidden=!!st;$('n-body').hidden=!st;$('n-logpanel').querySelectorAll('button,input').forEach(x=>x.disabled=!st||!!st.retired);
+  storeNote();if(!st)return;
+  const used=usedH(st),lim=+st.limit||1000,pct=used/lim*100,left=lim-used;
+  $('n-title').textContent=st.name+' · '+PROF[st.profile]+(st.retired?' · снята '+fmtDate(st.retired):'');
+  $('n-hours').innerHTML=fmt(used,1)+'<small>из '+fmt(lim,0)+' ч</small>';
+  const cls=pct<70?'ok':pct<100?'mid':'no';setPill($('n-pill'),cls,pct<70?'в норме':pct<100?'скоро замена':'ресурс выработан');
+  const fill=$('n-fill');fill.style.width=Math.min(100,pct)+'%';fill.style.background=css(cls==='ok'?'--good':cls==='mid'?'--warn':'--bad');
+  $('n-left').textContent=left>0?fmt(left,0)+' ч':'перерасход '+fmt(-left,0)+' ч';
+  const t=dayNum(today()),inst=st.installed?dayNum(st.installed):t,win=Math.max(7,Math.min(30,t-inst+1));
+  const recent=N.sessions.filter(s=>s.sid===st.id&&t-dayNum(s.d)<win).reduce((a,s)=>a+s.m,0)/60,rate=recent/win;
+  $('n-rate').textContent=rate>0?fmt(rate*7,1)+' ч в неделю':'нет данных';
+  if(st.retired)$('n-when').textContent='снята';
+  else if(left<=0)$('n-when').textContent='пора менять';
+  else if(rate>0){const d=new Date((t+left/rate)*864e5);$('n-when').textContent=d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}
+  else $('n-when').textContent='нужно больше записей';
+  $('n-inst').textContent=fmtDate(st.installed);
+  // недели
+  const weeks=new Array(12).fill(0),mon=t-((new Date(t*864e5).getUTCDay()+6)%7);
+  N.sessions.filter(s=>s.sid===st.id).forEach(s=>{const sd=dayNum(s.d),ws=sd-((new Date(sd*864e5).getUTCDay()+6)%7),idx=11-Math.round((mon-ws)/7);if(idx>=0&&idx<12)weeks[idx]+=s.m/60});
+  drawWeeks(weeks,mon);
+  const hist=N.sessions.filter(s=>s.sid===st.id).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.t||0)-(a.t||0)),tb=$('n-hist');tb.innerHTML='';
+  hist.slice(0,12).forEach(s=>{const tr=document.createElement('tr');tr.innerHTML='<td class="n">'+fmtDate(s.d)+'</td><td class="n">'+hm(s.m)+'</td><td class="note-cell"></td><td></td>';
+    tr.children[2].textContent=s.n||'';const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Удалить';
+    del.addEventListener('click',()=>{if(del.classList.contains('arm'))mutate(()=>{N.sessions=N.sessions.filter(x=>x.id!==s.id)});else{del.classList.add('arm');del.textContent='Точно удалить?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});
+    if(!st.retired)tr.children[3].appendChild(del);tb.appendChild(tr)});
+  $('n-histnote').textContent=!hist.length?'Записей пока нет. Отметьте первое прослушивание слева.':hist.length>12?'Показаны последние 12 из '+hist.length+' записей.':'';
+  $('n-replace').hidden=!!st.retired;
+}
+function drawWeeks(w,mon){
+  const svg=$('n-chart');svg.innerHTML='';const W=640,H=200,m={l:40,r:10,t:10,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const max=Math.max(2,Math.ceil(Math.max(...w)));const yt=ticks(0,max,4),top=yt[yt.length-1]||max;const Y=v=>m.t+ph*(1-v/top),bw=pw/12;
+  yt.forEach(v=>{el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:css('--line')},svg);el('text',{x:m.l-6,y:Y(v)+4,'text-anchor':'end','font-size':11,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},svg,fmt(v,0))});
+  w.forEach((v,i)=>{const x=m.l+i*bw+bw*.18;if(v>0)el('rect',{x,y:Y(v),width:bw*.64,height:Math.max(1,Y(0)-Y(v)),rx:2,fill:css(i===11?'--amber':'--glow'),opacity:i===11?1:.55},svg);
+    if(i%2===1||i===11){const d=new Date((mon-(11-i)*7)*864e5);el('text',{x:x+bw*.32,y:H-10,'text-anchor':'middle','font-size':11,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},svg,String(d.getUTCDate()).padStart(2,'0')+'.'+String(d.getUTCMonth()+1).padStart(2,'0'))}});
+  el('text',{x:m.l,y:m.t+10,'font-size':11,fill:css('--muted')},svg,'ч');
+}
+function addSession(min,day,note){const st=active();if(!st||!(min>0))return;
+  mutate(()=>{N.sessions.push({id:rid(),sid:st.id,d:day||today(),m:Math.round(min),n:(note||'').slice(0,120),t:Date.now()})});
+  $('n-logmsg').textContent='Записано: '+hm(min)+(note?' — '+note:'')+'.'}
+$('n-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(b)addSession(+b.dataset.m,today(),'')});
+$('n-logform').addEventListener('submit',e=>{e.preventDefault();const m=num('n-min');if(!(m>0&&m<1440)){$('n-logmsg').textContent='Укажите время от 1 до 1440 минут.';return}
+  addSession(m,$('n-day').value||today(),$('n-note').value.trim());$('n-note').value=''});
+$('n-addtoggle').addEventListener('click',()=>{$('n-form').hidden=!$('n-form').hidden});
+$('n-cancel').addEventListener('click',()=>{if(N.styli.length)$('n-form').hidden=true});
+$('n-profile').addEventListener('change',()=>{$('n-limit').value=$('n-profile').value.split('|')[1]});
+$('n-form').addEventListener('submit',e=>{e.preventDefault();const name=$('n-name').value.trim()||'Игла',[profile]=$('n-profile').value.split('|');
+  const limit=num('n-limit'),start=num('n-start')||0;if(!(limit>0))return;
+  mutate(()=>{const s={id:rid(),name:name.slice(0,60),profile,limit,start,installed:$('n-date').value||today(),retired:null};N.styli.push(s);N.activeId=s.id});
+  $('n-form').hidden=true});
+$('n-replace').addEventListener('click',()=>{$('n-confirm').hidden=false});
+$('n-no').addEventListener('click',()=>{$('n-confirm').hidden=true});
+$('n-yes').addEventListener('click',()=>{const st=active();if(!st)return;$('n-confirm').hidden=true;
+  mutate(()=>{const o=N.styli.find(x=>x.id===st.id);o.retired=today();const s={id:rid(),name:st.name,profile:st.profile,limit:st.limit,start:0,installed:today(),retired:null};N.styli.push(s);N.activeId=s.id})});
+// секундомер (время старта помнит этот браузер)
+let tStart=+lsGet(TKEY)||0,tInt=null;
+function tick(){const s=tStart?Math.floor((Date.now()-tStart)/1000):0;$('n-tval').textContent=Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function syncTimer(){const b=$('n-timer');b.textContent=tStart?'Остановить и записать':'Начать';b.classList.toggle('on',!!tStart);clearInterval(tInt);if(tStart)tInt=setInterval(tick,1000);tick()}
+$('n-timer').addEventListener('click',()=>{if(!tStart){tStart=Date.now();lsSet(TKEY,String(tStart))}else{const min=(Date.now()-tStart)/60000;tStart=0;lsSet(TKEY,null);
+  if(min>=1)addSession(min,today(),$('n-note').value.trim());else $('n-logmsg').textContent='Меньше минуты — не записано.'}syncTimer()});
+$('n-date').value=today();$('n-day').value=today();
+function loadLocal(){mode='local';try{N=normalize(JSON.parse(lsGet(LSKEY)||'{}'))}catch(e){N=normalize({})}renderN()}
+loadLocal();syncTimer();
+(async()=>{try{if(!(window.claude&&window.claude.use))return;const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+  const uid=user?await user.id():null;if(!db||!uid)return;
+  ref=db.doc('data/users/'+uid+'/stylus');let first=true;const timer=setTimeout(()=>{if(first)$('n-store').textContent='Не удаётся связаться с хранилищем. Показан журнал из этого браузера.'},10000);
+  ref.onSnapshot(snap=>{clearTimeout(timer);
+    if(first){first=false;mode='db';
+      if(!snap.exists){const local=lsGet(LSKEY);if(local){try{N=normalize(JSON.parse(local))}catch(e){}if(N.styli.length)persist()}renderN();return}}
+    if(snap.metadata.hasPendingWrites)return;N=normalize(snap.data());renderN()},
+    e=>{clearTimeout(timer);mode='local';storeNote()});
+}catch(e){}})();
+
+/* ---------- VTA ---------- */
+function calcVta(){const L=num('v-L'),dh=num('v-dh'),da=num('v-da');
+  const a=Math.atan(dh/L)*DEG,h=L*Math.tan(da/DEG);
+  $('v-a').textContent=isFinite(a)?(a>0?'+':'')+fmt(a,2)+'°':'—';$('v-h').textContent=isFinite(h)?fmt(h,1)+' мм':'—';
+  $('v-rec').textContent=isFinite(L)?fmt(Math.atan(0.5/L)*DEG,2)+'°':'—'}
+['v-L','v-dh','v-da'].forEach(i=>$(i).addEventListener('input',calcVta));
+$('v-useL').addEventListener('click',()=>{if(protState){$('v-L').value=protState.g.L.toFixed(1);calcVta()}});
+
+/* ---------- общее хранилище: личные данные пользователя ---------- */
+let ctxP=null;
+function getCtx(){if(!ctxP)ctxP=(async()=>{try{if(!(window.claude&&window.claude.use))return null;
+  const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);const uid=user?await user.id():null;return db&&uid?{db,uid}:null}catch(e){return null}})();return ctxP}
+const permErr=e=>e&&['invalid_argument','revoked','not_granted','capability_disabled','capability_removed'].includes(e.code);
+function docStore(name,lsKey,onData){
+  const s={mode:'local',data:null,ref:null,chain:Promise.resolve()};
+  try{s.data=JSON.parse(lsGet(lsKey)||'null')}catch(e){}
+  s.save=d=>{s.data=d;if(s.mode==='db'&&s.ref){const body=JSON.parse(JSON.stringify(d));
+      s.chain=s.chain.then(()=>s.ref.set(body)).catch(e=>{if(permErr(e)){s.mode='local';lsSet(lsKey,JSON.stringify(s.data));onData(s.data,s.mode)}})}
+    else lsSet(lsKey,JSON.stringify(d))};
+  onData(s.data,'local');
+  getCtx().then(ctx=>{if(!ctx)return;s.ref=ctx.db.doc('data/users/'+ctx.uid+'/'+name);let first=true;
+    s.ref.onSnapshot(snap=>{if(first){first=false;s.mode='db';if(!snap.exists){if(s.data)s.save(s.data);onData(s.data,'db');return}}
+      if(snap.metadata.hasPendingWrites)return;s.data=JSON.parse(JSON.stringify(snap.data()||{}));onData(s.data,'db')},
+      ()=>{s.mode='local';onData(s.data,'local')})});
+  return s;
+}
+
+/* ---------- 0. Моя система ---------- */
+const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','vlo','vhi','clo','chi','phono','pcap','icpf','iclen','armc','amp','df','spk','z','zmin','zmax','slen','ssec'];
+const YTXT=['tt','cart','type','hz','prof','phono','amp','spk'];
+let P={system:null,setups:[],prefs:{washEvery:20}};
+function readSys(){const o={};YF.forEach(k=>{const v=$('y-'+k).value;o[k]=YTXT.includes(k)?v.trim():parseFloat(String(v).replace(',','.'))});return o}
+function fillSys(o){YF.forEach(k=>{if(o[k]!=null&&!(typeof o[k]==='number'&&!isFinite(o[k])))$('y-'+k).value=o[k]})}
+function setVal(id,v){if(v!=null&&!(typeof v==='number'&&!isFinite(v)))$(id).value=v}
+function applySys(o){
+  ['r-arm','r-cart','a-preset'].forEach(i=>$(i).value='');
+  setVal('r-eff',o.meff);setVal('r-mass',o.cmass);setVal('r-comp',o.comp);setVal('r-hz',o.hz);
+  setVal('a-d',o.D);setVal('a-fov',o.ov);setVal('a-foff',o.off);
+  setVal('m-pf',o.icpf);setVal('m-len',o.iclen);setVal('m-arm',o.armc);setVal('m-pre',o.pcap);setVal('m-lo',o.clo);setVal('m-hi',o.chi);
+  setVal('c-len',o.slen);setVal('c-sec',o.ssec);setVal('c-z',o.z);setVal('c-zmin',o.zmin);setVal('c-zmax',o.zmax);setVal('c-df',o.df);
+  if(isFinite(o.D))setVal('v-L',(o.D+(isFinite(o.ov)?o.ov:0)).toFixed(1));
+  if(o.cart)$('n-name').value=o.cart;
+  const opt=[...$('n-profile').options].find(x=>x.value.startsWith(o.prof+'|'));if(opt){$('n-profile').value=opt.value;$('n-limit').value=opt.value.split('|')[1]}
+  if(isFinite(o.vlo)&&isFinite(o.vhi)&&!$('j-vtf').dataset.touched)$('j-vtf').value=+((o.vlo+o.vhi)/2).toFixed(2);
+  calcRes();calcMM();calcCable();calcVta();$('c-sec').dispatchEvent(new Event('input'));calcAlign();
+}
+function checkRow(name,value,cls,label){return `<div class="check"><b>${name}</b><span class="v">${value}</span><span class="pill ${cls}">${label}</span></div>`}
+function renderChecks(){
+  const o=P.system||readSys(),rows=[];
+  const C=o.hz==100?o.comp*1.7:o.comp,M=o.meff+o.cmass+1,f=1000/(2*Math.PI*Math.sqrt(M*C));
+  rows.push(isFinite(f)?checkRow('Резонанс тонарма и головки',fmt(f,1)+' Гц · норма 8–12 Гц',f>=8&&f<=12?'ok':f>=7&&f<=14?'mid':'no',f>=8&&f<=12?'хорошо':f>=7&&f<=14?'на грани':'несовместимо'):checkRow('Резонанс','заполните массу и гибкость','info','—'));
+  if(o.type==='MC')rows.push(checkRow('Ёмкость нагрузки','для MC-головки почти не важна','ok','не важно'));
+  else{const t=o.icpf*o.iclen+o.armc+o.pcap;rows.push(isFinite(t)?checkRow('Ёмкость нагрузки MM',fmt(t,0)+' пФ · рекомендация '+fmt(o.clo,0)+'–'+fmt(o.chi,0),t>=o.clo&&t<=o.chi?'ok':t<o.clo?'mid':'no',t>=o.clo&&t<=o.chi?'в норме':t<o.clo?'меньше нормы':'больше нормы'):checkRow('Ёмкость нагрузки','заполните данные кабеля','info','—'))}
+  const R=2*RHO*o.slen/o.ssec,zo=8/o.df,rc=ripple(zo+R,o.zmin,o.zmax)-ripple(zo,o.zmin,o.zmax);
+  rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','заполните длину и сечение','info','—'));
+  if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм, '+fmt(o.off,1)+'°':''),'info','справка'))}
+  const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
+  if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
+  else rows.push(checkRow('Прижимная сила','запишите настройку в журнал ниже','info','нет данных'));
+  $('y-checks').innerHTML=rows.join('');
+}
+function vtfPill(){const v=num('j-vtf'),o=P.system||readSys(),p=$('j-pill');
+  if(!isFinite(v)||!isFinite(o.vlo))setPill(p,'info','—');else if(v<o.vlo)setPill(p,'no','легче нормы');else if(v>o.vhi)setPill(p,'mid','тяжелее нормы');else setPill(p,'ok','в диапазоне головки')}
+function renderSetups(){const tb=$('j-list');tb.innerHTML='';const list=P.setups.slice().sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.t||0)-(a.t||0));
+  $('j-empty').hidden=!!list.length;
+  list.slice(0,30).forEach(s=>{const tr=document.createElement('tr');tr.innerHTML='<td class="n">'+fmtDate(s.d)+'</td><td class="n">'+(isFinite(s.vtf)?fmt(s.vtf,2)+' г':'—')+'</td><td class="n"></td><td></td><td class="note-cell"></td><td></td>';
+    tr.children[2].textContent=s.as||'—';tr.children[3].textContent=s.h||'—';tr.children[4].textContent=s.n||'';
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Удалить';
+    del.addEventListener('click',()=>{if(del.classList.contains('arm')){P.setups=P.setups.filter(x=>x.id!==s.id);saveP();renderSetups();renderChecks()}else{del.classList.add('arm');del.textContent='Точно?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});
+    tr.children[5].appendChild(del);tb.appendChild(tr)})}
+let PS=null;
+function saveP(){PS.save(JSON.parse(JSON.stringify(P)))}
+function onProfile(d,mode){
+  if(d&&typeof d==='object'){P={system:d.system||null,setups:Array.isArray(d.setups)?d.setups:[],prefs:Object.assign({washEvery:20},d.prefs||{})}}
+  if(P.prefs.room){const r=P.prefs.room;['L','W','H','rt','front'].forEach(k=>{if(isFinite(r[k]))$('o-'+k).value=r[k]})}
+  renderRoom();
+  if(P.system){fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
+  $('k-every').value=P.prefs.washEvery;renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
+}
+$('y-form').addEventListener('submit',e=>{e.preventDefault();const o=readSys();if(!(o.D>100&&o.D<400)){$('y-msg').textContent='Проверьте расстояние от шпинделя до оси тонарма: обычно 200–300 мм.';return}
+  P.system=o;saveP();applySys(o);renderChecks();vtfPill();$('y-msg').textContent='Сохранено. Калькуляторы обновлены.';
+  $('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'});
+$('y-form').addEventListener('input',()=>{if(!P.system)renderChecks();$('y-msg').textContent=''});
+$('j-vtf').addEventListener('input',()=>{$('j-vtf').dataset.touched='1';vtfPill()});
+$('j-form').addEventListener('submit',e=>{e.preventDefault();const v=num('j-vtf');
+  P.setups.push({id:rid(),d:$('j-date').value||today(),vtf:isFinite(v)?v:null,as:$('j-as').value.trim().slice(0,30),h:$('j-h').value.trim().slice(0,40),n:$('j-note').value.trim().slice(0,160),t:Date.now()});
+  if(P.setups.length>300)P.setups.splice(0,P.setups.length-300);saveP();$('j-note').value='';renderSetups();renderChecks()});
+$('j-date').value=today();
+
+/* ---------- Коллекция ---------- */
+const GR=['M','NM','VG+','VG','G+','G','F','P'],GRN={M:'Mint — новая, не играна',NM:'Near Mint — почти идеальная','VG+':'Very Good Plus — следы есть, на звук не влияют',VG:'Very Good — слышны щелчки в тихих местах','G+':'Good Plus — заметный шум',G:'Good — сильный шум, но играет',F:'Fair — на грани',P:'Poor — проблемная'};
+['k-mc','k-sc'].forEach(id=>{const s=$(id);GR.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g+(id==='k-mc'?' — '+GRN[g].split(' — ')[1]:'');s.appendChild(o)});s.value='NM'});
+const razy=n=>{const a=n%10,b=n%100;return n+(a>=2&&a<=4&&(b<12||b>14)?' раза':' раз')};
+const gradeCls=g=>['M','NM','VG+'].includes(g)?'ok':['VG','G+'].includes(g)?'mid':g?'no':'info';
+const MINUTES={'LP 33':40,'12″ 45':25,'7″ 45':8,'78':8};
+let RECS=[],recMode='local',recCol=null,recChain=Promise.resolve(),editId=null;
+function recLocalSave(){lsSet('vinyl-lab-records',JSON.stringify(RECS))}
+function recWrite(r){const body=Object.assign({},r);delete body.id;
+  if(recMode==='db'&&recCol){recChain=recChain.then(()=>recCol.doc(r.id).set(body)).catch(e=>{if(permErr(e)){recMode='local';recLocalSave();renderCat()}else if(e&&e.code==='quota_exceeded')$('k-msg').textContent='Хранилище заполнено: удалите часть записей.'})}
+  else recLocalSave()}
+function recPut(r){const i=RECS.findIndex(x=>x.id===r.id);if(i>=0)RECS[i]=r;else RECS.push(r);recWrite(r);renderCat()}
+function recDel(id){RECS=RECS.filter(x=>x.id!==id);if(recMode==='db'&&recCol)recChain=recChain.then(()=>recCol.doc(id).delete()).catch(()=>{});else recLocalSave();renderCat()}
+const washEvery=()=>Math.max(1,+P.prefs.washEvery||20);
+const needsWash=r=>!r.wd||(r.psw||0)>=washEvery();
+function filtered(){const q=$('k-q').value.trim().toLowerCase(),f=chipVal('k-filter'),srt=$('k-sort').value;
+  let l=RECS.filter(r=>!q||[r.a,r.t,r.l,r.n].join(' ').toLowerCase().includes(q));
+  if(f==='wash')l=l.filter(needsWash);if(f==='never')l=l.filter(r=>!r.pc);
+  const by={a:(x,y)=>(x.a||'').localeCompare(y.a||'','ru')||(x.y||0)-(y.y||0),add:(x,y)=>(y.add||'').localeCompare(x.add||''),lp:(x,y)=>(y.lp||'').localeCompare(x.lp||''),y:(x,y)=>(+x.y||9999)-(+y.y||9999),mc:(x,y)=>GR.indexOf(x.mc)-GR.indexOf(y.mc)};
+  return l.sort(by[srt]||by.a)}
+function renderCat(){
+  const t=dayNum(today());
+  $('k-cnt').textContent=RECS.length.toLocaleString('ru-RU');
+  const sum=RECS.reduce((a,r)=>a+(+r.p||0),0);$('k-sum').textContent=sum?Math.round(sum).toLocaleString('ru-RU')+' ₽':'—';
+  $('k-wash').textContent=RECS.filter(needsWash).length;$('k-month').textContent=RECS.filter(r=>r.lp&&t-dayNum(r.lp)<30).length;
+  $('k-empty').hidden=!!RECS.length;
+  const l=filtered(),ul=$('k-list');ul.innerHTML='';
+  l.slice(0,150).forEach(r=>{const li=document.createElement('li');
+    const ttl=document.createElement('div');ttl.className='ttl';ttl.textContent=(r.a||'—')+' — '+(r.t||'—');
+    const sm=document.createElement('small');sm.textContent=[r.y,r.f,r.l].filter(Boolean).join(' · ')+(r.pc?' · слушали '+razy(r.pc)+', последний '+fmtDate(r.lp):' · ещё не слушали');ttl.appendChild(sm);
+    if(r.n){const n=document.createElement('small');n.textContent=r.n;ttl.appendChild(n)}
+    const tags=document.createElement('div');tags.className='tags';
+    const g=document.createElement('span');g.className='grade '+gradeCls(r.mc);g.title=r.mc?GRN[r.mc]:'';g.textContent=(r.mc||'?')+' / '+(r.sc||'?');tags.appendChild(g);
+    const w=document.createElement('span');w.className='pill '+(needsWash(r)?'mid':'ok');w.textContent=!r.wd?'не мыта':needsWash(r)?'пора мыть':'помыта '+fmtDate(r.wd);tags.appendChild(w);
+    const acts=document.createElement('div');acts.className='acts';
+    const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b);return b};
+    mk('Слушаю',()=>playRec(r));mk('Помыта сегодня',()=>{recPut(Object.assign({},r,{wd:today(),ws:(r.ws||0)+1,psw:0}));$('k-msg').textContent='Отмечена мойка: '+r.a+' — '+r.t+'.'});
+    mk('Изменить',()=>editRec(r));
+    mk('Удалить',b=>{if(b.classList.contains('arm'))recDel(r.id);else{b.classList.add('arm');b.textContent='Точно удалить?';setTimeout(()=>{b.classList.remove('arm');b.textContent='Удалить'},4000)}});
+    li.append(ttl,tags,acts);ul.appendChild(li)});
+  $('k-more').textContent=l.length>150?'Показаны 150 из '+l.length+'. Уточните поиск.':RECS.length&&!l.length?'Ничего не найдено.':'';
+  $('k-store').textContent=recMode==='db'?'Коллекция сохраняется в вашем аккаунте.':'Коллекция хранится только в этом браузере.';
+  renderStats();renderPick(false);if(W)renderW();
+}
+function playRec(r){const m=MINUTES[r.f]||40;recPut(Object.assign({},r,{pc:(r.pc||0)+1,psw:(r.psw||0)+1,lp:today()}));
+  const st=active();if(st&&!st.retired){addSession(m,today(),r.a+' — '+r.t);$('k-msg').textContent='Записано: '+r.a+' — '+r.t+', '+m+' мин в журнал иглы «'+st.name+'».'}
+  else $('k-msg').textContent='Прослушивание отмечено. Добавьте иглу на вкладке «Игла», чтобы время шло в её журнал.'}
+function editRec(r){editId=r.id;['a','t','y','l','p','n','wd'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
+  $('k-formtitle').textContent='Изменить пластинку';$('k-submit').textContent='Сохранить изменения';$('k-cancel').hidden=false;$('k-a').focus();
+  if(location.hash!=='#kollekciya')location.hash='kollekciya';document.getElementById('k-form').scrollIntoView({block:'start'})}
+function resetForm(){editId=null;$('k-form').reset();$('k-mc').value='NM';$('k-sc').value='NM';$('k-formtitle').textContent='Добавить пластинку';$('k-submit').textContent='Добавить в коллекцию';$('k-cancel').hidden=true}
+$('k-cancel').addEventListener('click',()=>{pendingWant=null;resetForm();$('k-msg').textContent=''});
+$('k-form').addEventListener('submit',e=>{e.preventDefault();const a=$('k-a').value.trim(),t=$('k-t').value.trim();if(!a||!t){$('k-msg').textContent='Укажите исполнителя и альбом.';return}
+  const old=editId?RECS.find(x=>x.id===editId):null;const wd=$('k-wd').value||'';
+  const r=Object.assign({},old||{id:rid(),add:today(),pc:0,psw:0,ws:0},{a:a.slice(0,120),t:t.slice(0,160),y:$('k-y').value.trim().slice(0,4),f:$('k-f').value,mc:$('k-mc').value,sc:$('k-sc').value,l:$('k-l').value.trim().slice(0,80),p:num('k-p')||0,n:$('k-n').value.trim().slice(0,200),wd,wm:$('k-wm').value});
+  if(wd&&(!old||old.wd!==wd)){r.psw=0;r.ws=(r.ws||0)+1}
+  recPut(r);$('k-msg').textContent=(old?'Сохранено: ':'Добавлено: ')+a+' — '+t+'.';
+  if(pendingWant&&!old){W.del(pendingWant);$('k-msg').textContent+=' Убрана из списка «Хочу купить».'}pendingWant=null;resetForm()});
+['k-q','k-sort'].forEach(i=>$(i).addEventListener('input',renderCat));chips('k-filter',renderCat);
+$('k-every').addEventListener('change',()=>{const v=Math.round(num('k-every'));if(v>0){P.prefs.washEvery=v;saveP();renderCat()}});
+// CSV
+function parseCSV(text){const rows=[];let row=[],f='',q=false;for(let i=0;i<text.length;i++){const c=text[i];
+  if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"')q=true;else if(c===','){row.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f=''}else f+=c}
+  if(f!==''||row.length){row.push(f);rows.push(row)}return rows.filter(r=>r.some(x=>x.trim()!==''))}
+const gradeOf=s=>{const m=/\(([^)]+)\)/.exec(s||'');let g=m?m[1].trim():'';g=g.replace(' or M-','').replace('M-','NM');return GR.includes(g)?g:(/^generic|^no cover/i.test(s||'')?'':'')};
+const fmtOf=s=>{s=s||'';if(/7"/.test(s))return '7″ 45';if(/78 RPM/i.test(s))return '78';if(/12"/.test(s)&&/45 RPM/i.test(s))return '12″ 45';return 'LP 33'};
+$('k-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;const st=$('k-imp');
+  try{const rows=parseCSV(await file.text());const h=rows.shift().map(x=>x.trim());const ix=n=>h.indexOf(n);
+    if(ix('Artist')<0||ix('Title')<0){st.textContent='Это не похоже на экспорт коллекции Discogs: нет колонок Artist и Title.';return}
+    const have=new Set(RECS.map(r=>(r.a+'|'+r.t).toLowerCase()));let added=0,skipped=0;const todo=[];
+    rows.forEach(c=>{const a=(c[ix('Artist')]||'').replace(/\s\(\d+\)/g,'').trim(),t=(c[ix('Title')]||'').trim();if(!a||!t)return;
+      const key=(a+'|'+t).toLowerCase();if(have.has(key)){skipped++;return}have.add(key);
+      const lab=[c[ix('Label')],c[ix('Catalog#')]].filter(Boolean).join(', ');const da=(c[ix('Date Added')]||'').slice(0,10);const yr=(c[ix('Released')]||'').slice(0,4);
+      todo.push({id:rid(),a:a.slice(0,120),t:t.slice(0,160),y:yr==='0'?'':yr,f:fmtOf(c[ix('Format')]),mc:gradeOf(c[ix('Collection Media Condition')]),sc:gradeOf(c[ix('Collection Sleeve Condition')]),l:lab.slice(0,80),p:0,n:(c[ix('Collection Notes')]||'').slice(0,200),wd:'',wm:'',add:/^\d{4}-\d\d-\d\d$/.test(da)?da:today(),pc:0,psw:0,ws:0})});
+    if(recMode==='db'&&recCol){for(const r of todo){RECS.push(r);const body=Object.assign({},r);delete body.id;
+        try{await recCol.doc(r.id).set(body)}catch(err){if(err&&err.code==='quota_exceeded'){st.textContent='Хранилище заполнено после '+added+' пластинок.';break}}
+        added++;if(added%20===0){st.textContent='Импортирую… '+added+' из '+todo.length;renderCat()}}}
+    else{RECS.push(...todo);added=todo.length;recLocalSave()}
+    renderCat();st.textContent='Импортировано: '+added+(skipped?'. Уже были в коллекции: '+skipped:'')+'.';e.target.value=''}
+  catch(err){st.textContent='Не получилось прочитать файл. Нужен CSV-экспорт коллекции с Discogs.'}});
+const csvCell=v=>{v=v==null?'':String(v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+$('k-export').addEventListener('click',async()=>{const st=$('k-exp');if(!RECS.length){st.textContent='Коллекция пуста.';return}
+  const dl=await getDownloads();if(!dl){st.textContent='В этом окне скачивание недоступно. Откройте страницу на claude.ai в браузере.';return}
+  const head=['Исполнитель','Альбом','Год','Формат','Лейбл, номер','Винил','Конверт','Цена','Последняя мойка','Способ мойки','Прослушиваний','Последнее прослушивание','Добавлена','Заметки'];
+  const lines=[head].concat(filtered().map(r=>[r.a,r.t,r.y,r.f,r.l,r.mc,r.sc,r.p||'',r.wd,r.wm,r.pc||0,r.lp||'',r.add,r.n])).map(r=>r.map(csvCell).join(','));
+  try{await dl.save({filename:'vinyl-collection-'+today()+'.csv',data:'﻿'+lines.join('\r\n')});st.textContent='Файл сохранён.'}
+  catch(e){st.textContent=e&&e.code==='declined'?'Скачивание отменено.':'Скачать не получилось.'}});
+function loadRecs(){try{RECS=JSON.parse(lsGet('vinyl-lab-records')||'[]')}catch(e){RECS=[]}renderCat();
+  getCtx().then(ctx=>{if(!ctx)return;recCol=ctx.db.doc('data/users/'+ctx.uid+'/catalog').collection('records');let first=true;
+    recCol.limit(1000).onSnapshot(snap=>{if(first){first=false;recMode='db';
+        if(snap.empty&&RECS.length){const local=RECS.slice();local.forEach(r=>recWrite(r));renderCat();return}}
+      RECS=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id}));renderCat()},()=>{recMode='local';renderCat()})})}
+
+/* ---------- общий список-хранилище ---------- */
+function colStore(name,lsKey,onChange){const s={mode:'local',list:[],col:null,chain:Promise.resolve()};
+  try{s.list=JSON.parse(lsGet(lsKey)||'[]')}catch(e){s.list=[]}
+  const local=()=>lsSet(lsKey,JSON.stringify(s.list));
+  s.put=r=>{const i=s.list.findIndex(x=>x.id===r.id);if(i>=0)s.list[i]=r;else s.list.push(r);
+    if(s.mode==='db'&&s.col){const b=Object.assign({},r);delete b.id;s.chain=s.chain.then(()=>s.col.doc(r.id).set(b)).catch(e=>{if(permErr(e)){s.mode='local';local();onChange()}})}else local();onChange()};
+  s.del=id=>{s.list=s.list.filter(x=>x.id!==id);if(s.mode==='db'&&s.col)s.chain=s.chain.then(()=>s.col.doc(id).delete()).catch(()=>{});else local();onChange()};
+  getCtx().then(ctx=>{if(!ctx)return;s.col=ctx.db.doc('data/users/'+ctx.uid+'/'+name).collection('items');let first=true;
+    s.col.limit(1000).onSnapshot(snap=>{if(first){first=false;s.mode='db';if(snap.empty&&s.list.length){s.list.slice().forEach(r=>s.put(r));return}}
+      s.list=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id}));onChange()},()=>{s.mode='local';onChange()})});
+  return s}
+
+/* ---------- Хочу купить ---------- */
+let W=null,wEdit=null,pendingWant=null;
+const PRI={1:['Очень хочу','no'],2:['Хочу','mid'],3:['Когда-нибудь','info']};
+const keyAT=(a,t)=>((a||'')+'|'+(t||'')).toLowerCase().trim();
+function renderW(){if(!W)return;const l=W.list,q=$('w-q').value.trim().toLowerCase(),own=new Set(RECS.map(r=>keyAT(r.a,r.t)));
+  $('w-cnt').textContent=l.length;$('w-top').textContent=l.filter(w=>+w.pri===1).length;
+  const sum=l.reduce((a,w)=>a+(+w.max||0),0);$('w-sum').textContent=sum?Math.round(sum).toLocaleString('ru-RU')+' ₽':'—';
+  $('w-empty').hidden=!!l.length;$('w-store').textContent=W.mode==='db'?'Список сохраняется в вашем аккаунте.':'Список хранится только в этом браузере.';
+  const ul=$('w-list');ul.innerHTML='';
+  l.filter(w=>!q||[w.a,w.t,w.ed,w.where].join(' ').toLowerCase().includes(q)).sort((x,y)=>(+x.pri||2)-(+y.pri||2)||(y.add||'').localeCompare(x.add||'')).forEach(w=>{
+    const li=document.createElement('li'),ttl=document.createElement('div');ttl.className='ttl';ttl.textContent=w.a+' — '+w.t;
+    [w.ed,w.where?'видел: '+w.where:''].filter(Boolean).forEach(s=>{const sm=document.createElement('small');sm.textContent=s;ttl.appendChild(sm)});
+    const tags=document.createElement('div');tags.className='tags';const pr=PRI[w.pri]||PRI[2];
+    const pp=document.createElement('span');pp.className='pill '+pr[1];pp.textContent=pr[0];tags.appendChild(pp);
+    if(+w.max){const m=document.createElement('span');m.className='grade info';m.textContent='до '+Math.round(w.max).toLocaleString('ru-RU')+' ₽';tags.appendChild(m)}
+    if(own.has(keyAT(w.a,w.t))){const o=document.createElement('span');o.className='tag-warn';o.textContent='уже есть в коллекции';tags.appendChild(o)}
+    const acts=document.createElement('div');acts.className='acts';const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b)};
+    mk('Купил',()=>{resetForm();pendingWant=w.id;$('k-a').value=w.a;$('k-t').value=w.t;$('k-n').value=w.ed||'';$('k-p').value=w.max||'';$('k-cancel').hidden=false;
+      $('k-msg').textContent='Проверьте состояние и цену и нажмите «Добавить в коллекцию». Пластинка уйдёт из списка желаний.';location.hash='kollekciya';setTimeout(()=>$('k-form').scrollIntoView({block:'start'}),60)});
+    mk('Изменить',()=>{wEdit=w.id;$('w-a').value=w.a;$('w-t').value=w.t;$('w-ed').value=w.ed||'';$('w-max').value=w.max||'';$('w-pri').value=w.pri||2;$('w-where').value=w.where||'';
+      $('w-formtitle').textContent='Изменить';$('w-submit').textContent='Сохранить';$('w-cancel').hidden=false;$('w-a').focus()});
+    mk('Удалить',b=>{if(b.classList.contains('arm'))W.del(w.id);else{b.classList.add('arm');b.textContent='Точно удалить?';setTimeout(()=>{b.classList.remove('arm');b.textContent='Удалить'},4000)}});
+    li.append(ttl,tags,acts);ul.appendChild(li)})}
+function wReset(){wEdit=null;$('w-form').reset();$('w-pri').value='2';$('w-formtitle').textContent='Добавить в список';$('w-submit').textContent='Добавить в список';$('w-cancel').hidden=true}
+$('w-cancel').addEventListener('click',wReset);$('w-q').addEventListener('input',renderW);
+$('w-form').addEventListener('submit',e=>{e.preventDefault();const a=$('w-a').value.trim(),t=$('w-t').value.trim();if(!a||!t){$('w-msg').textContent='Укажите исполнителя и альбом.';return}
+  const old=wEdit?W.list.find(x=>x.id===wEdit):null;
+  W.put(Object.assign({},old||{id:rid(),add:today()},{a:a.slice(0,120),t:t.slice(0,160),ed:$('w-ed').value.trim().slice(0,120),max:num('w-max')||0,pri:+$('w-pri').value,where:$('w-where').value.trim().slice(0,160)}));
+  const dup=RECS.some(r=>keyAT(r.a,r.t)===keyAT(a,t));
+  $('w-msg').textContent=(old?'Сохранено: ':'Добавлено: ')+a+' — '+t+'.'+(dup?' Такая пластинка уже есть в коллекции — может, ищете другое издание?':'');wReset()});
+
+/* ---------- Что послушать ---------- */
+let pickId=null,decKey='';
+const decOf=y=>{y=parseInt(y);return y>1900&&y<2100?String(Math.floor(y/10)*10):''};
+function candidates(){const dec=$('q-dec').value,f=$('q-fmt').value,old=$('q-old').checked,t=dayNum(today());
+  return RECS.filter(r=>(!dec||decOf(r.y)===dec)&&(!f||r.f===f)&&(!old||!r.lp||t-dayNum(r.lp)>=60))}
+function renderPick(force){
+  const decs=[...new Set(RECS.map(r=>decOf(r.y)).filter(Boolean))].sort(),k=decs.join(',');
+  if(k!==decKey){decKey=k;const sel=$('q-dec'),cur=sel.value;sel.innerHTML='<option value="">Любое десятилетие</option>'+decs.map(d=>`<option value="${d}">${d}-е</option>`).join('');if(decs.includes(cur))sel.value=cur}
+  const card=$('q-card'),c=candidates();
+  if(force||!c.some(r=>r.id===pickId)){
+    const sorted=c.slice().sort((a,b)=>(a.lp||'').localeCompare(b.lp||'')),pool=sorted.slice(0,Math.max(1,Math.ceil(sorted.length/2)));
+    let pick=pool[Math.floor(Math.random()*pool.length)];if(force&&pool.length>1)while(pick&&pick.id===pickId)pick=pool[Math.floor(Math.random()*pool.length)];
+    pickId=pick?pick.id:null}
+  const r=RECS.find(x=>x.id===pickId);$('q-play').disabled=!r;$('q-next').disabled=c.length<2;
+  card.innerHTML='';const add=(cls,txt)=>{const d=document.createElement('div');d.className=cls;d.textContent=txt;card.appendChild(d)};
+  if(!RECS.length){add('pm','Добавьте пластинки в коллекцию, и здесь появится подсказка, что поставить.');return}
+  if(!r){add('pm','Под эти условия ничего не подходит. Снимите галочку «давно не слушали» или выберите другое десятилетие.');return}
+  add('pa',r.a);add('pt',r.t);add('pm',[r.y,r.f,r.mc].filter(Boolean).join(' · ')+(r.lp?' · последний раз '+fmtDate(r.lp):' · ещё не слушали'));
+}
+$('q-next').addEventListener('click',()=>{renderPick(true);$('q-msg').textContent=''});
+['q-dec','q-fmt','q-old'].forEach(i=>$(i).addEventListener('change',()=>renderPick(true)));
+$('q-play').addEventListener('click',()=>{const r=RECS.find(x=>x.id===pickId);if(!r)return;playRec(r);$('q-msg').textContent=$('k-msg').textContent});
+
+/* ---------- Статистика ---------- */
+function barChart(svg,labels,values,yFmt,hi){svg.innerHTML='';const Wd=640,H=200,m={l:56,r:10,t:12,b:28},pw=Wd-m.l-m.r,ph=H-m.t-m.b;
+  const max=Math.max(1,...values),yt=ticks(0,max,4),top=Math.max(max,yt[yt.length-1]||max),Y=v=>m.t+ph*(1-v/top),bw=pw/Math.max(1,values.length);
+  yt.forEach(v=>{el('line',{x1:m.l,x2:Wd-m.r,y1:Y(v),y2:Y(v),stroke:css('--line')},svg);el('text',{x:m.l-6,y:Y(v)+4,'text-anchor':'end','font-size':11,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},svg,yFmt(v))});
+  const step=Math.ceil(values.length/10);
+  values.forEach((v,i)=>{const x=m.l+i*bw+bw*.15;if(v>0)el('rect',{x,y:Y(v),width:bw*.7,height:Math.max(1,Y(0)-Y(v)),rx:2,fill:css(i===hi?'--amber':'--glow'),opacity:i===hi?1:.7},svg);
+    if(i%step===0||i===values.length-1)el('text',{x:x+bw*.35,y:H-9,'text-anchor':'middle','font-size':11,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},svg,labels[i])})}
+function hbars(box,rows,colorFn){box.innerHTML='';const max=Math.max(1,...rows.map(r=>r[1]));
+  rows.forEach(([lab,v])=>{const d=document.createElement('div');d.className='hbar';const a=document.createElement('span');a.textContent=lab;a.title=lab;
+    const b=document.createElement('span');b.className='b';b.style.width=(v/max*100)+'%';if(colorFn)b.style.background=colorFn(lab);
+    const c=document.createElement('span');c.className='c';c.textContent=v;d.append(a,b,c);box.appendChild(d)})}
+const money=v=>v>=1e6?fmt(v/1e6,1)+' млн':v>=1000?fmt(v/1000,0)+' тыс':fmt(v,0);
+function renderStats(){const has=RECS.length>0;$('st-empty').hidden=has;$('st-body').hidden=!has;if(!has)return;const t=dayNum(today());
+  const byA={};RECS.forEach(r=>{const a=(r.a||'—').trim();byA[a]=(byA[a]||0)+1});
+  $('st-art-n').textContent=Object.keys(byA).length;$('st-plays').textContent=RECS.reduce((a,r)=>a+(r.pc||0),0);
+  const ys=RECS.map(r=>parseInt(r.y)).filter(y=>y>1900&&y<2100);$('st-avg').textContent=ys.length?Math.round(ys.reduce((a,b)=>a+b,0)/ys.length):'—';
+  $('st-idle').textContent=RECS.filter(r=>r.lp?t-dayNum(r.lp)>365:(r.add&&t-dayNum(r.add)>365)).length;
+  const decs={};ys.forEach(y=>{const d=Math.floor(y/10)*10;decs[d]=(decs[d]||0)+1});const dk=Object.keys(decs).map(Number).sort((a,b)=>a-b);
+  if(dk.length){const lab=[],val=[];for(let d=dk[0];d<=dk[dk.length-1];d+=10){lab.push(d+'-е');val.push(decs[d]||0)}let hi=0;val.forEach((v,i)=>{if(v>val[hi])hi=i});barChart($('st-dec'),lab,val,v=>fmt(v,0),hi)}
+  else $('st-dec').innerHTML='';
+  hbars($('st-art'),Object.entries(byA).sort((a,b)=>b[1]-a[1]).slice(0,8));
+  const gc={};RECS.forEach(r=>{if(r.mc)gc[r.mc]=(gc[r.mc]||0)+1});
+  hbars($('st-gr'),GR.filter(g=>gc[g]).map(g=>[g,gc[g]]),g=>{const c=gradeCls(g);return css(c==='ok'?'--good':c==='mid'?'--warn':'--bad')});
+  const top=RECS.filter(r=>r.pc>0).sort((a,b)=>b.pc-a.pc).slice(0,5),ol=$('st-top');ol.innerHTML='';
+  if(!top.length){const li=document.createElement('li');li.textContent='Пока пусто. Отмечайте прослушивания кнопкой «Слушаю».';ol.appendChild(li)}
+  top.forEach(r=>{const li=document.createElement('li');li.textContent=r.a+' — '+r.t+' ';const s=document.createElement('span');s.textContent=razy(r.pc);li.appendChild(s);ol.appendChild(li)});
+  const priced=RECS.filter(r=>+r.p>0&&r.add);$('st-valwrap').hidden=!priced.length;
+  if(priced.length){const byM={};priced.forEach(r=>{const m=r.add.slice(0,7);byM[m]=(byM[m]||0)+(+r.p)});
+    const ms=Object.keys(byM).sort();let [y,mo]=ms[0].split('-').map(Number);const [ey,em]=ms[ms.length-1].split('-').map(Number);const lab=[],val=[];let acc=0;
+    while(y<ey||(y===ey&&mo<=em)){const k=y+'-'+String(mo).padStart(2,'0');acc+=byM[k]||0;lab.push(String(mo).padStart(2,'0')+'.'+String(y).slice(2));val.push(acc);mo++;if(mo>12){mo=1;y++}}
+    const n=val.length,sl=Math.max(0,n-24);barChart($('st-val'),lab.slice(sl),val.slice(sl),money,n-sl-1)}
+}
+
+/* ---------- Комната ---------- */
+const CS=343;
+function readRoom(){return {L:num('o-L'),W:num('o-W'),H:num('o-H'),rt:num('o-rt'),front:num('o-front')}}
+function roomModes(L,Wd,H){const out=[],mx=d=>Math.ceil(200*2*d/CS);
+  for(let p=0;p<=mx(L);p++)for(let q=0;q<=mx(Wd);q++)for(let r=0;r<=mx(H);r++){if(!p&&!q&&!r)continue;
+    const f=CS/2*Math.sqrt((p/L)**2+(q/Wd)**2+(r/H)**2);if(f>200)continue;const nz=(p>0)+(q>0)+(r>0);out.push({p,q,r,f,type:nz===1?'ax':nz===2?'tan':'obl'})}
+  return out.sort((a,b)=>a.f-b.f)}
+const DIMN=m=>m.p?['Длина',m.p,'вдоль комнаты']:m.q?['Ширина',m.q,'поперёк']:['Высота',m.r,'пол — потолок'];
+function renderRoom(){
+  const {L,W:Wd,H,rt,front}=readRoom();if(!(L>1&&Wd>1&&H>1&&L<50&&Wd<50&&H<20))return;
+  // Cardas
+  const side=0.276*Wd,fr=0.447*Wd,sep=Wd-2*side,lis=fr+sep*Math.sqrt(3)/2,p38=L*0.62;
+  $('o-side').textContent=fmt(side,2)+' м';$('o-fr').textContent=fmt(fr,2)+' м';$('o-sep').textContent=fmt(sep,2)+' м';$('o-lis').textContent=fmt(lis,2)+' м';
+  let note;if(lis>L-0.5)note='По треугольнику слушатель оказывается почти у задней стены. Уменьшите треугольник: садитесь в точке 38 % — '+fmt(p38,2)+' м от фронтальной стены.';
+  else if(Math.abs(lis-L/2)<0.08*L)note='Место попадает почти в середину комнаты, где провал баса. Сдвиньтесь к точке 38 % — '+fmt(p38,2)+' м от фронтальной стены.';
+  else note='Слушатель в '+fmt(L-lis,2)+' м от задней стены ('+Math.round((L-lis)/L*100)+' % длины). Точка 38 % для сравнения — '+fmt(p38,2)+' м от фронтальной стены.';
+  $('o-lisnote').textContent=note;
+  // plan
+  const svg=$('o-plan');svg.innerHTML='';const s=Math.min(320/Wd,320/L),ox=200-Wd*s/2,oy=40,X=x=>ox+x*s,Y=y=>oy+y*s,ink=css('--ink'),mut=css('--muted');
+  svg.setAttribute('viewBox','0 0 400 '+Math.round(L*s+80));
+  el('rect',{x:X(0),y:Y(0),width:Wd*s,height:L*s,fill:css('--bg'),stroke:ink,'stroke-width':2},svg);
+  el('text',{x:200,y:oy-10,'text-anchor':'middle','font-size':12,fill:mut},svg,'стена за колонками · '+fmt(Wd,1)+' м');
+  el('line',{x1:X(0),x2:X(Wd),y1:Y(L/2),y2:Y(L/2),stroke:css('--bad'),'stroke-dasharray':'4 4','stroke-width':1},svg);
+  el('text',{x:X(Wd)+5,y:Y(L/2)+3,'font-size':10,fill:css('--bad')},svg,'середина');
+  el('line',{x1:X(0),x2:X(Wd),y1:Y(p38),y2:Y(p38),stroke:css('--good'),'stroke-dasharray':'2 4','stroke-width':1.5},svg);
+  el('text',{x:X(Wd)+5,y:Y(p38)+3+(Math.abs(p38-L/2)*s<12?12:0),'font-size':10,fill:css('--good')},svg,'точка 38 %');
+  const ly=Math.min(lis,L-0.2),sp=[[side,fr],[Wd-side,fr]];
+  el('polygon',{points:sp.map(p=>X(p[0])+','+Y(p[1])).join(' ')+' '+X(Wd/2)+','+Y(ly),fill:css('--glow-soft'),stroke:css('--amber'),'stroke-width':1.5,opacity:.9},svg);
+  sp.forEach(p=>el('rect',{x:X(p[0])-8,y:Y(p[1])-12,width:16,height:12,rx:2,fill:ink},svg));
+  el('circle',{cx:X(Wd/2),cy:Y(ly),r:7,fill:css('--amber')},svg);
+  el('text',{x:X(Wd/2),y:Y(ly)+22,'text-anchor':'middle','font-size':11,fill:ink},svg,'слушатель');
+  el('text',{x:200,y:Y(L)+18,'text-anchor':'middle','font-size':12,fill:mut},svg,'длина '+fmt(L,1)+' м');
+  // SBIR
+  const fs=CS/(4*front);$('o-sbir').innerHTML=isFinite(fs)?fmt(fs,0)+'<small>Гц</small>':'—';
+  const tb=$('o-sbirtab');tb.innerHTML='';[0.2,0.3,0.5,0.75,1,1.25,1.5,2].forEach(d=>{const tr=document.createElement('tr');if(Math.abs(d-front)<0.13)tr.className='sel';tr.innerHTML='<td class="n">'+fmt(d,2)+' м</td><td class="n">'+fmt(CS/(4*d),0)+' Гц</td>';tb.appendChild(tr)});
+  // modes
+  const modes=roomModes(L,Wd,H),ax=modes.filter(m=>m.type==='ax'),coin=[];
+  ax.forEach((a,i)=>ax.slice(i+1).forEach(b=>{const da=a.p?'L':a.q?'W':'H',db=b.p?'L':b.q?'W':'H';if(da!==db&&Math.abs(a.f-b.f)<3)coin.push([a,b])}));
+  const ms=$('o-modes');ms.innerHTML='';const Wc=640,Hc=220,m={l:20,r:16,t:16,b:30},pw=Wc-m.l-m.r,ph=Hc-m.t-m.b,XF=f=>m.l+(f-20)/180*pw;
+  coin.forEach(([a,b])=>{const f=(a.f+b.f)/2;el('rect',{x:XF(f)-8,y:m.t,width:16,height:ph,fill:css('--bad'),opacity:.12},ms)});
+  const schr=2000*Math.sqrt(rt/(L*Wd*H));
+  for(let f=20;f<=200;f+=20){el('line',{x1:XF(f),x2:XF(f),y1:m.t+ph,y2:m.t+ph+4,stroke:mut},ms);el('text',{x:XF(f),y:Hc-10,'text-anchor':'middle','font-size':11,fill:mut,'font-family':'IBM Plex Mono, monospace'},ms,f)}
+  el('line',{x1:m.l,x2:Wc-m.r,y1:m.t+ph,y2:m.t+ph,stroke:css('--line')},ms);
+  if(schr>20&&schr<200){el('line',{x1:XF(schr),x2:XF(schr),y1:m.t,y2:m.t+ph,stroke:ink,'stroke-dasharray':'3 3',opacity:.6},ms);el('text',{x:XF(schr)+4,y:m.t+10,'font-size':10,fill:mut},ms,'Шрёдер '+fmt(schr,0)+' Гц')}
+  const hgt={ax:1,tan:.6,obl:.35},col={ax:css('--amber'),tan:css('--c2'),obl:css('--muted')};
+  modes.filter(x=>x.f>=20).slice().sort((a,b)=>hgt[a.type]-hgt[b.type]).forEach(x=>el('line',{x1:XF(x.f),x2:XF(x.f),y1:m.t+ph,y2:m.t+ph*(1-hgt[x.type]*0.92),stroke:col[x.type],'stroke-width':x.type==='ax'?3:1.5},ms));
+  $('o-verdict').textContent=coin.length?'Совпадают осевые моды: '+[...new Set(coin.map(([a,b])=>fmt((a.f+b.f)/2,0)+' Гц'))].join(', ')+'. На этих частотах вероятен гул. Помогают басовые ловушки в углах и поиск места слушателя тонами ниже.':'Осевые моды разных направлений не совпадают: пропорции комнаты удачные, сильного гула на одной частоте не будет.';
+  const at=$('o-axial');at.innerHTML='';const coinSet=new Set(coin.flat());
+  ax.filter(a=>Math.max(a.p,a.q,a.r)<=3).forEach(a=>{const [n,k,dir]=DIMN(a),tr=document.createElement('tr');
+    tr.innerHTML='<td>'+n+', '+k+'-я'+(coinSet.has(a)?' <span class="tag-warn">совпадение</span>':'')+'</td><td class="n">'+fmt(a.f,1)+' Гц</td><td>'+dir+'</td><td></td>';
+    const b=document.createElement('button');b.type='button';b.className='del';b.textContent='▶ тон';b.addEventListener('click',()=>playTone(a.f,6));tr.children[3].appendChild(b);at.appendChild(tr)});
+  $('o-schr').textContent=isFinite(schr)?fmt(schr,0)+' Гц':'—';$('o-vol').textContent=fmt(L*Wd*H,1)+' м³';
+}
+let actx=null,cur=null,sweepInt=null;
+function audioCtx(){if(!actx){const AC=window.AudioContext||window.webkitAudioContext;actx=new AC()}if(actx.state==='suspended')actx.resume();return actx}
+function stopTone(){clearInterval(sweepInt);if(cur&&actx){try{const t=actx.currentTime;cur.g.gain.cancelScheduledValues(t);cur.g.gain.setValueAtTime(cur.g.gain.value,t);cur.g.gain.linearRampToValueAtTime(0,t+0.15);cur.o.stop(t+0.2)}catch(e){}}cur=null;$('o-play').textContent=''}
+function startOsc(f,dur){stopTone();const a=audioCtx(),o=a.createOscillator(),g=a.createGain(),t=a.currentTime;o.type='sine';o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.25,t+0.3);g.gain.setValueAtTime(0.25,t+dur-0.4);g.gain.linearRampToValueAtTime(0,t+dur);
+  o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur+0.05);cur={o,g};o.onended=()=>{if(cur&&cur.o===o){cur=null;clearInterval(sweepInt);$('o-play').textContent=''}};return {o,t}}
+function playTone(f,dur){try{startOsc(f,dur);$('o-play').textContent='Играет '+fmt(f,1)+' Гц, '+dur+' с.'}catch(e){$('o-play').textContent='Звук недоступен в этом окне.'}}
+$('o-sweep').addEventListener('click',()=>{try{const D=40,{o,t}=startOsc(20,D);o.frequency.exponentialRampToValueAtTime(200,t+D);const t0=Date.now();
+  sweepInt=setInterval(()=>{const e=(Date.now()-t0)/1000;$('o-play').textContent='Свип: сейчас ≈ '+fmt(20*Math.pow(10,Math.min(1,e/D)),0)+' Гц'},250)}catch(e){$('o-play').textContent='Звук недоступен в этом окне.'}});
+$('o-stop').addEventListener('click',stopTone);
+$('o-form').addEventListener('input',()=>{renderRoom();$('o-msg').textContent=''});
+$('o-form').addEventListener('submit',e=>{e.preventDefault();const r=readRoom();if(!(r.L>1&&r.W>1&&r.H>1)){$('o-msg').textContent='Проверьте размеры комнаты.';return}
+  P.prefs.room=r;saveP();$('o-msg').textContent='Комната сохранена.'});
+
+calcRes();calcSpeed();calcCable();calcMM();calcVta();renderRoom();
+W=colStore('wants','vinyl-lab-wants',renderW);renderW();
+/* ---------- резервная копия ---------- */
+let bkData=null;
+$('bk-save').addEventListener('click',async()=>{const st=$('bk-msg'),dl=await getDownloads();
+  if(!dl){st.textContent='В этом окне скачивание недоступно. Откройте страницу на claude.ai в браузере.';return}
+  const body={app:'vinyl-lab',v:1,date:today(),profile:P,stylus:N,records:RECS,wants:W?W.list:[]};
+  try{await dl.save({filename:'vinyl-lab-'+today()+'.json',data:JSON.stringify(body)});st.textContent='Копия сохранена. Пластинок: '+RECS.length+', записей в журнале иглы: '+N.sessions.length+'.'}
+  catch(e){st.textContent=e&&e.code==='declined'?'Сохранение отменено.':'Сохранить не получилось.'}});
+$('bk-file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());if(!d||d.app!=='vinyl-lab')throw 0;bkData=d;
+    $('bk-what').textContent='Копия от '+fmtDate(d.date)+'. Пластинок: '+(d.records||[]).length+', в списке желаний: '+(d.wants||[]).length+', игл: '+((d.stylus&&d.stylus.styli)||[]).length+'. Пластинки и список желаний добавятся к текущим. Система и журнал иглы заменятся данными из файла.';
+    $('bk-confirm').hidden=false;$('bk-msg').textContent=''}
+  catch(err){$('bk-msg').textContent='Это не файл резервной копии Винил·Лаб.'}});
+$('bk-no').addEventListener('click',()=>{bkData=null;$('bk-confirm').hidden=true});
+$('bk-yes').addEventListener('click',()=>{const d=bkData;if(!d)return;$('bk-confirm').hidden=true;
+  if(d.profile){P={system:d.profile.system||null,setups:Array.isArray(d.profile.setups)?d.profile.setups:[],prefs:Object.assign({washEvery:20},d.profile.prefs||{})};saveP();onProfile(P,PS.mode)}
+  if(d.stylus){N=normalize(d.stylus);persist();renderN()}
+  (d.records||[]).forEach(r=>{if(r&&r.id&&r.a)recPut(r)});(d.wants||[]).forEach(w=>{if(w&&w.id&&w.a)W.put(w)});
+  $('bk-msg').textContent='Данные восстановлены.';bkData=null});
+
+/* ---------- установка приложения ---------- */
+if(STANDALONE){$('app-open').hidden=true;$('app-text').textContent='Эту версию можно установить на телефон: иконка на рабочем столе, работает без интернета. Данные хранятся на этом устройстве — делайте резервную копию в файл.'}
+let installEvt=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;$('app-install').hidden=false});
+$('app-install').addEventListener('click',async()=>{if(!installEvt)return;installEvt.prompt();try{await installEvt.userChoice}catch(e){}installEvt=null;$('app-install').hidden=true});
+if(matchMedia('(display-mode: standalone)').matches){$('app-panel').hidden=true}
+
+PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();
+showTab();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{calcRes();calcAlign();if(lastAnalysis)showAnalysis(lastAnalysis,num('s-nom')||3150)});
+})();
+</script>

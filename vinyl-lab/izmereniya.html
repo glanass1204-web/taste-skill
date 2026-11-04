@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Винил·Лаб — Измерения</title>
+<meta name="theme-color" content="#0F1318">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Винил·Лаб">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -77,6 +83,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб — измерения</h1>
     <p class="tag">Измерения микрофоном телефона или компьютера: скорость диска и детонация, АЧХ в комнате, баланс каналов, уровень громкости.</p>
   </div>
+  <a class="btn" href="./" style="text-decoration:none">← Винил·Лаб: система, коллекция, калькуляторы</a>
 </header>
 
 <div class="micbar">
@@ -155,8 +162,9 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
 </div>
 
 <footer>
-  Винил·Лаб — измерения. Звук обрабатывается только на вашем устройстве и никуда не отправляется. Основные калькуляторы, коллекция и журналы — на основной странице Винил·Лаб в claude.ai.
+  Винил·Лаб — измерения. Звук обрабатывается только на вашем устройстве и никуда не отправляется.
 </footer>
+<script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </div>
 
 <script>

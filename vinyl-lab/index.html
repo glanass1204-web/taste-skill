@@ -379,7 +379,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.2</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.3</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -1802,7 +1802,7 @@ const TT=[
   {id:'pslx310',skin:'sony',arm:'line',pitch:0,name:'Sony PS-LX310BT',fixed:true,D:null,ov:null,off:null,meff:null,note:'Автоматический проигрыватель с несъёмной головкой: прижимная сила, антискейтинг и юстировка выставлены на заводе и не регулируются. Пригодятся журнал иглы, коллекция и проверка скорости.'},
   {id:'psx50',skin:'silver',arm:'line',pitch:0,name:'Sony PS-X50 (винтаж)',D:221,ov:14,off:null,meff:null,note:'Эффективная длина 235 мм и свес 14 мм — по инструкции, со слов владельцев. Эффективную массу и офсет впишите сами.'}
 ];
-const BRAND=t=>t.name.split(' ')[0];
+const BRAND=t=>{const m=t.name.match(/^(Monitor Audio|Q Acoustics|Cambridge Audio|Pro-Ject|Audio-Technica)\b/);return m?m[1]:t.name.split(' ')[0]};
 const CARTS=[
   {id:'2mred',name:'Ortofon 2M Red',life:1000,type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
   {id:'2mblue',name:'Ortofon 2M Blue',life:1000,type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
@@ -1845,6 +1845,14 @@ const SPKS=[
   {id:'q350',name:'KEF Q350',z:8,zmin:3.7,sens:87,f3:null,plo:15,phi:120},
   {id:'oberon5',name:'DALI Oberon 5',z:6,zmin:null,sens:88,f3:null,plo:30,phi:150},
   {id:'d121',name:'Wharfedale Diamond 12.1',z:8,zmin:null,sens:88,f3:null},
+  {id:'ls50m',name:'KEF LS50 Meta',z:8,zmin:3.5,sens:85,f3:79,plo:40,phi:100,note:'Чувствительность низкая (85 дБ) — усилителю нужен запас мощности.'},
+  {id:'spektor2',name:'DALI Spektor 2',z:6,zmin:null,sens:84.5,f3:54,plo:25,phi:100,note:'Снята с производства, но часто встречается б/у.'},
+  {id:'bw607s3',name:'B&W 607 S3',z:8,zmin:3,sens:84,f3:null,plo:30,phi:100,note:'Минимум импеданса 3 Ом — нужен усилитель, уверенно работающий на 4 Ом.'},
+  {id:'bw606s3',name:'B&W 606 S3',z:8,zmin:3.7,sens:88,f3:null,plo:30,phi:120},
+  {id:'q3020i',name:'Q Acoustics 3020i',z:6,zmin:4,sens:88,f3:64,plo:25,phi:75},
+  {id:'rp600m2',name:'Klipsch RP-600M II',z:8,zmin:null,sens:94.5,f3:44,phi:100,note:'94,5 дБ Klipsch указывает в комнате; в безэховой камере измеряют около 86 дБ — реальная громкость будет ниже расчётной.'},
+  {id:'bronze100',name:'Monitor Audio Bronze 100',z:8,zmin:null,sens:87,f3:null,plo:30,phi:100},
+  {id:'chora806',name:'Focal Chora 806',z:8,zmin:4.6,sens:89,f3:58,plo:25,phi:120},
   {id:'s90',name:'Радиотехника S-90 (35АС-012)',z:4,zmin:null,sens:85,f3:31.5,plo:35,phi:90,note:'Чувствительность 85 дБ (0,338 Па/√Вт), номинальная мощность 35 Вт, паспортная 90 Вт — по паспорту.'}
 ];
 fillSelect($('y-pick-amp'),AMPS);fillSelect($('y-pick-spk'),SPKS);

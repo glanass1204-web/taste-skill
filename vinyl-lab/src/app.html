@@ -1348,27 +1348,42 @@ const TT=[
   {id:'dce',name:'Pro-Ject Debut Carbon EVO',D:200,ov:18.5,off:null,meff:6,cart:'2mred',note:'Pro-Ject не указывает угол офсета: поле оставлено пустым.'},
   {id:'devo2',name:'Pro-Ject Debut EVO 2',D:200,ov:18.5,off:null,meff:7,note:'Pro-Ject не указывает угол офсета. Штатная головка Pick it MM EVO выбирается вручную: в её паспорте нет гибкости.'},
   {id:'planar3',name:'Rega Planar 3 (тонарм RB330)',D:222,ov:14.5,off:21.55,meff:11},
-  {id:'dp400',name:'Denon DP-400',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет. Головодержатель весит 11 г с крепежом.'}
+  {id:'dp400',name:'Denon DP-400',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет. Головодержатель весит 11 г с крепежом.'},
+  {id:'dp450',name:'Denon DP-450USB',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет.'},
+  {id:'dp300f',name:'Denon DP-300F',D:202.5,ov:19,off:null,meff:null,note:'Полностью автоматический. Denon не указывает эффективную массу и офсет.'},
+  {id:'dp3000ne',name:'Denon DP-3000NE',D:230,ov:14,off:null,meff:null,note:'Denon не указывает эффективную массу. Тонарм рассчитан на головки 4–16 г, головодержатель весит 11 г: это тонарм средней-высокой массы, хорошо подходит для жёстких MC вроде DL-103.'},
+  {id:'pshx500',name:'Sony PS-HX500',D:null,ov:null,off:null,meff:null,cart:'sonyhx500',note:'Sony указывает только эффективную длину тонарма 221 мм, свес не указан — впишите расстояние до оси тонарма, если измерите его.'},
+  {id:'pslx310',name:'Sony PS-LX310BT',fixed:true,D:null,ov:null,off:null,meff:null,note:'Автоматический проигрыватель с несъёмной головкой: прижимная сила, антискейтинг и юстировка выставлены на заводе и не регулируются. Пригодятся журнал иглы, коллекция и проверка скорости.'},
+  {id:'psx50',name:'Sony PS-X50 (винтаж)',D:221,ov:14,off:null,meff:null,note:'Эффективная длина 235 мм и свес 14 мм — по инструкции, со слов владельцев. Эффективную массу и офсет впишите сами.'}
 ];
+const BRAND=t=>t.name.split(' ')[0];
 const CARTS=[
   {id:'2mred',name:'Ortofon 2M Red',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
   {id:'2mblue',name:'Ortofon 2M Blue',type:'MM',m:7.2,c:20,hz:10,prof:'elliptical',vlo:1.6,vhi:2.0,vrec:1.8,clo:150,chi:300},
   {id:'vm95e',name:'Audio-Technica AT-VM95E',type:'MM',m:6.1,c:7,hz:100,prof:'elliptical',vlo:1.8,vhi:2.2,vrec:2.0,clo:100,chi:200},
   {id:'mp110',name:'Nagaoka MP-110',type:'MM',m:6.5,c:20,hz:100,prof:'elliptical',vlo:1.5,vhi:2.0,vrec:1.8,clo:100,chi:200},
-  {id:'dl103',name:'Denon DL-103 (MC)',type:'MC',m:8.5,c:5,hz:100,prof:'conical',vlo:2.2,vhi:2.8,vrec:2.5,clo:null,chi:null}
+  {id:'dl103',name:'Denon DL-103 (MC)',type:'MC',m:8.5,c:5,hz:100,prof:'conical',vlo:2.2,vhi:2.8,vrec:2.5,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом.'},
+  {id:'dl103r',name:'Denon DL-103R (MC)',type:'MC',m:8.5,c:5,hz:100,prof:'conical',vlo:2.2,vhi:2.8,vrec:2.5,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом (от 40 Ом с повышающим трансформатором).'},
+  {id:'dl301',name:'Denon DL-301 II (MC)',type:'MC',m:6,c:13,hz:100,prof:'elliptical',vlo:1.2,vhi:1.6,vrec:1.4,clo:null,chi:null,note:'Нагрузка фонокорректора — от 100 Ом. Гибкость 13 — по данным продавца.'},
+  {id:'dl110',name:'Denon DL-110 (MC, высокий выход)',type:'MC',m:4.8,c:null,hz:100,prof:'elliptical',vlo:null,vhi:null,vrec:null,clo:null,chi:null,note:'Выход 1,6 мВ: подключается к обычному MM-входу. Denon на сайте не указывает гибкость и прижимную силу — впишите их из инструкции головки.'},
+  {id:'sonyhx500',name:'Sony PS-HX500 (штатная)',type:'MM',m:null,c:null,hz:10,prof:'conical',vlo:null,vhi:null,vrec:3,clo:null,chi:null,note:'Sony указывает для штатной головки только прижимную силу 3 г.'}
 ];
-TT.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;$('y-pick-tt').appendChild(o)});
-CARTS.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$('y-pick-cart').appendChild(o)});
-function cartFields(c){return {cart:c.name.replace(' (MC)',''),type:c.type,cmass:c.m,comp:c.c,hz:String(c.hz),prof:c.prof,vlo:c.vlo,vhi:c.vhi,vrec:c.vrec,clo:c.clo,chi:c.chi}}
+function fillSelect(sel,list){const groups={};list.forEach(x=>{(groups[BRAND(x)]=groups[BRAND(x)]||[]).push(x)});
+  Object.keys(groups).sort().forEach(b=>{const g=document.createElement('optgroup');g.label=b;groups[b].forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;g.appendChild(o)});sel.appendChild(g)})}
+fillSelect($('y-pick-tt'),TT);fillSelect($('y-pick-cart'),CARTS);
+function cartFields(c){return {cart:c.name.replace(/ \(.*\)$/,''),type:c.type,cmass:c.m,comp:c.c,hz:String(c.hz),prof:c.prof,vlo:c.vlo,vhi:c.vhi,vrec:c.vrec,clo:c.clo,chi:c.chi}}
 function pickSave(note){const o=readSys();P.system=o;saveP();applySys(o);renderChecks();vtfPill();
   $('y-pick-note').textContent=note;$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-pick-tt').addEventListener('change',()=>{const t=TT.find(x=>x.id===$('y-pick-tt').value);if(!t)return;
   fillSys({tt:t.name,D:t.D,ov:t.ov,off:t.off,meff:t.meff});const notes=['Подставлены паспортные данные: '+t.name+'.'];
   const c=t.cart&&CARTS.find(x=>x.id===t.cart);if(c){fillSys(cartFields(c));$('y-pick-cart').value=c.id;notes.push('Головка '+c.name+' — штатная для этого проигрывателя.')}
+  if(t.fixed){fillSys({cart:'штатная, несъёмная',type:'MM',cmass:null,comp:null,prof:'conical',vlo:null,vhi:null,vrec:null,clo:null,chi:null});$('y-pick-cart').value=''}
   if(t.note)notes.push(t.note);pickSave(notes.join(' '))});
 $('y-pick-cart').addEventListener('change',()=>{const c=CARTS.find(x=>x.id===$('y-pick-cart').value);if(!c)return;fillSys(cartFields(c));
-  pickSave('Подставлены паспортные данные головки '+c.name+'.'+(c.hz===100?' Гибкость указана при 100 Гц и пересчитана к 10 Гц приблизительно.':''))});
-function renderSetup(){const o=P.system||readSys(),rows=[];
+  pickSave('Подставлены паспортные данные головки '+c.name+'.'+(c.hz===100&&c.c?' Гибкость указана при 100 Гц и пересчитана к 10 Гц приблизительно.':'')+(c.note?' '+c.note:''))});
+function renderSetup(){const o=P.system||readSys(),rows=[],tt=TT.find(t=>t.name===o.tt);
+  if(tt&&tt.fixed){$('y-setup').innerHTML=checkRow('Тонарм и головка','настраивать не нужно: прижимная сила, антискейтинг и юстировка выставлены на заводе','ok','заводская')+
+    checkRow('Что стоит проверять','скорость диска — вкладка «Скорость» или измерения микрофоном; износ иглы — журнал на вкладке «Игла»','info','уход');return}
   const vr=isFinite(o.vrec)?o.vrec:(o.vlo+o.vhi)/2;
   rows.push(isFinite(vr)?checkRow('Прижимная сила',fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г':''),'ok','старт'):checkRow('Прижимная сила','укажите диапазон головки','info','—'));
   rows.push(isFinite(vr)?checkRow('Антискейтинг','≈ '+fmt(vr,1)+' по шкале — столько же, сколько прижимная сила','ok','старт'):checkRow('Антискейтинг','равен прижимной силе по шкале','info','—'));
@@ -1403,7 +1418,8 @@ function renderChecks(){
   rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','заполните длину и сечение','info','—'));
   if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм'+(isFinite(o.off)?', '+fmt(o.off,1)+'°':''):''),'info','справка'))}
   const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
-  if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
+  if(last&&isFinite(last.vtf)&&!isFinite(o.vlo))rows.push(checkRow('Прижимная сила',fmt(last.vtf,2)+' г от '+fmtDate(last.d)+' · диапазон головки не указан','info','справка'));
+  else if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmt(o.vlo,1)+'–'+fmt(o.vhi,1)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
   else rows.push(checkRow('Прижимная сила','запишите настройку в журнал ниже','info','нет данных'));
   $('y-checks').innerHTML=rows.join('');renderSetup();
 }
@@ -1422,7 +1438,7 @@ function onProfile(d,mode){
   if(d&&typeof d==='object'){P={system:normSys(d.system)||null,setups:Array.isArray(d.setups)?d.setups:[],prefs:Object.assign({washEvery:20},d.prefs||{})}}
   if(P.prefs.room){const r=P.prefs.room;['L','W','H','rt','front'].forEach(k=>{if(isFinite(r[k]))$('o-'+k).value=r[k]})}
   renderRoom();
-  if(P.system){const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(' (MC)','')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';}
+  if(P.system){const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(/ \(.*\)$/,'')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';}
   if(P.system){fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
   $('k-every').value=P.prefs.washEvery;renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
 }

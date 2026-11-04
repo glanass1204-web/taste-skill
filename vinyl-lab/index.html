@@ -261,7 +261,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб</h1>
     <p class="tag">Личный дневник винильщика: система, пластинки, износ иглы и подсказки по настройке — всё в одном месте.</p>
   </div>
-  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.9</span></div>
+  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.10</span></div>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
@@ -1173,8 +1173,8 @@ function ticks(a,b,n){const s=niceStep(b-a,n);const out=[];for(let v=Math.ceil(a
 
 /* ---------- 1. Резонанс ---------- */
 function calcRes(){
-  const eff=num('r-eff'),cm=num('r-mass'),sc=num('r-screw')||0,c0=num('r-comp'),hz=+$('r-hz').value;
-  const C=hz===100?c0*1.7:c0, M=eff+cm+sc, f=1000/(2*Math.PI*Math.sqrt(M*C));
+  const eff=num('r-eff'),cm=num('r-mass'),sc=num('r-screw')||0,c0=num('r-comp'),hz=+$('r-hz').value,ok=eff>0&&cm>0&&sc>=0&&c0>0;
+  const C=hz===100?c0*1.7:c0, M=eff+cm+sc, f=ok?1000/(2*Math.PI*Math.sqrt(M*C)):NaN;
   $('r-f').innerHTML=isFinite(f)?fmt(f,1)+'<small>Гц</small>':'—';
   $('r-M').textContent=fmt(M,1)+' г'; $('r-C').textContent=fmt(C,1)+' мкм/мН';
   const massFor=fr=>Math.pow(1000/(2*Math.PI*fr),2)/C-eff-sc;
@@ -1182,7 +1182,7 @@ function calcRes(){
   $('r-ideal').textContent=isFinite(mi)?(mi>0?fmt(mi,1)+' г':'недостижимо'):'—';
   $('r-range').textContent=isFinite(lo)?(hi<=0?'недостижимо':lo<=0?'до '+fmt(hi,1)+' г':fmt(lo,1)+'–'+fmt(hi,1)+' г'):'—';
   const p=$('r-pill'),t=$('r-text');
-  if(!isFinite(f)){setPill(p,'mid','введите данные');t.textContent='';}
+  if(!isFinite(f)){setPill(p,'mid','введите данные');t.textContent='Масса тонарма, масса головки и гибкость должны быть больше нуля.';$('r-ideal').textContent='—';$('r-range').textContent='—';}
   else if(f>=8&&f<=12){setPill(p,'ok','хорошо');t.textContent='Резонанс в оптимальной зоне: головка и тонарм совместимы.'}
   else if(f>=7&&f<8){setPill(p,'mid','на грани');t.textContent='Частота низковата. Тонарм может реагировать на коробление пластинки и шаги по полу. Подойдёт более лёгкая головка или менее гибкая игла.'}
   else if(f>12&&f<=14){setPill(p,'mid','на грани');t.textContent='Частота высоковата. Возможен подъём низа и хуже трекинг на сильно модулированных местах. Подойдёт более тяжёлая головка или утяжелитель.'}
@@ -1342,7 +1342,8 @@ chips('a-std',calcAlign);chips('a-kind',calcAlign);
 
 /* ---------- 3. Скорость ---------- */
 function calcSpeed(){
-  const n=num('s-nom'),m=num('s-meas'),rpm=+$('s-rpm').value;const dev=(m/n-1)*100;
+  const n=num('s-nom'),m=num('s-meas'),rpm=+$('s-rpm').value;const dev=n>0&&m>0&&Math.abs(m/n-1)<0.2?(m/n-1)*100:NaN;
+  if(!isFinite(dev)){$('s-dev').textContent='—';$('s-real').textContent='—';$('s-verdict').textContent=n>0&&m>0?'Измеренная частота отличается от тона больше чем на 20 %: проверьте, та ли частота указана на пластинке.':'Введите частоту тона и измеренную частоту.';return}
   $('s-dev').textContent=isFinite(dev)?(dev>0?'+':'')+fmt(dev,2)+' %':'—';
   $('s-real').textContent=isFinite(dev)?fmt(rpm*(1+dev/100),2)+' об/мин':'—';
   const a=Math.abs(dev);$('s-verdict').textContent=!isFinite(dev)?'':a<=0.3?'В пределах нормы для хорошего проигрывателя (±0,3 %).':a<=1?'Заметно на слух музыкантам с абсолютным слухом. Стоит подстроить скорость.':'Слышимая ошибка высоты тона. Требуется регулировка или замена пассика.';
@@ -1400,7 +1401,7 @@ const awgOf=mm2=>{const d=Math.sqrt(4*mm2/Math.PI);return 36-39*Math.log(d/0.127
 function ripple(Rs,zmin,zmax){return 20*Math.log10((zmax/(zmax+Rs))/(zmin/(zmin+Rs)))}
 function calcCable(){
   const len=num('c-len'),A=num('c-sec'),z=num('c-z'),zmin=num('c-zmin'),zmax=num('c-zmax'),df=num('c-df');
-  const R=2*RHO*len/A,zo=8/df;
+  const R=len>0&&A>0?2*RHO*len/A:NaN,zo=df>0?8/df:NaN;
   $('c-awg').textContent=isFinite(A)?'≈ AWG '+Math.round(awgOf(A)):'';
   const ripC=ripple(zo+R,zmin,zmax)-ripple(zo,zmin,zmax),ripAll=ripple(zo+R,zmin,zmax);
   const loss=20*Math.log10((z/(z+zo+R))/(z/(z+zo)));
@@ -1422,7 +1423,8 @@ $('c-sec').addEventListener('input',()=>{const v=num('c-sec');$('c-chips').query
 ['c-len','c-z','c-zmin','c-zmax','c-df'].forEach(i=>$(i).addEventListener('input',calcCable));
 
 function calcMM(){
-  const tot=num('m-pf')*num('m-len')+num('m-arm')+num('m-pre'),lo=num('m-lo'),hi=num('m-hi');
+  const parts=['m-pf','m-len','m-arm','m-pre'].map(num),lo=num('m-lo'),hi=num('m-hi');
+  const tot=parts.every(v=>v>=0)?parts[0]*parts[1]+parts[2]+parts[3]:NaN;
   $('m-tot').innerHTML=isFinite(tot)?fmt(tot,0)+'<small>пФ</small>':'—';
   const p=$('m-pill');if(!isFinite(tot))setPill(p,'mid','—');else if(tot>=lo&&tot<=hi)setPill(p,'ok','в рекомендации');
   else if(tot<lo)setPill(p,'mid','меньше рекомендации: можно добавить ёмкость на входе');else setPill(p,'no','больше рекомендации: короче кабель или меньше ёмкость входа');
@@ -1565,7 +1567,7 @@ loadLocal();syncTimer();
 }catch(e){}})();
 
 /* ---------- VTA ---------- */
-function calcVta(){const L=num('v-L'),dh=num('v-dh'),da=num('v-da');
+function calcVta(){const L0=num('v-L'),L=L0>=100&&L0<=400?L0:NaN,dh=num('v-dh'),da=num('v-da');
   const a=Math.atan(dh/L)*DEG,h=L*Math.tan(da/DEG);
   $('v-a').textContent=isFinite(a)?(a>0?'+':'')+fmt(a,2)+'°':'—';$('v-h').textContent=isFinite(h)?fmt(h,1)+' мм':'—';
   $('v-rec').textContent=isFinite(L)?fmt(Math.atan(0.5/L)*DEG,2)+'°':'—'}
@@ -1584,6 +1586,8 @@ function docStore(name,lsKey,onData){
       s.chain=s.chain.then(()=>s.ref.set(body)).catch(e=>{if(permErr(e)){s.mode='local';lsSet(lsKey,JSON.stringify(s.data));onData(s.data,s.mode)}})}
     else lsSet(lsKey,JSON.stringify(d))};
   onData(s.data,'local');
+  // другая вкладка (например, страница измерений) записала данные — подхватываем, чтобы не затереть их
+  addEventListener('storage',e=>{if(e.key!==lsKey||s.mode!=='local')return;try{s.data=JSON.parse(e.newValue||'null')}catch(err){return}onData(s.data,'local')});
   getCtx().then(ctx=>{if(!ctx)return;s.ref=ctx.db.doc('data/users/'+ctx.uid+'/'+name);let first=true;
     s.ref.onSnapshot(snap=>{if(first){first=false;s.mode='db';if(!snap.exists){if(s.data)s.save(s.data);onData(s.data,'db');return}}
       if(snap.metadata.hasPendingWrites)return;s.data=JSON.parse(JSON.stringify(snap.data()||{}));onData(s.data,'db')},
@@ -2214,7 +2218,7 @@ if(lsGet('vinyl-lab-night')==='1')setNight(true);
 </script>
 
 <div id="upd" hidden style="position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--ink);color:var(--bg);border-radius:10px;padding:12px 14px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)"><span>Вышла новая версия Винил·Лаб</span><button type="button" onclick="location.reload()" style="font:inherit;font-weight:600;background:var(--glow);color:#141A21;border:0;border-radius:6px;padding:8px 12px;cursor:pointer">Обновить</button></div>
-<script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>{let had=!!navigator.serviceWorker.controller;
+<script>if('serviceWorker' in navigator&&window.isSecureContext)addEventListener('load',()=>{let had=!!navigator.serviceWorker.controller;
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had){had=true;return}const u=document.getElementById('upd');if(u)u.hidden=false});
 navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),3600000)}).catch(()=>{})});</script>
 </body>

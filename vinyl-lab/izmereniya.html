@@ -104,7 +104,9 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
     <div class="row">
       <div class="field"><label for="f0">Тон на пластинке</label><div class="unit"><input id="f0" inputmode="decimal" value="3150"><span>Гц</span></div></div>
       <button type="button" class="btn" id="spReset">Сбросить</button>
+      <button type="button" class="btn" id="spSave">Записать в дневник</button>
     </div>
+    <p class="status" id="spMsg" aria-live="polite"></p>
     <div class="readout"><div class="big" id="spDev">—</div><span class="pill info" id="spPill">ждём тон</span></div>
     <dl class="kv">
       <div><dt>Частота сейчас</dt><dd id="spF">—</dd></div>
@@ -145,6 +147,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
       <button type="button" class="btn primary" id="balAuto">Проверить автоматически</button>
       <button type="button" class="btn" id="balL">Замерить левый</button>
       <button type="button" class="btn" id="balR">Замерить правый</button>
+      <button type="button" class="btn" id="balSave">Записать в дневник</button>
     </div>
     <div class="readout"><div class="big" id="balD">—</div><span class="pill info" id="balPill">нет замера</span></div>
     <dl class="kv"><div><dt>Левый</dt><dd id="balLv">—</dd></div><div><dt>Правый</dt><dd id="balRv">—</dd></div></dl>
@@ -167,7 +170,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
 <footer>
   Винил·Лаб — измерения. Звук обрабатывается только на вашем устройстве и никуда не отправляется.
 </footer>
-<script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+<script>if('serviceWorker' in navigator&&window.isSecureContext)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </div>
 
 <script>
@@ -321,6 +324,21 @@ function drawLevel(){if(!lvHist.length)return;const cal=num('cal')||0,now=lvHist
   setPill($('lvPill'),cal?(avg+cal>85?'no':'ok'):'info',cal?(avg+cal>85?'громко для долгого прослушивания':'дБ SPL (по калибровке)'):'дБFS, без калибровки')}
 $('lvReset').addEventListener('click',()=>{lvPeak=-Infinity});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopNoise()});
+
+/* запись результата в дневник Винил·Лаба (общее хранилище браузера с основной страницей сайта) */
+function localDay(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function toDiary(text){try{let o=null;try{o=JSON.parse(localStorage.getItem('vinyl-lab-profile')||'null')}catch(e){}
+  o=o&&typeof o==='object'?o:{system:null,setups:[],notes:[],prefs:{washEvery:20}};
+  o.notes=(Array.isArray(o.notes)?o.notes:[]).concat([{id:Math.random().toString(36).slice(2,10),d:localDay(),text:text.slice(0,500),t:Date.now()}]).slice(-500);
+  localStorage.setItem('vinyl-lab-profile',JSON.stringify(o));return true}catch(e){return false}}
+$('spSave').addEventListener('click',()=>{const dev=$('spDev').textContent.trim();
+  if(dev==='—'||!sp.length){$('spMsg').textContent='Сначала дождитесь результата замера.';return}
+  const ok=toDiary('Замер скорости (тон '+fmt(num('f0'),0)+' Гц): '+dev.replace(/\s+/g,' ')+', детонация '+$('spSd').textContent+' (2σ), пик '+$('spPk').textContent);
+  $('spMsg').textContent=ok?'Записано в дневник Винил·Лаба.':'Не получилось записать: браузер не даёт сохранять данные.'});
+$('balSave').addEventListener('click',()=>{const d=bal.R-bal.L;
+  if(!isFinite(d)){$('balMsg').textContent='Сначала сделайте замер обоих каналов.';return}
+  const a=Math.abs(d),t=a<0.05?'каналы равны':(d>0?'правый громче':'левый громче')+' на '+fmt(a,1)+' дБ';
+  $('balMsg').textContent=toDiary('Баланс каналов: '+t)?'Записано в дневник Винил·Лаба.':'Не получилось записать: браузер не даёт сохранять данные.'});
 })();
 </script>
 </body>

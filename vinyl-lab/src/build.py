@@ -13,7 +13,10 @@ head_extra='''<meta name="theme-color" content="#0F1318">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Винил·Лаб">
 <style>html{-webkit-text-size-adjust:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>'''
-sw='''<script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>'''
+sw='''<div id="upd" hidden style="position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--ink);color:var(--bg);border-radius:10px;padding:12px 14px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)"><span>Вышла новая версия Винил·Лаб</span><button type="button" onclick="location.reload()" style="font:inherit;font-weight:600;background:var(--glow);color:#141A21;border:0;border-radius:6px;padding:8px 12px;cursor:pointer">Обновить</button></div>
+<script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>{let had=!!navigator.serviceWorker.controller;
+navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had){had=true;return}const u=document.getElementById('upd');if(u)u.hidden=false});
+navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),3600000)}).catch(()=>{})});</script>'''
 page='<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'+head_extra+'\n</head>\n<body>\n'+html+'\n'+sw+'\n</body>\n</html>\n'
 open(OUT+'/index.html','w',encoding='utf-8').write(page)
 # manifest

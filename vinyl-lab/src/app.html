@@ -45,7 +45,18 @@ nav.tabs a:focus-visible,button:focus-visible,input:focus-visible,select:focus-v
 
 section.tool{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;align-items:start}
 section.tool[hidden]{display:none!important}
-@media (max-width:820px){section.tool{grid-template-columns:minmax(0,1fr)}}
+#sistema{grid-template-areas:"a b" "c b";grid-template-rows:auto 1fr}
+#sys-a{grid-area:a}#sys-b{grid-area:b}#sys-c{grid-area:c}
+@media (max-width:820px){section.tool{grid-template-columns:minmax(0,1fr)}
+  #sistema{grid-template-areas:"a" "b" "c";grid-template-rows:auto}
+  nav.tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;
+    position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);padding-block:12px;
+    margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    padding-inline:max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px))}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs a{flex:0 0 auto;scroll-snap-align:start;padding:9px 12px}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+  header{padding-block:22px 14px}}
 .col{display:flex;flex-direction:column;gap:20px;min-width:0}
 h2{font-family:var(--f-display);font-weight:500;font-size:20px;margin:0;text-wrap:balance}
 h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
@@ -123,6 +134,9 @@ code,.f{font-family:var(--f-mono);font-size:13px;color:var(--ink);background:var
 .check span.v{grid-column:1;font-size:13px;color:var(--muted)}
 .check .pill{grid-row:1/span 2;grid-column:2;justify-self:end}
 .pill.info{color:var(--muted)}
+a.nowlink{color:inherit;text-decoration:none;border-radius:6px}
+a.nowlink:hover b{color:var(--amber)}
+a.nowlink b::after{content:" →";color:var(--muted);font-weight:400}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px}
 .records{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .records li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
@@ -165,7 +179,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб</h1>
     <p class="tag">Профиль системы, коллекция пластинок и калькуляторы для настройки винилового тракта: резонанс тонарма, юстировка с протрактором, скорость диска, провода и журнал износа иглы.</p>
   </div>
-  <span class="badge">прототип · v0.2</span>
+  <span class="badge">прототип · v0.3</span>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
@@ -182,15 +196,17 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
 
 <!-- ============ СИСТЕМА ============ -->
 <section class="tool" id="sistema">
-  <div class="col">
+  <div class="col" id="sys-a">
     <div><h2>Моя система</h2></div>
     <p class="note" id="y-state">Сейчас в форме пример. Впишите свою технику и сохраните: данные подставятся во все калькуляторы.</p>
     <div class="panel">
       <h3>Быстрый выбор из списка</h3>
       <div class="field"><label for="y-pick-tt">Проигрыватель</label><select id="y-pick-tt"><option value="">— другой, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
-      <p class="note" id="y-pick-note">Выберите свой проигрыватель и головку: паспортные данные подставятся сами, система сохранится, а справа появятся рекомендуемые установки.</p>
+      <p class="note" id="y-pick-note">Выберите свой проигрыватель и головку: паспортные данные подставятся сами, система сохранится, и появятся рекомендуемые установки.</p>
     </div>
+  </div>
+  <div class="col" id="sys-c">
     <form class="panel" id="y-form">
       <h3>Проигрыватель и тонарм</h3>
       <div class="field"><label for="y-tt">Модель</label><div class="unit"><input id="y-tt" value="Technics SL-1200MK2" autocomplete="off"></div></div>
@@ -239,7 +255,11 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <p class="status" id="y-msg" aria-live="polite"></p>
     </form>
   </div>
-  <div class="col">
+  <div class="col" id="sys-b">
+    <div class="panel" id="now-panel">
+      <h3>Сейчас</h3>
+      <div class="checks" id="y-now"></div>
+    </div>
     <div class="panel">
       <h3>Рекомендуемые установки</h3>
       <div class="checks" id="y-setup"></div>
@@ -922,7 +942,9 @@ function chipVal(id){const b=$(id).querySelector('[aria-pressed="true"]');return
 const TABS=['sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
 function showTab(){const h=location.hash.slice(1);const t=TABS.includes(h)?h:TABS[0];
   TABS.forEach(x=>{$(x).hidden=x!==t;document.querySelector('[data-tab="'+x+'"]').toggleAttribute('aria-current',x===t);if(x===t)document.querySelector('[data-tab="'+x+'"]').setAttribute('aria-current','page')});
-  if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo();}
+  if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo();
+  const cur=document.querySelector('[data-tab="'+t+'"]');if(cur&&cur.scrollIntoView&&matchMedia('(max-width:820px)').matches)cur.scrollIntoView({block:'nearest',inline:'center'});
+  const nav=document.querySelector('nav.tabs');if(nav&&window.scrollY>nav.offsetTop)window.scrollTo({top:nav.offsetTop})}
 addEventListener('hashchange',showTab);
 
 /* ---------- generic line chart ---------- */
@@ -1260,7 +1282,7 @@ function renderN(){
     del.addEventListener('click',()=>{if(del.classList.contains('arm'))mutate(()=>{N.sessions=N.sessions.filter(x=>x.id!==s.id)});else{del.classList.add('arm');del.textContent='Точно удалить?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});
     if(!st.retired)tr.children[3].appendChild(del);tb.appendChild(tr)});
   $('n-histnote').textContent=!hist.length?'Записей пока нет. Отметьте первое прослушивание слева.':hist.length>12?'Показаны последние 12 из '+hist.length+' записей.':'';
-  $('n-replace').hidden=!!st.retired;
+  $('n-replace').hidden=!!st.retired;renderNow();
 }
 function drawWeeks(w,mon){
   const svg=$('n-chart');svg.innerHTML='';const W=640,H=200,m={l:40,r:10,t:10,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b;
@@ -1416,10 +1438,13 @@ function applySys(o){
 }
 function checkRow(name,value,cls,label){return `<div class="check"><b>${name}</b><span class="v">${value}</span><span class="pill ${cls}">${label}</span></div>`}
 function renderChecks(){
-  const o=P.system||readSys(),rows=[];
+  const o=P.system||readSys(),rows=[],fixedTT=TT.find(t=>t.name===o.tt&&t.fixed);
   const C=o.hz==100?o.comp*1.7:o.comp,M=o.meff+o.cmass+1,f=1000/(2*Math.PI*Math.sqrt(M*C));
-  rows.push(isFinite(f)?checkRow('Резонанс тонарма и головки',fmt(f,1)+' Гц · норма 8–12 Гц',f>=8&&f<=12?'ok':f>=7&&f<=14?'mid':'no',f>=8&&f<=12?'хорошо':f>=7&&f<=14?'на грани':'несовместимо'):checkRow('Резонанс','заполните массу и гибкость','info','—'));
-  if(o.type==='MC')rows.push(checkRow('Ёмкость нагрузки','для MC-головки почти не важна','ok','не важно'));
+  if(fixedTT)rows.push(checkRow('Тонарм и головка','заводская настройка, проверять резонанс и нагрузку не нужно','ok','заводская'));
+  else rows.push(isFinite(f)?checkRow('Резонанс тонарма и головки',fmt(f,1)+' Гц · норма 8–12 Гц',f>=8&&f<=12?'ok':f>=7&&f<=14?'mid':'no',f>=8&&f<=12?'хорошо':f>=7&&f<=14?'на грани':'несовместимо'):checkRow('Резонанс','заполните массу и гибкость','info','—'));
+  if(fixedTT){}
+  else if(o.type==='MC')rows.push(checkRow('Ёмкость нагрузки','для MC-головки почти не важна','ok','не важно'));
+  else if(!isFinite(o.clo))rows.push(checkRow('Ёмкость нагрузки','рекомендация головки не указана','info','—'));
   else{const t=o.icpf*o.iclen+o.armc+o.pcap;rows.push(isFinite(t)?checkRow('Ёмкость нагрузки MM',fmt(t,0)+' пФ · рекомендация '+fmt(o.clo,0)+'–'+fmt(o.chi,0),t>=o.clo&&t<=o.chi?'ok':t<o.clo?'mid':'no',t>=o.clo&&t<=o.chi?'в норме':t<o.clo?'меньше нормы':'больше нормы'):checkRow('Ёмкость нагрузки','заполните данные кабеля','info','—'))}
   const R=2*RHO*o.slen/o.ssec,zo=8/o.df,rc=ripple(zo+R,o.zmin,o.zmax)-ripple(zo,o.zmin,o.zmax);
   rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','заполните длину и сечение','info','—'));
@@ -1438,7 +1463,7 @@ function renderSetups(){const tb=$('j-list');tb.innerHTML='';const list=P.setups
     tr.children[2].textContent=s.as||'—';tr.children[3].textContent=s.h||'—';tr.children[4].textContent=s.n||'';
     const del=document.createElement('button');del.type='button';del.className='del';del.textContent='Удалить';
     del.addEventListener('click',()=>{if(del.classList.contains('arm')){P.setups=P.setups.filter(x=>x.id!==s.id);saveP();renderSetups();renderChecks()}else{del.classList.add('arm');del.textContent='Точно?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});
-    tr.children[5].appendChild(del);tb.appendChild(tr)})}
+    tr.children[5].appendChild(del);tb.appendChild(tr)});renderNow()}
 let PS=null;
 function saveP(){PS.save(JSON.parse(JSON.stringify(P)))}
 function onProfile(d,mode){
@@ -1501,7 +1526,7 @@ function renderCat(){
     li.append(ttl,tags,acts);ul.appendChild(li)});
   $('k-more').textContent=l.length>150?'Показаны 150 из '+l.length+'. Уточните поиск.':RECS.length&&!l.length?'Ничего не найдено.':'';
   $('k-store').textContent=recMode==='db'?'Коллекция сохраняется в вашем аккаунте.':'Коллекция хранится только в этом браузере.';
-  renderStats();renderPick(false);if(W)renderW();
+  renderStats();renderPick(false);if(W)renderW();renderNow();
 }
 function playRec(r){const m=MINUTES[r.f]||40;recPut(Object.assign({},r,{pc:(r.pc||0)+1,psw:(r.psw||0)+1,lp:today()}));
   const st=active();if(st&&!st.retired){addSession(m,today(),r.a+' — '+r.t);$('k-msg').textContent='Записано: '+r.a+' — '+r.t+', '+m+' мин в журнал иглы «'+st.name+'».'}
@@ -1587,7 +1612,7 @@ function renderW(){if(!W)return;const l=W.list,q=$('w-q').value.trim().toLowerCa
     mk('Изменить',()=>{wEdit=w.id;$('w-a').value=w.a;$('w-t').value=w.t;$('w-ed').value=w.ed||'';$('w-max').value=w.max||'';$('w-pri').value=w.pri||2;$('w-where').value=w.where||'';
       $('w-formtitle').textContent='Изменить';$('w-submit').textContent='Сохранить';$('w-cancel').hidden=false;$('w-a').focus()});
     mk('Удалить',b=>{if(b.classList.contains('arm'))W.del(w.id);else{b.classList.add('arm');b.textContent='Точно удалить?';setTimeout(()=>{b.classList.remove('arm');b.textContent='Удалить'},4000)}});
-    li.append(ttl,tags,acts);ul.appendChild(li)})}
+    li.append(ttl,tags,acts);ul.appendChild(li)});renderNow()}
 function wReset(){wEdit=null;$('w-form').reset();$('w-pri').value='2';$('w-formtitle').textContent='Добавить в список';$('w-submit').textContent='Добавить в список';$('w-cancel').hidden=true}
 $('w-cancel').addEventListener('click',wReset);$('w-q').addEventListener('input',renderW);
 $('w-form').addEventListener('submit',e=>{e.preventDefault();const a=$('w-a').value.trim(),t=$('w-t').value.trim();if(!a||!t){$('w-msg').textContent='Укажите исполнителя и альбом.';return}
@@ -1747,7 +1772,21 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;$('ap
 $('app-install').addEventListener('click',async()=>{if(!installEvt)return;installEvt.prompt();try{await installEvt.userChoice}catch(e){}installEvt=null;$('app-install').hidden=true});
 if(matchMedia('(display-mode: standalone)').matches){$('app-panel').hidden=true}
 
-PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();
+/* ---------- сводка «Сейчас» ---------- */
+function renderNow(){if(!window.__vlNow)return;const rows=[],t=dayNum(today());
+  const st=active();
+  if(st&&!st.retired){const used=usedH(st),lim=+st.limit||1000,pct=used/lim*100;
+    rows.push(`<a class="check nowlink" href="#igla"><b>Игла: ${esc(st.name)}</b><span class="v">${fmt(used,0)} из ${fmt(lim,0)} ч · осталось ${fmt(Math.max(0,lim-used),0)} ч</span><span class="pill ${pct<70?'ok':pct<100?'mid':'no'}">${pct<70?'в норме':pct<100?'скоро замена':'пора менять'}</span></a>`)}
+  else rows.push(`<a class="check nowlink" href="#igla"><b>Игла</b><span class="v">добавьте иглу, чтобы следить за износом</span><span class="pill info">нет данных</span></a>`);
+  if(RECS.length){const w=RECS.filter(needsWash).length,m=RECS.filter(r=>r.lp&&t-dayNum(r.lp)<30).length;
+    rows.push(`<a class="check nowlink" href="#kollekciya"><b>Коллекция: ${RECS.length}</b><span class="v">слушали за 30 дней: ${m} · пора помыть: ${w}</span><span class="pill ${w?'mid':'ok'}">${w?'есть что помыть':'всё чистое'}</span></a>`)}
+  const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
+  if(last){const ago=t-dayNum(last.d);rows.push(`<div class="check"><b>Последняя настройка тонарма</b><span class="v">${fmtDate(last.d)}${isFinite(last.vtf)?' · '+fmt(last.vtf,2)+' г':''}</span><span class="pill ${ago>180?'mid':'ok'}">${ago>180?'больше полугода':'недавно'}</span></div>`)}
+  if(W&&W.list.length){const top=W.list.filter(x=>+x.pri===1).length;rows.push(`<a class="check nowlink" href="#hochu"><b>Хочу купить: ${W.list.length}</b><span class="v">очень хочу: ${top}</span><span class="pill info">список</span></a>`)}
+  $('y-now').innerHTML=rows.join('')}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();window.__vlNow=true;renderNow();
 showTab();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{calcRes();calcAlign();if(lastAnalysis)showAnalysis(lastAnalysis,num('s-nom')||3150)});
 })();

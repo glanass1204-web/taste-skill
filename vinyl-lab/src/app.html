@@ -79,6 +79,29 @@ p{margin:0}
 .unit span{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding:0 10px;white-space:nowrap}
 textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;resize:vertical;min-height:72px}
 .feed{display:flex;flex-direction:column;gap:18px}
+.flabel{font-size:13px;font-weight:500}
+.phgrid{display:flex;flex-wrap:wrap;gap:8px}
+.phgrid figure{margin:0;position:relative;width:76px;height:76px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
+.phgrid img{width:100%;height:100%;object-fit:cover;display:block}
+.phgrid button{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:14px;line-height:24px;cursor:pointer;padding:0}
+.rec{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.rec .thumb{flex:0 0 auto;width:56px;height:56px;border-radius:5px;object-fit:cover;border:1px solid var(--line);background:var(--bg);cursor:zoom-in;padding:0}
+.rec .thumb img{width:100%;height:100%;object-fit:cover;border-radius:5px;display:block}
+.pickcard{position:relative}
+.pickcard .pcover{width:84px;height:84px;border-radius:6px;object-fit:cover;float:right;margin-left:12px}
+.lb{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lb img{max-width:100%;max-height:calc(100% - 64px);object-fit:contain;border-radius:6px}
+.lb-bar{display:flex;gap:10px;align-items:center;color:#fff;font-size:14px}
+.lb .btn{background:#222;color:#fff;border-color:#444}
+.yhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.yyear{font-family:var(--f-display);font-weight:700;font-size:clamp(44px,9vw,72px);line-height:1;color:var(--amber)}
+.ylead{font-size:15px;color:var(--muted);max-width:40ch}
+#i-chart{min-width:0}
+.ybig{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.ybig div{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:2px;background:var(--bg)}
+.ybig b{font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.ybig span{font-size:12px;color:var(--muted)}
 .panel,section.tool{scroll-margin-top:84px}
 .steps li.done{color:var(--muted);text-decoration:line-through}
 .steps li a{color:var(--amber);font-weight:600}
@@ -212,11 +235,12 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>Винил<span>·</span>Лаб</h1>
     <p class="tag">Личный дневник винильщика: система, пластинки, износ иглы и подсказки по настройке — всё в одном месте.</p>
   </div>
-  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.6</span></div>
+  <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v0.7</span></div>
 </header>
 
 <nav class="tabs" aria-label="Инструменты">
   <a href="#dnevnik" data-tab="dnevnik">Дневник</a>
+  <a href="#itogi" data-tab="itogi">Итоги года</a>
   <a href="#sistema" data-tab="sistema">Моя система</a>
   <a href="#kollekciya" data-tab="kollekciya">Коллекция</a>
   <a href="#hochu" data-tab="hochu">Хочу купить</a>
@@ -267,6 +291,35 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <p class="note" id="d-sum"></p>
       <div class="feed" id="d-feed"></div>
       <div class="chips"><button type="button" class="btn" id="d-more" hidden>Показать раньше</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ИТОГИ ГОДА ============ -->
+<section class="tool" id="itogi" hidden>
+  <div class="col">
+    <div><h2>Итоги года</h2></div>
+    <div class="panel">
+      <div class="field"><label for="i-year">Год</label><select id="i-year"></select></div>
+      <p class="note">Итоги собираются из дневника: прослушиваний, журнала иглы, настроек, коллекции и заметок. Чем подробнее записываете, что слушали, тем интереснее итоги.</p>
+      <button type="button" class="btn" id="i-dl">Скачать итоги текстом</button>
+      <p class="status" id="i-msg" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="panel" id="i-body">
+      <div class="yhead"><span class="yyear" id="i-y">—</span><span class="ylead" id="i-lead"></span></div>
+      <div class="ybig" id="i-big"></div>
+      <div id="i-empty" class="note" hidden>За этот год в дневнике пока нет записей.</div>
+      <div id="i-more" class="col" style="gap:20px">
+        <div id="i-chartwrap" class="col" style="gap:10px"><h3>Часы прослушивания по месяцам</h3>
+          <div class="chart"><svg id="i-chart" viewBox="0 0 640 200" role="img" aria-label="Часы прослушивания по месяцам"></svg></div></div>
+        <div class="statgrid">
+          <div class="col" style="gap:10px"><h3>Чаще всего слушали</h3><ol class="toplist" id="i-top"></ol></div>
+          <div class="col" style="gap:10px"><h3>Исполнители года</h3><div class="hbars" id="i-art"></div></div>
+        </div>
+        <div class="checks" id="i-facts"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -389,7 +442,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
     <div class="panel" id="bk-panel">
       <h3>Резервная копия и перенос данных</h3>
-      <p class="note">Сохраните все данные в файл: систему, журналы, коллекцию и список желаний. Из этого файла их можно восстановить или перенести, например из приложения на телефоне сюда и обратно.</p>
+      <p class="note">Сохраните все данные в файл: систему, журналы, коллекцию и список желаний. Из этого файла их можно восстановить или перенести, например из приложения на телефоне сюда и обратно. Фото пластинок в копию не входят.</p>
       <div class="chips">
         <button type="button" class="btn" id="bk-save">Сохранить копию в файл</button>
         <label class="btn" for="bk-file" style="display:inline-flex;align-items:center">Восстановить из файла</label>
@@ -416,6 +469,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div class="field"><label for="k-y">Год</label><div class="unit"><input id="k-y" inputmode="numeric" autocomplete="off"></div></div>
         <div class="field"><label for="k-f">Формат</label><select id="k-f"><option>LP 33</option><option>12″ 45</option><option>7″ 45</option><option>78</option></select></div>
       </div>
+      <div class="field"><span class="flabel">Фото</span>
+        <div class="phgrid" id="k-ph"></div>
+        <div class="chips"><label class="btn" for="k-phfile" style="display:inline-flex;align-items:center">Добавить фото</label><input type="file" id="k-phfile" accept="image/*" multiple hidden aria-label="Фото пластинки"></div>
+        <span class="hint" id="k-phhint">Конверт, яблоко, состояние винила — до 6 фото.</span></div>
       <details id="k-morefields" class="more"><summary>Подробнее: состояние, цена, мойка, жанр</summary>
       <div class="row2" style="margin-top:12px">
         <div class="field"><label for="k-mc">Винил</label><select id="k-mc"></select></div>
@@ -1029,6 +1086,11 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
   </div>
 </section>
 
+<div id="lb" class="lb" hidden role="dialog" aria-modal="true" aria-label="Фото пластинки">
+  <img id="lb-img" alt="">
+  <div class="lb-bar"><button type="button" class="btn" id="lb-prev">←</button><span id="lb-cap"></span><button type="button" class="btn" id="lb-next">→</button><button type="button" class="btn" id="lb-close">Закрыть</button></div>
+</div>
+
 <footer>
   <span>Винил·Лаб — прототип для оценки. Методика расчётов раскрыта в блоках «Как считается».</span>
   <span>Данные системы, коллекции и журналов видны только вам.</span>
@@ -1050,10 +1112,10 @@ function chips(id,cb){const box=$(id);box.addEventListener('click',e=>{const b=e
 function chipVal(id){const b=$(id).querySelector('[aria-pressed="true"]');return b?b.dataset.v:null}
 
 /* ---------- tabs ---------- */
-const TABS=['dnevnik','sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
+const TABS=['dnevnik','itogi','sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
 function showTab(){const h=location.hash.slice(1);const t=TABS.includes(h)?h:TABS[0];
   TABS.forEach(x=>{$(x).hidden=x!==t;document.querySelector('[data-tab="'+x+'"]').toggleAttribute('aria-current',x===t);if(x===t)document.querySelector('[data-tab="'+x+'"]').setAttribute('aria-current','page')});
-  if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo();
+  if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo(); if(t==='itogi')renderItogi();
   const cur=document.querySelector('[data-tab="'+t+'"]');if(cur&&cur.scrollIntoView&&matchMedia('(max-width:820px)').matches)cur.scrollIntoView({block:'nearest',inline:'center'});
   const nav=document.querySelector('nav.tabs');if(nav&&window.scrollY>nav.offsetTop)window.scrollTo({top:nav.offsetTop})}
 addEventListener('hashchange',showTab);
@@ -1650,12 +1712,44 @@ function renderCat(){
     const mk=(txt,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.addEventListener('click',()=>fn(b));acts.appendChild(b);return b};
     mk('Слушаю',()=>playRec(r));mk('Помыта сегодня',()=>{recPut(Object.assign({},r,{wd:today(),ws:(r.ws||0)+1,psw:0}));$('k-msg').textContent='Отмечена мойка: '+r.a+' — '+r.t+'.'});
     mk('Изменить',()=>editRec(r));
-    mk('Удалить',b=>{if(b.classList.contains('arm'))recDel(r.id);else{b.classList.add('arm');b.textContent='Точно удалить?';setTimeout(()=>{b.classList.remove('arm');b.textContent='Удалить'},4000)}});
-    li.append(ttl,tags,acts);ul.appendChild(li)});
+    mk('Удалить',b=>{if(b.classList.contains('arm')){(r.ph||[]).forEach(phDel);recDel(r.id)}else{b.classList.add('arm');b.textContent='Точно удалить?';setTimeout(()=>{b.classList.remove('arm');b.textContent='Удалить'},4000)}});
+    const wrap=document.createElement('div');wrap.className='rec';
+    if(r.ph&&r.ph.length){const b=document.createElement('button');b.type='button';b.className='thumb';b.setAttribute('aria-label','Фото: '+r.a+' — '+r.t);const im=document.createElement('img');im.alt='';setImg(im,r.ph[0]);b.appendChild(im);b.addEventListener('click',()=>openLb(r.ph,0));wrap.appendChild(b)}
+    wrap.appendChild(ttl);
+    li.append(wrap,tags,acts);ul.appendChild(li)});
   $('k-more').textContent=l.length>150?'Показаны 150 из '+l.length+'. Уточните поиск.':RECS.length&&!l.length?'Ничего не найдено.':'';
   $('k-store').textContent=recMode==='db'?'Коллекция сохраняется в вашем аккаунте.':'Коллекция хранится только в этом браузере.';
   renderStats();renderPick(false);if(W)renderW();renderNow();
 }
+/* ---------- фото пластинок ---------- */
+const PH={assets:undefined,urls:{}};
+async function phAssets(){if(PH.assets!==undefined)return PH.assets;try{PH.assets=(!STANDALONE&&window.claude&&window.claude.use)?await window.claude.use('assets'):null}catch(e){PH.assets=null}return PH.assets}
+function idbOpen(){return new Promise((res,rej)=>{try{const r=indexedDB.open('vinyl-lab-photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('ph');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
+async function idbDo(mode,fn){const d=await idbOpen();return new Promise((res,rej)=>{const t=d.transaction('ph',mode),st=t.objectStore('ph');const rq=fn(st);t.oncomplete=()=>res(rq&&rq.result);t.onerror=()=>rej(t.error)})}
+async function shrink(file){const url=URL.createObjectURL(file);try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+  const k=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);return await new Promise(res=>c.toBlob(res,'image/jpeg',0.82))}finally{URL.revokeObjectURL(url)}}
+async function phSave(file){const blob=await shrink(file);if(!blob)throw new Error('decode');const a=await phAssets();
+  if(a){try{const r=await a.upload(blob,{type:'image/jpeg'});PH.urls['a:'+r.id]=r.url;return 'a:'+r.id}catch(e){if(e&&e.code==='quota_or_state')throw e}}
+  const k=Date.now().toString(36)+rid();await idbDo('readwrite',st=>st.put(blob,k));return 'i:'+k}
+async function phSrc(ref){if(!ref)return null;if(PH.urls[ref])return PH.urls[ref];if(ref.startsWith('a:'))return '/_blob/'+ref.slice(2);
+  try{const b=await idbDo('readonly',st=>st.get(ref.slice(2)));if(!b)return null;return PH.urls[ref]=URL.createObjectURL(b)}catch(e){return null}}
+async function phDel(ref){try{if(ref.startsWith('a:')){const a=await phAssets();if(a)await a.delete(ref.slice(2))}else await idbDo('readwrite',st=>st.delete(ref.slice(2)))}catch(e){}}
+function setImg(img,ref){phSrc(ref).then(u=>{if(u)img.src=u;else img.alt='фото недоступно'})}
+let formPh=[],formPhNew=[],formPhDrop=[];
+function renderFormPh(){const g=$('k-ph');g.innerHTML='';formPh.forEach((ref,i)=>{const f=document.createElement('figure');const im=document.createElement('img');im.alt='Фото '+(i+1);setImg(im,ref);
+  const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','Убрать фото '+(i+1));
+  x.addEventListener('click',()=>{formPh.splice(i,1);if(formPhNew.includes(ref)){formPhNew=formPhNew.filter(z=>z!==ref);phDel(ref)}else formPhDrop.push(ref);renderFormPh()});
+  f.append(im,x);g.appendChild(f)})}
+$('k-phfile').addEventListener('change',async e=>{const files=[...e.target.files].slice(0,Math.max(0,6-formPh.length));e.target.value='';if(!files.length){$('k-phhint').textContent='Не больше 6 фото на пластинку.';return}
+  $('k-phhint').textContent='Сохраняю фото…';let ok=0;
+  for(const f of files){try{const ref=await phSave(f);formPh.push(ref);formPhNew.push(ref);ok++;renderFormPh()}catch(err){$('k-phhint').textContent=err&&err.code==='quota_or_state'?'Место для фото закончилось.':'Не получилось сохранить фото. Попробуйте JPG или PNG.';return}}
+  const a=await phAssets();$('k-phhint').textContent='Добавлено фото: '+ok+'. '+(a?'Сохранятся в хранилище страницы.':'Хранятся на этом устройстве.')});
+function openLb(refs,i){if(!refs||!refs.length)return;let k=i||0;const show=()=>{setImg($('lb-img'),refs[k]);$('lb-cap').textContent=(k+1)+' из '+refs.length;$('lb-prev').hidden=$('lb-next').hidden=refs.length<2};
+  show();$('lb').hidden=false;$('lb-prev').onclick=()=>{k=(k+refs.length-1)%refs.length;show()};$('lb-next').onclick=()=>{k=(k+1)%refs.length;show()};$('lb-close').focus()}
+$('lb-close').addEventListener('click',()=>{$('lb').hidden=true});
+$('lb').addEventListener('click',e=>{if(e.target.id==='lb')$('lb').hidden=true});
+document.addEventListener('keydown',e=>{if($('lb').hidden)return;if(e.key==='Escape')$('lb').hidden=true;if(e.key==='ArrowRight')$('lb-next').click();if(e.key==='ArrowLeft')$('lb-prev').click()});
 function dAgo(n){const d=new Date((dayNum(today())-n)*864e5);return d.toISOString().slice(0,10)}
 const DEMO=[['Pink Floyd','The Dark Side Of The Moon','1973','рок','VG+','VG',4500,30,5,2,'Harvest, SHVL 804'],['Miles Davis','Kind Of Blue','1959','джаз','NM','NM',3200,4,3,0,'Columbia, переиздание'],
   ['Кино','Группа крови','1988','рок','VG','G+',2500,95,1,null,'Мелодия'],['Daft Punk','Random Access Memories','2013','электроника','M','M',6000,null,0,0,''],
@@ -1667,14 +1761,15 @@ function playRec(r){const m=MINUTES[r.f]||40;recPut(Object.assign({},r,{pc:(r.pc
   if(r.demo){$('k-msg').textContent='Это пример: прослушивание отмечено только у пластинки, в журнал иглы не записано.';return}
   const st=active();if(st&&!st.retired){addSession(m,today(),r.a+' — '+r.t);$('k-msg').textContent='Записано: '+r.a+' — '+r.t+', '+m+' мин в журнал иглы «'+st.name+'».'}
   else $('k-msg').textContent='Прослушивание отмечено. Добавьте иглу на вкладке «Игла», чтобы время шло в её журнал.'}
-function editRec(r){editId=r.id;$('k-morefields').open=true;['a','t','y','l','p','n','wd','g'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
+function editRec(r){formPhNew.forEach(phDel);editId=r.id;formPh=(r.ph||[]).slice();formPhNew=[];formPhDrop=[];renderFormPh();$('k-morefields').open=true;['a','t','y','l','p','n','wd','g'].forEach(k=>$('k-'+k).value=r[k]||'');$('k-f').value=r.f||'LP 33';$('k-mc').value=r.mc||'NM';$('k-sc').value=r.sc||'NM';$('k-wm').value=r.wm||'';
   $('k-formtitle').textContent='Изменить пластинку';$('k-submit').textContent='Сохранить изменения';$('k-cancel').hidden=false;$('k-a').focus();
   if(location.hash!=='#kollekciya')location.hash='kollekciya';document.getElementById('k-form').scrollIntoView({block:'start'})}
-function resetForm(){editId=null;$('k-form').reset();$('k-mc').value='NM';$('k-sc').value='NM';$('k-formtitle').textContent='Добавить пластинку';$('k-submit').textContent='Добавить в коллекцию';$('k-cancel').hidden=true}
-$('k-cancel').addEventListener('click',()=>{pendingWant=null;resetForm();$('k-msg').textContent=''});
+function resetForm(){editId=null;formPh=[];formPhNew=[];formPhDrop=[];renderFormPh();$('k-phhint').textContent='Конверт, яблоко, состояние винила — до 6 фото.';$('k-form').reset();$('k-mc').value='NM';$('k-sc').value='NM';$('k-formtitle').textContent='Добавить пластинку';$('k-submit').textContent='Добавить в коллекцию';$('k-cancel').hidden=true}
+$('k-cancel').addEventListener('click',()=>{pendingWant=null;formPhNew.forEach(phDel);resetForm();$('k-msg').textContent=''});
 $('k-form').addEventListener('submit',e=>{e.preventDefault();const a=$('k-a').value.trim(),t=$('k-t').value.trim();if(!a||!t){$('k-msg').textContent='Укажите исполнителя и альбом.';return}
   const old=editId?RECS.find(x=>x.id===editId):null;const wd=$('k-wd').value||'';
-  const r=Object.assign({},old||{id:rid(),add:today(),pc:0,psw:0,ws:0},{a:a.slice(0,120),t:t.slice(0,160),y:$('k-y').value.trim().slice(0,4),f:$('k-f').value,mc:$('k-mc').value,sc:$('k-sc').value,l:$('k-l').value.trim().slice(0,80),p:num('k-p')||0,n:$('k-n').value.trim().slice(0,200),g:$('k-g').value.trim().slice(0,40),wd,wm:$('k-wm').value});
+  const r=Object.assign({},old||{id:rid(),add:today(),pc:0,psw:0,ws:0},{a:a.slice(0,120),t:t.slice(0,160),y:$('k-y').value.trim().slice(0,4),f:$('k-f').value,mc:$('k-mc').value,sc:$('k-sc').value,l:$('k-l').value.trim().slice(0,80),p:num('k-p')||0,n:$('k-n').value.trim().slice(0,200),g:$('k-g').value.trim().slice(0,40),wd,wm:$('k-wm').value,ph:formPh.slice()});
+  formPhDrop.forEach(phDel);formPhNew=[];formPhDrop=[];
   if(wd&&(!old||old.wd!==wd)){r.psw=0;r.ws=(r.ws||0)+1}
   recPut(r);$('k-msg').textContent=(old?'Сохранено: ':'Добавлено: ')+a+' — '+t+'.';
   if(pendingWant&&!old){W.del(pendingWant);$('k-msg').textContent+=' Убрана из списка «Хочу купить».'}pendingWant=null;resetForm()});
@@ -1782,6 +1877,7 @@ function renderPick(force){
   card.innerHTML='';const add=(cls,txt)=>{const d=document.createElement('div');d.className=cls;d.textContent=txt;card.appendChild(d)};
   if(!RECS.length){add('pm','Добавьте пластинки в коллекцию, и здесь появится подсказка, что поставить.');return}
   if(!r){add('pm','Под эти условия ничего не подходит. Снимите галочку «давно не слушали» или выберите другое десятилетие.');return}
+  if(r.ph&&r.ph.length){const im=document.createElement('img');im.className='pcover';im.alt='';setImg(im,r.ph[0]);card.appendChild(im)}
   add('pa',r.a);add('pt',r.t);add('pm',[r.y,r.f,r.g,r.mc].filter(Boolean).join(' · ')+(r.lp?' · последний раз '+fmtDate(r.lp):' · ещё не слушали'));
 }
 $('q-next').addEventListener('click',()=>{renderPick(true);$('q-msg').textContent=''});
@@ -1789,16 +1885,16 @@ $('q-next').addEventListener('click',()=>{renderPick(true);$('q-msg').textConten
 $('q-play').addEventListener('click',()=>{const r=RECS.find(x=>x.id===pickId);if(!r)return;playRec(r);$('q-msg').textContent=$('k-msg').textContent});
 
 /* ---------- Статистика ---------- */
-function barChart(svg,labels,values,yFmt,hi){svg.innerHTML='';const Wd=640,H=200,m={l:56,r:10,t:12,b:28},pw=Wd-m.l-m.r,ph=H-m.t-m.b;
+function barChart(svg,labels,values,yFmt,hi,Wd=640){svg.innerHTML='';svg.setAttribute('viewBox','0 0 '+Wd+' 200');const H=200,m={l:56,r:10,t:12,b:28},pw=Wd-m.l-m.r,ph=H-m.t-m.b;
   const max=Math.max(1,...values),yt=ticks(0,max,4),top=Math.max(max,yt[yt.length-1]||max),Y=v=>m.t+ph*(1-v/top),bw=pw/Math.max(1,values.length);
   yt.forEach(v=>{el('line',{x1:m.l,x2:Wd-m.r,y1:Y(v),y2:Y(v),stroke:css('--line')},svg);el('text',{x:m.l-6,y:Y(v)+4,'text-anchor':'end','font-size':11,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},svg,yFmt(v))});
   const step=Math.ceil(values.length/10);
   values.forEach((v,i)=>{const x=m.l+i*bw+bw*.15;if(v>0)el('rect',{x,y:Y(v),width:bw*.7,height:Math.max(1,Y(0)-Y(v)),rx:2,fill:css(i===hi?'--amber':'--glow'),opacity:i===hi?1:.7},svg);
     if(i%step===0||i===values.length-1)el('text',{x:x+bw*.35,y:H-9,'text-anchor':'middle','font-size':11,fill:css('--muted'),'font-family':'IBM Plex Mono, monospace'},svg,labels[i])})}
-function hbars(box,rows,colorFn){box.innerHTML='';const max=Math.max(1,...rows.map(r=>r[1]));
+function hbars(box,rows,colorFn,valFmt){box.innerHTML='';const max=Math.max(1,...rows.map(r=>r[1]));
   rows.forEach(([lab,v])=>{const d=document.createElement('div');d.className='hbar';const a=document.createElement('span');a.textContent=lab;a.title=lab;
     const b=document.createElement('span');b.className='b';b.style.width=(v/max*100)+'%';if(colorFn)b.style.background=colorFn(lab);
-    const c=document.createElement('span');c.className='c';c.textContent=v;d.append(a,b,c);box.appendChild(d)})}
+    const c=document.createElement('span');c.className='c';c.textContent=valFmt?valFmt(v):v;d.append(a,b,c);box.appendChild(d)})}
 const money=v=>v>=1e6?fmt(v/1e6,1)+' млн':v>=1000?fmt(v/1000,0)+' тыс':fmt(v,0);
 function renderStats(){const has=RECS.length>0;$('st-empty').hidden=has;$('st-body').hidden=!has;if(!has)return;const t=dayNum(today());
   const byA={};RECS.forEach(r=>{const a=(r.a||'—').trim();byA[a]=(byA[a]||0)+1});
@@ -1930,7 +2026,7 @@ function renderNow(){if(!window.__vlNow)return;const rows=[],t=dayNum(today());
   if((P.system||N.styli.length||RECS.some(r=>!r.demo))&&(STANDALONE||PS.mode!=='db')){const lb=P.prefs.lastBackup,ago=lb?t-dayNum(lb):Infinity;
     rows.push(`<a class="check nowlink" href="#sistema" data-scroll="bk-panel"><b>Резервная копия</b><span class="v">${lb?'последняя '+fmtDate(lb):'ещё не делали'} · данные хранятся только на этом устройстве</span><span class="pill ${ago>30?'mid':'ok'}">${ago>30?'пора сделать':'свежая'}</span></a>`)}
   if(W&&W.list.length){const top=W.list.filter(x=>+x.pri===1).length;rows.push(`<a class="check nowlink" href="#hochu"><b>Хочу купить: ${W.list.length}</b><span class="v">очень хочу: ${top}</span><span class="pill info">список</span></a>`)}
-  $('y-now').innerHTML=rows.join('');renderDiary()}
+  $('y-now').innerHTML=rows.join('');renderDiary();renderItogi()}
 /* ---------- Дневник: подсказки и лента ---------- */
 let dLimit=30;
 function hintRow(href,title,detail,cls,label,scroll){return `<a class="check nowlink" href="${href}"${scroll?' data-scroll="'+scroll+'"':''}><b>${esc(title)}</b><span class="v">${esc(detail)}</span><span class="pill ${cls}">${esc(label)}</span></a>`}
@@ -1982,6 +2078,56 @@ function renderDiary(){if(!window.__vlNow)return;const H=[],t=dayNum(today()),o=
         del.addEventListener('click',()=>{if(del.classList.contains('arm')){P.notes=P.notes.filter(z=>z.id!==e.id);saveP();renderDiary()}else{del.classList.add('arm');del.textContent='Точно?';setTimeout(()=>{del.classList.remove('arm');del.textContent='Удалить'},4000)}});li.appendChild(del)}
       ul.appendChild(li)});box.appendChild(ul);feed.appendChild(box)});
   $('d-more').hidden=days.length<=dLimit}
+/* ---------- Итоги года ---------- */
+const MON_S=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+function yearData(Y){const ys=String(Y),inY=d=>d&&d.slice(0,4)===ys;
+  const S=N.sessions.filter(x=>inY(x.d)),min=S.reduce((a,x)=>a+x.m,0),days=[...new Set(S.map(x=>x.d))].sort();
+  let streak=0,best=0,prev=null;days.forEach(d=>{const n=dayNum(d);streak=prev!==null&&n-prev===1?streak+1:1;best=Math.max(best,streak);prev=n});
+  const months=new Array(12).fill(0);S.forEach(x=>months[+x.d.slice(5,7)-1]+=x.m/60);
+  const byN={};S.forEach(x=>{if(x.n){byN[x.n]=byN[x.n]||{m:0,c:0};byN[x.n].m+=x.m;byN[x.n].c++}});
+  const top=Object.entries(byN).sort((a,b)=>b[1].c-a[1].c||b[1].m-a[1].m).slice(0,5);
+  const art={};Object.entries(byN).forEach(([n,v])=>{if(n.includes(' — ')){const a=n.split(' — ')[0].trim();art[a]=(art[a]||0)+v.m}});
+  const arts=Object.entries(art).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([a,m])=>[a,Math.round(m/6)/10]);
+  const real=RECS.filter(r=>!r.demo),added=real.filter(r=>inY(r.add)),spent=added.reduce((a,r)=>a+(+r.p||0),0),dear=added.slice().sort((a,b)=>(+b.p||0)-(+a.p||0))[0];
+  const washed=real.filter(r=>inY(r.wd)).length,setups=P.setups.filter(x=>inY(x.d)).length,notes=(P.notes||[]).filter(x=>inY(x.d)).length;
+  const inst=N.styli.filter(x=>inY(x.installed)),ret=N.styli.filter(x=>inY(x.retired));
+  const gen={};Object.entries(byN).forEach(([n,v])=>{const r=real.find(z=>(z.a+' — '+z.t)===n);if(r&&r.g){const g=r.g.toLowerCase();gen[g]=(gen[g]||0)+v.m}});
+  const topGen=Object.entries(gen).sort((a,b)=>b[1]-a[1])[0];
+  const bm=months.indexOf(Math.max(...months));
+  return {Y,S,min,days,best,months,top,arts,added,spent,dear,washed,setups,notes,inst,ret,topGen,bm}}
+function yearsAvail(){const ys=new Set([today().slice(0,4)]);N.sessions.forEach(x=>ys.add(x.d.slice(0,4)));RECS.forEach(r=>{if(r.add&&!r.demo)ys.add(r.add.slice(0,4))});P.setups.forEach(x=>ys.add(x.d.slice(0,4)));(P.notes||[]).forEach(x=>ys.add(x.d.slice(0,4)));return [...ys].filter(y=>/^\d{4}$/.test(y)).sort().reverse()}
+function renderItogi(){if(!window.__vlNow||$('itogi').hidden)return;const sel=$('i-year'),ys=yearsAvail(),cur=sel.value;
+  if(sel.dataset.k!==ys.join(',')){sel.dataset.k=ys.join(',');sel.innerHTML=ys.map(y=>`<option>${y}</option>`).join('');sel.value=ys.includes(cur)?cur:ys[0]}
+  const D=yearData(+sel.value);$('i-y').textContent=D.Y;
+  const empty=!D.S.length&&!D.added.length&&!D.setups&&!D.notes;$('i-empty').hidden=!empty;$('i-more').hidden=empty;
+  $('i-lead').textContent=empty?'':D.min?('Вы слушали винил '+D.days.length+' '+plural(D.days.length,'день','дня','дней')+(D.best>1?', самая длинная серия — '+D.best+' '+plural(D.best,'день','дня','дней')+' подряд':'')+'.'):'Год начат: записывайте, что слушаете, и здесь появятся итоги.';
+  const big=[[hm(D.min)||'0 мин','прослушивания'],[D.S.length,'сеансов'],[D.added.length,plural(D.added.length,'пластинка добавлена','пластинки добавлено','пластинок добавлено')],[D.spent?Math.round(D.spent).toLocaleString('ru-RU')+' ₽':'—','потрачено на пластинки']];
+  $('i-big').innerHTML=big.map(([v,l])=>`<div><b>${esc(String(v))}</b><span>${esc(l)}</span></div>`).join('');
+  if(empty)return;
+  $('i-chartwrap').hidden=!D.min;if(D.min)barChart($('i-chart'),MON_S,D.months.map(v=>Math.round(v*10)/10),v=>fmt(v,Number.isInteger(v)?0:1),D.bm,matchMedia('(max-width:520px)').matches?380:640);
+  const ol=$('i-top');ol.innerHTML='';if(!D.top.length){const li=document.createElement('li');li.textContent='Записывайте в дневник, что слушаете, — здесь появится топ года.';ol.appendChild(li)}
+  D.top.forEach(([n,v])=>{const li=document.createElement('li');li.textContent=n+' ';const sp=document.createElement('span');sp.textContent=razy(v.c)+' · '+hm(v.m);li.appendChild(sp);ol.appendChild(li)});
+  hbars($('i-art'),D.arts.length?D.arts:[['пока нет данных',0]],null,v=>fmt(v,1)+' ч');
+  const F=[];const fr=(t,d,c,l)=>F.push(checkRow(t,d,c,l));
+  if(D.top.length)fr('Пластинка года',D.top[0][0]+' — '+razy(D.top[0][1].c),'ok','№ 1');
+  if(D.min)fr('Самый музыкальный месяц',['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'][D.bm]+': '+hm(D.months[D.bm]*60),'info','месяц');
+  if(D.topGen)fr('Любимый жанр',D.topGen[0]+' — '+hm(D.topGen[1]),'info','жанр');
+  if(D.dear&&+D.dear.p)fr('Самая дорогая покупка',D.dear.a+' — '+D.dear.t+', '+Math.round(D.dear.p).toLocaleString('ru-RU')+' ₽','info','покупка');
+  if(D.inst.length||D.ret.length)fr('Иглы',(D.inst.length?'установлено: '+D.inst.length:'')+(D.ret.length?(D.inst.length?', ':'')+'заменено: '+D.ret.length:''),'info','игла');
+  const st=active();if(st&&!st.retired){const u=usedH(st),lim=+st.limit||1000;fr('Текущая игла',st.name+': '+fmt(u,0)+' из '+fmt(lim,0)+' ч',u/lim<0.8?'ok':'mid',Math.round(u/lim*100)+' %')}
+  if(D.setups)fr('Настройки тонарма','записей в журнале: '+D.setups,'info','настройка');
+  if(D.washed)fr('Мойка','помыто пластинок: '+D.washed,'info','уход');
+  if(D.notes)fr('Заметки','записей в дневнике: '+D.notes,'info','дневник');
+  $('i-facts').innerHTML=F.join('')}
+$('i-year').addEventListener('change',renderItogi);
+$('i-dl').addEventListener('click',async()=>{const D=yearData(+$('i-year').value),st=$('i-msg'),dl=await getDownloads();
+  if(!dl){st.textContent='В этом окне скачивание недоступно. Откройте страницу на claude.ai в браузере.';return}
+  const L=['# Винил·Лаб — итоги '+D.Y+' года','','- Прослушивание: '+(hm(D.min)||'0 мин')+', сеансов: '+D.S.length+', дней с винилом: '+D.days.length+(D.best>1?', самая длинная серия: '+D.best+' дн.':''),
+    '- Добавлено пластинок: '+D.added.length+(D.spent?', потрачено: '+Math.round(D.spent).toLocaleString('ru-RU')+' ₽':''),'- Настроек тонарма: '+D.setups+', помыто пластинок: '+D.washed+', заметок: '+D.notes,''];
+  if(D.top.length){L.push('## Чаще всего слушали','');D.top.forEach(([n,v],i)=>L.push((i+1)+'. '+n+' — '+razy(v.c)+', '+hm(v.m)));L.push('')}
+  if(D.arts.length){L.push('## Исполнители года','');D.arts.forEach(([a,h])=>L.push('- '+a+' — '+fmt(h,1)+' ч'));L.push('')}
+  if(D.min){L.push('## По месяцам','');D.months.forEach((h,i)=>{if(h)L.push('- '+MON_S[i]+': '+hm(h*60))})}
+  try{await dl.save({filename:'vinyl-itogi-'+D.Y+'.md',data:L.join('\n')});st.textContent='Итоги сохранены.'}catch(e){st.textContent=e&&e.code==='declined'?'Скачивание отменено.':'Скачать не получилось.'}});
 function plural(n,a,b,c){const x=n%10,y=n%100;return x===1&&y!==11?a:x>=2&&x<=4&&(y<12||y>14)?b:c}
 chips('d-filter',()=>{dLimit=30;renderDiary()});
 $('d-more').addEventListener('click',()=>{dLimit+=30;renderDiary()});

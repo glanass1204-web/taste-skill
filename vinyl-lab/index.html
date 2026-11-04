@@ -239,6 +239,15 @@ select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--
 .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .unit input{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.webq{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:stretch}
+.webq select,.webq input{min-width:0}
+@media (max-width:420px){.webq{grid-template-columns:1fr auto}.webq select{grid-column:1/-1}}
+.webres{margin-top:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--glow-soft);font-size:14px}
+.webres h4{margin:0 0 6px;font-size:15px;font-weight:600}
+.webres dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:6px 0}
+.webres dt{color:var(--muted)}.webres dd{margin:0;font-variant-numeric:tabular-nums}
+.webres .src{font-size:12px;color:var(--muted);overflow-wrap:anywhere}.webres .src a{color:inherit}
+.webres .chips{margin-top:8px}
 .chips button,.btn{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
 .chips button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);font-weight:600}
 .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:500}
@@ -379,7 +388,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.3</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.4</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -527,6 +536,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-amp">Усилитель</label><select id="y-pick-amp"><option value="">— другой, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-spk">Колонки</label><select id="y-pick-spk"><option value="">— другие, ввести вручную —</option></select></div>
+      <div class="field webf"><label for="y-web-q">Нет в списке — найти в интернете</label>
+        <div class="webq"><select id="y-web-kind" aria-label="Что ищем"><option value="amp">Усилитель</option><option value="spk">Колонки</option></select><div class="unit"><input id="y-web-q" placeholder="например, Yamaha A-S301" autocomplete="off" enterkeyhint="search"></div><button type="button" class="btn primary" id="y-web-go">Найти</button></div>
+        <span class="hint" id="y-web-hint">Характеристики найдутся сами: мощность, импеданс, чувствительность, вход PHONO. Перед подстановкой вы их увидите.</span>
+        <div class="webres" id="y-web-res" hidden aria-live="polite"></div></div>
       <div class="field"><span class="flabel">Фото вашего проигрывателя</span>
         <div class="ttph"><img id="y-ttimg" alt="Ваш проигрыватель" hidden><div class="chips"><label class="btn" for="y-ttfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-ttdel" hidden>Убрать фото</button></div></div>
         <input type="file" id="y-ttfile" accept="image/*" hidden aria-label="Фото проигрывателя">
@@ -1856,12 +1869,67 @@ const SPKS=[
   {id:'s90',name:'Радиотехника S-90 (35АС-012)',z:4,zmin:null,sens:85,f3:31.5,plo:35,phi:90,note:'Чувствительность 85 дБ (0,338 Па/√Вт), номинальная мощность 35 Вт, паспортная 90 Вт — по паспорту.'}
 ];
 fillSelect($('y-pick-amp'),AMPS);fillSelect($('y-pick-spk'),SPKS);
-$('y-pick-amp').addEventListener('change',()=>{const a=AMPS.find(x=>x.id===$('y-pick-amp').value);if(!a)return;
-  {const f={amp:a.name,p8:a.p8,p4:a.p4,aphono:a.ph};if(a.df)f.df=a.df;fillSys(f)}
-  pickSave('Подставлены данные усилителя '+a.name+': '+a.p8+' Вт на 8 Ом'+(a.p4?', '+a.p4+' Вт на 4 Ом':'')+(a.ph?', вход PHONO '+a.ph+'.':', без входа PHONO.')+(a.df?'':' Коэффициент демпфирования производитель не указывает — оставлено прежнее значение.')+(a.note?' '+a.note:''))});
-$('y-pick-spk').addEventListener('change',()=>{const k=SPKS.find(x=>x.id===$('y-pick-spk').value);if(!k)return;
+function applyAmp(a,extra){{const f={amp:a.name,p8:a.p8,p4:a.p4,aphono:a.ph};if(a.df)f.df=a.df;fillSys(f)}
+  pickSave('Подставлены данные усилителя '+a.name+': '+a.p8+' Вт на 8 Ом'+(a.p4?', '+a.p4+' Вт на 4 Ом':'')+(a.ph?', вход PHONO '+a.ph+'.':', без входа PHONO.')+(a.df?'':' Коэффициент демпфирования '+(a.src?'не найден':'производитель не указывает')+' — оставлено прежнее значение.')+(a.note?' '+a.note:'')+(extra||''))}
+$('y-pick-amp').addEventListener('change',()=>{const a=AMPS.find(x=>x.id===$('y-pick-amp').value);if(a)applyAmp(a)});
+function applySpk(k,extra){
   const f={spk:k.name,z:k.z,sens:k.sens,f3:k.f3,plo:k.plo||null,phi:k.phi||k.pmax||null,zmin:k.zmin||+(k.z*0.8).toFixed(1)};fillSys(f);
-  pickSave('Подставлены данные колонок '+k.name+': '+k.z+' Ом'+(k.zmin?' (минимум '+fmt(k.zmin,1)+')':' (минимум не указан — взята оценка '+fmt(k.z*0.8,1)+' Ом: по стандарту не ниже 80 % номинала)')+', '+fmt(k.sens,k.sens%1?1:0)+' дБ/Вт/м'+(k.f3?', бас до '+fmt(k.f3,k.f3%1?1:0)+' Гц':'')+'.'+(k.pmax&&!k.plo?' Производитель указывает допустимую мощность '+k.pmax+' Вт.':'')+(k.note?' '+k.note:''))});
+  pickSave('Подставлены данные колонок '+k.name+': '+k.z+' Ом'+(k.zmin?' (минимум '+fmt(k.zmin,1)+')':' (минимум не указан — взята оценка '+fmt(k.z*0.8,1)+' Ом: по стандарту не ниже 80 % номинала)')+', '+fmt(k.sens,k.sens%1?1:0)+' дБ/Вт/м'+(k.f3?', бас до '+fmt(k.f3,k.f3%1?1:0)+' Гц':'')+'.'+(k.pmax&&!k.plo?' Производитель указывает допустимую мощность '+k.pmax+' Вт.':'')+(k.note?' '+k.note:'')+(extra||''))}
+$('y-pick-spk').addEventListener('change',()=>{const k=SPKS.find(x=>x.id===$('y-pick-spk').value);if(k)applySpk(k)});
+/* поиск характеристик в интернете: Claude + поиск Firecrawl (если подключён у зрителя) */
+const WEB={key:'vinyl-lab-found',ctl:null};
+function webLoad(){try{return JSON.parse(localStorage.getItem(WEB.key))||{amp:[],spk:[]}}catch(e){return {amp:[],spk:[]}}}
+function webStore(kind,o){try{const d=webLoad();d[kind]=(d[kind]||[]).filter(x=>x.name.toLowerCase()!==o.name.toLowerCase());d[kind].push(o);localStorage.setItem(WEB.key,JSON.stringify(d))}catch(e){}}
+function webAddToList(kind,o){const list=kind==='amp'?AMPS:SPKS,sel=$(kind==='amp'?'y-pick-amp':'y-pick-spk');
+  const old=list.findIndex(x=>x.name.toLowerCase()===o.name.toLowerCase());if(old>=0){if(!String(list[old].id).startsWith('w-'))return list[old];list.splice(old,1)}
+  o.id='w-'+o.name.toLowerCase().replace(/[^a-z0-9а-яё]+/g,'-');list.push(o);
+  sel.querySelectorAll('optgroup').forEach(g=>g.remove());fillSelect(sel,list);return o}
+{const d=webLoad();(d.amp||[]).forEach(o=>webAddToList('amp',o));(d.spk||[]).forEach(o=>webAddToList('spk',o))}
+const NUM=(v,lo,hi)=>{v=typeof v==='string'?parseFloat(v.replace(',','.')):v;return typeof v==='number'&&isFinite(v)&&v>=lo&&v<=hi?+v:null};
+function webClean(kind,r){if(!r||typeof r!=='object'||!r.found)return null;const name=String(r.name||'').trim().slice(0,80);if(!name)return null;
+  const src=(Array.isArray(r.sources)?r.sources:[]).map(String).filter(u=>/^https?:\/\//.test(u)).slice(0,3);let note=r.note?String(r.note).trim().slice(0,240):'';if(note&&!/[.!?…]$/.test(note))note+='.';
+  if(kind==='amp'){const o={name,p8:NUM(r.p8,1,1000),p4:NUM(r.p4,1,2000),df:NUM(r.df,5,10000),ph:['MM','MM/MC'].includes(r.ph)?r.ph:'',note,src};return o.p8?o:null}
+  const o={name,z:NUM(r.z,2,16),zmin:NUM(r.zmin,1,16),sens:NUM(r.sens,75,110),f3:NUM(r.f3,10,200),plo:NUM(r.plo,1,1000),phi:NUM(r.phi,1,2000),pmax:NUM(r.pmax,1,2000),note,src};
+  if(o.zmin&&o.z&&o.zmin>o.z)o.zmin=null;return o.z&&o.sens?o:null}
+function webPrompt(kind,q,canSearch){const amp=kind==='amp';
+  return 'Найди паспортные характеристики '+(amp?'стереоусилителя':'акустических колонок (пассивных)')+' «'+q+'» для приложения меломана.\n'+
+  (canSearch?'Сначала найди данные инструментом web_search (не больше 3 запросов, лучше сайт производителя или крупный магазин) и опирайся на найденное. В sources перечисли адреса страниц, где видел цифры.\n':'Поиска в интернете нет — отвечай по своим знаниям; sources оставь пустым.\n')+
+  'Не выдумывай: если цифры нет или ты не уверен, ставь null. Если модель не найдена или это не '+(amp?'усилитель':'колонки')+', верни {"found":false}.\n'+
+  'Ответь только JSON без пояснений:\n'+(amp?
+  '{"found":true,"name":"точное название модели","p8":мощность Вт на канал на 8 Ом,"p4":Вт на канал на 4 Ом или null,"df":коэффициент демпфирования или null,"ph":"MM" | "MM/MC" | "" (встроенный вход для проигрывателя),"note":"коротко по-русски важная оговорка или пусто","sources":["url"]}':
+  '{"found":true,"name":"точное название модели","z":номинальный импеданс Ом,"zmin":минимальный импеданс Ом или null,"sens":чувствительность дБ (2,83 В или 1 Вт / 1 м),"f3":нижняя граница АЧХ Гц при −3 дБ или null,"plo":рекомендуемая мощность усилителя от, Вт или null,"phi":до, Вт или null,"pmax":допустимая мощность Вт или null,"note":"коротко по-русски важная оговорка или пусто","sources":["url"]}')}
+function webLinks(q){const u=encodeURIComponent(q+' характеристики');return '<a href="https://yandex.ru/search/?text='+u+'" target="_blank" rel="noopener">Яндекс</a> · <a href="https://www.google.com/search?q='+u+'" target="_blank" rel="noopener">Google</a>'}
+function webShow(html){const r=$('y-web-res');r.innerHTML=html;r.hidden=false}
+function webCard(kind,o,how){const amp=kind==='amp',f=(v,u)=>v==null?'<span style="color:var(--muted)">нет данных</span>':esc(fmt(v,v%1?1:0))+' '+u;
+  const rows=amp?[['На 8 Ом',f(o.p8,'Вт')],['На 4 Ом',f(o.p4,'Вт')],['Демпфирование',f(o.df,'')],['Вход PHONO',o.ph?esc(o.ph):'нет']]:
+    [['Импеданс',f(o.z,'Ом')],['Минимум',f(o.zmin,'Ом')],['Чувствительность',f(o.sens,'дБ')],['Бас до',f(o.f3,'Гц')],['Усилитель',o.plo||o.phi?esc((o.plo||'?')+'–'+(o.phi||'?'))+' Вт':o.pmax?'до '+esc(o.pmax)+' Вт':'<span style="color:var(--muted)">нет данных</span>']];
+  webShow('<h4>'+esc(o.name)+'</h4><dl>'+rows.map(r=>'<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>').join('')+'</dl>'+(o.note?'<p class="src" style="color:var(--ink)">'+esc(o.note)+'</p>':'')+
+    '<p class="src">'+how+(o.src&&o.src.length?': '+o.src.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])+'</a>').join(', '):'')+'. Сверьте с паспортом — ошибки возможны.</p>'+
+    '<div class="chips"><button type="button" class="btn primary" id="y-web-apply">Подставить в систему</button><button type="button" class="btn" id="y-web-x">Отмена</button></div>');
+  $('y-web-apply').onclick=()=>{const it=webAddToList(kind,Object.assign({},o));webStore(kind,o);$(amp?'y-pick-amp':'y-pick-spk').value=it.id;
+    const extra=' Данные найдены '+(o.src&&o.src.length?'в интернете':'по памяти Claude')+' — сверьте с паспортом.';amp?applyAmp(it,extra):applySpk(it,extra);$('y-web-res').hidden=true;$('y-web-q').value=''};
+  $('y-web-x').onclick=()=>{$('y-web-res').hidden=true}}
+async function webFind(){const q=$('y-web-q').value.trim(),kind=$('y-web-kind').value,btn=$('y-web-go');if(q.length<3){$('y-web-q').focus();return}
+  if(WEB.ctl){WEB.ctl.abort();WEB.ctl=null;return}
+  const has=window.claude&&window.claude.use;let sample=null,mcp=null;
+  if(has){webShow('Подключаюсь…');try{[sample,mcp]=await Promise.all([window.claude.use('sample'),window.claude.use('mcp')])}catch(e){}}
+  if(!sample){webShow('Автоматический поиск работает в версии на claude.ai. Здесь можно открыть поиск и вписать цифры вручную: '+webLinks(q)+'.');return}
+  const ctl=WEB.ctl=new AbortController();btn.textContent='Стоп';let n=0;
+  const tools=mcp?[{name:'web_search',description:'Поиск в интернете. Возвращает заголовки, адреса и выдержки страниц.',inputSchema:{type:'object',properties:{query:{type:'string'}},required:['query']},
+    execute:async(i)=>{if(++n>3)throw new Error('Лимит поиска исчерпан — отвечай по найденному.');const qq=String(i&&i.query||q).slice(0,200);webShow('Ищу в интернете: «'+esc(qq)+'»…');
+      const r=await mcp.callTool('Firecrawl','firecrawl_search',{query:qq,objective:'Найти паспортные характеристики hi-fi техники для дневника меломана',limit:5});
+      const web=(r&&r.payload&&r.payload.data&&r.payload.data.web)||[];return web.slice(0,5).map(w=>({title:w.title,url:w.url,text:String(w.description||'').slice(0,700)}))}}]:undefined;
+  webShow(mcp?'Ищу в интернете…':'Спрашиваю Claude…');
+  try{let r;try{r=await sample.json(webPrompt(kind,q,!!mcp),{signal:ctl.signal,tools,modelTier:'default'})}
+    catch(e){const soft=e&&!['cancelled','not_granted','rate_limited'].includes(e.code);if(!(mcp&&soft))throw e;
+      mcp=null;webShow('Поиск недоступен — спрашиваю Claude…');r=await sample.json(webPrompt(kind,q,false),{signal:ctl.signal,modelTier:'default'})}
+    const o=webClean(kind,r);
+    if(!o){webShow('Не нашёл надёжных данных по «'+esc(q)+'». Проверьте название или поищите сами: '+webLinks(q)+'.');return}
+    webCard(kind,o,o.src&&o.src.length?'Найдено в интернете':'По памяти Claude, без поиска в интернете')}
+  catch(e){const c=e&&e.code;webShow(c==='cancelled'?'Поиск остановлен.':c==='not_granted'?'Без разрешения на Claude поиск не работает. Можно поискать вручную: '+webLinks(q)+'.':c==='rate_limited'?'Слишком много запросов подряд — попробуйте через минуту.':'Не получилось найти: '+esc((e&&e.message)||'ошибка')+'. Поищите вручную: '+webLinks(q)+'.')}
+  finally{WEB.ctl=null;btn.textContent='Найти'}}
+$('y-web-go').addEventListener('click',webFind);
+$('y-web-q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();webFind()}});
 /* расчёт: мощность и громкость на месте слушателя */
 function powerCalc(o){const lowZ=isFinite(o.z)&&o.z<=5,P=lowZ&&isFinite(o.p4)?o.p4:o.p8;
   const spl=isFinite(o.sens)&&P>0&&o.dist>0?o.sens+10*Math.log10(P)-20*Math.log10(o.dist)+3:NaN;return {P,spl,lowZ}}

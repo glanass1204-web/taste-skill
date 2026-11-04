@@ -65,15 +65,39 @@ header{padding-block:32px 22px;border-bottom:1px solid var(--line)}
 .vfd b{font-family:var(--f-mono);font-weight:500;font-size:clamp(14px,2.4vw,18px);color:var(--glow);text-shadow:0 0 8px color-mix(in srgb,var(--glow) 60%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .deck{display:flex;flex-direction:column;gap:10px;min-width:0}
 .deck-svg{width:100%;height:auto;display:block;filter:drop-shadow(0 14px 22px rgba(0,0,0,.28))}
-.plinth{fill:var(--deck)}.plinth-in{fill:none;stroke:var(--deck-ring);stroke-width:1}
-.platter{fill:var(--deck-ring)}.vinyl{fill:var(--vinyl)}.groove{fill:none;stroke:var(--groove);stroke-width:1.2}
-.strobe circle{fill:var(--deck-muted)}
+.plinth{fill:var(--plinth,var(--deck))}.plinth-in{fill:none;stroke:var(--plinth-line,var(--deck-ring));stroke-width:1}
+.platter{fill:var(--rim,var(--deck-ring))}.vinyl{fill:var(--vinyl)}.groove{fill:none;stroke:var(--groove);stroke-width:1.2}
+.strobe circle{fill:var(--strobe-c,var(--deck-muted))}
 .label{fill:var(--glow)}.label-t{font-family:var(--f-mono);font-size:7.2px;letter-spacing:.06em;fill:rgba(0,0,0,.72)}
 .label-dot{fill:rgba(0,0,0,.5)}.spindle{fill:var(--deck-ink)}
-.armrest{fill:var(--deck-ring)}.armtube{stroke:var(--deck-ink);stroke-width:5;stroke-linecap:round}
-.cweight{fill:var(--deck-muted)}.headshell{fill:var(--deck-ink)}.cart{fill:var(--glow)}
-.pivot{fill:var(--deck-ring);stroke:var(--deck-muted);stroke-width:1}.pivot-in{fill:var(--deck-ink)}
-.deck-t{font-family:var(--f-mono);font-size:10px;fill:var(--deck-muted);text-anchor:middle}
+.armrest{fill:var(--rim,var(--deck-ring))}.armtube{fill:none;stroke:var(--arm,var(--deck-ink));stroke-width:5;stroke-linecap:round}
+.cweight{fill:var(--cw,var(--deck-muted))}.headshell{fill:var(--arm,var(--deck-ink))}.cart{fill:var(--glow)}
+.pivot{fill:var(--rim,var(--deck-ring));stroke:var(--cw,var(--deck-muted));stroke-width:1}.pivot-in{fill:var(--arm,var(--deck-ink))}
+.deck-t{font-family:var(--f-mono);font-size:10px;fill:var(--dtext,var(--deck-muted));text-anchor:middle}
+.deck-cap{margin:-2px 0 0;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;min-height:1em}
+.hero.photo .deck-cap{display:none}
+.pitch,.tbtn,.armS{display:none}
+.hero[data-pitch="1"] .pitch,.hero[data-pitch="1"] .tbtn{display:inline}
+.hero[data-arm="s"] .armS{display:inline}.hero[data-arm="s"] line.armtube{display:none}
+.pitch-track{fill:var(--plinth-line,var(--deck-ring))}.pitch-knob{fill:var(--arm,var(--deck-ink))}
+.tbtn-b{fill:var(--cw,var(--deck-ring))}.tbtn-t{font-size:8px;fill:var(--plinth,var(--deck))}
+.hero[data-skin="silver"] .deck-svg{--plinth:url(#g-silver);--plinth-line:#8B9198;--rim:#D3D8DD;--arm:#F2F4F6;--cw:#7D848B;--dtext:#30353B;--strobe-c:#4A5058}
+.hero[data-skin="silver"] .tbtn-t{fill:#F2F4F6}
+.hero[data-skin="blackdj"] .deck-svg{--plinth:#17191C;--plinth-line:#30343A;--rim:#C9CED3;--arm:#E3E6E9;--cw:#6F767E;--dtext:#8A929B;--strobe-c:#3A3F45}
+.hero[data-skin="project"] .deck-svg{--plinth:#8E1C25;--plinth-line:#B03842;--rim:#1B1B1B;--arm:#232323;--cw:#3A3A3A;--dtext:#F4CDD0;--strobe-c:transparent}
+.hero[data-skin="rega"] .deck-svg{--plinth:#EEF0EE;--plinth-line:#CDD3CF;--rim:rgba(110,185,168,.55);--arm:#1C1D1F;--cw:#2B2C2F;--dtext:#5F6764;--strobe-c:transparent}
+.hero[data-skin="denon"] .deck-svg{--plinth:#121315;--plinth-line:#2B2E33;--rim:#BFC4C9;--arm:#D9DDE1;--cw:#5E646B;--dtext:#7D848C;--strobe-c:transparent}
+.hero[data-skin="sony"] .deck-svg{--plinth:#1B1C1F;--plinth-line:#33363C;--rim:#2A2C30;--arm:#C7CCD1;--cw:#555A61;--dtext:#7A8189;--strobe-c:transparent}
+:root[data-night] .hero[data-skin] .deck-svg{--plinth:var(--deck);--plinth-line:var(--deck-ring);--rim:var(--deck-ring);--arm:var(--deck-ink);--cw:var(--deck-muted);--dtext:var(--deck-muted);--strobe-c:var(--deck-muted)}
+.deck-photo{position:relative;border-radius:18px;overflow:hidden;background:var(--deck);aspect-ratio:400/260;box-shadow:0 14px 22px rgba(0,0,0,.28)}
+.deck-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.hero.photo .deck-svg{display:none}.hero.photo .deck-photo{display:block!important}
+.dp-badge{position:absolute;right:12px;bottom:12px;width:64px;height:64px;border-radius:50%;background:var(--deck);padding:4px;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.dp-disc{--lab:var(--glow);--sz:56px}
+.hero.playing .dp-disc{animation:spin var(--rev,1.8s) linear infinite}
+.dp-model{position:absolute;left:12px;bottom:12px;max-width:calc(100% - 100px);font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:#fff;background:rgba(0,0,0,.55);padding:4px 8px;border-radius:5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.deckview{font-size:13px;padding:7px 12px}
+.ttph{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.ttph img{width:120px;height:78px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
 .led{fill:var(--glow);filter:drop-shadow(0 0 4px var(--glow))}.led.off{fill:var(--deck-ring);filter:none}
 #rec{transform-origin:150px 130px;transform-box:view-box}
 #arm{transform-origin:330px 60px;transform-box:view-box;transition:transform 1.4s cubic-bezier(.45,.05,.2,1)}
@@ -355,17 +379,21 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.0</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.1</span></div>
   </div>
   <div class="deck">
+    <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
     <svg viewBox="0 0 400 260" class="deck-svg" role="img" aria-label="Проигрыватель Винил·Лаб">
       <defs>
+        <linearGradient id="g-silver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE0E4"/><stop offset=".55" stop-color="#B9BFC5"/><stop offset="1" stop-color="#A2A9B0"/></linearGradient>
         <linearGradient id="g-sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
         <clipPath id="c-rec"><circle cx="150" cy="130" r="100"/></clipPath>
         <path id="p-label" d="M150 130 m-25 0 a25 25 0 1 1 50 0 a25 25 0 1 1 -50 0"/>
       </defs>
       <rect x="6" y="6" width="388" height="248" rx="18" class="plinth"/>
       <rect x="14" y="14" width="372" height="232" rx="12" class="plinth-in"/>
+      <g class="pitch"><rect x="364" y="96" width="8" height="96" rx="3" class="pitch-track"/><rect x="359" y="138" width="18" height="12" rx="2" class="pitch-knob"/><text x="368" y="208" class="deck-t">PITCH</text></g>
+      <g class="tbtn"><rect x="24" y="212" width="40" height="26" rx="3" class="tbtn-b"/><text x="44" y="229" class="deck-t tbtn-t">START</text></g>
       <circle cx="150" cy="130" r="110" class="platter"/>
       <g id="rec">
         <g class="strobe"><circle cx="256.0" cy="130.0" r="1.6"/><circle cx="254.4" cy="148.4" r="1.6"/><circle cx="249.6" cy="166.3" r="1.6"/><circle cx="241.8" cy="183.0" r="1.6"/><circle cx="231.2" cy="198.1" r="1.6"/><circle cx="218.1" cy="211.2" r="1.6"/><circle cx="203.0" cy="221.8" r="1.6"/><circle cx="186.3" cy="229.6" r="1.6"/><circle cx="168.4" cy="234.4" r="1.6"/><circle cx="150.0" cy="236.0" r="1.6"/><circle cx="131.6" cy="234.4" r="1.6"/><circle cx="113.7" cy="229.6" r="1.6"/><circle cx="97.0" cy="221.8" r="1.6"/><circle cx="81.9" cy="211.2" r="1.6"/><circle cx="68.8" cy="198.1" r="1.6"/><circle cx="58.2" cy="183.0" r="1.6"/><circle cx="50.4" cy="166.3" r="1.6"/><circle cx="45.6" cy="148.4" r="1.6"/><circle cx="44.0" cy="130.0" r="1.6"/><circle cx="45.6" cy="111.6" r="1.6"/><circle cx="50.4" cy="93.7" r="1.6"/><circle cx="58.2" cy="77.0" r="1.6"/><circle cx="68.8" cy="61.9" r="1.6"/><circle cx="81.9" cy="48.8" r="1.6"/><circle cx="97.0" cy="38.2" r="1.6"/><circle cx="113.7" cy="30.4" r="1.6"/><circle cx="131.6" cy="25.6" r="1.6"/><circle cx="150.0" cy="24.0" r="1.6"/><circle cx="168.4" cy="25.6" r="1.6"/><circle cx="186.3" cy="30.4" r="1.6"/><circle cx="203.0" cy="38.2" r="1.6"/><circle cx="218.1" cy="48.8" r="1.6"/><circle cx="231.2" cy="61.9" r="1.6"/><circle cx="241.8" cy="77.0" r="1.6"/><circle cx="249.6" cy="93.7" r="1.6"/><circle cx="254.4" cy="111.6" r="1.6"/></g>
@@ -381,6 +409,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <g id="arm">
         <rect x="318" y="18" width="24" height="30" rx="5" class="cweight"/>
         <line x1="330" y1="60" x2="330" y2="196" class="armtube"/>
+        <path d="M330 60 C356 104 306 150 330 196" class="armtube armS"/>
         <path d="M322 194h16l-2 22h-12z" class="headshell"/>
         <rect x="325" y="212" width="10" height="8" rx="1.5" class="cart"/>
       </g>
@@ -390,8 +419,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <circle cx="304" cy="244" r="3" class="led" id="led33"/><circle cx="336" cy="244" r="3" class="led off" id="led45"/>
       <circle cx="372" cy="232" r="4" class="led off" id="ledpwr"/>
     </svg>
+    <p class="deck-cap" id="deck-model"></p>
     <div class="deck-ctl">
       <button type="button" class="startbtn" id="h-start" aria-pressed="false"><span class="sb-dot"></span><span id="h-startl">Старт</span></button>
+      <button type="button" class="btn deckview" id="h-view" hidden>Показать фото</button>
       <div class="speedsel" role="group" aria-label="Скорость диска"><button type="button" id="h-33" aria-pressed="true">33⅓</button><button type="button" id="h-45" aria-pressed="false">45</button></div>
     </div>
     <p class="deck-hint" id="h-hint">Ставите пластинку — нажмите «Старт»: время пойдёт в журнал иглы.</p>
@@ -494,6 +525,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <h3>Быстрый выбор из списка</h3>
       <div class="field"><label for="y-pick-tt">Проигрыватель</label><select id="y-pick-tt"><option value="">— другой, ввести вручную —</option></select></div>
       <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
+      <div class="field"><span class="flabel">Фото вашего проигрывателя</span>
+        <div class="ttph"><img id="y-ttimg" alt="Ваш проигрыватель" hidden><div class="chips"><label class="btn" for="y-ttfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-ttdel" hidden>Убрать фото</button></div></div>
+        <input type="file" id="y-ttfile" accept="image/*" hidden aria-label="Фото проигрывателя">
+        <span class="hint" id="y-tthint">Встанет в шапку вместо рисунка. Без фото рисунок подстроится под марку проигрывателя.</span></div>
       <p class="note" id="y-pick-note">Выберите свой проигрыватель и головку: паспортные данные подставятся сами, система сохранится, и появятся рекомендуемые установки.</p>
     </div>
   </div>
@@ -1739,21 +1774,21 @@ function readSys(){const o={};YF.forEach(k=>{const v=$('y-'+k).value;o[k]=YTXT.i
 function fillSys(o){YF.forEach(k=>{if(!(k in o))return;const v=o[k];$('y-'+k).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v})}
 /* база проигрывателей и головок — паспортные данные производителей */
 const TT=[
-  {id:'sl1200mk7',name:'Technics SL-1200MK7 / GR / G',D:215,ov:15,off:22,meff:12},
-  {id:'sl1200mk2',name:'Technics SL-1200MK2 – MK5',D:215,ov:15,off:22,meff:12},
-  {id:'sl1500c',name:'Technics SL-1500C',D:215,ov:15,off:22,meff:12,cart:'2mred'},
-  {id:'sl100c',name:'Technics SL-100C',D:215,ov:15,off:22,meff:12},
-  {id:'lp120x',name:'Audio-Technica AT-LP120XUSB',D:214.5,ov:16,off:null,meff:null,cart:'vm95e',note:'Audio-Technica не публикует угол офсета и эффективную массу тонарма: эти поля оставлены пустыми.'},
-  {id:'dce',name:'Pro-Ject Debut Carbon EVO',D:200,ov:18.5,off:null,meff:6,cart:'2mred',note:'Pro-Ject не указывает угол офсета: поле оставлено пустым.'},
-  {id:'devo2',name:'Pro-Ject Debut EVO 2',D:200,ov:18.5,off:null,meff:7,note:'Pro-Ject не указывает угол офсета. Штатная головка Pick it MM EVO выбирается вручную: в её паспорте нет гибкости.'},
-  {id:'planar3',name:'Rega Planar 3 (тонарм RB330)',D:222,ov:14.5,off:21.55,meff:11},
-  {id:'dp400',name:'Denon DP-400',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет. Головодержатель весит 11 г с крепежом.'},
-  {id:'dp450',name:'Denon DP-450USB',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет.'},
-  {id:'dp300f',name:'Denon DP-300F',D:202.5,ov:19,off:null,meff:null,note:'Полностью автоматический. Denon не указывает эффективную массу и офсет.'},
-  {id:'dp3000ne',name:'Denon DP-3000NE',D:230,ov:14,off:null,meff:null,note:'Denon не указывает эффективную массу. Тонарм рассчитан на головки 4–16 г, головодержатель весит 11 г: это тонарм средней-высокой массы, хорошо подходит для жёстких MC вроде DL-103.'},
-  {id:'pshx500',name:'Sony PS-HX500',D:null,ov:null,off:null,meff:null,cart:'sonyhx500',note:'Sony указывает только эффективную длину тонарма 221 мм, свес не указан — впишите расстояние до оси тонарма, если измерите его.'},
-  {id:'pslx310',name:'Sony PS-LX310BT',fixed:true,D:null,ov:null,off:null,meff:null,note:'Автоматический проигрыватель с несъёмной головкой: прижимная сила, антискейтинг и юстировка выставлены на заводе и не регулируются. Пригодятся журнал иглы, коллекция и проверка скорости.'},
-  {id:'psx50',name:'Sony PS-X50 (винтаж)',D:221,ov:14,off:null,meff:null,note:'Эффективная длина 235 мм и свес 14 мм — по инструкции, со слов владельцев. Эффективную массу и офсет впишите сами.'}
+  {id:'sl1200mk7',skin:'silver',arm:'s',pitch:1,name:'Technics SL-1200MK7 / GR / G',D:215,ov:15,off:22,meff:12},
+  {id:'sl1200mk2',skin:'silver',arm:'s',pitch:1,name:'Technics SL-1200MK2 – MK5',D:215,ov:15,off:22,meff:12},
+  {id:'sl1500c',skin:'silver',arm:'s',pitch:1,name:'Technics SL-1500C',D:215,ov:15,off:22,meff:12,cart:'2mred'},
+  {id:'sl100c',skin:'blackdj',arm:'s',pitch:1,name:'Technics SL-100C',D:215,ov:15,off:22,meff:12},
+  {id:'lp120x',skin:'blackdj',arm:'s',pitch:1,name:'Audio-Technica AT-LP120XUSB',D:214.5,ov:16,off:null,meff:null,cart:'vm95e',note:'Audio-Technica не публикует угол офсета и эффективную массу тонарма: эти поля оставлены пустыми.'},
+  {id:'dce',skin:'project',arm:'line',pitch:0,name:'Pro-Ject Debut Carbon EVO',D:200,ov:18.5,off:null,meff:6,cart:'2mred',note:'Pro-Ject не указывает угол офсета: поле оставлено пустым.'},
+  {id:'devo2',skin:'project',arm:'line',pitch:0,name:'Pro-Ject Debut EVO 2',D:200,ov:18.5,off:null,meff:7,note:'Pro-Ject не указывает угол офсета. Штатная головка Pick it MM EVO выбирается вручную: в её паспорте нет гибкости.'},
+  {id:'planar3',skin:'rega',arm:'line',pitch:0,name:'Rega Planar 3 (тонарм RB330)',D:222,ov:14.5,off:21.55,meff:11},
+  {id:'dp400',skin:'denon',arm:'s',pitch:0,name:'Denon DP-400',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет. Головодержатель весит 11 г с крепежом.'},
+  {id:'dp450',skin:'denon',arm:'s',pitch:0,name:'Denon DP-450USB',D:204,ov:16,off:null,meff:null,note:'Denon не указывает эффективную массу и офсет.'},
+  {id:'dp300f',skin:'denon',arm:'line',pitch:0,name:'Denon DP-300F',D:202.5,ov:19,off:null,meff:null,note:'Полностью автоматический. Denon не указывает эффективную массу и офсет.'},
+  {id:'dp3000ne',skin:'denon',arm:'s',pitch:1,name:'Denon DP-3000NE',D:230,ov:14,off:null,meff:null,note:'Denon не указывает эффективную массу. Тонарм рассчитан на головки 4–16 г, головодержатель весит 11 г: это тонарм средней-высокой массы, хорошо подходит для жёстких MC вроде DL-103.'},
+  {id:'pshx500',skin:'sony',arm:'line',pitch:0,name:'Sony PS-HX500',D:null,ov:null,off:null,meff:null,cart:'sonyhx500',note:'Sony указывает только эффективную длину тонарма 221 мм, свес не указан — впишите расстояние до оси тонарма, если измерите его.'},
+  {id:'pslx310',skin:'sony',arm:'line',pitch:0,name:'Sony PS-LX310BT',fixed:true,D:null,ov:null,off:null,meff:null,note:'Автоматический проигрыватель с несъёмной головкой: прижимная сила, антискейтинг и юстировка выставлены на заводе и не регулируются. Пригодятся журнал иглы, коллекция и проверка скорости.'},
+  {id:'psx50',skin:'silver',arm:'line',pitch:0,name:'Sony PS-X50 (винтаж)',D:221,ov:14,off:null,meff:null,note:'Эффективная длина 235 мм и свес 14 мм — по инструкции, со слов владельцев. Эффективную массу и офсет впишите сами.'}
 ];
 const BRAND=t=>t.name.split(' ')[0];
 const CARTS=[
@@ -1777,7 +1812,7 @@ function fillSelect(sel,list){const groups={};list.forEach(x=>{(groups[BRAND(x)]
   Object.keys(groups).sort().forEach(b=>{const g=document.createElement('optgroup');g.label=b;groups[b].forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;g.appendChild(o)});sel.appendChild(g)})}
 fillSelect($('y-pick-tt'),TT);fillSelect($('y-pick-cart'),CARTS);
 function cartFields(c){return {cart:c.name.replace(/ \(.*\)$/,''),type:c.type,cmass:c.m,comp:c.c,hz:String(c.hz),prof:c.prof,vlo:c.vlo,vhi:c.vhi,vrec:c.vrec,clo:c.clo,chi:c.chi}}
-function pickSave(note){const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;clearTimeout(sysTimer);saveP();applySys(o);renderChecks();vtfPill();
+function pickSave(note){const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;clearTimeout(sysTimer);saveP();renderDeck();applySys(o);renderChecks();vtfPill();
   $('y-pick-note').textContent=note;$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-pick-tt').addEventListener('change',()=>{const t=TT.find(x=>x.id===$('y-pick-tt').value);if(!t)return;
   fillSys({tt:t.name,D:t.D,ov:t.ov,off:t.off,meff:t.meff});const notes=['Подставлены паспортные данные: '+t.name+'.'];
@@ -1854,11 +1889,11 @@ function onProfile(d,mode){
   if(P.system&&!sysDirty&&sj!==lastSysJSON){lastSysJSON=sj;
     const tt=TT.find(t=>t.name===P.system.tt),ct=CARTS.find(c=>c.name.replace(/ \(.*\)$/,'')===P.system.cart);$('y-pick-tt').value=tt?tt.id:'';$('y-pick-cart').value=ct?ct.id:'';
     fillSys(P.system);applySys(P.system);$('y-state').textContent='Система сохранена'+(mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
-  if(document.activeElement!==$('k-every'))$('k-every').value=P.prefs.washEvery;renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
+  if(document.activeElement!==$('k-every'))$('k-every').value=P.prefs.washEvery;if(window.__vlNow)renderDeck();renderSetups();renderChecks();vtfPill();if(typeof renderCat==='function')renderCat();
 }
 $('y-form').addEventListener('submit',e=>{e.preventDefault();commitSys()});
 let sysDirty=false,sysTimer=null,lastSysJSON='',roomDirty=false,roomTimer=null,lastRoomJSON='';
-function commitSys(){clearTimeout(sysTimer);const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;saveP();applySys(o);renderChecks();vtfPill();
+function commitSys(){clearTimeout(sysTimer);const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);sysDirty=false;saveP();renderDeck();applySys(o);renderChecks();vtfPill();
   $('y-msg').textContent='Сохранено. Калькуляторы обновлены.';$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-form').addEventListener('input',e=>{sysDirty=true;$('y-msg').textContent='Сохраняю…';
   if(e.target.id==='y-tt')$('y-pick-tt').value='';if(e.target.id==='y-cart')$('y-pick-cart').value='';
@@ -2251,6 +2286,31 @@ function setRpm(r){$('hero').style.setProperty('--rev',r===45?'1.333s':'1.8s');$
 $('h-33').addEventListener('click',()=>setRpm(33));$('h-45').addEventListener('click',()=>setRpm(45));
 setRpm(lsGet('vinyl-lab-rpm')==='45'?45:33);
 
+
+/* ---------- проигрыватель в шапке: стиль под модель и своё фото ---------- */
+function deckSkin(tt){const t=TT.find(x=>x.name===tt);if(t&&t.skin)return {skin:t.skin,arm:t.arm,pitch:t.pitch};const n=nrm(tt);
+  if(/technics/.test(n))return {skin:/sl-?100c|mk7.*black/.test(n)?'blackdj':'silver',arm:'s',pitch:1};
+  if(/audio-?technica|at-lp/.test(n))return {skin:'blackdj',arm:'s',pitch:1};
+  if(/pro-?ject/.test(n))return {skin:'project',arm:'line',pitch:0};
+  if(/rega/.test(n))return {skin:'rega',arm:'line',pitch:0};
+  if(/denon/.test(n))return {skin:'denon',arm:'s',pitch:0};
+  if(/sony/.test(n))return {skin:'sony',arm:'line',pitch:0};
+  return {skin:'',arm:'line',pitch:0}}
+function renderDeck(){const h=$('hero'),o=P.system||{},k=deckSkin(o.tt||'');
+  if(k.skin)h.dataset.skin=k.skin;else delete h.dataset.skin;h.dataset.arm=k.arm;h.dataset.pitch=k.pitch?'1':'0';
+  const model=(o.tt||'').replace(/\s*\(.*\)\s*$/,'').slice(0,34);$('deck-model').textContent=model;$('dp-model').textContent=model;$('dp-model').hidden=!model;
+  const ref=P.prefs.ttPhoto,view=P.prefs.deckView||'photo';$('h-view').hidden=!ref;$('h-view').textContent=view==='photo'?'Показать рисунок':'Показать фото';
+  h.classList.toggle('photo',!!ref&&view==='photo');
+  if(ref){if($('deck-img').dataset.ref!==ref){$('deck-img').dataset.ref=ref;setImg($('deck-img'),ref,()=>{h.classList.remove('photo');$('h-view').hidden=true})}
+    if($('y-ttimg').dataset.ref!==ref){$('y-ttimg').dataset.ref=ref;setImg($('y-ttimg'),ref,()=>{$('y-ttimg').hidden=true})}$('y-ttimg').hidden=false;$('y-ttdel').hidden=false}
+  else{$('y-ttimg').hidden=true;$('y-ttdel').hidden=true;$('deck-img').removeAttribute('src');delete $('deck-img').dataset.ref;delete $('y-ttimg').dataset.ref}}
+$('y-ttfile').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;$('y-tthint').textContent='Сохраняю фото…';
+  try{const ref=await phSave(f),old=P.prefs.ttPhoto;P.prefs.ttPhoto=ref;P.prefs.deckView='photo';saveP();if(old)phDel(old);renderDeck();
+    $('y-tthint').textContent='Фото в шапке. Переключить на рисунок можно кнопкой под проигрывателем.'}
+  catch(err){$('y-tthint').textContent='Не получилось сохранить фото. Попробуйте JPG или PNG.'}});
+$('y-ttdel').addEventListener('click',()=>{const old=P.prefs.ttPhoto;P.prefs.ttPhoto=null;P.prefs.deckView='art';saveP();if(old)phDel(old);renderDeck();$('y-tthint').textContent='Фото убрано.'});
+$('h-view').addEventListener('click',()=>{P.prefs.deckView=(P.prefs.deckView||'photo')==='photo'?'art':'photo';saveP();renderDeck()});
+
 /* ---------- сводка «Сейчас» ---------- */
 function renderNow(){if(!window.__vlNow)return;heroStats();heroSync();const rows=[],t=dayNum(today());
   const st=active();
@@ -2384,7 +2444,7 @@ $('d-quick').addEventListener('click',e=>{const b=e.target.closest('button');if(
 document.addEventListener('click',e=>{const a=e.target.closest('[data-scroll]');if(!a)return;setTimeout(()=>{const t=$(a.dataset.scroll);if(t)t.scrollIntoView({block:'start',behavior:'smooth'})},60)});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();window.__vlNow=true;renderNow();
+PS=docStore('profile','vinyl-lab-profile',onProfile);loadRecs();window.__vlNow=true;renderNow();renderDeck();
 showTab();
 function redrawAll(){try{calcRes();calcAlign();drawProtractor();renderN();renderStats();renderRoom();if(lastAnalysis)showAnalysis(lastAnalysis,num('s-nom')||3150)}catch(e){}}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);

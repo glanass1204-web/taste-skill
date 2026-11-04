@@ -97,6 +97,22 @@ header{padding-block:32px 22px;border-bottom:1px solid var(--line)}
 .hero.playing .dp-disc{animation:spin var(--rev,1.8s) linear infinite}
 .dp-model{position:absolute;left:12px;bottom:12px;max-width:calc(100% - 100px);font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:#fff;background:rgba(0,0,0,.55);padding:4px 8px;border-radius:5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .deckview{font-size:13px;padding:7px 12px}
+.spkcard{display:flex;align-items:center;gap:14px;margin:12px auto 0;max-width:420px;padding:10px 12px;border-radius:12px;background:var(--glow-soft);border:1px solid var(--line)}
+.spkcard[hidden]{display:none}
+.spk-pic{flex:none;width:96px;height:70px;border-radius:8px;overflow:hidden;display:grid;place-items:center;background:var(--deck)}
+.spk-pic img{width:100%;height:100%;object-fit:cover;display:block}
+.spk-art{width:84px;height:62px}
+.spk-art .cab{fill:var(--vinyl);stroke:var(--deck-ring);stroke-width:1.5}
+.spk-art .tw,.spk-art .wf{fill:var(--deck);stroke:var(--deck-ring);stroke-width:1.2}
+.spk-art .cone{fill:var(--groove);transform-box:fill-box;transform-origin:center}
+.spk-art .dome{fill:var(--deck-muted)}
+.hero.playing .spk-art .cone{animation:thump .46s ease-in-out infinite alternate}
+@keyframes thump{from{transform:scale(1)}to{transform:scale(.88)}}
+@media (prefers-reduced-motion:reduce){.hero.playing .spk-art .cone{animation:none}}
+.spk-txt{min-width:0}
+.spk-l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.spk-n{font-weight:600;overflow-wrap:anywhere}
+.spk-m{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .ttph{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.ttph img{width:120px;height:78px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
 .led{fill:var(--glow);filter:drop-shadow(0 0 4px var(--glow))}.led.off{fill:var(--deck-ring);filter:none}
 #rec{transform-origin:150px 130px;transform-box:view-box}
@@ -389,7 +405,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.6</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.7</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -435,6 +451,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <button type="button" class="btn deckview" id="h-view" hidden>Показать фото</button>
       <div class="speedsel" role="group" aria-label="Скорость диска"><button type="button" id="h-33" aria-pressed="true">33⅓</button><button type="button" id="h-45" aria-pressed="false">45</button></div>
     </div>
+    <div class="spkcard" id="spkcard" hidden><div class="spk-pic"><img id="spk-img" alt="Ваши колонки" hidden><svg class="spk-art" id="spk-art" viewBox="0 0 104 76" aria-hidden="true"><g class="spk"><rect x="2" y="2" width="44" height="72" rx="5" class="cab"/><circle cx="24" cy="18" r="6" class="tw"/><circle cx="24" cy="18" r="2.2" class="dome"/><circle cx="24" cy="48" r="15" class="wf"/><circle cx="24" cy="48" r="10" class="cone"/><circle cx="24" cy="48" r="3.5" class="dome"/></g><g transform="translate(56 0)"><g class="spk"><rect x="2" y="2" width="44" height="72" rx="5" class="cab"/><circle cx="24" cy="18" r="6" class="tw"/><circle cx="24" cy="18" r="2.2" class="dome"/><circle cx="24" cy="48" r="15" class="wf"/><circle cx="24" cy="48" r="10" class="cone"/><circle cx="24" cy="48" r="3.5" class="dome"/></g></g></svg></div>
+      <div class="spk-txt"><div class="spk-l">Колонки</div><div class="spk-n" id="spk-name"></div><div class="spk-m" id="spk-meta"></div></div></div>
     <p class="deck-hint" id="h-hint">Ставите пластинку — нажмите «Старт»: время пойдёт в журнал иглы.</p>
   </div>
 </header>
@@ -541,6 +559,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div class="webq"><select id="y-web-kind" aria-label="Что ищем"><option value="amp">Усилитель</option><option value="spk">Колонки</option></select><div class="unit"><input id="y-web-q" placeholder="например, Yamaha A-S301" autocomplete="off" enterkeyhint="search"></div><button type="button" class="btn primary" id="y-web-go">Найти</button></div>
         <span class="hint" id="y-web-hint">Ищет во встроенном каталоге — интернет не нужен. Если модели нет, подскажет, где найти паспорт.</span>
         <div class="webres" id="y-web-res" hidden aria-live="polite"></div></div>
+      <div class="field"><span class="flabel">Фото ваших колонок</span>
+        <div class="ttph"><img id="y-spkimg" alt="Ваши колонки" hidden><div class="chips"><label class="btn" for="y-spkfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-spkdel" hidden>Убрать фото</button></div></div>
+        <input type="file" id="y-spkfile" accept="image/*" hidden aria-label="Фото колонок">
+        <span class="hint" id="y-spkhint">Появится на главной под проигрывателем. Без фото там будет рисунок колонок.</span></div>
       <div class="field"><span class="flabel">Фото вашего проигрывателя</span>
         <div class="ttph"><img id="y-ttimg" alt="Ваш проигрыватель" hidden><div class="chips"><label class="btn" for="y-ttfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-ttdel" hidden>Убрать фото</button></div></div>
         <input type="file" id="y-ttfile" accept="image/*" hidden aria-label="Фото проигрывателя">
@@ -2500,7 +2522,19 @@ function renderDeck(){const h=$('hero'),o=P.system||{},k=deckSkin(o.tt||'');
   h.classList.toggle('photo',!!ref&&view==='photo');
   if(ref){if($('deck-img').dataset.ref!==ref){$('deck-img').dataset.ref=ref;setImg($('deck-img'),ref,()=>{h.classList.remove('photo');$('h-view').hidden=true})}
     if($('y-ttimg').dataset.ref!==ref){$('y-ttimg').dataset.ref=ref;setImg($('y-ttimg'),ref,()=>{$('y-ttimg').hidden=true})}$('y-ttimg').hidden=false;$('y-ttdel').hidden=false}
-  else{$('y-ttimg').hidden=true;$('y-ttdel').hidden=true;$('deck-img').removeAttribute('src');delete $('deck-img').dataset.ref;delete $('y-ttimg').dataset.ref}}
+  else{$('y-ttimg').hidden=true;$('y-ttdel').hidden=true;$('deck-img').removeAttribute('src');delete $('deck-img').dataset.ref;delete $('y-ttimg').dataset.ref}
+  renderSpk()}
+function renderSpk(){const o=P.system||{},ref=P.prefs.spkPhoto,name=String(o.spk||'').trim();
+  $('spkcard').hidden=!name&&!ref;$('spk-name').textContent=name||'Ваши колонки';
+  const m=[];if(+o.z)m.push(fmt(+o.z,0)+' Ом');if(+o.sens)m.push(fmt(+o.sens,o.sens%1?1:0)+' дБ');if(+o.f3)m.push('бас до '+fmt(+o.f3,0)+' Гц');$('spk-meta').textContent=m.join(' · ');
+  const img=$('spk-img'),art=$('spk-art');
+  if(ref){if(img.dataset.ref!==ref){img.dataset.ref=ref;setImg(img,ref,()=>{img.hidden=true;art.style.display=''})}img.hidden=false;art.style.display='none';
+    if($('y-spkimg').dataset.ref!==ref){$('y-spkimg').dataset.ref=ref;setImg($('y-spkimg'),ref,()=>{$('y-spkimg').hidden=true})}$('y-spkimg').hidden=false;$('y-spkdel').hidden=false}
+  else{img.hidden=true;img.removeAttribute('src');delete img.dataset.ref;art.style.display='';$('y-spkimg').hidden=true;$('y-spkdel').hidden=true;delete $('y-spkimg').dataset.ref}}
+$('y-spkfile').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;$('y-spkhint').textContent='Сохраняю фото…';
+  try{const ref=await phSave(f),old=P.prefs.spkPhoto;P.prefs.spkPhoto=ref;saveP();if(old)phDel(old);renderSpk();$('y-spkhint').textContent='Фото колонок теперь на главной под проигрывателем.'}
+  catch(err){$('y-spkhint').textContent='Не получилось сохранить фото. Попробуйте JPG или PNG.'}});
+$('y-spkdel').addEventListener('click',()=>{const old=P.prefs.spkPhoto;P.prefs.spkPhoto=null;saveP();if(old)phDel(old);renderSpk();$('y-spkhint').textContent='Фото убрано — на главной снова рисунок.'});
 $('y-ttfile').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;$('y-tthint').textContent='Сохраняю фото…';
   try{const ref=await phSave(f),old=P.prefs.ttPhoto;P.prefs.ttPhoto=ref;P.prefs.deckView='photo';saveP();if(old)phDel(old);renderDeck();
     $('y-tthint').textContent='Фото в шапке. Переключить на рисунок можно кнопкой под проигрывателем.'}

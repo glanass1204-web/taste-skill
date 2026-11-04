@@ -64,9 +64,12 @@ header{padding-block:32px 22px;border-bottom:1px solid var(--line)}
 #rec{transform-origin:150px 130px;transform-box:view-box}
 #arm{transform-origin:330px 60px;transform-box:view-box;transition:transform 1.4s cubic-bezier(.45,.05,.2,1)}
 .hero.playing #arm{transform:rotate(41deg)}
+.hero.playing #rec{animation:spin var(--rev,1.8s) linear infinite}
+.yrec .disc{animation:spin 24s linear infinite}
+.hero:not(.playing) .startbtn .sb-dot{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{background:var(--glow);box-shadow:0 0 12px var(--glow)}}
+@media (prefers-reduced-motion:reduce){.hero.playing #rec{animation-duration:6s}#arm{transition-duration:.6s}}
 @media (prefers-reduced-motion:no-preference){
-  .hero.playing #rec{animation:spin var(--rev,1.8s) linear infinite}
-  .yrec .disc{animation:spin 24s linear infinite}
   .pickcard:hover .pdisc{transform:translateX(18px) rotate(50deg)}
   .pickcard.spin .pdisc{transform:translateX(18px);animation:spin 1.8s linear infinite}}
 @keyframes spin{to{transform:rotate(360deg)}}

@@ -19,6 +19,8 @@
   --bg:#E8EBEE; --panel:#F7F8FA; --ink:#141A21; --muted:#56616E; --line:#C9D0D8;
   --amber:#8F5300; --glow:#F0A21A; --glow-soft:#F6D9A6;
   --good:#1A6E43; --warn:#9A4A00; --bad:#B3261E; --c2:#2F6FB0;
+  --deck:#1D2228; --deck-ink:#D5DCE3; --deck-muted:#7C8794; --deck-ring:#3B434D; --vinyl:#0F1114;
+  --vuface:#F4E9CC; --vuink:#2A2118; --vugood:#2E7D4F;
   --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
   --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -26,9 +28,9 @@
 }
 @media (prefers-color-scheme:dark){:root{
   --bg:#0F1318; --panel:#171C23; --ink:#E5E9EE; --muted:#8E99A7; --line:#2B333D;
-  --amber:#F3AE45; --glow:#F0A21A; --glow-soft:#4A3510; --good:#3FB97A; --warn:#E5A532; --bad:#EF6A5E; --c2:#6AA8E8; color-scheme:dark}}
+  --amber:#F3AE45; --glow:#F0A21A; --glow-soft:#4A3510; --good:#3FB97A; --warn:#E5A532; --bad:#EF6A5E; --c2:#6AA8E8; --deck:#0A0D11; --deck-ring:#2E353E; --deck-muted:#6E7A88; --vuface:#E8D6A6; color-scheme:dark}}
 :root[data-night]{--bg:#000000; --panel:#0A0101; --ink:#F04A3A; --muted:#B8382B; --line:#3A0B07;
-  --amber:#FF5A3C; --glow:#C42418; --glow-soft:#260402; --good:#E0503B; --warn:#FF6A3D; --bad:#FF2A1A; --c2:#B03A2E; color-scheme:dark}
+  --amber:#FF5A3C; --glow:#C42418; --glow-soft:#260402; --good:#E0503B; --warn:#FF6A3D; --bad:#FF2A1A; --c2:#B03A2E; --deck:#050000; --deck-ink:#F04A3A; --deck-muted:#8E2A20; --deck-ring:#2A0805; --vinyl:#0A0000; --vuface:#1A0201; --vuink:#F04A3A; --vugood:#E0503B; color-scheme:dark}
 :root[data-night] .vu div{background:var(--glow)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -77,20 +79,63 @@ details summary{cursor:pointer;font-weight:600;font-size:14px}
 details .how{margin-top:8px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);max-width:68ch}
 footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 .warnbox{border:1px solid var(--warn);border-radius:8px;padding:12px 14px;font-size:14px}
+header.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:28px;align-items:center;padding-block:28px 22px}
+.hero-text{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hero h1{font-size:clamp(30px,5.4vw,52px)}
+.vfd{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;background:var(--deck);border-radius:10px;padding:10px 12px;box-shadow:inset 0 2px 8px rgba(0,0,0,.5)}
+.vfd div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vfd .vk{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--deck-muted)}
+.vfd b{font-family:var(--f-mono);font-weight:500;font-size:clamp(14px,2.4vw,18px);color:var(--glow);text-shadow:0 0 8px color-mix(in srgb,var(--glow) 60%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.deck{background:var(--deck);border-radius:18px;padding:14px;box-shadow:0 14px 26px rgba(0,0,0,.28),inset 0 0 0 1px var(--deck-ring);display:flex;flex-direction:column;gap:12px}
+.deck .gauge{max-width:none}
+.startbtn{font:inherit;font-family:var(--f-display);font-weight:500;font-size:14px;letter-spacing:.06em;text-transform:uppercase;display:inline-flex;align-items:center;gap:10px;justify-content:center;
+  padding:12px 20px;border-radius:999px;border:1px solid var(--deck-ring);background:var(--deck);color:var(--deck-ink);cursor:pointer;box-shadow:0 2px 0 var(--deck-ring)}
+.deck .startbtn{background:color-mix(in srgb,var(--deck-ring) 45%,var(--deck))}
+.startbtn .sb-dot{width:10px;height:10px;border-radius:50%;background:var(--deck-ring)}
+.startbtn.on .sb-dot{background:var(--glow);box-shadow:0 0 10px var(--glow)}
+.startbtn:not(.on) .sb-dot{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{background:var(--glow);box-shadow:0 0 12px var(--glow)}}
+.startbtn:active{transform:translateY(1px);box-shadow:none}
+.micbar{position:fixed!important;z-index:20;top:calc(8px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));max-width:1120px;margin:0 auto;
+  background:var(--deck);color:var(--deck-ink);border:0!important;border-radius:12px;padding:10px 12px;box-shadow:0 8px 20px rgba(0,0,0,.3);transform:translateY(calc(-100% - 24px));transition:transform .3s ease}
+.micbar.show{transform:none}
+.panel{scroll-margin-top:90px}
+.grid{margin-top:24px}
+.micbar .startbtn{padding:8px 14px;font-size:12px}
+.micbar .micstat{color:var(--deck-muted)}
+.micbar .vu{background:var(--deck-ring);border:0}
+.gauge{width:100%;max-width:320px;height:auto;display:block;margin:0 auto}
+.gauge .face{fill:var(--vuface)}.gauge .tk{stroke:var(--vuink);stroke-width:1.4}.gauge .tl{font-family:var(--f-mono);font-size:10px;fill:var(--vuink);text-anchor:middle}
+.gauge .zr{fill:none;stroke:var(--bad);stroke-width:7}.gauge .zg{fill:none;stroke:var(--vugood);stroke-width:7}
+.gauge .needle{stroke:var(--vuink);stroke-width:2;stroke-linecap:round}.gauge .cap{fill:var(--vuink)}
+.gauge .ndl{transform-origin:150px 150px;transform-box:view-box}
+.gauge .gt{font-family:var(--f-display);font-size:11px;letter-spacing:.2em;fill:var(--vuink);text-anchor:middle;opacity:.7}
+.gauge .gv{font-family:var(--f-mono);font-size:13px;fill:var(--vuink);text-anchor:middle}
+.instr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,150px);gap:14px;align-items:center}
+.strobe{width:100%;max-width:150px;height:auto;display:block;margin:0 auto}
+.strobe .plat{fill:var(--deck)}.strobe .dot{fill:var(--glow)}.strobe .lab{fill:var(--deck-ring)}.strobe .sp{fill:var(--deck-ink)}
+.stcap{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+@media (max-width:820px){header.hero{grid-template-columns:minmax(0,1fr);gap:16px}}
+@media (max-width:520px){header.hero{padding-block:16px}.hero .tag{display:none}.instr{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-  <div>
+<header class="hero">
+  <div class="hero-text">
     <h1>Винил<span>·</span>Лаб — измерения</h1>
     <p class="tag">Измерения микрофоном телефона или компьютера: скорость диска и детонация, АЧХ в комнате, баланс каналов, уровень громкости.</p>
+    <div class="vfd"><div><span class="vk">Микрофон</span><b id="h-mic">выкл</b></div><div><span class="vk">Уровень</span><b id="h-lvl">—</b></div><div><span class="vk">Частота</span><b id="h-sr">—</b></div></div>
+    <div class="row"><a class="btn" href="./" style="text-decoration:none">← Винил·Лаб: дневник, коллекция, калькуляторы</a><button type="button" class="btn" id="night" aria-pressed="false">Ночной режим</button></div>
   </div>
-  <div class="row"><a class="btn" href="./" style="text-decoration:none">← Винил·Лаб: система, коллекция, калькуляторы</a><button type="button" class="btn" id="night" aria-pressed="false">Ночной режим</button></div>
+  <div class="deck">
+    <svg class="gauge" id="g-hero" viewBox="0 0 300 170" role="img" aria-label="Уровень с микрофона"></svg>
+    <button type="button" class="startbtn" id="mic2"><span class="sb-dot"></span><span>Включить микрофон</span></button>
+  </div>
 </header>
 
 <div class="micbar">
-  <button type="button" class="btn primary" id="mic">Включить микрофон</button>
+  <button type="button" class="startbtn" id="mic"><span class="sb-dot"></span><span id="micl">Включить микрофон</span></button>
   <div class="vu" aria-hidden="true"><div id="vu"></div></div>
   <span class="micstat" id="micstat">Микрофон выключен</span>
 </div>
@@ -108,6 +153,8 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
     </div>
     <p class="status" id="spMsg" aria-live="polite"></p>
     <div class="readout"><div class="big" id="spDev">—</div><span class="pill info" id="spPill">ждём тон</span></div>
+    <div class="instr"><svg class="gauge" id="g-speed" viewBox="0 0 300 170" role="img" aria-label="Отклонение скорости"></svg>
+      <div><svg class="strobe" id="strobe" viewBox="0 0 160 160" role="img" aria-label="Виртуальный стробоскоп"></svg><p class="stcap" id="stcap">Метки стоят — скорость точная</p></div></div>
     <dl class="kv">
       <div><dt>Частота сейчас</dt><dd id="spF">—</dd></div>
       <div><dt>Скорость</dt><dd id="spRpm">—</dd></div>
@@ -150,6 +197,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
       <button type="button" class="btn" id="balSave">Записать в дневник</button>
     </div>
     <div class="readout"><div class="big" id="balD">—</div><span class="pill info" id="balPill">нет замера</span></div>
+    <svg class="gauge" id="g-bal" viewBox="0 0 300 170" role="img" aria-label="Баланс каналов"></svg>
     <dl class="kv"><div><dt>Левый</dt><dd id="balLv">—</dd></div><div><dt>Правый</dt><dd id="balRv">—</dd></div></dl>
     <p class="status" id="balMsg" aria-live="polite"></p>
   </section>
@@ -158,6 +206,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
   <section class="panel">
     <h2>Уровень громкости</h2>
     <div class="readout"><div class="big" id="lvNow">—</div><span class="pill info" id="lvPill">дБ без калибровки</span></div>
+    <svg class="gauge" id="g-lvl" viewBox="0 0 300 170" role="img" aria-label="Средний уровень громкости"></svg>
     <dl class="kv"><div><dt>Средний за 10 с</dt><dd id="lvAvg">—</dd></div><div><dt>Пик</dt><dd id="lvPk">—</dd></div></dl>
     <div class="row">
       <div class="field"><label for="cal">Поправка калибровки</label><div class="unit"><input id="cal" inputmode="decimal" value="0"><span>дБ</span></div></div>
@@ -170,7 +219,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-si
 <footer>
   Винил·Лаб — измерения. Звук обрабатывается только на вашем устройстве и никуда не отправляется.
 </footer>
-<script>if('serviceWorker' in navigator&&window.isSecureContext)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+<script>if('serviceWorker' in navigator&&window.isSecureContext)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{})})).catch(()=>{}));</script>
 </div>
 
 <script>
@@ -182,6 +231,27 @@ const num=id=>{const v=parseFloat(String($(id).value).replace(',','.'));return i
 const NS='http://www.w3.org/2000/svg';
 function el(tag,a,p,txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
 function setPill(p,cls,t){p.className='pill '+cls;p.textContent=t}
+/* стрелочные приборы */
+function makeGauge(id,o){const g=$(id),P=(deg,R)=>[150+R*Math.sin(deg*Math.PI/180),150-R*Math.cos(deg*Math.PI/180)],A=v=>-60+120*(Math.max(o.min,Math.min(o.max,v))-o.min)/(o.max-o.min);
+  el('rect',{x:0,y:0,width:300,height:170,rx:14,class:'face'},g);
+  (o.zones||[]).forEach(([a,b,c])=>{const [x1,y1]=P(A(a),118),[x2,y2]=P(A(b),118);el('path',{d:`M${x1} ${y1} A118 118 0 0 1 ${x2} ${y2}`,class:c},g)});
+  o.ticks.forEach(v=>{const a=A(v),maj=o.labels.includes(v),[ax,ay]=P(a,maj?96:104),[bx,by]=P(a,112);el('line',{x1:ax,y1:ay,x2:bx,y2:by,class:'tk'},g);
+    if(maj){const [lx,ly]=P(a,82);el('text',{x:lx,y:ly+4,class:'tl'},g,o.fmt?o.fmt(v):String(v))}});
+  el('text',{x:150,y:126,class:'gt'},g,o.title);const val=el('text',{x:150,y:144,class:'gv'},g,'');
+  const n=el('g',{class:'ndl'},g);el('line',{x1:150,y1:150,x2:150,y2:44,class:'needle'},n);el('circle',{cx:150,cy:150,r:7,class:'cap'},g);
+  let cur=o.min;n.style.transform='rotate(-60deg)';
+  return {set(v,label){if(!isFinite(v)){val.textContent='';return}cur=v;n.style.transform='rotate('+A(v)+'deg)';val.textContent=label||''},
+    smooth(v,k){if(!isFinite(v))return;cur+=(v-cur)*(k||0.2);n.style.transform='rotate('+A(cur)+'deg)'}}}
+const GH=makeGauge('g-hero',{min:-50,max:0,ticks:[-50,-40,-30,-20,-15,-10,-6,-3,0],labels:[-40,-20,-10,0],zones:[[-6,0,'zr']],title:'УРОВЕНЬ, дБFS'});
+const GS=makeGauge('g-speed',{min:-2,max:2,ticks:[-2,-1.5,-1,-.5,-.3,0,.3,.5,1,1.5,2],labels:[-2,-1,0,1,2],zones:[[-.3,.3,'zg'],[1,2,'zr'],[-2,-1,'zr']],title:'СКОРОСТЬ, %',fmt:v=>(v>0?'+':'')+v});
+const GB=makeGauge('g-bal',{min:-3,max:3,ticks:[-3,-2,-1,-.5,0,.5,1,2,3],labels:[-3,-1,0,1,3],zones:[[-.5,.5,'zg'],[1.5,3,'zr'],[-3,-1.5,'zr']],title:'ЛЕВЫЙ · ПРАВЫЙ, дБ',fmt:v=>v===0?'0':(v<0?'L'+(-v):'R'+v)});
+const GL=makeGauge('g-lvl',{min:-60,max:0,ticks:[-60,-50,-40,-30,-20,-10,-6,0],labels:[-60,-40,-20,0],zones:[[-6,0,'zr']],title:'СРЕДНИЙ, дБ'});
+/* виртуальный стробоскоп: метки стоят при точной скорости, бегут при ошибке */
+const ST=(()=>{const g=$('strobe');el('circle',{cx:80,cy:80,r:76,class:'plat'},g);const ring=el('g',{},g);
+  for(let i=0;i<48;i++){const a=i/48*2*Math.PI;el('rect',{x:80+68*Math.cos(a)-2,y:80+68*Math.sin(a)-4,width:4,height:8,rx:1,class:'dot',transform:`rotate(${i/48*360+90} ${80+68*Math.cos(a)} ${80+68*Math.sin(a)})`},ring)}
+  el('circle',{cx:80,cy:80,r:30,class:'lab'},g);el('circle',{cx:80,cy:80,r:3,class:'sp'},g);let ang=0,dev=0,last=performance.now();
+  (function step(t){const dt=Math.min(100,t-last);last=t;ang+=dev*dt*0.06;ring.setAttribute('transform',`rotate(${ang%360} 80 80)`);requestAnimationFrame(step)})(last);
+  return {set(d){dev=isFinite(d)?Math.max(-3,Math.min(3,d)):0}}})();
 function setNight(on){document.documentElement.toggleAttribute('data-night',on);$('night').setAttribute('aria-pressed',on?'true':'false');$('night').textContent=on?'Дневной режим':'Ночной режим';
   const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=on?'#000000':'#0F1318';try{on?localStorage.setItem('vinyl-lab-night','1'):localStorage.removeItem('vinyl-lab-night')}catch(e){}}
 $('night').addEventListener('click',()=>setNight(!document.documentElement.hasAttribute('data-night')));
@@ -206,13 +276,15 @@ async function startMic(){
   }
   const a=audio();const src=a.createMediaStreamSource(stream);an=a.createAnalyser();an.fftSize=16384;an.smoothingTimeConstant=0;src.connect(an);
   timeBuf=new Float32Array(an.fftSize);freqBuf=new Float32Array(an.frequencyBinCount);running=true;
-  $('mic').textContent='Выключить микрофон';$('mic').classList.add('on');$('mic').classList.remove('primary');
+  micUI();
   $('micstat').textContent='Микрофон включён · '+(a.sampleRate/1000).toFixed(1)+' кГц';
   loop();
 }
 function stopMic(){running=false;cancelAnimationFrame(raf);if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;an=null;
-  $('mic').textContent='Включить микрофон';$('mic').classList.remove('on');$('mic').classList.add('primary');$('micstat').textContent='Микрофон выключен';$('vu').style.width='0'}
-$('mic').addEventListener('click',()=>running?stopMic():startMic());
+  micUI();$('micstat').textContent='Микрофон выключен';$('vu').style.width='0'}
+$('mic').addEventListener('click',()=>running?stopMic():startMic());$('mic2').addEventListener('click',()=>running?stopMic():startMic());
+new IntersectionObserver(es=>{document.querySelector('.micbar').classList.toggle('show',!es[0].isIntersecting)},{threshold:0}).observe(document.querySelector('.deck'));
+function micUI(){[$('mic'),$('mic2')].forEach(b=>{b.classList.toggle('on',running);b.lastElementChild.textContent=running?'Выключить микрофон':'Включить микрофон'});$('h-mic').textContent=running?'вкл':'выкл';$('h-sr').textContent=running&&ac?(ac.sampleRate/1000).toFixed(1)+' кГц':'—';if(!running){$('h-lvl').textContent='—';GH.set(-50,'')}}
 
 /* FFT */
 function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
@@ -224,14 +296,14 @@ const re=new Float64Array(NW),im=new Float64Array(NW);
 /* состояние измерений */
 let sp=[],spT0=performance.now(),lastSp=0;
 let rtaBands=null,rtaAvg=null,lvHist=[],lvPeak=-Infinity,lastDraw=0;
-let balCap=null,bal={L:NaN,R:NaN};
+let balCap=null,bal={L:NaN,R:NaN},lastVfd=0;
 
 function loop(){if(!running)return;raf=requestAnimationFrame(loop);
   an.getFloatTimeDomainData(timeBuf);const now=performance.now();
   // уровень
   let s=0;for(let i=timeBuf.length-4096;i<timeBuf.length;i++)s+=timeBuf[i]*timeBuf[i];
   const rms=Math.sqrt(s/4096),db=20*Math.log10(rms+1e-12);
-  $('vu').style.width=Math.max(0,Math.min(100,(db+70)/70*100))+'%';
+  $('vu').style.width=Math.max(0,Math.min(100,(db+70)/70*100))+'%';GH.smooth(db,0.18);if(now-lastVfd>250){lastVfd=now;$('h-lvl').textContent=isFinite(db)?db.toFixed(0)+' дБ':'—'}
   lvHist.push([now,db]);while(lvHist.length&&now-lvHist[0][0]>10000)lvHist.shift();if(db>lvPeak)lvPeak=db;
   if(balCap){balCap.sum+=rms*rms;balCap.n++}
   // скорость
@@ -251,11 +323,12 @@ function speedFrame(now){
 }
 function drawSpeed(now){
   const f0=num('f0'),recent=sp.filter(x=>now-x[0]<10000);
-  if(recent.length<10||now-(sp.length?sp[sp.length-1][0]:0)>1500){if(!sp.length||now-sp[sp.length-1][0]>1500)setPill($('spPill'),'info','ждём тон');return}
+  if(recent.length<10||now-(sp.length?sp[sp.length-1][0]:0)>1500){if(!sp.length||now-sp[sp.length-1][0]>1500){setPill($('spPill'),'info','ждём тон');ST.set(0)}return}
   const mean=recent.reduce((a,x)=>a+x[1],0)/recent.length,dev=(mean/f0-1)*100;
   const d=recent.map(x=>(x[1]/mean-1)*100),sd=Math.sqrt(d.reduce((a,v)=>a+v*v,0)/d.length),pk=d.reduce((m,v)=>Math.max(m,Math.abs(v)),0);
   $('spDev').innerHTML=(dev>0?'+':'')+fmt(dev,2)+'<small>%</small>';$('spF').textContent=fmt(sp[sp.length-1][1],1)+' Гц';
   $('spRpm').textContent=fmt(33.333*(1+dev/100),2)+' / '+fmt(45*(1+dev/100),2);$('spPk').textContent='±'+fmt(pk,3)+' %';$('spSd').textContent='±'+fmt(2*sd,3)+' %';
+  GS.set(dev,(dev>0?'+':'')+fmt(dev,2)+' %');ST.set(dev);$('stcap').textContent=Math.abs(dev)<0.05?'Метки стоят — скорость точная':dev>0?'Метки бегут вперёд — диск спешит':'Метки бегут назад — диск отстаёт';
   const a=Math.abs(dev);setPill($('spPill'),a<=0.3?'ok':a<=1?'mid':'no',a<=0.3?'скорость в норме':a<=1?'подстройте скорость':'слышимая ошибка');
   // график
   const svg=$('spChart');svg.innerHTML='';const W=640,H=220,m={l:50,r:10,t:10,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b;
@@ -307,7 +380,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function capture(ms){balCap={sum:0,n:0};await wait(ms);const c=balCap;balCap=null;return c.n?10*Math.log10(c.sum/c.n+1e-24):NaN}
 function showBal(){const d=bal.R-bal.L;$('balLv').textContent=isFinite(bal.L)?fmt(bal.L,1)+' дБ':'—';$('balRv').textContent=isFinite(bal.R)?fmt(bal.R,1)+' дБ':'—';
   if(!isFinite(d)){setPill($('balPill'),'info','нет замера');$('balD').textContent='—';return}
-  $('balD').innerHTML=fmt(Math.abs(d),1)+'<small>дБ</small>';const a=Math.abs(d);
+  $('balD').innerHTML=fmt(Math.abs(d),1)+'<small>дБ</small>';GB.set(d,(d>0?'R +':'L +')+fmt(Math.abs(d),1)+' дБ');const a=Math.abs(d);
   setPill($('balPill'),a<=0.5?'ok':a<=1.5?'mid':'no',a<0.05?'каналы равны':(d>0?'правый громче':'левый громче'));
   $('balMsg').textContent=a<=0.5?'Баланс в норме.':a<=1.5?'Небольшой перекос: проверьте, точно ли микрофон посередине, и азимут головки.':'Заметный перекос: проверьте азимут головки, контакты, регулятор баланса и расстановку колонок.'}
 async function manual(ch){if(!running){$('balMsg').textContent='Сначала включите микрофон.';return}$('balMsg').textContent='Замер '+(ch==='L'?'левого':'правого')+' канала, 3 секунды…';
@@ -320,7 +393,7 @@ $('balAuto').addEventListener('click',async()=>{if(!running){$('balMsg').textCon
 /* уровень */
 function drawLevel(){if(!lvHist.length)return;const cal=num('cal')||0,now=lvHist[lvHist.length-1][1];
   const avg=10*Math.log10(lvHist.reduce((a,x)=>a+Math.pow(10,x[1]/10),0)/lvHist.length);
-  $('lvNow').innerHTML=fmt(now+cal,1)+'<small>дБ</small>';$('lvAvg').textContent=fmt(avg+cal,1)+' дБ';$('lvPk').textContent=fmt(lvPeak+cal,1)+' дБ';
+  $('lvNow').innerHTML=fmt(now+cal,1)+'<small>дБ</small>';GL.set(avg,fmt(avg+cal,1)+' дБ');$('lvAvg').textContent=fmt(avg+cal,1)+' дБ';$('lvPk').textContent=fmt(lvPeak+cal,1)+' дБ';
   setPill($('lvPill'),cal?(avg+cal>85?'no':'ok'):'info',cal?(avg+cal>85?'громко для долгого прослушивания':'дБ SPL (по калибровке)'):'дБFS, без калибровки')}
 $('lvReset').addEventListener('click',()=>{lvPeak=-Infinity});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopNoise()});

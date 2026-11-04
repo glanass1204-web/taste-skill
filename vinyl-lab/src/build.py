@@ -16,7 +16,7 @@ head_extra='''<meta name="theme-color" content="#0F1318">
 sw='''<div id="upd" hidden style="position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--ink);color:var(--bg);border-radius:10px;padding:12px 14px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)"><span>Вышла новая версия Винил·Лаб</span><button type="button" onclick="location.reload()" style="font:inherit;font-weight:600;background:var(--glow);color:#141A21;border:0;border-radius:6px;padding:8px 12px;cursor:pointer">Обновить</button></div>
 <script>if('serviceWorker' in navigator&&window.isSecureContext)addEventListener('load',()=>{let had=!!navigator.serviceWorker.controller;
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had){had=true;return}const u=document.getElementById('upd');if(u)u.hidden=false});
-navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),3600000)}).catch(()=>{})});</script>'''
+navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const up=()=>r.update().catch(()=>{});setInterval(up,3600000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)up()})}).catch(()=>{})});</script>'''
 page='<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'+head_extra+'\n</head>\n<body>\n'+html+'\n'+sw+'\n</body>\n</html>\n'
 open(OUT+'/index.html','w',encoding='utf-8').write(page)
 # manifest
@@ -46,9 +46,12 @@ self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   const ext=/(fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|cdnjs\\.cloudflare\\.com)$/.test(u.hostname);
   if(u.origin!==location.origin&&!ext)return;
+  const page=r.mode==='navigate'||/\.html$|\/$/.test(u.pathname)||u.pathname.endsWith('sw.js');
   e.respondWith(caches.open(V).then(async c=>{const hit=await c.match(r,{ignoreSearch:u.origin===location.origin});
-    const net=fetch(r).then(res=>{if(res&&(res.ok||res.type==='opaque'))c.put(r,res.clone());return res}).catch(()=>hit||(r.mode==='navigate'?c.match('index.html'):undefined));
-    return hit||net}))});
+    const net=fetch(r,page?{cache:'no-cache'}:undefined).then(res=>{if(res&&(res.ok||res.type==='opaque'))c.put(r,res.clone());return res});
+    if(page){ // страницы: сначала свежая версия с сайта, сохранённая копия — только без сети
+      return net.catch(async()=>hit||await c.match(u.pathname.endsWith('izmereniya.html')?'izmereniya.html':'index.html'))}
+    return hit||net.catch(()=>undefined)}))});
 ''' % (ver, json.dumps(files))
 open(OUT+'/sw.js','w').write(swjs)
 # zip

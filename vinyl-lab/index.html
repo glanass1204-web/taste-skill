@@ -276,7 +276,7 @@ select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--
 .readout{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
 .big{font-family:var(--f-display);font-weight:700;font-size:clamp(40px,8vw,64px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .big small{font-size:.4em;font-weight:500;color:var(--muted);margin-left:4px}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid currentColor}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:0;border:0;background:none;cursor:default;white-space:nowrap}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .ok{color:var(--good)} .mid{color:var(--warn)} .no{color:var(--bad)}
 
@@ -327,6 +327,7 @@ code,.f{font-family:var(--f-mono);font-size:13px;color:var(--ink);background:var
 .check b{font-weight:600;font-size:14px}
 .check span.v{grid-column:1;font-size:13px;color:var(--muted)}
 .check .pill{grid-row:1/span 2;grid-column:2;justify-self:end}
+@media (max-width:560px){.check{grid-template-columns:minmax(0,1fr)}.check .pill{grid-row:auto;grid-column:1;justify-self:start}}
 .pill.info{color:var(--muted)}
 details.more{border-top:1px solid var(--line);padding-top:12px}
 details.more summary{font-size:14px;color:var(--amber)}
@@ -408,7 +409,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.8</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.9</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -642,7 +643,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <div class="panel">
       <h3>Рекомендуемые установки</h3>
       <div class="checks" id="y-setup"></div>
-      <p class="note">Это стартовые значения по паспортам. Тонкую подстройку делают на слух или с измерениями и записывают в журнал настроек ниже.</p>
+      <p class="note">С чего начать настройку — по паспортам ваших проигрывателя и головки. Подстроив на слух, запишите итог в «Журнал настроек тонарма» ниже: тогда в «Проверке системы» появится оценка, в норме ли прижимная сила.</p>
     </div>
     <div class="panel">
       <h3>Проверка системы</h3>
@@ -1167,6 +1168,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
   <div class="col">
     <div><h2>Акустический кабель</h2></div>
     <div class="panel">
+      <p class="note">Длина и сечение, которые вы здесь укажете, сразу сохраняются в «Моей системе» и учитываются в её проверке.</p>
       <div class="field"><label for="c-len">Длина кабеля до одной колонки</label>
         <div class="unit"><input id="c-len" inputmode="decimal" value="5"><span>м</span></div></div>
       <div class="field"><label for="c-sec">Сечение одной жилы</label>
@@ -1643,6 +1645,11 @@ function calcCable(){
     tr.innerHTML=`<td class="n">${fmt(a,a<1?2:1)} мм²</td><td class="n">${Math.round(awgOf(a))}</td><td class="n">${fmt(r*1000,0)} мОм</td><td class="n"><span class="${rc<0.1?'ok':rc<0.5?'mid':'no'}">${fmt(rc,2)} дБ</span></td>`;tb.appendChild(tr)});
 }
 chips('c-chips',v=>{$('c-sec').value=v;calcCable()});
+/* то, что вписано в «Провода» и «Нагрузку MM», — это ваша реальная система: сохраняем туда же */
+const LINK={'c-len':'slen','c-sec':'ssec','m-pf':'icpf','m-len':'iclen','m-arm':'armc','m-pre':'pcap'};let linkT=null;
+function linkBack(){clearTimeout(linkT);linkT=setTimeout(()=>{let ch=false;Object.entries(LINK).forEach(([c,k])=>{const v=num(c);if(isFinite(v)&&String(v)!==String(parseFloat(String($('y-'+k).value).replace(',','.')))){$('y-'+k).value=v;ch=true}});
+  if(!ch)return;const o=readSys();P.system=o;lastSysJSON=JSON.stringify(o);saveP();renderChecks();renderNow()},700)}
+Object.keys(LINK).forEach(c=>$(c).addEventListener('input',linkBack));$('c-chips').addEventListener('click',()=>setTimeout(linkBack,0));
 $('c-sec').addEventListener('input',()=>{const v=num('c-sec');$('c-chips').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',Math.abs(+b.dataset.v-v)<1e-6?'true':'false'));calcCable()});
 ['c-len','c-z','c-zmin','c-zmax','c-df'].forEach(i=>$(i).addEventListener('input',calcCable));
 
@@ -2035,16 +2042,16 @@ $('y-pick-tt').addEventListener('change',()=>{const t=TT.find(x=>x.id===$('y-pic
 $('y-pick-cart').addEventListener('change',()=>{const c=CARTS.find(x=>x.id===$('y-pick-cart').value);if(!c)return;fillSys(cartFields(c));
   pickSave('Подставлены паспортные данные головки '+c.name+'.'+(c.hz===100&&c.c?' Гибкость указана при 100 Гц и пересчитана к 10 Гц приблизительно.':'')+(c.note?' '+c.note:''))});
 function renderSetup(){const o=P.system||readSys(),rows=[],tt=TT.find(t=>t.name===o.tt);
-  if(tt&&tt.fixed){$('y-setup').innerHTML=checkRow('Тонарм и головка','настраивать не нужно: прижимная сила, антискейтинг и юстировка выставлены на заводе','ok','заводская')+
-    checkRow('Что стоит проверять','скорость диска — вкладка «Скорость» или измерения микрофоном; износ иглы — журнал на вкладке «Игла»','info','уход');return}
+  if(tt&&tt.fixed){$('y-setup').innerHTML=checkRow('Тонарм и головка','настраивать не нужно: прижимная сила, антискейтинг и юстировка выставлены на заводе','info','')+
+    checkRow('Что стоит проверять','скорость диска — вкладка «Скорость» или измерения микрофоном; износ иглы — журнал на вкладке «Игла»','info','');return}
   const vr=isFinite(o.vrec)?o.vrec:(o.vlo+o.vhi)/2;
-  rows.push(isFinite(vr)?checkRow('Прижимная сила',fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmtF(o.vlo)+'–'+fmtF(o.vhi)+' г':''),'ok','старт'):checkRow('Прижимная сила','укажите диапазон головки','info','—'));
-  rows.push(isFinite(vr)?checkRow('Антискейтинг','≈ '+fmt(vr,1)+' по шкале — столько же, сколько прижимная сила','ok','старт'):checkRow('Антискейтинг','равен прижимной силе по шкале','info','—'));
+  rows.push(isFinite(vr)?checkRow('Прижимная сила','начните с '+fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmtF(o.vlo)+'–'+fmtF(o.vhi)+' г':''),'info',''):checkRow('Прижимная сила','укажите диапазон головки','info',''));
+  rows.push(isFinite(vr)?checkRow('Антискейтинг','начните с '+fmt(vr,1)+' по шкале — столько же, сколько прижимная сила','info',''):checkRow('Антискейтинг','равен прижимной силе по шкале','info',''));
   if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);
-    rows.push(checkRow('Свес (overhang)',(isFinite(o.ov)?'заводской '+fmt(o.ov,1)+' мм · ':'')+'по Baerwald '+fmt(g.ov,1)+' мм при офсете '+fmt(g.beta*DEG,1)+'°','ok','юстировка'))}
-  rows.push(o.type==='MC'?checkRow('Нагрузка фонокорректора','MC-головка: сопротивление нагрузки по паспорту головки, ёмкость не важна','info','MC'):
-    isFinite(o.clo)?checkRow('Ёмкость нагрузки',fmt(o.clo,0)+'–'+fmt(o.chi,0)+' пФ вместе с кабелем, сопротивление 47 кОм','ok','MM'):checkRow('Ёмкость нагрузки','укажите рекомендацию головки','info','—'));
-  rows.push(checkRow('Высота тонарма (VTA)','для начала трубка тонарма параллельна пластинке, затем подстройка на слух','ok','старт'));
+    rows.push(checkRow('Свес (overhang)',(isFinite(o.ov)?'заводской '+fmt(o.ov,1)+' мм · ':'')+'по Baerwald '+fmt(g.ov,1)+' мм при офсете '+fmt(g.beta*DEG,1)+'°','info',''))}
+  rows.push(o.type==='MC'?checkRow('Нагрузка фонокорректора','MC-головка: сопротивление нагрузки по паспорту головки, ёмкость не важна','info',''):
+    isFinite(o.clo)?checkRow('Ёмкость нагрузки',fmt(o.clo,0)+'–'+fmt(o.chi,0)+' пФ вместе с кабелем, сопротивление 47 кОм','info',''):checkRow('Ёмкость нагрузки','укажите рекомендацию головки','info',''));
+  rows.push(checkRow('Высота тонарма (VTA)','начните с положения, когда трубка тонарма параллельна пластинке, затем подстройка на слух','info',''));
   $('y-setup').innerHTML=rows.join('')}
 function setVal(id,v){$(id).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v}
 function normSys(o){if(!o)return o;const r=Object.assign({},o);YF.forEach(k=>{if(!YTXT.includes(k)&&(r[k]==null||r[k]===''))r[k]=NaN});return r}
@@ -2061,7 +2068,7 @@ function applySys(o){
   if(isFinite(o.vlo)&&isFinite(o.vhi)&&!$('j-vtf').dataset.touched)$('j-vtf').value=+((o.vlo+o.vhi)/2).toFixed(2);
   calcRes();calcMM();calcCable();calcVta();$('c-sec').dispatchEvent(new Event('input'));calcAlign();
 }
-function checkRow(name,value,cls,label){return `<div class="check"><b>${name}</b><span class="v">${value}</span><span class="pill ${cls}">${label}</span></div>`}
+function checkRow(name,value,cls,label){const tag=cls==='info'||!label||label==='—'?'':`<span class="pill ${cls}">${label}</span>`;return `<div class="check"><b>${name}</b><span class="v">${value}</span>${tag}</div>`}
 function renderChecks(){
   const o=P.system||readSys(),rows=[],fixedTT=TT.find(t=>t.name===o.tt&&t.fixed);
   const C=o.hz==100?o.comp*1.7:o.comp,M=o.meff+o.cmass+1,f=1000/(2*Math.PI*Math.sqrt(M*C));
@@ -2082,7 +2089,7 @@ function renderChecks(){
       else if(!ph&&!ext&&o.amp)rows.push(checkRow('Фонокорректор','у усилителя нет входа PHONO — нужен внешний фонокорректор','mid','нужен'));
       else if(ph&&!ext)rows.push(checkRow('Вход PHONO','головку можно подключать прямо к усилителю ('+ph+')','ok','подходит'))}}
   const R=2*RHO*o.slen/o.ssec,zo=8/o.df,rc=ripple(zo+R,o.zmin,o.zmax)-ripple(zo,o.zmin,o.zmax);
-  rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','заполните длину и сечение','info','—'));
+  rows.push(isFinite(rc)?checkRow('Кабель к колонкам','неравномерность АЧХ '+fmt(rc,2)+' дБ',rc<0.1?'ok':rc<0.5?'mid':'no',rc<0.1?'неслышимо':rc<0.5?'на грани':'слышимо'):checkRow('Кабель к колонкам','не хватает: '+[[o.slen,'длина кабеля'],[o.ssec,'сечение'],[o.df,'коэффициент демпфирования усилителя'],[o.zmin,'минимальный импеданс колонок'],[o.zmax,'максимальный импеданс колонок']].filter(x=>!isFinite(x[0])).map(x=>x[1]).join(', ')+' (поля «Усилитель и колонки» ниже или вкладка «Провода»)','info','—'));
   if(isFinite(o.D)&&o.D>100){const g=geomNulls(o.D,66.0,120.89);rows.push(checkRow('Юстировка Baerwald','свес '+fmt(g.ov,1)+' мм, офсет '+fmt(g.beta*DEG,1)+'°'+(isFinite(o.ov)?' · заводская '+fmt(o.ov,1)+' мм'+(isFinite(o.off)?', '+fmt(o.off,1)+'°':''):''),'info','справка'))}
   const last=P.setups.slice().sort((a,b)=>a.d<b.d?1:-1)[0];
   if(last&&isFinite(last.vtf)&&!isFinite(o.vlo))rows.push(checkRow('Прижимная сила',fmt(last.vtf,2)+' г от '+fmtDate(last.d)+' · диапазон головки не указан','info','справка'));

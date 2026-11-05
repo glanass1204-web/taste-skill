@@ -256,6 +256,7 @@ select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--
 .unit input{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .qin{margin-top:6px}
+.gone{display:none!important}
 :root[data-simple] .adv{display:none!important}
 :root:not([data-simple]) .simp{display:none!important}
 #mode[aria-pressed="true"]{border-color:var(--ink)}
@@ -412,7 +413,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div class="adv"><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="mode" aria-pressed="false" title="Показать резонанс, юстировку, износ иглы и другие технические разделы">Подробно</button><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v2.0</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="mode" aria-pressed="false" title="Показать резонанс, юстировку, износ иглы и другие технические разделы">Подробно</button><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v2.1</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -685,7 +686,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
     <div class="panel" id="app-panel">
       <h3>Приложение на телефон</h3>
-      <p class="note" id="app-text">Винил·Лаб можно установить на телефон как обычное приложение: иконка на рабочем столе, работает без интернета, микрофон для измерений включается.</p>
+      <p class="note" id="app-text">Винил·Лаб можно установить на телефон как обычное приложение: иконка на рабочем столе, работает без интернета.</p>
       <div class="chips">
         <a class="btn primary" id="app-open" href="./" target="_blank" rel="noopener" style="text-decoration:none">Открыть версию для установки</a>
         <button type="button" class="btn primary" id="app-install" hidden>Установить приложение</button>
@@ -905,10 +906,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <p class="note">Сыграйте тон на системе и пройдитесь по комнате: на частотах мод бас в одних местах гудит, в других пропадает. Начните с малой громкости.</p>
       <div class="chips"><button type="button" class="btn" id="o-sweep">Плавный свип 20–200 Гц</button><button type="button" class="btn" id="o-stop">Остановить</button></div>
       <p class="status" id="o-play"></p>
-      <h3>Измерение микрофоном</h3>
-      <p class="note">Здесь микрофон не включается: в claude.ai такого разрешения для страниц нет. Поэтому измерения с микрофоном вынесены на отдельную страницу: скорость и детонация, АЧХ в комнате с розовым шумом, баланс каналов и уровень громкости.</p>
-      <a class="btn primary" href="izmereniya.html" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">Открыть измерения с микрофоном</a>
-      <p class="note">Для точного замера АЧХ комнаты используют бесплатную программу Room EQ Wizard (REW) и измерительный USB-микрофон, например miniDSP UMIK-1. Микрофон телефона на басу ниже 50 Гц сильно занижает уровень.</p>
+      <p class="note">Точный замер комнаты делают измерительным USB-микрофоном (например, miniDSP UMIK-1) и бесплатной программой Room EQ Wizard. Микрофон телефона для этого не годится.</p>
     </div>
   </div>
   <div class="col">
@@ -1143,7 +1141,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
   </div>
   <div class="col">
-    <div class="panel">
+    <div class="panel gone" hidden>
       <h3>Анализ записи тестового тона</h3>
       <p class="note">Замер в реальном времени через микрофон — на <a href="izmereniya.html" target="_blank" rel="noopener" style="color:var(--amber)">странице измерений</a>. Здесь можно разобрать готовую запись: запишите на телефон тестовую дорожку 3150 Гц с пластинки и загрузите файл. Программа покажет среднюю скорость и детонацию. Анализ идёт в браузере, файл никуда не отправляется.</p>
       <div class="drop">
@@ -2050,7 +2048,7 @@ $('y-pick-cart').addEventListener('change',()=>{const c=CARTS.find(x=>x.id===$('
   pickSave('Подставлены паспортные данные головки '+c.name+'.'+(c.hz===100&&c.c?' Гибкость указана при 100 Гц и пересчитана к 10 Гц приблизительно.':'')+(c.note?' '+c.note:''))});
 function renderSetup(){const o=P.system||readSys(),rows=[],tt=TT.find(t=>t.name===o.tt);
   if(tt&&tt.fixed){$('y-setup').innerHTML=checkRow('Тонарм и головка','настраивать не нужно: прижимная сила, антискейтинг и юстировка выставлены на заводе','info','')+
-    checkRow('Что стоит проверять','скорость диска — вкладка «Скорость» или измерения микрофоном; износ иглы — журнал на вкладке «Игла»','info','');return}
+    checkRow('Что стоит проверять','скорость диска — вкладка «Скорость» (стробоскоп); износ иглы — журнал на вкладке «Игла»','info','');return}
   const vr=isFinite(o.vrec)?o.vrec:(o.vlo+o.vhi)/2;
   rows.push(isFinite(vr)?checkRow('Прижимная сила','начните с '+fmt(vr,2)+' г'+(isFinite(o.vlo)?' · допустимо '+fmtF(o.vlo)+'–'+fmtF(o.vhi)+' г':''),'info',''):checkRow('Прижимная сила','укажите диапазон головки','info',''));
   rows.push(isFinite(vr)?checkRow('Антискейтинг','начните с '+fmt(vr,1)+' по шкале — столько же, сколько прижимная сила','info',''):checkRow('Антискейтинг','равен прижимной силе по шкале','info',''));

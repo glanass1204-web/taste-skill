@@ -20,9 +20,9 @@ navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{const
 page='<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'+head_extra+'\n</head>\n<body>\n'+html+'\n'+sw+'\n</body>\n</html>\n'
 open(OUT+'/index.html','w',encoding='utf-8').write(page)
 # manifest
-man={"name":"Винил·Лаб","short_name":"Винил·Лаб","description":"Настройка винилового тракта, коллекция пластинок и измерения микрофоном","lang":"ru","start_url":"./","scope":"./","display":"standalone","background_color":"#0F1318","theme_color":"#0F1318",
+man={"name":"Винил·Лаб","short_name":"Винил·Лаб","description":"Дневник винильщика: коллекция пластинок, своя система и подсказки","lang":"ru","start_url":"./","scope":"./","display":"standalone","background_color":"#0F1318","theme_color":"#0F1318",
  "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}],
- "shortcuts":[{"name":"Измерения микрофоном","url":"izmereniya.html"},{"name":"Коллекция","url":"./#kollekciya"}]}
+ "shortcuts":[{"name":"Коллекция","url":"./#kollekciya"}]}
 open(OUT+'/manifest.webmanifest','w',encoding='utf-8').write(json.dumps(man,ensure_ascii=False,indent=1))
 # icons
 def icon(size,pad):
@@ -63,9 +63,8 @@ readme='''Винил·Лаб — офлайн-версия
 Все данные хранятся в браузере на этом устройстве. Делайте резервную копию в файл
 (вкладка «Моя система» → «Резервная копия»).
 
-Измерения с микрофоном (izmereniya.html) на компьютере обычно работают и из файла.
-На телефоне браузер даёт микрофон только сайтам по https, поэтому там используйте
-https://glanass1204-web.github.io/taste-skill/vinyl-lab/ — его можно установить как приложение.
+На телефоне удобнее открыть https://glanass1204-web.github.io/taste-skill/vinyl-lab/
+и установить его как приложение.
 '''
 with zipfile.ZipFile(OUT+'/vinyl-lab.zip','w',zipfile.ZIP_DEFLATED) as z:
     for f in ['index.html','izmereniya.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable-512.png']:

@@ -242,6 +242,9 @@ select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--
 .unit input{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .qin{margin-top:6px}
+:root[data-simple] .adv{display:none!important}
+:root:not([data-simple]) .simp{display:none!important}
+#mode[aria-pressed="true"]{border-color:var(--ink)}
 .qin input{font-family:inherit;font-size:16px}
 .webf[hidden]{display:none}
 .webq{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:stretch}
@@ -392,10 +395,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <p class="tag">Личный дневник винильщика: система, пластинки, износ иглы и подсказки по настройке — всё в одном месте.</p>
     <div class="vfd" aria-live="off">
       <div><span class="vk" id="h-statek">Стоп</span><b id="h-time">0:00:00</b></div>
-      <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
+      <div class="adv"><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.9</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="mode" aria-pressed="false" title="Показать резонанс, юстировку, износ иглы и другие технические разделы">Подробно</button><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v2.0</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -443,7 +446,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
     <div class="spkcard" id="spkcard" hidden><div class="spk-pic"><img id="spk-img" alt="Ваши колонки" hidden><svg class="spk-art" id="spk-art" viewBox="0 0 104 76" aria-hidden="true"><g class="spk"><rect x="2" y="2" width="44" height="72" rx="5" class="cab"/><circle cx="24" cy="18" r="6" class="tw"/><circle cx="24" cy="18" r="2.2" class="dome"/><circle cx="24" cy="48" r="15" class="wf"/><circle cx="24" cy="48" r="10" class="cone"/><circle cx="24" cy="48" r="3.5" class="dome"/></g><g transform="translate(56 0)"><g class="spk"><rect x="2" y="2" width="44" height="72" rx="5" class="cab"/><circle cx="24" cy="18" r="6" class="tw"/><circle cx="24" cy="18" r="2.2" class="dome"/><circle cx="24" cy="48" r="15" class="wf"/><circle cx="24" cy="48" r="10" class="cone"/><circle cx="24" cy="48" r="3.5" class="dome"/></g></g></svg></div>
       <div class="spk-txt"><div class="spk-l">Колонки</div><div class="spk-n" id="spk-name"></div><div class="spk-m" id="spk-meta"></div></div></div>
-    <p class="deck-hint" id="h-hint">Ставите пластинку — нажмите «Старт»: время пойдёт в журнал иглы.</p>
+    <p class="deck-hint" id="h-hint"><span class="adv">Ставите пластинку — нажмите «Старт»: время пойдёт в журнал иглы.</span><span class="simp">Ставите пластинку — нажмите «Старт».</span></p>
   </div>
 </header>
 
@@ -454,11 +457,11 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
   <a href="#kollekciya" data-tab="kollekciya"><svg class="ti" aria-hidden="true"><use href="#i-coll"/></svg>Коллекция</a>
   <a href="#hochu" data-tab="hochu"><svg class="ti" aria-hidden="true"><use href="#i-want"/></svg>Хочу купить</a>
   <a href="#komnata" data-tab="komnata"><svg class="ti" aria-hidden="true"><use href="#i-room"/></svg>Комната</a>
-  <a href="#rezonans" data-tab="rezonans"><svg class="ti" aria-hidden="true"><use href="#i-res"/></svg>Резонанс</a>
-  <a href="#yustirovka" data-tab="yustirovka"><svg class="ti" aria-hidden="true"><use href="#i-align"/></svg>Юстировка</a>
-  <a href="#skorost" data-tab="skorost"><svg class="ti" aria-hidden="true"><use href="#i-speed"/></svg>Скорость</a>
-  <a href="#provoda" data-tab="provoda"><svg class="ti" aria-hidden="true"><use href="#i-cable"/></svg>Провода</a>
-  <a href="#igla" data-tab="igla"><svg class="ti" aria-hidden="true"><use href="#i-stylus"/></svg>Игла</a>
+  <a href="#rezonans" data-tab="rezonans" class="adv"><svg class="ti" aria-hidden="true"><use href="#i-res"/></svg>Резонанс</a>
+  <a href="#yustirovka" data-tab="yustirovka" class="adv"><svg class="ti" aria-hidden="true"><use href="#i-align"/></svg>Юстировка</a>
+  <a href="#skorost" data-tab="skorost" class="adv"><svg class="ti" aria-hidden="true"><use href="#i-speed"/></svg>Скорость</a>
+  <a href="#provoda" data-tab="provoda" class="adv"><svg class="ti" aria-hidden="true"><use href="#i-cable"/></svg>Провода</a>
+  <a href="#igla" data-tab="igla" class="adv"><svg class="ti" aria-hidden="true"><use href="#i-stylus"/></svg>Игла</a>
 </nav>
 
 <!-- ============ ДНЕВНИК ============ -->
@@ -561,7 +564,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
   </div>
   <div class="col" id="sys-c">
-    <form class="panel" id="y-form">
+    <form class="panel adv" id="y-form">
       <h3>Проигрыватель и тонарм</h3>
       <div class="field"><label for="y-tt">Модель</label><div class="unit"><input id="y-tt" value="Technics SL-1200MK2" autocomplete="off"></div></div>
       <div class="row2">
@@ -626,17 +629,17 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <h3>Сейчас</h3>
       <div class="checks" id="y-now"></div>
     </div>
-    <div class="panel">
+    <div class="panel adv">
       <h3>Рекомендуемые установки</h3>
       <div class="checks" id="y-setup"></div>
       <p class="note">С чего начать настройку — по паспортам ваших проигрывателя и головки. Подстроив на слух, запишите итог в «Журнал настроек тонарма» ниже: тогда в «Проверке системы» появится оценка, в норме ли прижимная сила.</p>
     </div>
     <div class="panel">
-      <h3>Проверка системы</h3>
+      <h3><span class="adv">Проверка системы</span><span class="simp">Подходит ли всё друг к другу</span></h3>
       <div class="checks" id="y-checks"></div>
       <p class="note">Подробности и расчёты — на вкладках калькуляторов. Масса крепежа головки принята за 1 г.</p>
     </div>
-    <div class="panel" id="j-panel">
+    <div class="panel adv" id="j-panel">
       <h3>Журнал настроек тонарма</h3>
       <form id="j-form" class="col" style="gap:12px">
         <div class="row2">
@@ -653,7 +656,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <tbody id="j-list"></tbody></table></div>
       <p class="note" id="j-empty">Записей пока нет. Отмечайте каждую настройку: так легко вернуться к варианту, который звучал лучше.</p>
     </div>
-    <div class="panel">
+    <div class="panel adv">
       <details><summary>Как выставить прижимную силу</summary><div class="how">
         <p>1. Выключите антискейтинг. Вращая противовес, добейтесь, чтобы тонарм парил горизонтально без опоры.</p>
         <p>2. Не трогая противовес, поверните его шкалу на ноль. Затем крутите противовес вместе со шкалой до нужной силы.</p>
@@ -883,7 +886,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <button type="submit" class="btn primary">Сохранить комнату</button>
       <p class="status" id="o-msg" aria-live="polite"></p>
     </form>
-    <div class="panel">
+    <div class="panel adv">
       <h3>Проверка на слух</h3>
       <p class="note">Сыграйте тон на системе и пройдитесь по комнате: на частотах мод бас в одних местах гудит, в других пропадает. Начните с малой громкости.</p>
       <div class="chips"><button type="button" class="btn" id="o-sweep">Плавный свип 20–200 Гц</button><button type="button" class="btn" id="o-stop">Остановить</button></div>
@@ -910,13 +913,13 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <p>Центр комнаты по длине — плохое место: там провал первой продольной моды. Прижатое к задней стене место даёт гулкий бас. Часто удачна точка на 38 % длины от задней стены.</p>
       </div></details>
     </div>
-    <div class="panel">
+    <div class="panel adv">
       <h3>Отражение от стены за колонкой</h3>
       <div class="readout"><div class="big" id="o-sbir" style="font-size:40px">—</div><span class="pill info" id="o-sbirpill">провал АЧХ</span></div>
       <p class="note">Звук НЧ-динамика отражается от стены за колонкой и в противофазе гасит прямой звук на частоте <span class="f">f = 343 / (4 · d)</span>. Ставьте колонку либо ближе к стене (провал уходит выше, в зону среднечастотника), либо дальше 1,5 м (провал опускается ниже 60 Гц, где он короче и тише).</p>
       <div class="tablewrap"><table><thead><tr><th>Расстояние</th><th>Провал на</th></tr></thead><tbody id="o-sbirtab"></tbody></table></div>
     </div>
-    <div class="panel">
+    <div class="panel adv">
       <h3>Комнатные моды до 200 Гц</h3>
       <div class="legend"><span><i style="background:var(--amber)"></i>осевые — самые сильные</span><span><i style="background:var(--c2)"></i>тангенциальные</span><span><i style="background:var(--muted)"></i>косые</span></div>
       <div class="chart"><svg id="o-modes" viewBox="0 0 640 220" role="img" aria-label="Распределение комнатных мод по частоте"></svg></div>
@@ -1355,8 +1358,12 @@ function chips(id,cb){const box=$(id);box.addEventListener('click',e=>{const b=e
 function chipVal(id){const b=$(id).querySelector('[aria-pressed="true"]');return b?b.dataset.v:null}
 
 /* ---------- tabs ---------- */
+/* простой режим: только дневник, коллекция, система без технических подробностей */
+const MKEY='vinyl-lab-mode';const isSimple=()=>document.documentElement.hasAttribute('data-simple');
+(function(){let m=null;try{m=localStorage.getItem(MKEY)}catch(e){}if(m!=='full')document.documentElement.setAttribute('data-simple','')})();
+const ADV_TABS=['rezonans','yustirovka','skorost','provoda','igla'];
 const TABS=['dnevnik','itogi','sistema','kollekciya','hochu','komnata','rezonans','yustirovka','skorost','provoda','igla'];
-function showTab(){const h=location.hash.slice(1);const t=TABS.includes(h)?h:TABS[0];
+function showTab(){const h=location.hash.slice(1);let t=TABS.includes(h)?h:TABS[0];if(isSimple()&&ADV_TABS.includes(t))t='dnevnik';
   TABS.forEach(x=>{$(x).hidden=x!==t;document.querySelector('[data-tab="'+x+'"]').toggleAttribute('aria-current',x===t);if(x===t)document.querySelector('[data-tab="'+x+'"]').setAttribute('aria-current','page')});
   if(t==='yustirovka')calcAlign(); if(t==='skorost'&&!lastAnalysis)runDemo(); if(t==='itogi')renderItogi();
   const cur=document.querySelector('[data-tab="'+t+'"]');if(cur&&cur.scrollIntoView&&matchMedia('(max-width:820px)').matches)cur.scrollIntoView({block:'nearest',inline:'center'});
@@ -2081,7 +2088,9 @@ function renderChecks(){
   if(last&&isFinite(last.vtf)&&!isFinite(o.vlo))rows.push(checkRow('Прижимная сила',fmt(last.vtf,2)+' г от '+fmtDate(last.d)+' · диапазон головки не указан','info','справка'));
   else if(last&&isFinite(last.vtf)){const v=last.vtf;rows.push(checkRow('Прижимная сила',fmt(v,2)+' г от '+fmtDate(last.d)+' · норма '+fmtF(o.vlo)+'–'+fmtF(o.vhi)+' г',v>=o.vlo&&v<=o.vhi?'ok':v<o.vlo?'no':'mid',v>=o.vlo&&v<=o.vhi?'в норме':v<o.vlo?'слишком лёгкая':'тяжелее нормы'))}
   else rows.push(checkRow('Прижимная сила','запишите настройку в журнал ниже','info','нет данных'));
-  $('y-checks').innerHTML=rows.join('');renderSetup();
+  let out=rows;if(isSimple()){out=rows.filter(r=>/<b>(Мощность усилителя|Громкость на месте слушателя|Низкий импеданс колонок|Вход PHONO|Фонокорректор)<\/b>/.test(r));
+    if(!out.length)out=[checkRow('Пока нечего проверять','выберите усилитель и колонки в списке выше — приложение подскажет, подходят ли они друг к другу','info','')]}
+  $('y-checks').innerHTML=out.join('');renderSetup();
 }
 function vtfPill(){const v=num('j-vtf'),o=P.system||readSys(),p=$('j-pill');
   if(!isFinite(v)||!isFinite(o.vlo))setPill(p,'info','—');else if(v<o.vlo)setPill(p,'no','легче нормы');else if(v>o.vhi)setPill(p,'mid','тяжелее нормы');else setPill(p,'ok','в диапазоне головки')}
@@ -2504,6 +2513,8 @@ function heroSync(){const on=!!tStart;$('hero').classList.toggle('playing',on);$
 function heroStats(){const st=active();$('h-stylus').textContent=st&&!st.retired?Math.round(usedH(st))+'/'+Math.round(+st.limit||1000)+' ч':'нет иглы';
   const m=N.sessions.filter(x=>x.d===today()).reduce((a,x)=>a+x.m,0);$('h-today').textContent=m?hm(m):'—'}
 $('h-start').addEventListener('click',()=>{const b=$('n-timer');
+  if(b.disabled&&isSimple()){if(!tStart){tStart=Date.now();lsSet(TKEY,String(tStart));syncTimer();$('h-hint').textContent='Играет. Нажмите «Стоп», когда сторона закончится.'}
+    else{const min=Math.round((Date.now()-tStart)/60000);tStart=0;lsSet(TKEY,null);syncTimer();$('h-hint').textContent=min>=1?'Послушали '+min+' мин. Хорошая сторона!':'Остановлено.'}return}
   if(b.disabled){$('h-hint').textContent='Сначала добавьте иглу — тогда время прослушивания пойдёт в её журнал.';location.hash='igla';return}
   const was=!!tStart;b.click();
   if(was){if(!$('n-tconfirm').hidden){location.hash='igla';$('h-hint').textContent='Секундомер шёл слишком долго — выберите, сколько записать.'}else $('h-hint').textContent=$('n-logmsg').textContent||'Записано в журнал иглы.'}
@@ -2563,7 +2574,7 @@ function renderNow(){if(!window.__vlNow)return;heroStats();heroSync();const rows
   if((P.system||N.styli.length||RECS.some(r=>!r.demo))&&(STANDALONE||PS.mode!=='db')){const lb=P.prefs.lastBackup,ago=lb?t-dayNum(lb):Infinity;
     rows.push(`<a class="check nowlink" href="#sistema" data-scroll="bk-panel"><b>Резервная копия</b><span class="v">${lb?'последняя '+fmtDate(lb):'ещё не делали'} · данные хранятся только на этом устройстве</span><span class="pill ${ago>30?'mid':'ok'}">${ago>30?'пора сделать':'свежая'}</span></a>`)}
   if(W&&W.list.length){const top=W.list.filter(x=>+x.pri===1).length;rows.push(`<a class="check nowlink" href="#hochu"><b>Хочу купить: ${W.list.length}</b><span class="v">очень хочу: ${top}</span><span class="pill info">список</span></a>`)}
-  $('y-now').innerHTML=rows.join('');renderDiary();renderItogi()}
+  $('y-now').innerHTML=(isSimple()?rows.filter(r=>!/href="#igla"|Последняя настройка тонарма/.test(r)):rows).join('');renderDiary();renderItogi()}
 /* ---------- Дневник: подсказки и лента ---------- */
 let dLimit=30;
 function hintRow(href,title,detail,cls,label,scroll){return `<a class="check nowlink" href="${href}"${scroll?' data-scroll="'+scroll+'"':''}><b>${esc(title)}</b><span class="v">${esc(detail)}</span><span class="pill ${cls}">${esc(label)}</span></a>`}
@@ -2585,9 +2596,10 @@ function renderDiary(){if(!window.__vlNow)return;const H=[],t=dayNum(today()),o=
   const idle=RECS.filter(r=>r.lp?t-dayNum(r.lp)>365:(r.add&&t-dayNum(r.add)>365)).length;if(idle)H.push(hintRow('#kollekciya',idle+' '+plural(idle,'пластинку','пластинки','пластинок')+' не слушали больше года','загляните в «Что послушать сегодня»','info','идея'));
   const hasData=!!(P.system||N.styli.length||RECS.some(r=>!r.demo));
   if(hasData&&(STANDALONE||PS.mode!=='db')){const lb=P.prefs.lastBackup;if(!lb||t-dayNum(lb)>30)H.push(hintRow('#sistema','Сделайте резервную копию','данные хранятся только на этом устройстве'+(lb?'; последняя копия '+fmtDate(lb):''),'mid','копия','bk-panel'))}
-  if(!H.length&&hasData)H.push('<div class="check"><b>Всё в порядке</b><span class="v">система настроена, игла в норме. Хорошего прослушивания!</span><span class="pill ok">порядок</span></div>');
+  if(isSimple()){for(let i=H.length-1;i>=0;i--)if(/href="#(rezonans|yustirovka|skorost|provoda|igla)"/.test(H[i]))H.splice(i,1)}
+  if(!H.length&&hasData)H.push('<div class="check"><b>Всё в порядке</b><span class="v">'+(isSimple()?'Хорошего прослушивания!':'система настроена, игла в норме. Хорошего прослушивания!')+'</span><span class="pill ok">порядок</span></div>');
   $('d-hints').innerHTML=H.join('');$('d-hintpanel').hidden=!H.length;
-  const steps=[[!!P.system,'#sistema','Выберите проигрыватель и головку','— установки и проверки появятся сами'],[!!st,'#igla','Добавьте иглу','— дневник начнёт считать износ'],[RECS.some(r=>!r.demo),'#kollekciya','Добавьте пару пластинок','— или импортируйте коллекцию из Discogs']];
+  const steps=[[!!P.system,'#sistema',isSimple()?'Выберите или впишите свою технику':'Выберите проигрыватель и головку',isSimple()?'— проигрыватель, усилитель, колонки':'— установки и проверки появятся сами'],...(isSimple()?[]:[[!!st,'#igla','Добавьте иглу','— дневник начнёт считать износ']]),[RECS.some(r=>!r.demo),'#kollekciya','Добавьте пару пластинок','— или импортируйте коллекцию из Discogs']];
   $('d-start').hidden=steps.every(x=>x[0]);
   $('d-steps').innerHTML=steps.map(([ok,h,a,b])=>`<li class="${ok?'done':''}"><a href="${h}">${a}</a> ${b}</li>`).join('');
   const dl=$('d-reclist'),opts=RECS.filter(r=>!r.demo||true).map(r=>r.a+' — '+r.t).sort((x,y)=>x.localeCompare(y,'ru'));
@@ -2691,6 +2703,10 @@ function redrawAll(){try{calcRes();calcAlign();drawProtractor();renderN();render
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);
 function setNight(on){document.documentElement.toggleAttribute('data-night',on);$('night').setAttribute('aria-pressed',on?'true':'false');$('night').textContent=on?'Дневной режим':'Ночной режим';
   const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=on?'#000000':'#0F1318';lsSet('vinyl-lab-night',on?'1':null);redrawAll()}
+$('mode').addEventListener('click',()=>{const simple=!isSimple();document.documentElement.toggleAttribute('data-simple',simple);try{localStorage.setItem(MKEY,simple?'simple':'full')}catch(e){}
+  syncMode();showTab();renderChecks();renderNow()});
+function syncMode(){$('mode').setAttribute('aria-pressed',isSimple()?'false':'true');$('mode').textContent=isSimple()?'Подробно':'Попроще'}
+syncMode();
 $('night').addEventListener('click',()=>setNight(!document.documentElement.hasAttribute('data-night')));
 if(lsGet('vinyl-lab-night')==='1')setNight(true);
 })();

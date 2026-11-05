@@ -5,6 +5,8 @@ description: Clean editorial-style interfaces. Warm monochrome palette, typograp
 
 # Protocol: Premium Utilitarian Minimalism UI Architect
 
+> **Restyling:** every concrete visual value this skill uses (fonts, colors, type scale, spacing, radius, shadows, motion) is collected in the **TOKENS** section at the bottom of this file. When generating code, declare those tokens first (CSS custom properties or the Tailwind theme) and reference them everywhere. To restyle the skill, fork the file and edit only that block. If a value elsewhere in this file disagrees with the TOKENS block, the TOKENS block wins.
+
 ## 1. Protocol Overview
 Name: Premium Utilitarian Minimalism & Editorial UI
 Description: An advanced frontend engineering directive for generating highly refined, ultra-minimalist, "document-style" web interfaces analogous to top-tier workspace platforms. This protocol strictly enforces a high-contrast warm monochrome palette, bespoke typographic hierarchies, meticulous structural macro-whitespace, bento-grid layouts, and an ultra-flat component architecture with deliberate muted pastel accents. It actively rejects standard generic SaaS design trends.
@@ -83,3 +85,67 @@ When tasked with writing frontend code (HTML, React, Tailwind, Vue) or designing
 5. Add scroll-entry animations to all major content blocks.
 6. Ensure sections have visual depth through imagery, ambient gradients, or subtle textures — no empty flat backgrounds.
 7. Provide code that reflects this high-end, uncluttered, editorial aesthetic natively without requiring manual adjustments.
+
+## 9. TOKENS
+> Single source of truth for this skill's look. Edit this block to restyle.
+
+```css
+:root {
+  /* Type */
+  --font-sans: "Geist Sans", "SF Pro Display", "Switzer", "Helvetica Neue", sans-serif;
+  --font-serif: "Newsreader", "Instrument Serif", "Lyon Text", serif;
+  --font-mono: "Geist Mono", "SF Mono", "JetBrains Mono", monospace;
+  --text-hero: clamp(2.75rem, 1.8rem + 4vw, 5rem);
+  --text-h2: clamp(1.875rem, 1.4rem + 2vw, 3rem);
+  --text-body: 1rem;
+  --text-tag: 0.75rem;
+  --tracking-serif: -0.03em;
+  --tracking-tag: 0.05em;
+  --leading-display: 1.1;
+  --leading-body: 1.6;
+  --measure: 56rem;                /* max-w-4xl */
+
+  /* Color: warm monochrome */
+  --color-bg: #f7f6f3;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f9f9f8;
+  --color-text: #111111;
+  --color-text-soft: #2f3437;
+  --color-muted: #787774;
+  --color-border: #eaeaea;
+  --color-button: #111111;
+  --color-button-hover: #333333;
+  --color-on-button: #ffffff;
+
+  /* Spot pastels (background / text) */
+  --pastel-red-bg: #fdebec;    --pastel-red-fg: #9f2f2d;
+  --pastel-blue-bg: #e1f3fe;   --pastel-blue-fg: #1f6c9f;
+  --pastel-green-bg: #edf3ec;  --pastel-green-fg: #346538;
+  --pastel-yellow-bg: #fbf3db; --pastel-yellow-fg: #956400;
+
+  /* Spacing and shape */
+  --space-section: clamp(6rem, 4.5rem + 4vw, 8rem); /* py-24 to py-32 */
+  --space-card: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  --border: 1px solid var(--color-border);
+  --radius-button: 6px;
+  --radius-card: 12px;
+  --radius-kbd: 4px;
+  --radius-tag: 9999px;
+
+  /* Depth */
+  --shadow-hover: 0 2px 8px rgb(0 0 0 / 0.04);
+  --grain-opacity: 0.04;
+
+  /* Motion */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-hover: 200ms;
+  --dur-reveal: 600ms;
+  --reveal-y: 12px;
+  --stagger: 80ms;
+  --press-scale: 0.98;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --reveal-y: 0px; --stagger: 0ms; }
+}
+```

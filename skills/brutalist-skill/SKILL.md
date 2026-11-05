@@ -5,6 +5,8 @@ description: Raw mechanical interfaces fusing Swiss typographic print with milit
 
 # SKILL: Industrial Brutalism & Tactical Telemetry UI
 
+> **Restyling:** every concrete visual value this skill uses (fonts, colors, type scale, spacing, radius, shadows, motion) is collected in the **TOKENS** section at the bottom of this file. When generating code, declare those tokens first (CSS custom properties or the Tailwind theme) and reference them everywhere. To restyle the skill, fork the file and edit only that block. If a value elsewhere in this file disagrees with the TOKENS block, the TOKENS block wins.
+
 ## 1. Skill Meta
 **Name:** Industrial Brutalism & Tactical Telemetry Interface Engineering
 **Description:** Advanced proficiency in architecting web interfaces that synthesize mid-century Swiss Typographic design, industrial manufacturing manuals, and retro-futuristic aerospace/military terminal interfaces. This discipline requires absolute mastery over rigid modular grids, extreme typographic scale contrast, purely utilitarian color palettes, and the programmatic simulation of analog degradation (halftones, CRT scanlines, bitmap dithering). The objective is to construct digital environments that project raw functionality, mechanical precision, and high data density, deliberately discarding conventional consumer UI patterns.
@@ -90,3 +92,49 @@ To prevent the design from appearing purely digital, simulated analog degradatio
 1.  **Grid Determinism:** Utilize `display: grid; gap: 1px;` with contrasting parent/child background colors to generate mathematically perfect, razor-thin dividing lines without complex border declarations.
 2.  **Semantic Rigidity:** Construct the DOM using precise semantic tags (`<data>`, `<samp>`, `<kbd>`, `<output>`, `<dl>`) to accurately reflect the technical nature of the telemetry.
 3.  **Typography Clamping:** Implement CSS `clamp()` functions exclusively for macro-typography to ensure massive text scales aggressively while maintaining structural integrity across viewports.
+
+## 9. TOKENS
+> Single source of truth for this skill's look. Edit this block to restyle. Use exactly one substrate (Section 4): set `data-substrate="print"` or `data-substrate="terminal"` on the root.
+
+```css
+:root {
+  /* Type */
+  --font-macro: "Neue Haas Grotesk Display", "Archivo Black", "Monument Extended", sans-serif;
+  --font-micro: "JetBrains Mono", "IBM Plex Mono", "Space Mono", monospace;
+  --font-texture: "EB Garamond", "Playfair Display", serif; /* sparing, dithered */
+  --text-macro: clamp(4rem, 10vw, 15rem);
+  --text-micro: 0.75rem;                 /* 10px to 14px range */
+  --tracking-macro: -0.05em;
+  --tracking-micro: 0.08em;
+  --leading-macro: 0.9;
+  --leading-micro: 1.3;
+
+  /* Shared accent */
+  --color-accent: #e61919;               /* hazard red, the only accent */
+
+  /* Geometry */
+  --radius: 0;
+  --rule-thin: 1px;
+  --rule-thick: 2px;
+  --grid-gap: 1px;                       /* gap-as-divider technique */
+  --noise-opacity: 0.05;
+}
+
+/* Swiss Industrial Print (light) */
+[data-substrate="print"] {
+  --color-bg: #f4f4f0;
+  --color-bg-alt: #eae8e3;
+  --color-fg: #111111;
+  --color-rule: #111111;
+}
+
+/* Tactical Telemetry (dark) */
+[data-substrate="terminal"] {
+  --color-bg: #0a0a0a;
+  --color-bg-alt: #121212;
+  --color-fg: #eaeaea;
+  --color-rule: #eaeaea;
+  --color-signal: #4af626;               /* optional, one element only */
+  --scanlines: repeating-linear-gradient(0deg, transparent, transparent 2px, rgb(0 0 0 / 0.1) 2px, rgb(0 0 0 / 0.1) 4px);
+}
+```

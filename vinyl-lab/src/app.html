@@ -241,6 +241,9 @@ select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--
 .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .unit input{width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.qin{margin-top:6px}
+.qin input{font-family:inherit;font-size:16px}
+.webf[hidden]{display:none}
 .webq{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:stretch}
 .webq select,.webq input{min-width:0}
 @media (max-width:420px){.webq{grid-template-columns:1fr auto}.webq select{grid-column:1/-1}}
@@ -391,7 +394,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
       <div><span class="vk">Игла</span><b id="h-stylus">—</b></div>
       <div><span class="vk">Сегодня</span><b id="h-today">—</b></div>
     </div>
-    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.7</span></div>
+    <div class="hdr-actions"><button type="button" class="btn" id="night" aria-pressed="false" title="Красный свет не сбивает ночное зрение">Ночной режим</button><span class="badge">прототип · v1.8</span></div>
   </div>
   <div class="deck">
     <div class="deck-photo" id="deck-photo" hidden><img id="deck-img" alt="Ваш проигрыватель"><div class="dp-badge"><div class="disc dp-disc"><span></span></div></div><span class="dp-model" id="dp-model"></span></div>
@@ -537,11 +540,11 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
     <p class="note" id="y-state">Сейчас в форме пример. Впишите свою технику и сохраните: данные подставятся во все калькуляторы.</p>
     <div class="panel">
       <h3>Быстрый выбор из списка</h3>
-      <div class="field"><label for="y-pick-tt">Проигрыватель</label><select id="y-pick-tt"><option value="">— другой, ввести вручную —</option></select></div>
-      <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— другая, ввести вручную —</option></select></div>
-      <div class="field"><label for="y-pick-amp">Усилитель</label><select id="y-pick-amp"><option value="">— другой, ввести вручную —</option></select></div>
-      <div class="field"><label for="y-pick-spk">Колонки</label><select id="y-pick-spk"><option value="">— другие, ввести вручную —</option></select></div>
-      <div class="field webf"><label for="y-web-q">Найти модель по названию</label>
+      <div class="field"><label for="y-pick-tt">Проигрыватель</label><select id="y-pick-tt"><option value="">— нет в списке, впишу сам —</option></select><div class="unit qin"><input id="q-tt" placeholder="или впишите свою модель, например «Вега 109»" autocomplete="off" aria-label="Проигрыватель: впишите модель"></div></div>
+      <div class="field"><label for="y-pick-cart">Головка</label><select id="y-pick-cart"><option value="">— нет в списке, впишу сам —</option></select><div class="unit qin"><input id="q-cart" placeholder="или впишите свою модель" autocomplete="off" aria-label="Головка: впишите модель"></div></div>
+      <div class="field"><label for="y-pick-amp">Усилитель</label><select id="y-pick-amp"><option value="">— нет в списке, впишу сам —</option></select><div class="unit qin"><input id="q-amp" placeholder="или впишите свою модель" autocomplete="off" aria-label="Усилитель: впишите модель"></div></div>
+      <div class="field"><label for="y-pick-spk">Колонки</label><select id="y-pick-spk"><option value="">— нет в списке, впишу сам —</option></select><div class="unit qin"><input id="q-spk" placeholder="или впишите свою модель" autocomplete="off" aria-label="Колонки: впишите модель"></div></div>
+      <div class="field webf" hidden><label for="y-web-q">Найти модель по названию</label>
         <div class="webq"><select id="y-web-kind" aria-label="Что ищем"><option value="amp">Усилитель</option><option value="spk">Колонки</option></select><div class="unit"><input id="y-web-q" placeholder="например, Yamaha A-S301" autocomplete="off" enterkeyhint="search"></div><button type="button" class="btn primary" id="y-web-go">Найти</button></div>
         <span class="hint" id="y-web-hint">Ищет во встроенном каталоге — интернет не нужен. Если модели нет, подскажет, где найти паспорт.</span>
         <div class="webres" id="y-web-res" hidden aria-live="polite"></div></div>
@@ -553,7 +556,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-si
         <div class="ttph"><img id="y-ttimg" alt="Ваш проигрыватель" hidden><div class="chips"><label class="btn" for="y-ttfile" style="display:inline-flex;align-items:center">Загрузить фото</label><button type="button" class="btn" id="y-ttdel" hidden>Убрать фото</button></div></div>
         <input type="file" id="y-ttfile" accept="image/*" hidden aria-label="Фото проигрывателя">
         <span class="hint" id="y-tthint">Встанет в шапку вместо рисунка. Без фото рисунок подстроится под марку проигрывателя.</span></div>
-      <p class="note" id="y-pick-note">Выберите свой проигрыватель и головку: паспортные данные подставятся сами, система сохранится, и появятся рекомендуемые установки.</p>
+      <p class="note" id="y-pick-note">Выберите модель из списка или впишите свою под ним. Если модель есть в каталоге, паспортные данные подставятся сами; если нет — название сохранится, а цифры можно поправить в форме ниже.</p>
     </div>
   </div>
   <div class="col" id="sys-c">
@@ -1807,7 +1810,8 @@ const YF=['tt','D','meff','ov','off','cart','type','cmass','comp','hz','prof','v
 const YTXT=['tt','cart','type','hz','prof','phono','amp','aphono','spk'];
 let P={system:null,setups:[],notes:[],prefs:{washEvery:20}};
 function readSys(){const o={};YF.forEach(k=>{const v=$('y-'+k).value;o[k]=YTXT.includes(k)?v.trim():parseFloat(String(v).replace(',','.'))});return o}
-function fillSys(o){YF.forEach(k=>{if(!(k in o))return;const v=o[k];$('y-'+k).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v})}
+function syncQ(){['tt','cart','amp','spk'].forEach(k=>{const q=$('q-'+k);if(q&&document.activeElement!==q)q.value=$('y-'+k).value})}
+function fillSys(o){YF.forEach(k=>{if(!(k in o))return;const v=o[k];$('y-'+k).value=v==null||(typeof v==='number'&&!isFinite(v))?'':v});syncQ()}
 /* база проигрывателей и головок — паспортные данные производителей */
 const TT=[
   {id:'sl1200mk7',skin:'silver',arm:'s',pitch:1,name:'Technics SL-1200MK7 / GR / G',D:215,ov:15,off:22,meff:12},
@@ -2102,7 +2106,18 @@ function commitSys(){clearTimeout(sysTimer);const o=readSys();P.system=o;lastSys
   $('y-msg').textContent='Сохранено. Калькуляторы обновлены.';$('y-state').textContent='Система сохранена'+(PS.mode==='db'?' в вашем аккаунте':' в этом браузере')+'. Данные подставлены во все калькуляторы.'}
 $('y-form').addEventListener('input',e=>{sysDirty=true;$('y-msg').textContent='Сохраняю…';
   if(e.target.id==='y-tt')$('y-pick-tt').value='';if(e.target.id==='y-cart')$('y-pick-cart').value='';
+  if(/^y-(tt|cart|amp|spk)$/.test(e.target.id))syncQ();
   clearTimeout(sysTimer);sysTimer=setTimeout(commitSys,900);renderChecks()});
+/* поле «впишите модель» прямо под списком: из каталога — подставляем паспорт, иначе — просто название */
+const QL={tt:()=>TT,cart:()=>CARTS,amp:()=>AMPS,spk:()=>SPKS},qn=t=>String(t).toLowerCase().replace(/[^a-z0-9а-яё]+/g,'');
+['tt','cart','amp','spk'].forEach(k=>{const q=$('q-'+k),y=$('y-'+k),sel=$('y-pick-'+k);
+  q.addEventListener('input',()=>{y.value=q.value;y.dispatchEvent(new Event('input',{bubbles:true}))});
+  q.addEventListener('change',()=>{const v=q.value.trim(),list=QL[k]();if(v.length<3)return;
+    let hit=list.find(x=>qn(x.name)===qn(v));if(!hit&&qn(v).length>=4){const part=list.filter(x=>qn(x.name).includes(qn(v)));if(part.length===1)hit=part[0]}
+    if(hit){sel.value=hit.id;sel.dispatchEvent(new Event('change'));q.value=hit.name}
+    else commitSys()});
+  sel.addEventListener('change',()=>{if(!sel.value){q.focus()}else setTimeout(()=>{q.value=y.value},0)})});
+syncQ();
 $('j-vtf').addEventListener('input',()=>{$('j-vtf').dataset.touched='1';vtfPill()});
 $('j-form').addEventListener('submit',e=>{e.preventDefault();const v=num('j-vtf');
   P.setups.push({id:rid(),d:$('j-date').value||today(),vtf:isFinite(v)?v:null,as:$('j-as').value.trim().slice(0,30),h:$('j-h').value.trim().slice(0,40),n:$('j-note').value.trim().slice(0,160),t:Date.now()});

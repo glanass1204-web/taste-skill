@@ -130,6 +130,7 @@ The `Install name` column is the exact value you pass to `--skill`.
 | **taste-skill-v1** | `design-taste-frontend-v1` | The original v1 of taste-skill, preserved for projects depending on its exact behavior. Use only if the v2 default breaks something specific in your workflow. |
 | **gpt-tasteskill** | `gpt-taste` | Stricter variant for GPT/Codex: higher layout variance, stronger GSAP direction, aggressive anti-slop. |
 | **image-to-code-skill** | `image-to-code` | Image-first pipeline: generate site references, analyze them, then implement the frontend to match. |
+| **owner-memory** | `owner-memory` | 🆕 Long-term memory about the owner and their projects: how to answer, project facts, decisions already made, tools chosen and rejected. Load first in their repositories. |
 | **thinking-skill** | `strategist-thinking` | 🆕 Seven thinking modes to run before building or changing anything: hidden principles, the 1% insight, first-principles strategy, missed opportunities, root cause, a learning plan and a thinking coach. |
 | **landing-page-skill** | `landing-page-taste` | 🆕 Landing page from zero, step by step: intake, positioning, section plan by page type, conversion copy, build, pre-flight. All fonts, colors, spacing and motion live in one TOKENS block at the bottom, so forking it restyles the skill. |
 | **redesign-skill** | `redesign-existing-projects` | Existing projects: audit the UI first, then fix layout, spacing, hierarchy, styling. |

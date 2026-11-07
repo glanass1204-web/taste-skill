@@ -5,6 +5,7 @@ image-to-code-skill: Image-first frontend skill for generating premium website r
 imagegen-frontend-web: Image-generation-only skill for creating premium website design reference images. Does not write code.
 imagegen-frontend-mobile: Image-generation-only skill for creating premium mobile app screen concepts and flows. Does not write code.
 brandkit: Image-generation-only skill for creating premium brand-kit overview images with logo concepts, identity systems, color palettes, typography, and mockups. Does not write code.
+owner-memory: Long-term memory about the owner and their projects: how to answer, project facts, decisions made, tools chosen and rejected. Load first in their repositories.
 thinking-skill: Seven thinking modes before building or changing anything: hidden principles, the 1% insight, first-principles strategy, missed opportunities, root cause, learning plan, thinking coach.
 landing-page-skill: Step-by-step landing page from zero: intake, positioning, section plan by page type, conversion copy, build, pre-flight. All visual values live in one editable TOKENS block.
 redesign-skill: For upgrading existing projects by auditing and fixing design problems.
